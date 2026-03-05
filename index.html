@@ -712,7 +712,7 @@
             mutDiv.innerHTML = (c.mutations && c.mutations.length > 0) ? c.mutations.map(m => `<div>✦ ${m}</div>`).join('') : "None";
 
             const updateSellButton = () => {
-                const cd = (c.acquiredAt || 0) + 10000 - Date.now();
+                const cd = (c.acquiredAt || 0) + 30000 - Date.now();
                 const btn = document.getElementById('det-sell-btn');
                 
                 if (cd > 0) {
@@ -847,7 +847,7 @@
             if (global.stealingEnabled === false) return alert("STEALING IS DISABLED IN ADMIN ABUSE");
 
             const now = Date.now();
-            if(now - (userData.lastStealTime || 0) < 100000) return alert("Cooldown active!");
+            if(now - (userData.lastStealTime || 0) < 300000) return alert("Cooldown active!");
             
             const isPlus = Math.random() > 0.5;
             let n1 = Math.floor(Math.random() * 50) + 10; let n2 = Math.floor(Math.random() * 50) + 10;
