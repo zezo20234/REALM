@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Card Realm">
+    <meta name="theme-color" content="#000000">
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkNhcmQgUmVhbG0iLAogICJzaG9ydF9uYW1lIjogIlJlYWxtIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMDAwMDAwIiwKICAidGhlbWVfY29sb3ciOiAiI2VhYjMwOCIKfQ==">
+    
+    <title>CARD REALM: FOOTBALL EDITION</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;800&display=swap');
+        
+        body { 
+            background: #050505; color: #fff; font-family: 'Outfit', sans-serif; 
+            height: 100vh; overflow: hidden; -webkit-tap-highlight-color: transparent;
+            /* Safe area for iPhone notches */
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        
+        .hide { display: none !important; }
+        input { background: rgba(255,255,255,0.05) !important; border: 1px solid rgba(255,255,255,0.1) !important; color: white !important; backdrop-filter: blur(5px); }
+        input:focus { border-color: #eab308 !important; }
+        select { -webkit-appearance: none; -moz-appearance: none; appearance: none; }
+        
+        /* Card Gradients & Styles */
+        .card-Common { background: linear-gradient(135deg, #374151, #111827); border: 2px solid #6b7280; }
+        .card-Uncommon { background: linear-gradient(135deg, #059669, #064e3b); border: 2px solid #34d399; box-shadow: inset 0 0 20px rgba(52,211,153,0.3), 0 0 10px rgba(5,150,105,0.4); }
+        .card-Rare { background: linear-gradient(135deg, #2563eb, #1e3a8a); border: 2px solid #60a5fa; box-shadow: inset 0 0 20px rgba(96,165,250,0.3), 0 0 10px rgba(37,99,235,0.4); }
+        .card-Epic { background: linear-gradient(135deg, #9333ea, #581c87); border: 2px solid #c084fc; box-shadow: inset 0 0 20px rgba(192,132,252,0.3), 0 0 15px rgba(147,51,234,0.5); }
+        .card-Legendary { background: linear-gradient(135deg, #d97706, #78350f); border: 2px solid #fde047; box-shadow: inset 0 0 30px rgba(253,224,71,0.4), 0 0 20px rgba(234,179,8,0.6); }
+        .card-Mythic { background: linear-gradient(135deg, #e11d48, #881337); border: 2px solid #fb7185; box-shadow: inset 0 0 30px rgba(251,113,133,0.4), 0 0 20px rgba(225,29,72,0.6); }
+        .card-Shabab { background: linear-gradient(135deg, #ec4899, #831843); border: 2px solid #f472b6; box-shadow: inset 0 0 30px rgba(244,114,182,0.4), 0 0 20px rgba(236,72,153,0.6); }
+        
+        .glass-panel { background: rgba(10,10,10,0.85); backdrop-filter: blur(15px); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="flex flex-col">
+
+    <div id="view-auth" class="fixed inset-0 z-[100] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-[#0a0a0a] p-8 flex flex-col justify-center gap-4">
+        <h1 class="text-6xl font-black text-center text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-600 tracking-tighter mb-10 drop-shadow-lg">REALM.</h1>
+        <div class="space-y-4 max-w-sm mx-auto w-full glass-panel p-6 rounded-3xl border border-white/10">
+            <input type="text" id="username" placeholder="Username" class="w-full p-4 rounded-xl outline-none transition-all font-medium">
+            <input type="password" id="password" placeholder="Password" class="w-full p-4 rounded-xl outline-none transition-all font-medium">
+            <div class="flex items-center gap-2 text-sm text-zinc-400 ml-1">
+                <input type="checkbox" id="stay-logged" checked class="w-4 h-4 accent-yellow-500"> <span>Keep me logged in</span>
+            </div>
+            <button onclick="auth('login')" class="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 text-black p-4 rounded-xl font-black text-lg active:scale-95 transition-transform shadow-lg shadow-yellow-500/20 mt-4">LOGIN</button>
+            <button onclick="auth('register')" class="w-full border border-zinc-600 text-zinc-300 p-4 rounded-xl font-bold active:scale-95 transition-transform">CREATE ACCOUNT</button>
+        </div>
+    </div>
+
+    <div id="view-game" class="hide flex flex-col h-full relative bg-[#050505]">
+        <div class="bg-zinc-900/50 border-b border-white/5 pt-2">
+            <p class="text-[9px] text-zinc-500 font-bold px-4 mb-1 tracking-widest uppercase">Live Players</p>
+            <div id="online-users" class="h-16 flex items-center gap-4 px-4 pb-2 overflow-x-auto no-scrollbar"></div>
+        </div>
+
+        <div class="px-5 py-4 flex justify-between items-center bg-gradient-to-b from-zinc-900/40 to-transparent">
+            <div>
+                <p class="text-[10px] text-zinc-500 uppercase font-black tracking-widest">Balance</p>
+                <p class="text-3xl font-black text-yellow-500 drop-shadow-md">$<span id="ui-money">0</span></p>
+            </div>
+            <div class="text-right flex flex-col items-end">
+                <div class="flex gap-3 items-center mb-1">
+                    <p class="text-xs text-zinc-400 uppercase font-bold">Lvl <span id="ui-level" class="text-white">1</span></p>
+                    <button onclick="logout()" class="text-[10px] text-zinc-500 hover:text-red-500 transition-colors">LOGOUT</button>
+                </div>
+                <button onclick="rebirth()" class="bg-blue-600/20 text-blue-400 border border-blue-500/30 px-4 py-1.5 rounded-full text-[10px] font-black tracking-wider active:scale-95">REBIRTH</button>
+            </div>
+        </div>
+
+        <div id="ui-announcement" class="bg-red-600 text-white text-[11px] font-bold py-1.5 px-4 text-center hide shadow-lg shadow-red-600/20"></div>
+
+        <div class="flex-1 overflow-y-auto p-4 space-y-8 pb-24 no-scrollbar">
+            
+            <section class="grid grid-cols-2 gap-3">
+                <div class="bg-zinc-900/60 p-4 rounded-2xl border border-white/5 relative overflow-hidden">
+                    <div class="absolute -right-2 -top-2 w-12 h-12 bg-yellow-500/10 rounded-full blur-xl"></div>
+                    <p class="text-[9px] text-zinc-400 font-bold tracking-wider">NEXT MUTATION</p>
+                    <p class="text-lg font-black text-white" id="ui-mut-timer">--:--</p>
+                </div>
+                <div class="bg-zinc-900/60 p-4 rounded-2xl border border-white/5 flex justify-between items-center">
+                    <div>
+                        <p class="text-[9px] text-zinc-400 font-bold tracking-wider">STEAL CD</p>
+                        <p class="text-lg font-black text-red-400" id="ui-steal-cd">READY</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[9px] text-zinc-400 font-bold tracking-wider">LUCK</p>
+                        <p class="text-lg font-black text-green-400 drop-shadow-[0_0_5px_rgba(74,222,128,0.5)]" id="ui-luck-status">1x</p>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <div class="flex justify-between items-end mb-3 px-1">
+                    <h2 class="font-black text-sm tracking-widest text-blue-400">POWER SHOP</h2>
+                </div>
+                <div id="ui-powers" class="grid grid-cols-3 gap-2"></div>
+            </section>
+
+            <section>
+                <div class="flex justify-between items-end mb-3 px-1">
+                    <h2 class="font-black text-sm tracking-widest text-zinc-300">STORE</h2>
+                    <p class="text-[10px] text-zinc-500 font-bold bg-zinc-900 px-2 py-1 rounded">Restock: <span id="ui-restock-timer" class="text-white">--:--</span></p>
+                </div>
+                <div id="ui-packs" class="grid grid-cols-2 gap-3"></div>
+            </section>
+
+            <section>
+                <div class="flex justify-between items-end mb-3 px-1">
+                    <h2 class="font-black text-sm tracking-widest text-zinc-300">MY DECK</h2>
+                    <button onclick="sellAll()" class="text-[10px] text-red-500 font-bold bg-red-900/20 border border-red-900/50 px-3 py-1 rounded active:scale-95">SELL ALL</button>
+                </div>
+                <div id="ui-inventory" class="grid grid-cols-2 gap-3"></div>
+            </section>
+        </div>
+
+        <button id="btn-sys" onclick="handleAdmin()" class="hide fixed bottom-safe right-4 mb-4 w-12 h-12 bg-black border border-red-900 rounded-full flex items-center justify-center text-[9px] text-red-600 font-black z-40 shadow-2xl">SYS</button>
+    </div>
+
+    <div id="view-details" class="hide fixed inset-0 z-[120] glass-panel p-6 flex flex-col justify-center items-center text-center transition-opacity">
+        <div class="bg-[#111] w-full max-w-sm p-6 rounded-3xl border border-white/10 relative shadow-2xl max-h-[90vh] overflow-y-auto no-scrollbar">
+            <button onclick="closeDetails()" class="absolute top-4 right-4 text-zinc-500 font-black text-xl w-8 h-8 bg-zinc-800 rounded-full flex items-center justify-center z-50">✕</button>
+            
+            <div id="det-card-visual" class="w-32 h-44 mx-auto rounded-xl mb-4 shadow-2xl border border-white/20 mt-4"></div>
+            
+            <h2 id="det-name" class="text-3xl font-black mb-1 text-white">Name</h2>
+            <p id="det-rarity" class="text-xs uppercase font-bold text-zinc-400 mb-4 tracking-widest">Rarity</p>
+
+            <div id="det-shield-status" class="mb-4"></div>
+            
+            <div class="grid grid-cols-2 gap-3 mb-4 text-left">
+                <div class="bg-black/50 p-4 rounded-xl border border-white/5">
+                    <p class="text-[10px] text-zinc-500 font-bold uppercase mb-1">Value</p>
+                    <p id="det-price" class="text-xl font-black text-yellow-500">$0</p>
+                </div>
+                <div class="bg-black/50 p-4 rounded-xl border border-white/5">
+                    <p class="text-[10px] text-zinc-500 font-bold uppercase mb-1">Drop Rate</p>
+                    <p id="det-chance" class="text-xl font-black text-blue-400">0%</p>
+                </div>
+            </div>
+
+            <div class="bg-black/50 p-4 rounded-xl text-left mb-4 border border-white/5 min-h-[60px]">
+                <p class="text-[10px] text-zinc-500 font-bold uppercase mb-2">Enhancements</p>
+                <div id="det-mutations" class="text-xs font-bold text-green-400 space-y-1">None</div>
+            </div>
+
+            <div id="det-powers-container" class="grid grid-cols-3 gap-2 mb-4"></div>
+            
+            <div class="flex gap-3">
+                <button id="det-sell-btn" class="flex-1 bg-red-500/10 border border-red-500/30 text-red-500 py-4 rounded-xl font-black text-sm active:scale-95 transition-transform">SELL ITEM</button>
+                <button id="det-send-btn" class="flex-1 bg-white/5 border border-white/10 text-white py-4 rounded-xl font-black text-sm active:scale-95 transition-transform">GIFT</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="view-base" class="hide fixed inset-0 z-[80] glass-panel p-6 overflow-y-auto pt-safe">
+        <div class="flex justify-between items-center mb-6 mt-4 bg-black/40 p-4 rounded-2xl border border-white/10">
+            <div>
+                <p class="text-[10px] text-red-500 font-bold uppercase tracking-widest">Infiltration</p>
+                <h2 id="base-owner-name" class="text-2xl font-black">USER</h2>
+            </div>
+            <button onclick="closeBase()" class="bg-white/10 px-4 py-2 rounded-xl text-xs font-bold active:scale-95">ABORT</button>
+        </div>
+        <p class="text-[11px] text-zinc-400 mb-4 font-medium text-center bg-red-900/20 py-2 rounded-lg border border-red-900/50">Select an asset to extract. 5 Min Cooldown applies.</p>
+        <div id="ui-base-inventory" class="grid grid-cols-2 gap-3 pb-10"></div>
+    </div>
+
+    <div id="view-math" class="hide fixed inset-0 z-[200] bg-[#0a0000] p-10 flex flex-col items-center justify-center text-center pt-safe">
+        <div class="w-full max-w-md bg-red-950/40 p-8 rounded-3xl border border-red-900/50 shadow-[0_0_50px_rgba(220,38,38,0.2)]">
+            <h2 class="text-3xl font-black text-red-500 mb-2 tracking-tighter">FIREWALL DETECTED</h2>
+            <p class="text-sm text-red-400/80 mb-8 font-medium">Solve the encryption to proceed:</p>
+            <p id="ui-math-eq" class="text-6xl font-black mb-10 tracking-widest text-white drop-shadow-lg">-- ? --</p>
+            <input type="number" id="math-input" class="w-full p-5 rounded-2xl text-4xl font-black text-center outline-none mb-4 bg-black/50 border-red-900/50 focus:border-red-500 placeholder:text-zinc-700">
+            <button onclick="submitMath()" class="w-full bg-red-600 text-white p-5 rounded-2xl font-black text-xl active:scale-95 transition-transform shadow-lg shadow-red-600/30">BYPASS</button>
+        </div>
+    </div>
+
+    <div id="view-admin" class="hide fixed inset-0 z-[150] glass-panel p-6 flex flex-col gap-4 pt-safe">
+        <div class="flex justify-between items-center mt-4">
+            <h1 class="text-red-600 font-black text-2xl tracking-tighter">SYSTEM ROOT</h1>
+            <button onclick="closeAdmin()" class="bg-white/10 px-4 py-2 rounded-lg text-xs font-bold">CLOSE</button>
+        </div>
+        <div class="space-y-4 overflow-y-auto bg-black p-4 rounded-2xl border border-red-900/30 pb-20">
+            
+            <div class="flex flex-col gap-2 bg-zinc-900 border border-white/10 p-4 rounded-xl">
+                <p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Stealing Control</p>
+                <div class="flex gap-2">
+                    <button onclick="adminSetStealing(true)" class="w-1/2 bg-green-900/50 border border-green-500/50 text-green-400 p-3 rounded-xl text-xs font-bold active:scale-95">ENABLE</button>
+                    <button onclick="adminSetStealing(false)" class="w-1/2 bg-red-900/50 border border-red-500/50 text-red-400 p-3 rounded-xl text-xs font-bold active:scale-95">DISABLE</button>
+                </div>
+            </div>
+            
+            <div class="flex flex-col gap-2 bg-zinc-900 border border-white/10 p-4 rounded-xl">
+                <p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Specific Restock</p>
+                <div class="flex gap-2">
+                    <select id="admin-pack-type" class="w-1/2 p-3 rounded-xl text-sm font-bold bg-black text-white border border-white/10 outline-none">
+                        <option value="Common">Common</option>
+                        <option value="Uncommon">Uncommon</option>
+                        <option value="Rare">Rare</option>
+                        <option value="Epic">Epic</option>
+                        <option value="Legendary">Legendary</option>
+                        <option value="Mythic">Mythic</option>
+                        <option value="ShababElBomb">ShababElBomb</option>
+                    </select>
+                    <input type="number" id="admin-pack-qty" placeholder="Qty" class="w-1/2 p-3 rounded-xl text-sm font-bold text-center">
+                </div>
+                <button onclick="adminRestockSpecific()" class="w-full bg-blue-900/50 border border-blue-500/50 text-blue-400 p-3 rounded-xl text-xs font-bold active:scale-95">RESTOCK PACK</button>
+            </div>
+
+            <button onclick="adminRestockAll()" class="w-full bg-zinc-900 border border-white/10 p-4 rounded-xl text-xs font-bold">FORCE RESTOCK ALL (MAX)</button>
+            
+            <div class="flex flex-col gap-2 bg-zinc-900 border border-white/10 p-4 rounded-xl">
+                <p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Custom Luck Modifier</p>
+                <div class="flex gap-2">
+                    <input type="number" id="admin-luck-mult" placeholder="Multiplier (e.g. 10)" class="w-1/2 p-3 rounded-xl text-sm font-bold text-center">
+                    <input type="number" id="admin-luck-time" placeholder="Minutes" class="w-1/2 p-3 rounded-xl text-sm font-bold text-center">
+                </div>
+                <div class="flex gap-2 mt-2">
+                    <button onclick="adminApplyCustomLuck()" class="w-2/3 bg-green-900/50 border border-green-500/50 text-green-400 p-3 rounded-xl text-xs font-bold active:scale-95">APPLY LUCK</button>
+                    <button onclick="adminSetLuck(1, 0)" class="w-1/3 bg-red-900/50 border border-red-500/50 text-red-400 p-3 rounded-xl text-xs font-bold active:scale-95">RESET</button>
+                </div>
+            </div>
+
+            <input type="text" id="admin-msg" placeholder="Global Alert..." class="w-full p-4 rounded-xl text-sm">
+            <button onclick="adminSendMsg()" class="w-full bg-red-600 font-black p-4 rounded-xl active:scale-95">BROADCAST ALERT</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, set, get, onValue, update, push, remove, serverTimestamp, onDisconnect } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const config = {
+            apiKey: "AIzaSyDclp6rqCZRVreOzTcxv840mXcl6nDKAv8",
+            authDomain: "pack-f76c3.firebaseapp.com",
+            databaseURL: "https://pack-f76c3-default-rtdb.firebaseio.com",
+            projectId: "pack-f76c3",
+            storageBucket: "pack-f76c3.firebasestorage.app",
+            messagingSenderId: "694325056042",
+            appId: "1:694325056042:web:aae383919a2ce159892953"
+        };
+
+        const app = initializeApp(config);
+        const db = getDatabase(app);
+
+        // Helper function to format numbers
+        window.formatNumber = (num) => {
+            if (num >= 1000000000000) return (num / 1000000000000).toFixed(1).replace(/\.0$/, '') + 'T';
+            if (num >= 1000000000) return (num / 1000000000).toFixed(1).replace(/\.0$/, '') + 'B';
+            if (num >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+            if (num >= 1000) return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+            return num.toString();
+        };
+
+        // ECONOMY
+        const PACK_TYPES = {
+            Common: { price: 100, odds: [100, 0, 0, 0, 0, 0, 0], max: 100, restockChance: 100 },
+            Uncommon: { price: 250, odds: [0, 100, 0, 0, 0, 0, 0], max: 75, restockChance: 80 },
+            Rare: { price: 600, odds: [0, 0, 100, 0, 0, 0, 0], max: 50, restockChance: 50 },
+            Epic: { price: 2500, odds: [0, 0, 0, 100, 0, 0, 0], max: 15, restockChance: 25 },
+            Legendary: { price: 12000, odds: [0, 0, 0, 0, 100, 0, 0], max: 5, restockChance: 10 },
+            Mythic: { price: 50000, odds: [0, 0, 0, 0, 0, 100, 0], max: 2, restockChance: 5 },
+            ShababElBomb: { price: 100000, odds: [0, 0, 0, 0, 0, 0, 100], max: 1, restockChance: 2.5 }
+        };
+
+        const POWERS = {
+            shield10: { name: "10m Defend", duration: 10, price: 5000 },
+            shield30: { name: "30m Defend", duration: 30, price: 10000 },
+            shield60: { name: "1hr Defend", duration: 60, price: 15000 }
+        };
+
+        const CARD_LIBRARY = {
+            Common: [
+                { name: "Harry Maguire", value: 105, chanceInRarity: 40 },
+                { name: "Antony", value: 110, chanceInRarity: 30 },
+                { name: "Everton FC", value: 120, chanceInRarity: 15 },
+                { name: "Jordan Henderson", value: 130, chanceInRarity: 10 },
+                { name: "Kalvin Phillips", value: 150, chanceInRarity: 5 }
+            ],
+            Uncommon: [
+                { name: "Nicolas Jackson", value: 265, chanceInRarity: 40 },
+                { name: "Darwin Nunez", value: 280, chanceInRarity: 30 },
+                { name: "West Ham United", value: 300, chanceInRarity: 15 },
+                { name: "Timo Werner", value: 350, chanceInRarity: 10 },
+                { name: "Joao Felix", value: 400, chanceInRarity: 5 }
+            ],
+            Rare: [
+                { name: "Marcus Rashford", value: 630, chanceInRarity: 40 },
+                { name: "Ousmane Dembele", value: 660, chanceInRarity: 30 },
+                { name: "AC Milan", value: 750, chanceInRarity: 15 },
+                { name: "Trent Alexander-Arnold", value: 850, chanceInRarity: 10 },
+                { name: "Gabriel Jesus", value: 1000, chanceInRarity: 5 }
+            ],
+            Epic: [
+                { name: "Phil Foden", value: 2625, chanceInRarity: 40 },
+                { name: "Bukayo Saka", value: 2800, chanceInRarity: 30 },
+                { name: "Arsenal FC", value: 3200, chanceInRarity: 15 },
+                { name: "Jamal Musiala", value: 3800, chanceInRarity: 10 },
+                { name: "Jude Bellingham", value: 4500, chanceInRarity: 5 }
+            ],
+            Legendary: [
+                { name: "Kevin De Bruyne", value: 12600, chanceInRarity: 40 },
+                { name: "Mohamed Salah", value: 13500, chanceInRarity: 30 },
+                { name: "Bayern Munich", value: 15000, chanceInRarity: 15 },
+                { name: "Vinicius Jr", value: 18000, chanceInRarity: 10 },
+                { name: "Kylian Mbappe", value: 25000, chanceInRarity: 5 }
+            ],
+            Mythic: [
+                { name: "Erling Haaland", value: 52500, chanceInRarity: 40 },
+                { name: "Real Madrid", value: 56000, chanceInRarity: 30 },
+                { name: "Cristiano Ronaldo", value: 65000, chanceInRarity: 15 },
+                { name: "Lionel Messi", value: 80000, chanceInRarity: 10 },
+                { name: "DIEGO JOTA", value: 100000, chanceInRarity: 5 }
+            ],
+            Shabab: [
+                { name: "3amer", value: 105000, chanceInRarity: 40 },
+                { name: "istira7a", value: 115000, chanceInRarity: 30 },
+                { name: "rotana khaleej", value: 135000, chanceInRarity: 15 },
+                { name: "PS5", value: 155000, chanceInRarity: 10 },
+                { name: "AT7ADDAK", value: 175000, chanceInRarity: 5 }
+            ]
+        };
+
+        const MUTATIONS = ["In-Form", "Icon", "Team of the Year", "Signed Edition", "Match Worn"];
+        const RARITIES_ORDER = ["Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythic", "Shabab"];
+
+        let uid = null;
+        let userData = null;
+        let global = {};
+        let currentRobbery = null;
+        let baseUnsubscribe = null; 
+        let detailsInterval = null; 
+
+        window.onload = () => {
+            const savedUid = localStorage.getItem('realm_uid') || sessionStorage.getItem('realm_uid');
+            if(savedUid) {
+                uid = savedUid;
+                document.getElementById('view-auth').classList.add('hide');
+                document.getElementById('view-game').classList.remove('hide');
+                initGame();
+            }
+        };
+
+        window.auth = async (type) => {
+            const u = document.getElementById('username').value.trim();
+            const p = document.getElementById('password').value;
+            const stayLogged = document.getElementById('stay-logged').checked;
+            
+            if(!u) return alert("Enter a username!");
+            if(p.length < 3) return alert("Password too short!");
+            
+            const userId = u.toLowerCase().replace(/[^a-z0-9]/g, ''); 
+            if(userId.length < 3) return alert("Username invalid! Use alphanumeric characters.");
+
+            try {
+                const userRef = ref(db, `users/${userId}`);
+                const snap = await get(userRef);
+
+                if(type === 'register') {
+                    if(snap.exists()) return alert("Username already taken!");
+                    await set(userRef, { 
+                        username: u, 
+                        password: p, 
+                        money: 500, 
+                        level: 1, 
+                        lastActive: serverTimestamp() 
+                    });
+                    loginSuccess(userId, stayLogged);
+                } else {
+                    if(!snap.exists()) return alert("User not found!");
+                    if(snap.val().password !== p) return alert("Incorrect password!");
+                    loginSuccess(userId, stayLogged);
+                }
+            } catch(e) { alert("Database Error: " + e.message); }
+        };
+
+        function loginSuccess(userId, stayLogged) {
+            uid = userId;
+            if(stayLogged) localStorage.setItem('realm_uid', uid);
+            else sessionStorage.setItem('realm_uid', uid);
+            
+            document.getElementById('view-auth').classList.add('hide');
+            document.getElementById('view-game').classList.remove('hide');
+            initGame();
+        }
+
+        window.logout = async () => {
+            if(confirm("Log out completely?")) {
+                localStorage.removeItem('realm_uid');
+                sessionStorage.removeItem('realm_uid');
+                if(uid) await update(ref(db, `users/${uid}`), { lastActive: 0 });
+                window.location.reload();
+            }
+        };
+
+        function initGame() {
+            const userActiveRef = ref(db, `users/${uid}/lastActive`);
+            onDisconnect(userActiveRef).set(0);
+
+            onValue(ref(db, `users/${uid}`), s => {
+                userData = s.val();
+                if(!userData) return;
+                document.getElementById('ui-money').innerText = window.formatNumber(Math.floor(userData.money));
+                document.getElementById('ui-level').innerText = userData.level >= 100 ? "100 (MAX)" : userData.level;
+                renderInventory();
+                renderPowersUI(); 
+
+                // NEW: Admin button check
+                const sysBtn = document.getElementById('btn-sys');
+                if (sysBtn) {
+                    // Check if the current user's username is 'zezo' (case-insensitive)
+                    if (userData.username && userData.username.toLowerCase() === 'zezo') {
+                        sysBtn.classList.remove('hide');
+                    } else {
+                        sysBtn.classList.add('hide');
+                    }
+                }
+            });
+
+            onValue(ref(db, `global`), s => {
+                global = s.val() || {};
+                checkGlobalTimers();
+                renderPacks();
+            });
+
+            onValue(ref(db, `users`), s => renderUserBar(s.val()));
+
+            onValue(ref(db, `robberies/${uid}`), s => {
+                if(s.exists()) triggerMathChallenge(s.val(), s.key);
+            });
+
+            setInterval(() => {
+                if(uid) update(ref(db, `users/${uid}`), { lastActive: serverTimestamp() });
+                updateUIState();
+            }, 1000);
+        }
+
+        function checkGlobalTimers() {
+            const now = Date.now();
+            if(!global.nextRestock || now > global.nextRestock) {
+                const stocks = {};
+                Object.keys(PACK_TYPES).forEach(k => stocks[k] = (Math.random()*100 < PACK_TYPES[k].restockChance) ? PACK_TYPES[k].max : 0);
+                update(ref(db, `global`), { stocks, nextRestock: now + (5 * 60000) });
+            }
+            if(!global.nextMutation || now > global.nextMutation) {
+                triggerGlobalMutationWave();
+                update(ref(db, `global`), { nextMutation: now + (5 * 60000) });
+            }
+        }
+
+        async function triggerGlobalMutationWave() {
+            try {
+                const snap = await get(ref(db, 'users'));
+                if (!snap.exists()) return;
+                
+                let updates = {};
+                const allUsers = snap.val();
+
+                Object.keys(allUsers).forEach(userId => {
+                    const user = allUsers[userId];
+                    
+                    if (user.inventory) {
+                        const cardIds = Object.keys(user.inventory);
+                        
+                        if (cardIds.length > 0) {
+                            const randomId = cardIds[Math.floor(Math.random() * cardIds.length)];
+                            const c = user.inventory[randomId];
+                            
+                            const mutName = MUTATIONS[Math.floor(Math.random() * MUTATIONS.length)];
+                            const bonus = Math.floor(Math.random() * 41) + 10; 
+                            
+                            c.price = Math.floor(c.price * (1 + (bonus/100)));
+                            if(!c.mutations) c.mutations = [];
+                            c.mutations.push(`${mutName} (+${bonus}%)`);
+                            
+                            updates[`users/${userId}/inventory/${randomId}`] = c;
+                        }
+                    }
+                });
+
+                if(Object.keys(updates).length > 0) {
+                    await update(ref(db, `/`), updates);
+                }
+            } catch (error) {
+                console.error("Mutation Error:", error);
+            }
+        }
+
+        window.buyPower = async (key) => {
+            const p = POWERS[key];
+            if(userData.money < p.price) return alert("Insufficient funds!");
+            
+            const currentCount = (userData.powers && userData.powers[key]) ? userData.powers[key] : 0;
+            
+            let updates = {};
+            updates[`users/${uid}/money`] = userData.money - p.price;
+            updates[`users/${uid}/powers/${key}`] = currentCount + 1;
+            
+            await update(ref(db, `/`), updates);
+        };
+
+        window.buyPack = async (type) => {
+            const pack = PACK_TYPES[type];
+            if(userData.money < pack.price) return alert("Insufficient funds!");
+            if(!global.stocks || (global.stocks[type] || 0) <= 0) return alert("Out of stock!");
+
+            let luck = (global.luckExpiry && Date.now() < global.luckExpiry) ? global.luckMult : 1;
+            let adjustedOdds = [...pack.odds];
+            
+            if (luck > 1) {
+                let foundBase = false;
+                for(let i = 0; i < RARITIES_ORDER.length; i++) {
+                    if (pack.odds[i] > 0) {
+                        if (!foundBase) {
+                            foundBase = true; 
+                        } else {
+                            adjustedOdds[i] = pack.odds[i] * luck; 
+                        }
+                    }
+                }
+            }
+
+            let totalWeight = adjustedOdds.reduce((a, b) => a + b, 0);
+            let roll = Math.random() * totalWeight;
+            
+            let rarity = "Common"; 
+            let rarityBaseChance = 100; 
+            let sum = 0;
+            
+            for(let i = RARITIES_ORDER.length - 1; i >= 0; i--) {
+                sum += adjustedOdds[i];
+                if(roll < sum) {
+                    rarity = RARITIES_ORDER[i];
+                    rarityBaseChance = (adjustedOdds[i] / totalWeight) * 100;
+                    break;
+                }
+            }
+
+            const pool = CARD_LIBRARY[rarity];
+            let cardRoll = Math.random() * 100;
+            let sumChance = 0;
+            let selectedCard = pool[0];
+            
+            for(let i = 0; i < pool.length; i++) {
+                sumChance += pool[i].chanceInRarity;
+                if(cardRoll <= sumChance) {
+                    selectedCard = pool[i];
+                    break;
+                }
+            }
+
+            const name = selectedCard.name;
+            const finalPrice = selectedCard.value; 
+            const absoluteChance = ((rarityBaseChance / 100) * (selectedCard.chanceInRarity / 100) * 100).toFixed(2);
+            const cardId = push(ref(db, `users/${uid}/inventory`)).key;
+            
+            await update(ref(db, `users/${uid}`), { money: userData.money - pack.price });
+            await update(ref(db, `global/stocks`), { [type]: global.stocks[type] - 1 });
+            
+            await set(ref(db, `users/${uid}/inventory/${cardId}`), { 
+                name, rarity, baseChance: absoluteChance, price: finalPrice, mutations: [],
+                acquiredAt: Date.now() 
+            });
+        };
+
+        window.getRequiredRebirthCard = (level) => {
+            if (level < 3) return "Harry Maguire";
+            if (level < 6) return "Nicolas Jackson";
+            if (level < 10) return "Marcus Rashford";
+            if (level < 15) return "3amer"; 
+            if (level < 20) return "Phil Foden";
+            if (level < 25) return "istira7a"; 
+            if (level < 35) return "Kevin De Bruyne";
+            if (level < 45) return "rotana khaleej"; 
+            if (level < 55) return "Erling Haaland";
+            if (level < 70) return "PS5"; 
+            if (level < 85) return "Lionel Messi";
+            if (level < 95) return "Pele";
+            return "AT7ADDAK TO GET"; 
+        };
+
+        window.rebirth = async () => {
+            if (userData.level >= 100) return alert("Congrats, you have beat the game!");
+
+            const cost = userData.level * 25000;
+            const reqCard = getRequiredRebirthCard(userData.level);
+            
+            let hasCard = false;
+            if (userData.inventory) {
+                hasCard = Object.values(userData.inventory).some(c => c.name === reqCard);
+            }
+
+            if (userData.money < cost || !hasCard) {
+                return alert(
+                    `To Rebirth to Level ${userData.level + 1}, you need:\n` +
+                    `- $${window.formatNumber(cost)}\n` +
+                    `- The specific card: "${reqCard}"\n\n` +
+                    `You currently have $${window.formatNumber(userData.money)} and ${hasCard ? 'DO' : 'DO NOT'} have the required card in your deck.`
+                );
+            }
+            
+            if (confirm(`Rebirth will consume your $${window.formatNumber(cost)} AND your entire deck (including your "${reqCard}"). Proceed?`)) {
+                let nextLevel = userData.level + 1;
+                await update(ref(db, `users/${uid}`), { level: nextLevel, money: nextLevel * 500, inventory: null });
+                if (nextLevel >= 100) alert("Congrats, you have beat the game!");
+            }
+        };
+
+        window.sellAll = async () => {
+            if(!userData || !userData.inventory) return alert("Your deck is empty!");
+            
+            let totalValue = 0;
+            let soldCount = 0;
+            let skippedCount = 0;
+            let updates = {};
+            
+            Object.keys(userData.inventory).forEach(id => {
+                const card = userData.inventory[id];
+                const cd = (card.acquiredAt || 0) + 10000 - Date.now();
+                
+                if (cd <= 0) {
+                    totalValue += card.price;
+                    soldCount++;
+                    updates[`inventory/${id}`] = null; 
+                } else {
+                    skippedCount++;
+                }
+            });
+
+            if(soldCount === 0) return alert(`No cards available to sell! (${skippedCount} cards still on 10-sec cooldown)`);
+
+            let msg = `Sell ${soldCount} cards for $${window.formatNumber(totalValue)}?`;
+            if (skippedCount > 0) msg += `\n(${skippedCount} cards skipped due to 10-sec cooldown)`;
+
+            if(confirm(msg)) {
+                updates[`money`] = userData.money + totalValue;
+                await update(ref(db, `users/${uid}`), updates);
+            }
+        };
+
+        function renderPowersUI() {
+            let html = '';
+            Object.keys(POWERS).forEach(k => {
+                const p = POWERS[k];
+                const owned = (userData && userData.powers && userData.powers[k]) ? userData.powers[k] : 0;
+                html += `
+                    <div onclick="buyPower('${k}')" class="bg-blue-900/20 p-3 rounded-xl border border-blue-500/20 active:scale-95 transition-transform text-center cursor-pointer hover:bg-blue-900/40">
+                        <p class="text-[9px] font-black text-blue-400 uppercase tracking-widest">${p.name}</p>
+                        <p class="text-sm font-black text-white mt-1">$${window.formatNumber(p.price)}</p>
+                        <p class="text-[9px] mt-1 text-zinc-400 font-bold">OWNED: ${owned}</p>
+                    </div>
+                `;
+            });
+            document.getElementById('ui-powers').innerHTML = html;
+        }
+
+        function renderPacks() {
+            let html = '';
+            Object.keys(PACK_TYPES).forEach(k => {
+                const stock = (global.stocks && global.stocks[k]) || 0;
+                const titleStyle = k === "ShababElBomb" ? "text-pink-500 font-black drop-shadow-md" : "text-zinc-500";
+                html += `
+                    <div onclick="buyPack('${k}')" class="bg-zinc-900/80 p-5 rounded-2xl border border-white/5 active:scale-95 transition-transform relative overflow-hidden cursor-pointer">
+                        <div class="absolute -right-4 -bottom-4 opacity-10 text-6xl font-black">${k[0]}</div>
+                        <p class="text-[10px] font-black uppercase tracking-widest ${titleStyle}">${k}</p>
+                        <p class="text-2xl font-black text-white mt-1">$${window.formatNumber(PACK_TYPES[k].price)}</p>
+                        <p class="text-[10px] mt-3 ${stock > 0 ? 'text-green-400' : 'text-red-500'} font-bold">STOCK: ${stock}</p>
+                    </div>
+                `;
+            });
+            document.getElementById('ui-packs').innerHTML = html;
+        }
+
+        function renderInventory() {
+            let html = '';
+            if(userData && userData.inventory) {
+                Object.keys(userData.inventory).forEach(id => {
+                    const c = userData.inventory[id];
+                    const isShielded = c.shieldUntil && c.shieldUntil > Date.now();
+                    const remMins = isShielded ? Math.ceil((c.shieldUntil - Date.now()) / 60000) : 0;
+                    
+                    html += `
+                        <div onclick="openDetails('${id}')" class="card-${c.rarity} aspect-[5/7] rounded-xl p-3 flex flex-col justify-between active:scale-95 transition-transform relative overflow-hidden shadow-lg cursor-pointer">
+                            ${c.mutations && c.mutations.length > 0 ? `<div class="absolute -right-6 top-4 bg-green-500 text-black text-[8px] font-black px-8 py-1 rotate-45 shadow-lg shadow-green-500/50 z-10">MUTATED</div>` : ''}
+                            ${isShielded ? `<div class="absolute -left-6 top-4 bg-blue-500 text-black text-[7px] font-black px-8 py-1 -rotate-45 shadow-lg shadow-blue-500/50 z-10 shield-timer" data-until="${c.shieldUntil}">${remMins}M LEFT</div>` : ''}
+                            
+                            <div>
+                                <p class="text-[9px] font-black opacity-70 uppercase tracking-widest text-white drop-shadow-md">${c.rarity}</p>
+                                <p class="font-black text-sm text-white drop-shadow-md leading-tight mt-1">${c.name}</p>
+                            </div>
+                            <div class="bg-black/40 backdrop-blur-sm p-2 rounded-lg border border-white/10 text-center">
+                                <p class="text-[10px] text-zinc-300 font-bold uppercase mb-0.5">Value</p>
+                                <p class="text-sm font-black text-yellow-400">$${window.formatNumber(c.price)}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            document.getElementById('ui-inventory').innerHTML = html;
+        }
+
+        window.openDetails = (id) => {
+            const c = userData.inventory[id];
+            if(!c) return;
+            
+            clearInterval(detailsInterval); 
+            
+            document.getElementById('det-card-visual').className = `w-32 h-44 mx-auto rounded-xl mb-4 shadow-2xl border border-white/20 card-${c.rarity}`;
+            document.getElementById('det-name').innerText = c.name;
+            document.getElementById('det-rarity').innerText = c.rarity;
+            document.getElementById('det-price').innerText = `$${window.formatNumber(c.price)}`;
+            document.getElementById('det-chance').innerText = `${c.baseChance}%`;
+            
+            const mutDiv = document.getElementById('det-mutations');
+            mutDiv.innerHTML = (c.mutations && c.mutations.length > 0) ? c.mutations.map(m => `<div>✦ ${m}</div>`).join('') : "None";
+
+            const updateSellButton = () => {
+                const cd = (c.acquiredAt || 0) + 10000 - Date.now();
+                const btn = document.getElementById('det-sell-btn');
+                
+                if (cd > 0) {
+                    btn.disabled = true;
+                    btn.className = "flex-1 bg-red-900/50 border border-red-900/50 text-red-500/50 py-4 rounded-xl font-black text-sm cursor-not-allowed";
+                    btn.innerText = `WAIT ${Math.ceil(cd/1000)}s`;
+                } else {
+                    btn.disabled = false;
+                    btn.className = "flex-1 bg-red-500/10 border border-red-500/30 text-red-500 py-4 rounded-xl font-black text-sm active:scale-95 transition-transform cursor-pointer";
+                    btn.innerText = "SELL ITEM";
+                    btn.onclick = () => { 
+                        remove(ref(db, `users/${uid}/inventory/${id}`)); 
+                        update(ref(db, `users/${uid}`), { money: userData.money + c.price }); 
+                        closeDetails(); 
+                    };
+                }
+            };
+            
+            updateSellButton();
+            detailsInterval = setInterval(updateSellButton, 1000);
+
+            const isShielded = c.shieldUntil && c.shieldUntil > Date.now();
+            if (isShielded) {
+                const remMins = Math.ceil((c.shieldUntil - Date.now()) / 60000);
+                document.getElementById('det-shield-status').innerHTML = `<div class="bg-blue-900/50 border border-blue-500 p-2 rounded-lg text-xs font-bold text-blue-400">🛡️ SECURED FOR ${remMins} MINS</div>`;
+                document.getElementById('det-powers-container').innerHTML = ''; 
+            } else {
+                document.getElementById('det-shield-status').innerHTML = '';
+                let powerHtml = '';
+                Object.keys(POWERS).forEach(k => {
+                    const count = (userData.powers && userData.powers[k]) ? userData.powers[k] : 0;
+                    if (count > 0) {
+                        powerHtml += `<button onclick="applyShield('${id}', '${k}')" class="bg-blue-600 border border-blue-400 text-white p-2 rounded-lg text-[10px] font-black active:scale-95">APPLY ${POWERS[k].name}</button>`;
+                    }
+                });
+                document.getElementById('det-powers-container').innerHTML = powerHtml;
+            }
+
+            document.getElementById('det-send-btn').onclick = () => {
+                const target = prompt("Target Username:");
+                if(target) {
+                    get(ref(db, `users`)).then(s => {
+                        let tUid = null; s.forEach(u => { if(u.val().username.toLowerCase() === target.toLowerCase()) tUid = u.key; });
+                        if(tUid) { 
+                            remove(ref(db, `users/${uid}/inventory/${id}`)); 
+                            c.acquiredAt = Date.now(); 
+                            push(ref(db, `users/${tUid}/inventory`), c); 
+                            alert("Sent!"); 
+                            closeDetails(); 
+                        }
+                        else alert("User not found!");
+                    });
+                }
+            };
+            
+            document.getElementById('view-details').classList.remove('hide');
+        };
+
+        window.closeDetails = () => {
+            clearInterval(detailsInterval);
+            document.getElementById('view-details').classList.add('hide');
+        };
+
+        window.applyShield = async (cardId, powerKey) => {
+            if(!userData.powers || !userData.powers[powerKey] || userData.powers[powerKey] <= 0) return;
+            const power = POWERS[powerKey];
+            
+            await update(ref(db, `users/${uid}/powers`), { [powerKey]: userData.powers[powerKey] - 1 });
+            await update(ref(db, `users/${uid}/inventory/${cardId}`), { shieldUntil: Date.now() + power.duration * 60000 });
+            
+            alert(`${power.name} applied successfully! Card is safe.`);
+            closeDetails();
+        };
+
+        function renderUserBar(users) {
+            let html = '';
+            if(users) {
+                Object.keys(users).forEach(k => {
+                    if(k === uid) return;
+                    const u = users[k];
+                    const isOnline = u.lastActive > 0 && (Date.now() - u.lastActive) < 5000;
+                    html += `
+                        <div onclick="${isOnline ? `openBase('${k}', '${u.username}')` : `alert('Offline!')`}" class="flex-shrink-0 flex flex-col items-center opacity-${isOnline ? '100' : '40'} cursor-pointer hover:scale-105 transition-transform">
+                            <div class="w-10 h-10 rounded-full border-2 ${isOnline ? 'border-green-400 bg-green-900/20' : 'border-zinc-700 bg-zinc-800'} flex items-center justify-center font-black text-sm shadow-lg">
+                                ${u.username[0].toUpperCase()}
+                            </div>
+                            <span class="text-[9px] mt-1.5 font-bold tracking-wider">${u.username}</span>
+                        </div>
+                    `;
+                });
+            }
+            document.getElementById('online-users').innerHTML = html;
+        }
+
+        window.openBase = (targetId, name) => {
+            document.getElementById('base-owner-name').innerText = name.toUpperCase();
+            
+            if(baseUnsubscribe) baseUnsubscribe();
+            
+            baseUnsubscribe = onValue(ref(db, `users/${targetId}/inventory`), s => {
+                let html = '';
+                const inv = s.val();
+                if(!inv) html = "<p class='text-zinc-500 col-span-2 text-center mt-4'>No assets found.</p>";
+                else {
+                    Object.keys(inv).forEach(id => {
+                        const c = inv[id];
+                        const isShielded = c.shieldUntil && c.shieldUntil > Date.now();
+                        const remMins = isShielded ? Math.ceil((c.shieldUntil - Date.now()) / 60000) : 0;
+                        
+                        html += `
+                            <div ${isShielded ? '' : `onclick="startSteal('${targetId}', '${id}', '${c.name}')"`} class="card-${c.rarity} aspect-[5/7] rounded-xl p-3 flex flex-col justify-between ${isShielded ? 'opacity-40 grayscale cursor-not-allowed' : 'active:scale-95 transition-transform cursor-pointer opacity-90 hover:opacity-100'}">
+                                <div><p class="text-[9px] font-black opacity-70 uppercase">${c.rarity}</p><p class="font-black text-sm text-white">${c.name}</p></div>
+                                <div class="${isShielded ? 'bg-blue-900/80 border-blue-500/50' : 'bg-red-900/80 border-red-500/50'} p-2 rounded-lg text-center border">
+                                    <p class="text-[10px] text-white font-black uppercase base-shield-timer" data-until="${isShielded ? c.shieldUntil : ''}">${isShielded ? `LOCKED (${remMins}M)` : 'EXTRACT'}</p>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+                document.getElementById('ui-base-inventory').innerHTML = html;
+            });
+            document.getElementById('view-base').classList.remove('hide');
+        };
+
+        window.closeBase = () => { 
+            if(baseUnsubscribe) { baseUnsubscribe(); baseUnsubscribe = null; } 
+            document.getElementById('view-base').classList.add('hide'); 
+        };
+
+        window.startSteal = async (targetId, cardId, cardName) => {
+            // Check if stealing has been disabled globally
+            if (global.stealingEnabled === false) return alert("STEALING IS DISABLED IN ADMIN ABUSE");
+
+            const now = Date.now();
+            if(now - (userData.lastStealTime || 0) < 300000) return alert("Cooldown active!");
+            
+            const isPlus = Math.random() > 0.5;
+            let n1 = Math.floor(Math.random() * 50) + 10; let n2 = Math.floor(Math.random() * 50) + 10;
+            if(!isPlus && n1 < n2) { let t = n1; n1 = n2; n2 = t; }
+            
+            const rData = { robberId: uid, robberName: userData.username, cardId, cardName, equation: `${n1} ${isPlus?'+':'-'} ${n2}`, answer: isPlus ? n1+n2 : n1-n2, status: 'pending' };
+            await update(ref(db, `users/${uid}`), { lastStealTime: now });
+            await set(ref(db, `robberies/${targetId}`), rData);
+            triggerMathChallenge(rData, targetId);
+        };
+
+        function triggerMathChallenge(data, targetId) {
+            currentRobbery = { ...data, targetId };
+            document.getElementById('ui-math-eq').innerText = data.equation;
+            document.getElementById('math-input').value = '';
+            document.getElementById('view-math').classList.remove('hide');
+            setTimeout(() => document.getElementById('math-input').focus(), 100);
+        }
+
+        window.submitMath = async () => {
+            const val = parseInt(document.getElementById('math-input').value);
+            
+            if (val !== currentRobbery.answer) {
+                alert("Incorrect!");
+                document.getElementById('math-input').value = '';
+                return;
+            }
+
+            const snap = await get(ref(db, `robberies/${currentRobbery.targetId}`));
+            
+            if (snap.exists() && snap.val().status !== 'solved') {
+                await update(ref(db, `robberies/${currentRobbery.targetId}`), { status: 'solved', winner: uid });
+                
+                if (currentRobbery.robberId === uid) {
+                    const cSnap = await get(ref(db, `users/${currentRobbery.targetId}/inventory/${currentRobbery.cardId}`));
+                    if(cSnap.exists()) { 
+                        let stolenCard = cSnap.val();
+                        stolenCard.acquiredAt = Date.now(); 
+                        
+                        await push(ref(db, `users/${uid}/inventory`), stolenCard); 
+                        await remove(ref(db, `users/${currentRobbery.targetId}/inventory/${currentRobbery.cardId}`)); 
+                        alert("Extracted Successfully!"); 
+                    } else {
+                        alert("Card not found. It may have already been sold or moved.");
+                    }
+                } else {
+                    alert("Firewall secured! Card saved.");
+                }
+                
+                await remove(ref(db, `robberies/${currentRobbery.targetId}`));
+            } else {
+                if (currentRobbery.robberId === uid) {
+                    alert("Too late! The defender solved the encryption first. The card is saved.");
+                } else {
+                    alert("Too late! The attacker bypassed the firewall first. Your card was stolen!");
+                }
+            }
+            
+            document.getElementById('view-math').classList.add('hide');
+        };
+
+        window.handleAdmin = () => { if(prompt("Passcode:") === "555") document.getElementById('view-admin').classList.remove('hide'); };
+        window.closeAdmin = () => document.getElementById('view-admin').classList.add('hide');
+        
+        window.adminSetStealing = async (enabled) => {
+            await update(ref(db, `global`), { stealingEnabled: enabled });
+            alert(`Stealing has been ${enabled ? 'ENABLED' : 'DISABLED'}.`);
+        };
+
+        window.adminRestockAll = () => { 
+            let s = {}; Object.keys(PACK_TYPES).forEach(k => s[k] = PACK_TYPES[k].max); update(ref(db, `global/stocks`), s); 
+            alert("All packs force restocked to MAX!");
+        };
+        
+        window.adminRestockSpecific = async () => {
+            const packType = document.getElementById('admin-pack-type').value;
+            const qty = parseInt(document.getElementById('admin-pack-qty').value);
+            if(isNaN(qty) || qty < 0) return alert("Enter a valid quantity!");
+            
+            const currentStock = (global.stocks && global.stocks[packType]) ? global.stocks[packType] : 0;
+            await update(ref(db, `global/stocks`), { [packType]: currentStock + qty });
+            
+            document.getElementById('admin-pack-qty').value = '';
+            alert(`Added ${qty} to ${packType} stock!`);
+        };
+
+        window.adminSetLuck = (m, min) => update(ref(db, `global`), { luckMult: m, luckExpiry: Date.now() + (min*60000) });
+        window.adminSendMsg = () => {
+            const msg = document.getElementById('admin-msg').value;
+            if(!msg) return;
+            update(ref(db, `global`), { announcement: msg, annExpiry: Date.now() + 60000 });
+            document.getElementById('admin-msg').value = '';
+        };
+
+        window.adminApplyCustomLuck = () => {
+            const mult = parseFloat(document.getElementById('admin-luck-mult').value) || 1;
+            const mins = parseFloat(document.getElementById('admin-luck-time').value) || 0;
+            adminSetLuck(mult, mins);
+            document.getElementById('admin-luck-mult').value = '';
+            document.getElementById('admin-luck-time').value = '';
+            alert(`Global Luck set to ${mult}x for ${mins} minutes!`);
+        };
+
+        function updateUIState() {
+            if(!global.nextRestock) return;
+            
+            const luckStatusEl = document.getElementById('ui-luck-status');
+            if (global.luckExpiry && Date.now() < global.luckExpiry) {
+                const luck = global.luckMult || 1;
+                const rem = Math.max(0, Math.floor((global.luckExpiry - Date.now()) / 1000));
+                const mins = Math.floor(rem / 60);
+                const secs = (rem % 60).toString().padStart(2, '0');
+                
+                luckStatusEl.innerText = `${luck}x (${mins}:${secs})`;
+                luckStatusEl.className = "text-lg font-black text-green-400 drop-shadow-[0_0_5px_rgba(74,222,128,0.5)]";
+            } else {
+                luckStatusEl.innerText = "1x";
+                luckStatusEl.className = "text-lg font-black text-zinc-500";
+            }
+            
+            const ann = document.getElementById('ui-announcement');
+            if(global.announcement && Date.now() < global.annExpiry) { ann.innerText = global.announcement; ann.classList.remove('hide'); } 
+            else ann.classList.add('hide');
+
+            const rst = Math.max(0, Math.floor((global.nextRestock - Date.now())/1000));
+            document.getElementById('ui-restock-timer').innerText = `${Math.floor(rst/60)}:${(rst%60).toString().padStart(2,'0')}`;
+            const mut = Math.max(0, Math.floor((global.nextMutation - Date.now())/1000));
+            document.getElementById('ui-mut-timer').innerText = `${Math.floor(mut/60)}:${(mut%60).toString().padStart(2,'0')}`;
+
+            if(userData) {
+                const cd = Math.max(0, Math.floor(((userData.lastStealTime||0) + 300000 - Date.now())/1000));
+                document.getElementById('ui-steal-cd').innerText = cd > 0 ? `${Math.floor(cd/60)}:${(cd%60).toString().padStart(2,'0')}` : "READY";
+                document.getElementById('ui-steal-cd').className = cd > 0 ? "text-lg font-black text-red-500" : "text-lg font-black text-green-400";
+            }
+
+            document.querySelectorAll('.shield-timer').forEach(el => {
+                const until = parseInt(el.getAttribute('data-until'));
+                if (until > Date.now()) {
+                    el.innerText = `${Math.ceil((until - Date.now()) / 60000)}M LEFT`;
+                } else {
+                    el.remove();
+                }
+            });
+
+            document.querySelectorAll('.base-shield-timer').forEach(el => {
+                const untilAttr = el.getAttribute('data-until');
+                if (untilAttr) {
+                    const until = parseInt(untilAttr);
+                    if (until > Date.now()) {
+                        el.innerText = `LOCKED (${Math.ceil((until - Date.now()) / 60000)}M)`;
+                    } else {
+                        el.innerText = 'EXTRACT (RELOAD)';
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
