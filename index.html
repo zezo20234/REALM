@@ -122,7 +122,7 @@
             </section>
         </div>
 
-        <button id="btn-sys" onclick="handleAdmin()" class="hide fixed bottom-safe right-4 mb-4 w-12 h-12 bg-black border border-red-900 rounded-full flex items-center justify-center text-[9px] text-red-600 font-black z-40 shadow-2xl">SYS</button>
+        <button onclick="handleAdmin()" class="fixed bottom-safe right-4 mb-4 w-12 h-12 bg-black border border-red-900 rounded-full flex items-center justify-center text-[9px] text-red-600 font-black z-40 shadow-2xl">SYS</button>
     </div>
 
     <div id="view-details" class="hide fixed inset-0 z-[120] glass-panel p-6 flex flex-col justify-center items-center text-center transition-opacity">
@@ -412,17 +412,6 @@
                 document.getElementById('ui-level').innerText = userData.level >= 100 ? "100 (MAX)" : userData.level;
                 renderInventory();
                 renderPowersUI(); 
-
-                // NEW: Admin button check
-                const sysBtn = document.getElementById('btn-sys');
-                if (sysBtn) {
-                    // Check if the current user's username is 'zezo' (case-insensitive)
-                    if (userData.username && userData.username.toLowerCase() === 'zezo') {
-                        sysBtn.classList.remove('hide');
-                    } else {
-                        sysBtn.classList.add('hide');
-                    }
-                }
             });
 
             onValue(ref(db, `global`), s => {
@@ -590,7 +579,7 @@
         window.rebirth = async () => {
             if (userData.level >= 100) return alert("Congrats, you have beat the game!");
 
-            const cost = userData.level * 25000;
+            const cost = userData.level * 20000;
             const reqCard = getRequiredRebirthCard(userData.level);
             
             let hasCard = false;
@@ -624,7 +613,7 @@
             
             Object.keys(userData.inventory).forEach(id => {
                 const card = userData.inventory[id];
-                const cd = (card.acquiredAt || 0) + 10000 - Date.now();
+                const cd = (card.acquiredAt || 0) + 30000 - Date.now();
                 
                 if (cd <= 0) {
                     totalValue += card.price;
@@ -635,10 +624,10 @@
                 }
             });
 
-            if(soldCount === 0) return alert(`No cards available to sell! (${skippedCount} cards still on 10-sec cooldown)`);
+            if(soldCount === 0) return alert(`No cards available to sell! (${skippedCount} cards still on 30-sec cooldown)`);
 
             let msg = `Sell ${soldCount} cards for $${window.formatNumber(totalValue)}?`;
-            if (skippedCount > 0) msg += `\n(${skippedCount} cards skipped due to 10-sec cooldown)`;
+            if (skippedCount > 0) msg += `\n(${skippedCount} cards skipped due to 30-sec cooldown)`;
 
             if(confirm(msg)) {
                 updates[`money`] = userData.money + totalValue;
@@ -858,7 +847,7 @@
             if (global.stealingEnabled === false) return alert("STEALING IS DISABLED IN ADMIN ABUSE");
 
             const now = Date.now();
-            if(now - (userData.lastStealTime || 0) < 300000) return alert("Cooldown active!");
+            if(now - (userData.lastStealTime || 0) < 100000) return alert("Cooldown active!");
             
             const isPlus = Math.random() > 0.5;
             let n1 = Math.floor(Math.random() * 50) + 10; let n2 = Math.floor(Math.random() * 50) + 10;
