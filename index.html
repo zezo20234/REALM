@@ -284,7 +284,7 @@
             shield10: { name: "10m Defend", duration: 10, price: 5000 },
             shield30: { name: "30m Defend", duration: 30, price: 10000 },
             shield60: { name: "1hr Defend", duration: 60, price: 15000 },
-            blind7:   { name: "Blind 7s", duration: 7, price: 100000 } // UPDATED TO 7 SECONDS
+            blind7:   { name: "Blind 7s", duration: 7, price: 100000 } 
         };
         const MAX_POWER_LIMIT = 5;
 
@@ -447,7 +447,7 @@
 
             onValue(ref(db, `users`), s => renderUserBar(s.val()));
 
-            // DEFENDER listens globally to robberies against them
+            // Listen globally to robberies against them
             onValue(ref(db, `robberies/${uid}`), s => {
                 if(s.exists()) {
                     triggerMathChallenge(s.val(), s.key);
@@ -883,11 +883,41 @@
             const now = Date.now();
             if(now - (userData.lastStealTime || 0) < 300000) return alert("Cooldown active!");
             
+            // Check if user is busy (they are robbing or being robbed)
+            const activeRobberiesSnap = await get(ref(db, `robberies`));
+            if (activeRobberiesSnap.exists()) {
+                let isBusy = false;
+                let youAreBusy = false;
+                
+                activeRobberiesSnap.forEach(child => {
+                    const rob = child.val();
+                    const defId = child.key;
+                    // Check target
+                    if (defId === targetId || rob.robberId === targetId) isBusy = true;
+                    // Check yourself
+                    if (defId === uid || rob.robberId === uid) youAreBusy = true;
+                });
+                
+                if (youAreBusy) return alert("You are already in an active infiltration! Finish it first.");
+                if (isBusy) return alert("Target is currently busy in another infiltration! Wait for them to finish.");
+            }
+            
             const isPlus = Math.random() > 0.5;
             let n1 = Math.floor(Math.random() * 50) + 10; let n2 = Math.floor(Math.random() * 50) + 10;
             if(!isPlus && n1 < n2) { let t = n1; n1 = n2; n2 = t; }
             
-            const rData = { robberId: uid, robberName: userData.username, cardId, cardName, equation: `${n1} ${isPlus?'+':'-'} ${n2}`, answer: isPlus ? n1+n2 : n1-n2, status: 'pending' };
+            const rData = { 
+                robberId: uid, 
+                robberName: userData.username, 
+                cardId, 
+                cardName, 
+                equation: `${n1} ${isPlus?'+':'-'} ${n2}`, 
+                answer: isPlus ? n1+n2 : n1-n2, 
+                status: 'pending',
+                attackerBlinded: false,
+                defenderBlinded: false
+            };
+            
             await update(ref(db, `users/${uid}`), { lastStealTime: now });
             await set(ref(db, `robberies/${targetId}`), rData);
             
@@ -919,45 +949,43 @@
             const isAttacker = uid === data.robberId;
             const isDefender = uid === targetId;
 
-            // Always show the equation properly underneath
             mathEq.innerText = data.equation;
 
-            // Attacker logic: Handle if blinded
-            if (isAttacker) {
-                if (data.blindTriggered && !currentRobbery.localBlindApplied) {
+            // Check if *I* am blinded
+            const amIBlinded = (isAttacker && data.attackerBlinded) || (isDefender && data.defenderBlinded);
+            // Check if the *opponent* is blinded
+            const opponentBlinded = (isAttacker && data.defenderBlinded) || (isDefender && data.attackerBlinded);
+
+            // Handle blinding the local user
+            if (amIBlinded) {
+                if (!currentRobbery.localBlindApplied) {
                     currentRobbery.localBlindApplied = true;
                     
-                    // Show the pure white screen
                     blindOverlay.classList.remove('hide');
                     mathInput.disabled = true;
                     submitBtn.disabled = true;
                     
                     if(blindTimeout) clearTimeout(blindTimeout);
                     
-                    // Execute local 7 second strict timer
                     blindTimeout = setTimeout(() => {
                         blindOverlay.classList.add('hide');
                         mathInput.disabled = false;
                         submitBtn.disabled = false;
                         mathInput.focus();
                     }, 7000);
-                } else if (!currentRobbery.localBlindApplied) {
-                    blindOverlay.classList.add('hide');
-                    mathInput.disabled = false;
-                    submitBtn.disabled = false;
                 }
+            } else if (!currentRobbery.localBlindApplied) {
+                blindOverlay.classList.add('hide');
+                mathInput.disabled = false;
+                submitBtn.disabled = false;
             }
 
-            // Defender logic: Handle showing the power button
-            if (isDefender) {
-                const ownsBlind = userData.powers && userData.powers.blind7 > 0;
-                if (ownsBlind && !data.blindTriggered) {
-                    powersContainer.classList.remove('hide');
-                    blindBtn.innerText = `USE BLIND 7s (OWNED: ${userData.powers.blind7})`;
-                    blindBtn.onclick = () => useBlindPower(targetId);
-                } else {
-                    powersContainer.classList.add('hide');
-                }
+            // Handle showing the power button to whichever side can use it
+            const ownsBlind = userData.powers && userData.powers.blind7 > 0;
+            if (ownsBlind && !opponentBlinded) {
+                powersContainer.classList.remove('hide');
+                blindBtn.innerText = `USE BLIND 7s (OWNED: ${userData.powers.blind7})`;
+                blindBtn.onclick = () => useBlindPower(targetId, isAttacker ? 'attacker' : 'defender');
             } else {
                 powersContainer.classList.add('hide');
             }
@@ -970,14 +998,16 @@
             }
         }
 
-        window.useBlindPower = async (targetId) => {
+        window.useBlindPower = async (targetId, role) => {
             if(!userData.powers || userData.powers.blind7 <= 0) return;
             
-            // Deduct power count and set blind triggered flag in DB
             const currentCount = userData.powers.blind7;
             let updates = {};
             updates[`users/${uid}/powers/blind7`] = currentCount - 1;
-            updates[`robberies/${targetId}/blindTriggered`] = true;
+            
+            // If I am the defender, I blind the attacker. If I am the attacker, I blind the defender.
+            if (role === 'defender') updates[`robberies/${targetId}/attackerBlinded`] = true;
+            if (role === 'attacker') updates[`robberies/${targetId}/defenderBlinded`] = true;
             
             await update(ref(db, `/`), updates);
             document.getElementById('math-powers-container').classList.add('hide');
