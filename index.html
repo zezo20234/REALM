@@ -532,53 +532,45 @@
             if(!global.stocks || (global.stocks[type] || 0) <= 0) return alert("Out of stock!");
 
             let luck = (global.luckExpiry && Date.now() < global.luckExpiry) ? global.luckMult : 1;
-            let adjustedOdds = [...pack.odds];
             
-            if (luck > 1) {
-                let foundBase = false;
-                for(let i = 0; i < RARITIES_ORDER.length; i++) {
-                    if (pack.odds[i] > 0) {
-                        if (!foundBase) {
-                            foundBase = true; 
-                        } else {
-                            adjustedOdds[i] = pack.odds[i] * luck; 
-                        }
-                    }
-                }
-            }
+            // 1. DETERMINE STRICT PACK RARITY BOUNDARY
+            let rarityIndex = pack.odds.findIndex(o => o > 0);
+            let rarity = RARITIES_ORDER[rarityIndex];
 
-            let totalWeight = adjustedOdds.reduce((a, b) => a + b, 0);
-            let roll = Math.random() * totalWeight;
-            
-            let rarity = "Common"; 
-            let rarityBaseChance = 100; 
-            let sum = 0;
-            
-            for(let i = RARITIES_ORDER.length - 1; i >= 0; i--) {
-                sum += adjustedOdds[i];
-                if(roll < sum) {
-                    rarity = RARITIES_ORDER[i];
-                    rarityBaseChance = (adjustedOdds[i] / totalWeight) * 100;
-                    break;
-                }
-            }
-
+            // 2. GET THE CARDS IN THAT RARITY POOL
             const pool = CARD_LIBRARY[rarity];
-            let cardRoll = Math.random() * 100;
+            
+            // 3. APPLY REALISTIC LUCK TO SPECIFIC CARDS (internal math)
+            let adjustedWeights = pool.map((card, index) => {
+                let weight = card.chanceInRarity;
+                if (luck > 1) {
+                    let rankBonus = index / (pool.length - 1); 
+                    weight = weight * (1 + (luck - 1) * rankBonus); 
+                }
+                return weight;
+            });
+
+            // 4. ROLL FOR THE CARD (using the boosted weights)
+            let totalWeight = adjustedWeights.reduce((a, b) => a + b, 0);
+            let cardRoll = Math.random() * totalWeight;
+            
             let sumChance = 0;
             let selectedCard = pool[0];
             
             for(let i = 0; i < pool.length; i++) {
-                sumChance += pool[i].chanceInRarity;
+                sumChance += adjustedWeights[i];
                 if(cardRoll <= sumChance) {
                     selectedCard = pool[i];
                     break;
                 }
             }
 
+            // 5. SET THE DISPLAYED PERCENTAGE TO THE UN-MODIFIED BASE CHANCE
+            // Since the pack guarantees this rarity, the true base chance is exactly what is hardcoded in the pool.
+            const absoluteChance = selectedCard.chanceInRarity.toFixed(2);
+
             const name = selectedCard.name;
             const finalPrice = selectedCard.value; 
-            const absoluteChance = ((rarityBaseChance / 100) * (selectedCard.chanceInRarity / 100) * 100).toFixed(2);
             const cardId = push(ref(db, `users/${uid}/inventory`)).key;
             
             await update(ref(db, `users/${uid}`), { money: userData.money - pack.price });
