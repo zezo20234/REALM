@@ -175,7 +175,7 @@
 
     <div id="view-math" class="hide fixed inset-0 z-[200] bg-[#0a0000] p-10 flex flex-col items-center justify-center text-center pt-safe">
         
-        <div id="math-blind-overlay" class="hide absolute inset-0 z-[300] bg-white flex items-center justify-center">
+        <div id="math-blind-overlay" class="hide fixed inset-0 z-[999] bg-white flex items-center justify-center">
             <h1 class="text-black text-6xl font-black tracking-tighter drop-shadow-2xl animate-pulse">BLINDED</h1>
         </div>
 
@@ -183,6 +183,7 @@
             <h2 class="text-3xl font-black text-red-500 mb-2 tracking-tighter">FIREWALL DETECTED</h2>
             <p class="text-sm text-red-400/80 mb-8 font-medium">Solve the encryption to proceed:</p>
             <p id="ui-math-eq" class="text-6xl font-black mb-10 tracking-widest text-white drop-shadow-lg transition-all duration-300">-- ? --</p>
+            
             <input type="number" id="math-input" class="w-full p-5 rounded-2xl text-4xl font-black text-center outline-none mb-4 bg-black/50 border-red-900/50 focus:border-red-500 placeholder:text-zinc-700 disabled:opacity-50">
             <button id="math-submit-btn" onclick="submitMath()" class="w-full bg-red-600 text-white p-5 rounded-2xl font-black text-xl active:scale-95 transition-transform shadow-lg shadow-red-600/30 disabled:opacity-50 disabled:active:scale-100">BYPASS</button>
             
@@ -956,19 +957,24 @@
             // Check if the *opponent* is blinded
             const opponentBlinded = (isAttacker && data.defenderBlinded) || (isDefender && data.attackerBlinded);
 
-            // Handle blinding the local user
+            // Handle blinding the local user completely
             if (amIBlinded) {
                 if (!currentRobbery.localBlindApplied) {
                     currentRobbery.localBlindApplied = true;
                     
                     blindOverlay.classList.remove('hide');
+                    
+                    // Physically disable and hide the input so the keyboard drops
+                    mathInput.readOnly = true;
                     mathInput.disabled = true;
+                    mathInput.blur(); // Drops mobile keyboard immediately
                     submitBtn.disabled = true;
                     
                     if(blindTimeout) clearTimeout(blindTimeout);
                     
                     blindTimeout = setTimeout(() => {
                         blindOverlay.classList.add('hide');
+                        mathInput.readOnly = false;
                         mathInput.disabled = false;
                         submitBtn.disabled = false;
                         mathInput.focus();
@@ -976,12 +982,13 @@
                 }
             } else if (!currentRobbery.localBlindApplied) {
                 blindOverlay.classList.add('hide');
+                mathInput.readOnly = false;
                 mathInput.disabled = false;
                 submitBtn.disabled = false;
             }
 
-            // Handle showing the power button to whichever side can use it
-            const ownsBlind = userData.powers && userData.powers.blind7 > 0;
+            // Handle showing the power button to whoever owns it and hasn't already blinded the opponent
+            const ownsBlind = userData && userData.powers && userData.powers.blind7 > 0;
             if (ownsBlind && !opponentBlinded) {
                 powersContainer.classList.remove('hide');
                 blindBtn.innerText = `USE BLIND 7s (OWNED: ${userData.powers.blind7})`;
@@ -1016,6 +1023,12 @@
         window.closeMathChallenge = () => {
             document.getElementById('view-math').classList.add('hide');
             document.getElementById('math-blind-overlay').classList.add('hide'); // Safety hide
+            
+            // Always ensure keyboard works again when popup closes
+            const mathInput = document.getElementById('math-input');
+            mathInput.readOnly = false;
+            mathInput.disabled = false;
+            
             if(activeRobberyUnsub) { activeRobberyUnsub(); activeRobberyUnsub = null; }
             if(blindTimeout) clearTimeout(blindTimeout);
             currentRobbery = null;
