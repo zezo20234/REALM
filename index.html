@@ -901,13 +901,25 @@
             if (activeRobberiesSnap.exists()) {
                 let isBusy = false;
                 let youAreBusy = false;
+                let cleanupUpdates = {};
                 
                 activeRobberiesSnap.forEach(child => {
                     const rob = child.val();
                     const defId = child.key;
-                    if (defId === targetId || rob.robberId === targetId) isBusy = true;
-                    if (defId === uid || rob.robberId === uid) youAreBusy = true;
+                    
+                    // Cleanup stuck infiltrations (older than 3 minutes or no timestamp)
+                    if (!rob.timestamp || now - rob.timestamp > 180000) {
+                        cleanupUpdates[`robberies/${defId}`] = null;
+                    } else {
+                        if (defId === targetId || rob.robberId === targetId) isBusy = true;
+                        if (defId === uid || rob.robberId === uid) youAreBusy = true;
+                    }
                 });
+                
+                // Automatically fix the database if there are stuck robberies
+                if (Object.keys(cleanupUpdates).length > 0) {
+                    await update(ref(db, `/`), cleanupUpdates);
+                }
                 
                 if (youAreBusy) return alert("You are already in an active infiltration! Finish it first.");
                 if (isBusy) return alert("Target is currently busy in another infiltration! Wait for them to finish.");
@@ -926,7 +938,8 @@
                 answer: isPlus ? n1+n2 : n1-n2, 
                 status: 'pending',
                 attackerBlinded: false,
-                defenderBlinded: false
+                defenderBlinded: false,
+                timestamp: Date.now() // Added timestamp to prevent future stuck sessions
             };
             
             await update(ref(db, `users/${uid}`), { lastStealTime: now });
