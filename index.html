@@ -2761,6 +2761,24 @@
             margin-top: 2px;
         }
 
+        .custom-pack-out-of-stock {
+            opacity: 0.72;
+            filter: grayscale(0.25);
+        }
+
+        .custom-pack-out-of-stock::after {
+            content: 'OUT OF STOCK';
+            position: absolute;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            background: rgba(5, 8, 16, 0.58);
+            color: #f87171;
+            font-weight: 900;
+            letter-spacing: 1px;
+            pointer-events: none;
+        }
+
         /* --- COMING SOON OVERLAY --- */
         #coming-soon-screen {
             position: fixed;
@@ -3631,9 +3649,7 @@
                         style="background:var(--bg-surface);border:1px solid var(--border-glow);color:white;padding:10px;border-radius:8px;">
                     <input type="number" id="cp-stock" placeholder="Total stock" min="1"
                         style="background:var(--bg-surface);border:1px solid var(--border-glow);color:white;padding:10px;border-radius:8px;">
-                    <input type="number" id="cp-min-restock" placeholder="Min restock" min="0"
-                        style="background:var(--bg-surface);border:1px solid var(--border-glow);color:white;padding:10px;border-radius:8px;">
-                    <input type="number" id="cp-max-restock" placeholder="Max restock" min="0"
+                    <input type="number" id="cp-restock-percent" placeholder="Restock % of max" min="0" max="100" step="1"
                         style="background:var(--bg-surface);border:1px solid var(--border-glow);color:white;padding:10px;border-radius:8px;">
                     <select id="cp-duration"
                         style="background:var(--bg-surface);border:1px solid var(--border-glow);color:white;padding:10px;border-radius:8px;grid-column:1/-1;">
@@ -3646,10 +3662,12 @@
                     </select>
                 </div>
 
-                <div style="display:flex;gap:8px;margin-bottom:8px;">
-                    <input type="text" id="cp-card-name" placeholder="Card name (exact from registry)"
-                        style="flex:1;background:var(--bg-surface);border:1px solid var(--border-glow);color:white;padding:10px;border-radius:8px;font-size:0.85rem;">
-                    <input type="number" id="cp-card-chance" placeholder="%" min="1" max="100"
+                <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+                    <input type="text" id="cp-card-name" placeholder="Any card name (no registry needed)"
+                        style="flex:2;min-width:120px;background:var(--bg-surface);border:1px solid var(--border-glow);color:white;padding:10px;border-radius:8px;font-size:0.85rem;">
+                    <input type="number" id="cp-card-cost" placeholder="Cost €" min="0" step="0.01"
+                        style="width:80px;background:var(--bg-surface);border:1px solid var(--border-glow);color:white;padding:10px;border-radius:8px;">
+                    <input type="number" id="cp-card-chance" placeholder="%" min="0.1" max="100" step="0.1"
                         style="width:70px;background:var(--bg-surface);border:1px solid var(--border-glow);color:white;padding:10px;border-radius:8px;">
                     <button class="btn-lvlup" id="cp-add-card" style="background:#374151;">ADD</button>
                 </div>
@@ -4700,7 +4718,7 @@ const MUTATIONS_LIST = [
         }
 
         function startPackOpeningExperience(packKey, cardObject, streakBonusInfo) {
-            const hex = PACK_COLOR_HEX[packKey] || '#2563eb';
+            const hex = cardObject.customColor || PACK_COLOR_HEX[packKey] || '#2563eb';
             resetPackOpenVisuals();
             packOpeningInProgress = true;
 
@@ -5922,9 +5940,37 @@ const MUTATIONS_LIST = [
         });
 
         // 10 MINUTE RESTOCK CYCLE WITH CHANCES
+        function processCustomPackPercentageRestocks(currentSystemEpochTime, restockFrequencyInterval) {
+            for (const packId in customPacksLive) {
+                const pack = customPacksLive[packId];
+                if (!pack?.active || currentSystemEpochTime > pack.expiresAt) continue;
+
+                const maxStock = Math.max(0, parseInt(pack.originalStock, 10) || parseInt(pack.stock, 10) || 0);
+                const restockPercent = Math.max(0, Math.min(100, parseFloat(pack.restockPercent) || 0));
+                if (maxStock <= 0 || restockPercent <= 0) continue;
+                if (pack.lastRestockAt && currentSystemEpochTime - pack.lastRestockAt < restockFrequencyInterval) continue;
+
+                runTransaction(ref(db, `custom_packs/${packId}`), currentPack => {
+                    if (!currentPack?.active || currentSystemEpochTime > currentPack.expiresAt) return currentPack;
+                    if (currentPack.lastRestockAt && currentSystemEpochTime - currentPack.lastRestockAt < restockFrequencyInterval) return currentPack;
+
+                    const cap = Math.max(0, parseInt(currentPack.originalStock, 10) || parseInt(currentPack.stock, 10) || 0);
+                    const pct = Math.max(0, Math.min(100, parseFloat(currentPack.restockPercent) || 0));
+                    const replenishAmount = Math.ceil(cap * (pct / 100));
+                    const nextStock = Math.min(cap, (parseInt(currentPack.stock, 10) || 0) + replenishAmount);
+
+                    return {
+                        ...currentPack,
+                        stock: nextStock,
+                        lastRestockAt: currentSystemEpochTime
+                    };
+                });
+            }
+        }
+
         function processGlobalClockTicks() {
             const currentSystemEpochTime = Date.now();
-            const restockFrequencyInterval = 10 * 60 * 500;
+            const restockFrequencyInterval = 10 * 60 * 1000;
             const baselineRestockMarker = sharedGlobalPacks.lastRestockTime || 0;
             const structuralElapsedDelta = currentSystemEpochTime - baselineRestockMarker;
 
@@ -5956,6 +6002,8 @@ const MUTATIONS_LIST = [
                 const secondsField = Math.floor((dynamicTimeRemaining % 60000) / 1000);
                 document.getElementById('timer-restock').innerText = `${minutesField.toString().padStart(2, '0')}:${secondsField.toString().padStart(2, '0')}`;
             }
+
+            processCustomPackPercentageRestocks(currentSystemEpochTime, restockFrequencyInterval);
 
             const mutationFrequencyInterval = 1 * 60 * 1000;
             const localizedRemainingMutationTick = mutationFrequencyInterval - (currentSystemEpochTime % mutationFrequencyInterval);
@@ -6163,6 +6211,10 @@ const MUTATIONS_LIST = [
                 return applyMutationBonuses(hCard.baseValue);
             }
 
+            if (instanceObj.packSource === '__custom__' && instanceObj.customCardMeta) {
+                return applyMutationBonuses(parseFloat(instanceObj.customCardMeta.baseValue) || 0);
+            }
+
             const matchingBaseCardRegistryMeta = GAME_REGISTRY[instanceObj.packSource]?.find(x => x.id === instanceObj.cardId);
             if (!matchingBaseCardRegistryMeta) return 0;
 
@@ -6202,6 +6254,18 @@ const MUTATIONS_LIST = [
                         cardChance = 100;
                         cardIndex = hiddenCard.unlocksAtLevel;
                     }
+                } else if (currentInstanceItem.packSource === '__custom__' && currentInstanceItem.customCardMeta) {
+                    staticRegistryItemMeta = {
+                        id: currentInstanceItem.cardId,
+                        name: currentInstanceItem.customCardMeta.name,
+                        chance: currentInstanceItem.customCardMeta.chance,
+                        index: 0,
+                        baseValue: currentInstanceItem.customCardMeta.baseValue
+                    };
+                    cardColor = currentInstanceItem.customCardMeta.color || '#60a5fa';
+                    cardName = staticRegistryItemMeta.name;
+                    cardChance = parseFloat(staticRegistryItemMeta.chance) || 0;
+                    cardIndex = 0;
                 } else {
                     staticRegistryItemMeta = GAME_REGISTRY[currentInstanceItem.packSource]?.find(x => x.id === currentInstanceItem.cardId);
                     if (staticRegistryItemMeta) {
@@ -6347,6 +6411,19 @@ const MUTATIONS_LIST = [
                     cardChance = 100;
                     cardIndex = hiddenCard.unlocksAtLevel;
                 }
+            } else if (instanceData.packSource === '__custom__' && instanceData.customCardMeta) {
+                staticMeta = {
+                    id: instanceData.cardId,
+                    name: instanceData.customCardMeta.name,
+                    chance: instanceData.customCardMeta.chance,
+                    index: 0,
+                    baseValue: instanceData.customCardMeta.baseValue
+                };
+                cardColor = instanceData.customCardMeta.color || '#60a5fa';
+                cardName = staticMeta.name;
+                cardBaseValue = parseFloat(staticMeta.baseValue) || 0;
+                cardChance = parseFloat(staticMeta.chance) || 0;
+                cardIndex = 0;
             } else {
                 staticMeta = GAME_REGISTRY[instanceData.packSource]?.find(x => x.id === instanceData.cardId);
                 if (staticMeta) {
@@ -6760,8 +6837,15 @@ const MUTATIONS_LIST = [
             targetAssetKeys.forEach((instanceIdKey) => {
                 const currentInstanceItem = targetDeckPayload[instanceIdKey];
                 if (isRamezCard(currentInstanceItem)) return;
-                const staticRegistryItemMeta = GAME_REGISTRY[currentInstanceItem.packSource]?.find(x => x.id === currentInstanceItem.cardId);
+                const staticRegistryItemMeta = currentInstanceItem.packSource === '__custom__' && currentInstanceItem.customCardMeta
+                    ? {
+                        name: currentInstanceItem.customCardMeta.name,
+                        chance: currentInstanceItem.customCardMeta.chance,
+                        baseValue: currentInstanceItem.customCardMeta.baseValue
+                    }
+                    : GAME_REGISTRY[currentInstanceItem.packSource]?.find(x => x.id === currentInstanceItem.cardId);
                 if (!staticRegistryItemMeta) return;
+                const targetCardColor = currentInstanceItem.customCardMeta?.color || PACK_METADATA[currentInstanceItem.packSource]?.color || '#60a5fa';
 
                 const evaluatingSecurityLockIsActive = currentInstanceItem.cryptographicLockExpiry && currentInstanceItem.cryptographicLockExpiry > Date.now();
                 if (evaluatingSecurityLockIsActive) return;
@@ -6771,11 +6855,11 @@ const MUTATIONS_LIST = [
 
                 const itemCardUiNodeElement = document.createElement('div');
                 itemCardUiNodeElement.className = `card-item`;
-                itemCardUiNodeElement.style.setProperty('--rarity-color', PACK_METADATA[currentInstanceItem.packSource].color);
+                itemCardUiNodeElement.style.setProperty('--rarity-color', targetCardColor);
                 itemCardUiNodeElement.innerHTML = `
                     <div class="card-badge-top"><span>🎯 ${staticRegistryItemMeta.chance}%</span></div>
                     <div class="card-body">
-                        <div class="card-title" style="color:${PACK_METADATA[currentInstanceItem.packSource].color};">${staticRegistryItemMeta.name}</div>
+                        <div class="card-title" style="color:${targetCardColor};">${staticRegistryItemMeta.name}</div>
                     </div>
                     <div class="card-badge-bottom">
                         <span>🧬 M:${(currentInstanceItem.activeMutationIndexes || []).length}</span>
@@ -7848,10 +7932,15 @@ const MUTATIONS_LIST = [
         function initCustomPackForge() {
             document.getElementById('cp-add-card')?.addEventListener('click', () => {
                 const name = document.getElementById('cp-card-name').value.trim();
+                const cost = parseFloat(document.getElementById('cp-card-cost').value);
                 const chance = parseFloat(document.getElementById('cp-card-chance').value);
-                if (!name || isNaN(chance) || chance <= 0) return showToast('Enter card name and chance %.', 'error');
-                cpDraftCards.push({ name, chance });
+                if (!name) return showToast('Enter any card name string.', 'error');
+                if (isNaN(cost) || cost < 0) return showToast('Enter a valid cost (€).', 'error');
+                if (isNaN(chance) || chance <= 0) return showToast('Enter a valid drop chance %.', 'error');
+                // Registry bypass: accepts ANY arbitrary string as card name
+                cpDraftCards.push({ name, cost, chance });
                 document.getElementById('cp-card-name').value = '';
+                document.getElementById('cp-card-cost').value = '';
                 document.getElementById('cp-card-chance').value = '';
                 renderCpDraftList();
             });
@@ -7861,8 +7950,7 @@ const MUTATIONS_LIST = [
                 const color = document.getElementById('cp-color').value;
                 const price = parseFloat(document.getElementById('cp-price').value);
                 const stock = parseInt(document.getElementById('cp-stock').value);
-                const minR = parseInt(document.getElementById('cp-min-restock').value) || 0;
-                const maxR = parseInt(document.getElementById('cp-max-restock').value) || 0;
+                const restockPercent = Math.max(0, Math.min(100, parseFloat(document.getElementById('cp-restock-percent')?.value) || 0));
                 const durationHours = parseInt(document.getElementById('cp-duration').value);
                 const totalChance = cpDraftCards.reduce((s, c) => s + c.chance, 0);
 
@@ -7877,7 +7965,7 @@ const MUTATIONS_LIST = [
                 payload[`custom_packs/${packId}`] = {
                     name, color, price, stock,
                     originalStock: stock,
-                    minRestock: minR, maxRestock: maxR,
+                    restockPercent,
                     expiresAt: Date.now() + durationHours * 3600000,
                     cards: cpDraftCards,
                     active: true,
@@ -7890,8 +7978,7 @@ const MUTATIONS_LIST = [
                 document.getElementById('cp-name').value = '';
                 document.getElementById('cp-price').value = '';
                 document.getElementById('cp-stock').value = '';
-                document.getElementById('cp-min-restock').value = '';
-                document.getElementById('cp-max-restock').value = '';
+                if (document.getElementById('cp-restock-percent')) document.getElementById('cp-restock-percent').value = '';
                 renderCpDraftList();
             });
 
@@ -7935,7 +8022,8 @@ const MUTATIONS_LIST = [
             cpDraftCards.forEach((c, i) => {
                 const row = document.createElement('div');
                 row.className = 'cp-card-row';
-                row.innerHTML = `<span>${c.name}</span><span style="color:var(--accent-green);font-weight:800;">${c.chance}%</span><span class="cp-remove-btn" onclick="cpRemoveCard(${i})">✕</span>`;
+                const costLabel = c.cost != null ? `€${parseFloat(c.cost).toFixed(2)}` : '—';
+                row.innerHTML = `<span style="flex:1;">${c.name}</span><span style="color:#60a5fa;font-weight:800;margin-right:6px;">${costLabel}</span><span style="color:var(--accent-green);font-weight:800;">${c.chance}%</span><span class="cp-remove-btn" onclick="cpRemoveCard(${i})">✕</span>`;
                 listEl.appendChild(row);
             });
             if (cpDraftCards.length === 0) listEl.innerHTML = `<div style="text-align:center;color:#6b7280;font-size:0.78rem;padding:8px;">No cards added yet</div>`;
@@ -7963,8 +8051,9 @@ const MUTATIONS_LIST = [
             document.getElementById('cp-color').value = p.color;
             document.getElementById('cp-price').value = p.price;
             document.getElementById('cp-stock').value = p.stock;
-            document.getElementById('cp-min-restock').value = p.minRestock || 0;
-            document.getElementById('cp-max-restock').value = p.maxRestock || 0;
+            if (document.getElementById('cp-restock-percent')) {
+                document.getElementById('cp-restock-percent').value = p.restockPercent ?? 0;
+            }
             renderCpDraftList();
             showToast('Pack loaded for editing. Change fields and publish to save.', 'info');
         };
@@ -7982,15 +8071,18 @@ const MUTATIONS_LIST = [
             const now = Date.now();
             for (const pid in customPacksLive) {
                 const p = customPacksLive[pid];
-                if (!p.active || now > p.expiresAt || p.stock <= 0) continue;
+                if (!p.active || now > p.expiresAt) continue;
 
                 const msLeft = p.expiresAt - now;
                 const hLeft = Math.floor(msLeft / 3600000);
                 const mLeft = Math.floor((msLeft % 3600000) / 60000);
                 const countdownStr = hLeft > 0 ? `${hLeft}h ${mLeft}m remaining` : `${mLeft}m remaining`;
+                const availableStock = Math.max(0, parseInt(p.stock, 10) || 0);
+                const maxStock = Math.max(availableStock, parseInt(p.originalStock, 10) || availableStock || 0);
+                const soldOut = availableStock <= 0;
 
                 const box = document.createElement('div');
-                box.className = 'pack-box custom-pack-shimmer';
+                box.className = `pack-box custom-pack-shimmer${soldOut ? ' custom-pack-out-of-stock' : ''}`;
                 box.style.cssText = `border: 2px solid ${p.color}; box-shadow: 0 0 18px ${p.color}44; position:relative;`;
                 box.innerHTML = `
                     <div style="position:absolute;top:10px;left:10px;">
@@ -7999,9 +8091,9 @@ const MUTATIONS_LIST = [
                     <div class="pack-visual" style="--rarity-color:${p.color}; background:linear-gradient(135deg, ${p.color}, #050810);"></div>
                     <div style="font-weight:800;font-size:1rem;color:${p.color};">${p.name}</div>
                     <div class="cp-countdown">⏱ ${countdownStr}</div>
-                    <div style="font-size:0.75rem;color:#9ca3af;margin-top:2px;">${p.stock} left in stock</div>
+                    <div style="font-size:0.75rem;color:${soldOut ? '#f87171' : '#9ca3af'};margin-top:2px;">${soldOut ? 'Out of stock' : `${availableStock}/${maxStock} left in stock`}</div>
                     <div style="font-size:1.1rem;font-weight:900;color:var(--accent-green);margin:8px 0;">€${parseFloat(p.price).toFixed(2)}</div>
-                    <button class="btn-action btn-blue" style="width:100%;padding:10px;" onclick="purchaseCustomPack('${pid}')">BUY PACK</button>
+                    <button class="btn-action btn-blue" style="width:100%;padding:10px;${soldOut ? 'opacity:0.45;cursor:not-allowed;' : ''}" ${soldOut ? 'disabled' : ''} onclick="purchaseCustomPack('${pid}')">${soldOut ? 'OUT OF STOCK' : 'BUY PACK'}</button>
                 `;
                 cpZone.appendChild(box);
             }
@@ -8016,29 +8108,39 @@ const MUTATIONS_LIST = [
 
             let purchaseAllowed = false;
             await runTransaction(ref(db, `custom_packs/${packId}/stock`), current => {
-                if (current <= 0) return;
+                const currentStock = parseInt(current, 10) || 0;
+                if (currentStock <= 0) return;
                 purchaseAllowed = true;
-                return current - 1;
+                return currentStock - 1;
             });
             if (!purchaseAllowed) return showToast('Out of stock.', 'error');
 
-            const cards = pack.cards;
-            const roll = Math.random() * 100;
-            let cumulative = 0;
-            let chosenCardName = null;
-            for (const c of cards) {
-                cumulative += c.chance;
-                if (roll <= cumulative) { chosenCardName = c.name; break; }
-            }
-            if (!chosenCardName) chosenCardName = cards[cards.length - 1].name;
+            // --- REGISTRY BYPASS: use custom card data directly ---
+            const chosenCard = openCustomPackSimulated(pack.cards);
+            if (!chosenCard) return showToast('Pack has no valid cards.', 'error');
 
+            // Try to find the card in GAME_REGISTRY (optional — NOT required)
             let foundCard = null;
             let foundPackKey = null;
             for (const pk of PACK_TYPES) {
-                const match = GAME_REGISTRY[pk].find(c => c.name === chosenCardName);
+                const match = GAME_REGISTRY[pk]?.find(c => c.name === chosenCard.name);
                 if (match) { foundCard = match; foundPackKey = pk; break; }
             }
-            if (!foundCard) return showToast('Card not found in registry.', 'error');
+
+            // If NOT in registry, synthesize a virtual card object on the fly
+            if (!foundCard) {
+                const syntheticId = 'custom_' + chosenCard.name.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
+                foundCard = {
+                    id: syntheticId,
+                    name: chosenCard.name,
+                    chance: chosenCard.chance,
+                    baseValue: chosenCard.cost ?? 0,
+                    index: 0,
+                    pack: '__custom__',
+                    customColor: pack.color
+                };
+                foundPackKey = '__custom__';
+            }
 
             const instanceId = 'cp_' + Date.now() + '_' + Math.floor(Math.random() * 9999);
             const isNewDiscover = !userDataRecord.discovered?.[foundCard.id];
@@ -8046,26 +8148,62 @@ const MUTATIONS_LIST = [
             payload[`users/${activeUserSession.uid}/money`] = userDataRecord.money - pack.price;
             payload[`users/${activeUserSession.uid}/xp`] = (userDataRecord.xp || 0) + 15;
             payload[`inventory/${activeUserSession.uid}/${instanceId}`] = {
+                instanceId,
                 cardId: foundCard.id, packSource: foundPackKey,
-                acquiredTimestamp: Date.now(), activeMutationIndexes: [], cryptographicLockExpiry: 0
+                acquiredTimestamp: Date.now(), activeMutationIndexes: [], cryptographicLockExpiry: 0,
+                customCardMeta: foundPackKey === '__custom__' ? { name: foundCard.name, baseValue: foundCard.baseValue, chance: foundCard.chance, color: pack.color, packName: pack.name } : null
             };
             if (isNewDiscover) {
                 payload[`users/${activeUserSession.uid}/discovered/${foundCard.id}`] = Date.now();
                 trackQuestProgress('discover_cards', 1);
             }
             await update(ref(db, '/'), payload);
-            // Tutorial step 2/12: only advance when user is currently on "Buy a Pack" (index 1).
+            // Tutorial step 2/12
             if (isCurrentUserStillInTutorial() && getTutorialStep() === 1) {
                 advanceTutorialTo(2, { boughtPack: true, boughtPackAt: Date.now() });
-            }
-
-            if ((pack.stock - 1) <= 0) {
-                await update(ref(db, '/'), { [`custom_packs/${packId}/active`]: false });
             }
 
             trackQuestProgress('open_packs', 1, foundPackKey);
             startPackOpeningExperience(foundPackKey, foundCard, instanceId);
         };
+
+        // =========================================================
+        // STANDALONE: openCustomPackSimulated(cards)
+        // =========================================================
+        // Pure function — no registry dependency.
+        // Accepts an array of { name: string, cost: number, chance: number }
+        // Returns the chosen card object { name, cost, chance } or null.
+        //
+        // HOW IT WORKS:
+        //  - Treats each card's "chance" as a relative weight.
+        //  - Rolls a random number in [0, totalWeight) and walks the
+        //    cumulative distribution to pick a winner.
+        //  - Works even if chances don't sum to exactly 100.
+        //
+        // USAGE:
+        //  const cards = [
+        //    { name: "Dragon Fang",     cost: 50,  chance: 10 },
+        //    { name: "Phoenix Feather", cost: 120, chance: 5  },
+        //    { name: "Mud Clump",       cost: 2,   chance: 85 }
+        //  ];
+        //  const winner = openCustomPackSimulated(cards);
+        //  console.log(winner.name); // e.g. "Mud Clump"
+        // =========================================================
+        function openCustomPackSimulated(cards) {
+            if (!cards || cards.length === 0) return null;
+            const totalWeight = cards.reduce((sum, c) => sum + (c.chance || 0), 0);
+            if (totalWeight <= 0) return null;
+            const roll = Math.random() * totalWeight;
+            let cumulative = 0;
+            for (const c of cards) {
+                cumulative += (c.chance || 0);
+                if (roll < cumulative) return c;
+            }
+            return cards[cards.length - 1]; // safety fallback
+        }
+        // Expose globally so other modules/scripts can call it
+        window.openCustomPackSimulated = openCustomPackSimulated;
+
     </script>
 </body>
 
