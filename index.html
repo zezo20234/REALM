@@ -3798,7 +3798,14 @@ user-select: none;
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-        import { getDatabase, ref, set, get, onValue, update, runTransaction, push, remove, onDisconnect, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+        // Keep these exactly as they are:
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+// PASTE THE NEW LINE HERE (Replacing the old getDatabase one):
+import { initializeDatabase, ref, set, get, update, runTransaction, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
 
         // Firebase Configuration
         const firebaseConfig = {
@@ -3814,20 +3821,12 @@ user-select: none;
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const db = getDatabase(app);
-// 1. Correct import needed for v9/v10 Modular SDK 
-// Ensure these functions are included in your imports from "firebase/database"
-import { initializeApp } from "firebase/app";
-import { getDatabase, initializeRealtimeDatabase, persistentLocalCache } from "firebase/database";
-
-// 2. Change your initialization block to look EXACTLY like this:
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-
-// REPLACE YOUR PREVIOUS "const db = ..." AND PERSISTENCE LINES WITH THIS:
-const db = initializeRealtimeDatabase(app, {
+        // This replaces const db = getDatabase(app) and forces local storage persistence on
+const db = initializeDatabase(app, {
     persistenceEnabled: true
 });
+
+
 
 
         // Core Game Constants Setup
