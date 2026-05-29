@@ -10,6 +10,16 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Outfit:wght@400;600;700;800&display=swap"
         rel="stylesheet">
+        <!-- Stops the screen from zooming when players tap rapidly to open packs -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<!-- Hides the browser web-bars on iPhone/Android when installed -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<!-- Connects your app setup details -->
+<link rel="manifest" href="./manifest.json">
+
     <style>
         :root {
             --bg-dark: #090d16;
@@ -56,6 +66,16 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            /* Prevents the phone screen from bouncing/dragging up and down */
+overflow: hidden; 
+
+/* Stops game text from accidentally highlighting when tapping buttons */
+user-select: none; 
+-webkit-user-select: none;
+
+/* Kills the ugly blue flashing box when hitting "PACKS" or "VAULTS" */
+-webkit-tap-highlight-color: transparent;
+
         }
 
         /* --- GLOBAL LAYOUT --- */
@@ -3075,16 +3095,6 @@
 
         .btn-contact-admin:active {
             opacity: 0.8;
-        }
-        <!-- Stops the screen from zooming when players tap rapidly to open packs -->
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
-<!-- Hides the browser web-bars on iPhone/Android when installed -->
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
-<!-- Connects your app setup details -->
-<link rel="manifest" href="./manifest.json">
 
     </style>
 </head>
@@ -3805,6 +3815,9 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getDatabase(app);
+// Paste this right below const db = getDatabase(app);
+firebase.database.setPersistenceEnabled(db, true);
+firebase.database.goOnline(db);
 
         // Core Game Constants Setup
         const PACK_TYPES = ['paper', 'wood', 'stone', 'bronze', 'silver', 'gold', 'platinum', 'diamond', 'mythic', 'exotic', 'divine', 'celestial', 'galactic', 'universal', 'secret'];
@@ -8213,6 +8226,14 @@ const MUTATIONS_LIST = [
         }
         // Expose globally so other modules/scripts can call it
         window.openCustomPackSimulated = openCustomPackSimulated;
+// Registers your background service worker engine
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('Realm Engine Offline Setup: Successful'))
+      .catch(err => console.error('Offline Setup: Failed', err));
+  });
+}
 
     </script>
 </body>
