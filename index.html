@@ -3815,9 +3815,20 @@ user-select: none;
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getDatabase(app);
-// Paste this right below const db = getDatabase(app);
-firebase.database.setPersistenceEnabled(db, true);
-firebase.database.goOnline(db);
+// 1. Correct import needed for v9/v10 Modular SDK 
+// Ensure these functions are included in your imports from "firebase/database"
+import { initializeApp } from "firebase/app";
+import { getDatabase, initializeRealtimeDatabase, persistentLocalCache } from "firebase/database";
+
+// 2. Change your initialization block to look EXACTLY like this:
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+// REPLACE YOUR PREVIOUS "const db = ..." AND PERSISTENCE LINES WITH THIS:
+const db = initializeRealtimeDatabase(app, {
+    persistenceEnabled: true
+});
+
 
         // Core Game Constants Setup
         const PACK_TYPES = ['paper', 'wood', 'stone', 'bronze', 'silver', 'gold', 'platinum', 'diamond', 'mythic', 'exotic', 'divine', 'celestial', 'galactic', 'universal', 'secret'];
