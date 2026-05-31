@@ -3133,7 +3133,7 @@
     </div>
 
     <div id="luck-event-banner" aria-live="polite">
-        <div class="luck-banner-inner" id="luck-banner-text">✨ 8× LUCK EVENT ACTIVE<span class="luck-banner-sub"
+        <div class="luck-banner-inner" id="luck-banner-text">✨ 4× LUCK EVENT ACTIVE<span class="luck-banner-sub"
                 id="luck-banner-sub">Ends in 2:00</span></div>
     </div>
 
@@ -4326,6 +4326,7 @@ const MUTATIONS_LIST = [
         let activeClashRole = null;
         let clashUiSessionId = null;
         let clashUiLocked = false;
+        let mathChallengeStartTime = null;
         const processedStealSessionIds = new Set();
         const stealResolveInFlight = new Set();
         const stealTransferDoneLocally = new Set();
@@ -4749,16 +4750,16 @@ const MUTATIONS_LIST = [
         initPackOpenUi();
 
         // --- ADMIN SYSTEM ---
-        const ADMIN_CODE = '6767';
+        const ADMIN_CODE = 'fool';
         let globalAdminState = {};
         let selectedLuckMult = 1;
         let adminRepliesUnsub = null;
         let userAnsweredQuestionId = null;
         let globalLuckEventState = {}; // system/luckEvent (admin overrides)
 
-        const SCHEDULED_LUCK_MULT = 8;
-        const SCHEDULED_LUCK_INTERVAL_MS = 4 * 60 * 60 * 1000;
-        const SCHEDULED_LUCK_DURATION_MS = 2 * 60 * 1000;
+        const SCHEDULED_LUCK_MULT = 4;
+        const SCHEDULED_LUCK_INTERVAL_MS = 1 * 60 * 60 * 1000;
+        const SCHEDULED_LUCK_DURATION_MS = 5 * 60 * 1000;
 
         function isAdminUnlocked() {
             return sessionStorage.getItem('realm_admin_unlock') === '1';
@@ -4788,7 +4789,7 @@ const MUTATIONS_LIST = [
         function getActiveLuckMultiplier() {
             const now = Date.now();
 
-            // Scheduled 8× event (every 4 hours for 2 minutes), with admin override switches.
+            // Scheduled 4× event (every 1 hour for 5 minutes), with admin override switches.
             const forceOnUntil = globalLuckEventState.forceActiveUntil || 0;
             const forceOffUntil = globalLuckEventState.forceInactiveUntil || 0;
             const scheduledMult = getScheduledLuckMultiplier(now);
@@ -7272,6 +7273,8 @@ const MUTATIONS_LIST = [
                 targetInputField.value = '';
                 targetInputField.focus();
                 targetInputField.dataset.expectedResult = String(expectedResult);
+
+                mathChallengeStartTime = Date.now();
             }
 
             activeStealSessionUnsub = onValue(ref(db, `clash_sessions/${sessionId}`), snapshot => {
@@ -7297,7 +7300,8 @@ const MUTATIONS_LIST = [
             const calculatedExpectedTargetResult = parseInt(document.getElementById('math-player-input').dataset.expectedResult, 10);
 
             if (parsedPlayerInputVal === calculatedExpectedTargetResult) {
-                signalClashVictoryCaptureLock();
+                const solveTimeMs = Date.now() - mathChallengeStartTime;
+                signalClashVictoryCaptureLock(solveTimeMs);
             } else {
                 showToast('Wrong answer — try again.', 'error');
             }
@@ -7305,7 +7309,7 @@ const MUTATIONS_LIST = [
 
         // Reaction mini-game removed.
 
-        function signalClashVictoryCaptureLock() {
+        function signalClashVictoryCaptureLock(solveTimeMs) {
             if (!activeStealSequenceId || clashUiLocked || !activeUserSession?.uid) return;
 
             const myUid = activeUserSession.uid;
@@ -7314,10 +7318,20 @@ const MUTATIONS_LIST = [
             runTransaction(victoryVerificationSessionRef, (currentSessionData) => {
                 if (!currentSessionData) return;
                 if (currentSessionData.sessionState !== 'initialized') return;
-                if (currentSessionData.winnerSignaledUid) return;
+
+                if (currentSessionData.winnerSignaledUid) {
+                    const existingSolveTimeMs = currentSessionData.winnerSolveTimeMs || 0;
+                    if (solveTimeMs < existingSolveTimeMs) {
+                        currentSessionData.winnerSignaledUid = myUid;
+                        currentSessionData.winnerSolveTimeMs = solveTimeMs;
+                        return currentSessionData;
+                    }
+                    return;
+                }
 
                 currentSessionData.sessionState = 'terminated_resolved';
                 currentSessionData.winnerSignaledUid = myUid;
+                currentSessionData.winnerSolveTimeMs = solveTimeMs;
                 return currentSessionData;
             }).then(async result => {
                 if (!result.committed) {
