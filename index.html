@@ -14,7 +14,7 @@
 <meta name="theme-color" content="#090d16"> <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Realm">
-<link rel="apple-touch-icon" href="Gemini_Generated_Image_7hltsm7hltsm7hlt.png">
+<link rel="apple-touch-icon" href="LOGO.png">
     <style>
         :root {
             --bg-dark: #090d16;
@@ -3369,6 +3369,128 @@
             color: var(--accent-red);
         }
 
+        .trade-user-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 16px;
+        }
+
+        .trade-user-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-glow);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .trade-user-item:hover {
+            border-color: var(--primary);
+            transform: translateX(4px);
+        }
+
+        .trade-user-item .profile-badge {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 0.9rem;
+        }
+
+        .trade-user-item .user-info {
+            flex: 1;
+        }
+
+        .trade-user-item .user-name {
+            font-weight: 800;
+            font-size: 0.95rem;
+        }
+
+        .trade-user-item .user-id {
+            font-size: 0.75rem;
+            color: #9ca3af;
+        }
+
+        .loading-text {
+            text-align: center;
+            padding: 20px;
+            color: #9ca3af;
+        }
+
+        .trade-popup-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .trade-popup-actions button {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-glow);
+            border-radius: 12px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            border-bottom: 1px solid var(--border-glow);
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 800;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--accent-red);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 4px 8px;
+        }
+
+        .modal-body {
+            padding: 16px;
+            overflow-y: auto;
+        }
+
         /* --- ARCHIVE NOTIFICATION --- */
         .archive-notification {
             position: fixed;
@@ -3827,9 +3949,8 @@
                 <p class="section-desc">Trade cards and money with other players safely</p>
                 
                 <div class="trade-section">
-                    <div class="trade-search-box">
-                        <input type="text" id="trade-user-search" placeholder="Enter user ID or username...">
-                        <button onclick="searchTradeUser()">SEARCH</button>
+                    <div class="trade-user-list" id="trade-user-list">
+                        <div class="loading-text">Loading users...</div>
                     </div>
                     
                     <div id="trade-panel" class="trade-panel">
@@ -3865,6 +3986,23 @@
                         <div class="trade-actions">
                             <button class="btn-lock-trade" id="btn-lock-trade" onclick="lockTrade()">LOCK TRADE</button>
                             <button class="btn-cancel" onclick="cancelTrade()">CANCEL</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Trade Request Popup -->
+                <div id="trade-request-popup" class="modal-overlay" style="display:none;">
+                    <div class="modal-content" style="max-width:400px;">
+                        <div class="modal-header">
+                            <h3>Trade Request</h3>
+                            <button class="modal-close" onclick="closeTradeRequestPopup()">✕</button>
+                        </div>
+                        <div class="modal-body">
+                            <p id="trade-request-message"></p>
+                            <div class="trade-popup-actions">
+                                <button class="btn-cancel" onclick="closeTradeRequestPopup()">DECLINE</button>
+                                <button class="btn-lock-trade" onclick="acceptTradeRequest()">ACCEPT</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -5259,6 +5397,7 @@ const MUTATIONS_LIST = [
             if (target === 'ranks') handleLeaderboardQuery('money');
             if (target === 'quests') renderQuestsUI();
             if (target === 'packs') renderCustomPacksInShop();
+            if (target === 'trade') loadTradeUsers();
 
             // Tutorial progression for navigation-based steps.
 
@@ -9010,45 +9149,69 @@ const MUTATIONS_LIST = [
             }
         };
 
-        // Search for a user to trade with
-        window.searchTradeUser = async function() {
-            const searchInput = document.getElementById('trade-user-search').value.trim();
-            if (!searchInput) return showToast('Enter a user ID or username.', 'error');
-            if (!activeUserSession?.uid) return showToast('Not signed in.', 'error');
+        // Load and display users for trading
+        async function loadTradeUsers() {
+            const userList = document.getElementById('trade-user-list');
+            if (!activeUserSession?.uid) {
+                userList.innerHTML = '<div class="loading-text">Not signed in.</div>';
+                return;
+            }
 
             try {
-                // Search by username first
                 const usersSnap = await get(ref(db, 'users'));
                 const users = usersSnap.val() || {};
                 
-                let foundUser = null;
-                let foundUid = null;
-
+                userList.innerHTML = '';
+                
                 for (const uid in users) {
-                    if (uid === activeUserSession.uid) continue; // Can't trade with self
+                    if (uid === activeUserSession.uid) continue; // Skip self
+                    
                     const user = users[uid];
-                    if (user.username && user.username.toLowerCase() === searchInput.toLowerCase()) {
-                        foundUser = user;
-                        foundUid = uid;
-                        break;
-                    }
-                    if (uid === searchInput) {
-                        foundUser = user;
-                        foundUid = uid;
-                        break;
-                    }
+                    if (!user.username) continue;
+                    
+                    const userItem = document.createElement('div');
+                    userItem.className = 'trade-user-item';
+                    userItem.innerHTML = `
+                        <div class="profile-badge" style="background:${user.avatarBgColor || 'var(--primary)'}">
+                            ${user.avatarLetters || user.username.slice(0, 2).toUpperCase()}
+                        </div>
+                        <div class="user-info">
+                            <div class="user-name">${user.username}</div>
+                            <div class="user-id">ID: ${uid.slice(0, 8)}...</div>
+                        </div>
+                    `;
+                    userItem.onclick = () => showTradeRequestPopup(uid, user);
+                    userList.appendChild(userItem);
                 }
-
-                if (!foundUser) {
-                    return showToast('User not found.', 'error');
+                
+                if (userList.children.length === 0) {
+                    userList.innerHTML = '<div class="loading-text">No other users found.</div>';
                 }
-
-                // Initialize trade
-                initializeTrade(foundUid, foundUser);
             } catch (error) {
-                console.error('Trade search error:', error);
-                showToast('Error searching for user.', 'error');
+                console.error('Error loading users:', error);
+                userList.innerHTML = '<div class="loading-text">Error loading users.</div>';
             }
+        }
+
+        let pendingTradeUser = null;
+
+        function showTradeRequestPopup(uid, user) {
+            pendingTradeUser = { uid, user };
+            document.getElementById('trade-request-message').textContent = 
+                `Start a trade with ${user.username}?`;
+            document.getElementById('trade-request-popup').style.display = 'flex';
+        }
+
+        window.closeTradeRequestPopup = function() {
+            document.getElementById('trade-request-popup').style.display = 'none';
+            pendingTradeUser = null;
+        };
+
+        window.acceptTradeRequest = function() {
+            if (!pendingTradeUser) return;
+            const { uid, user } = pendingTradeUser;
+            closeTradeRequestPopup();
+            initializeTrade(uid, user);
         };
 
         function initializeTrade(partnerUid, partnerUser) {
@@ -9532,8 +9695,8 @@ const MUTATIONS_LIST = [
 
     </script>
     <div style="position: fixed; top: 12px; left: 12px; z-index: 9999; color: rgba(255, 255, 255, 0.4); font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
-    V:5.0
+    V:5.5
 </div>
 </body>
 
-</html>s
+</html>
