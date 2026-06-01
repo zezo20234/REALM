@@ -10,6 +10,11 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Outfit:wght@400;600;700;800&display=swap"
         rel="stylesheet">
+        <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#090d16"> <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Realm">
+<link rel="apple-touch-icon" href="Gemini_Generated_Image_7hltsm7hltsm7hlt.png">
     <style>
         :root {
             --bg-dark: #090d16;
@@ -2515,99 +2520,190 @@
         }
 
         /* --- QUESTS SYSTEM --- */
-        .quest-card {
-            background: linear-gradient(145deg, var(--bg-surface), var(--bg-panel));
-            border: 2px solid var(--border-glow);
-            border-radius: 14px;
-            padding: 14px;
-            position: relative;
+        .quest-board {
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
-            overflow: hidden;
+            gap: 14px;
         }
 
-        .quest-card.quest-active {
-            border-color: var(--primary);
+        .quest-tabs {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            background: rgba(15, 23, 42, 0.72);
+            border: 1px solid rgba(148, 163, 184, 0.16);
+            border-radius: 12px;
+            padding: 6px;
+        }
+
+        .quest-tab-btn {
+            min-height: 46px;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            background: transparent;
+            color: #9ca3af;
+            cursor: pointer;
+            font-size: 0.74rem;
+            font-weight: 900;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+        }
+
+        .quest-tab-btn.active {
+            color: #f8fafc;
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.35), rgba(20, 184, 166, 0.16));
+            border-color: rgba(96, 165, 250, 0.45);
+        }
+
+        .quest-tier-panel {
+            display: none;
+            background: rgba(17, 24, 39, 0.58);
+            border: 1px solid rgba(148, 163, 184, 0.15);
+            border-radius: 12px;
+            padding: 14px;
+        }
+
+        .quest-tier-panel.active {
+            display: block;
+        }
+
+        .quest-tier-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .quest-tier-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.96rem;
+            font-weight: 900;
+            margin-bottom: 4px;
+        }
+
+        .quest-tier-meta {
+            color: #94a3b8;
+            font-size: 0.74rem;
+            line-height: 1.4;
+        }
+
+        .quest-reset-timer {
+            min-width: 150px;
+            border: 1px solid rgba(96, 165, 250, 0.24);
+            border-radius: 8px;
+            padding: 8px 10px;
+            color: #bfdbfe;
+            background: rgba(37, 99, 235, 0.1);
+            font-size: 0.72rem;
+            font-weight: 900;
+            text-align: right;
+            text-transform: uppercase;
+        }
+
+        .quest-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .quest-grid.daily {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .quest-card {
+            min-height: 220px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 14px;
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            border-radius: 8px;
+            background: linear-gradient(145deg, rgba(15, 23, 42, 0.96), rgba(31, 41, 55, 0.8));
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
         }
 
         .quest-card.quest-completed {
-            border-color: var(--accent-green);
-            background: linear-gradient(145deg, rgba(16, 185, 129, 0.07), var(--bg-panel));
+            border-color: rgba(16, 185, 129, 0.7);
+            background: linear-gradient(145deg, rgba(6, 78, 59, 0.42), rgba(17, 24, 39, 0.9));
         }
 
         .quest-card.quest-claimed {
-            opacity: 0.55;
-            border-color: #374151;
+            border-color: rgba(148, 163, 184, 0.12);
+            opacity: 0.68;
         }
 
-        .quest-card.quest-expired {
-            opacity: 0.4;
-            border-color: #374151;
+        .quest-card-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
         }
 
-        .quest-card.quest-locked {
-            opacity: 0.3;
-            border-color: #1f2937;
-        }
-
-        .quest-day-badge {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: var(--primary);
-            color: white;
-            padding: 3px 9px;
-            border-radius: 6px;
+        .quest-slot-label {
+            color: #93c5fd;
             font-size: 0.66rem;
-            font-weight: 800;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
         }
 
-        .quest-card.quest-completed .quest-day-badge {
-            background: var(--accent-green);
+        .quest-status-pill {
+            border-radius: 999px;
+            padding: 3px 8px;
+            color: #cbd5e1;
+            background: rgba(148, 163, 184, 0.12);
+            font-size: 0.62rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            white-space: nowrap;
         }
 
-        .quest-card.quest-expired .quest-day-badge,
-        .quest-card.quest-claimed .quest-day-badge {
-            background: #374151;
-        }
-
-        .quest-card.quest-locked .quest-day-badge {
-            background: #1f2937;
+        .quest-card.quest-completed .quest-status-pill {
+            color: #bbf7d0;
+            background: rgba(16, 185, 129, 0.2);
         }
 
         .quest-title {
+            min-height: 38px;
             font-size: 0.92rem;
-            font-weight: 800;
-            padding-right: 56px;
+            font-weight: 900;
+            line-height: 1.25;
         }
 
         .quest-desc {
-            font-size: 0.75rem;
+            min-height: 46px;
+            font-size: 0.74rem;
             color: #9ca3af;
             line-height: 1.45;
         }
 
         .quest-progress-bar {
-            height: 6px;
-            background: var(--bg-surface);
+            height: 8px;
+            background: rgba(2, 6, 23, 0.75);
             border-radius: 999px;
             overflow: hidden;
-            border: 1px solid var(--border-glow);
+            border: 1px solid rgba(148, 163, 184, 0.14);
         }
 
         .quest-progress-fill {
+            width: 0;
             height: 100%;
             border-radius: 999px;
-            background: linear-gradient(90deg, var(--primary), #60a5fa);
-            transition: width 0.4s;
+            background: linear-gradient(90deg, #2563eb, #14b8a6);
+            transition: width 0.3s ease;
+        }
+
+        .quest-card.quest-completed .quest-progress-fill,
+        .quest-card.quest-claimed .quest-progress-fill {
+            background: linear-gradient(90deg, #059669, #84cc16);
         }
 
         .quest-progress-text {
-            font-size: 0.7rem;
-            color: #9ca3af;
-            font-weight: 600;
+            color: #cbd5e1;
+            font-size: 0.72rem;
+            font-weight: 800;
         }
 
         .quest-reward-line {
@@ -3817,9 +3913,52 @@
             </section>
 
             <section id="view-quests" class="view-panel">
-                <h2 class="section-title">Daily Quests</h2>
-                <p class="section-desc">Complete challenges to earn rewards. Each quest is live for 24 hours.</p>
-                <div id="container-quests" style="display:flex; flex-direction:column; gap:12px;"></div>
+                <h2 class="section-title">Quest Board</h2>
+                <p class="section-desc">Extreme rotating objectives for Daily, Weekly, and Monthly economy progression.</p>
+
+                <div id="container-quests" class="quest-board">
+                    <div class="quest-tabs" role="tablist" aria-label="Quest tiers">
+                        <button class="quest-tab-btn active" type="button" data-quest-tab="daily"
+                            onclick="setQuestTab('daily')">Daily</button>
+                        <button class="quest-tab-btn" type="button" data-quest-tab="weekly"
+                            onclick="setQuestTab('weekly')">Weekly</button>
+                        <button class="quest-tab-btn" type="button" data-quest-tab="monthly"
+                            onclick="setQuestTab('monthly')">Monthly</button>
+                    </div>
+
+                    <section class="quest-tier-panel active" data-quest-panel="daily">
+                        <div class="quest-tier-head">
+                            <div>
+                                <div class="quest-tier-title">Daily Quests</div>
+                                <div class="quest-tier-meta">3 slots. Very, very hard. Resets at local midnight.</div>
+                            </div>
+                            <div class="quest-reset-timer" id="quest-countdown-daily">Reset: --</div>
+                        </div>
+                        <div id="quest-slots-daily" class="quest-grid daily"></div>
+                    </section>
+
+                    <section class="quest-tier-panel" data-quest-panel="weekly">
+                        <div class="quest-tier-head">
+                            <div>
+                                <div class="quest-tier-title">Weekly Quests</div>
+                                <div class="quest-tier-meta">7 slots. Very, very, very, very, very hard. Resets Sunday at midnight.</div>
+                            </div>
+                            <div class="quest-reset-timer" id="quest-countdown-weekly">Reset: --</div>
+                        </div>
+                        <div id="quest-slots-weekly" class="quest-grid"></div>
+                    </section>
+
+                    <section class="quest-tier-panel" data-quest-panel="monthly">
+                        <div class="quest-tier-head">
+                            <div>
+                                <div class="quest-tier-title">Monthly Quests</div>
+                                <div class="quest-tier-meta">12 slots. Extreeeeeeeeemly hard. Resets on the 1st.</div>
+                            </div>
+                            <div class="quest-reset-timer" id="quest-countdown-monthly">Reset: --</div>
+                        </div>
+                        <div id="quest-slots-monthly" class="quest-grid"></div>
+                    </section>
+                </div>
 
                 <!-- Contact Admin -->
                 <div class="quest-contact-section">
@@ -4363,6 +4502,67 @@ const MUTATIONS_LIST = [
             { day: 30, title: 'Ultimate Discovery', description: 'Discover 35 unique cards total', type: 'discover_cards', target: 35, rewardType: 'xp', rewardMoney: 0, rewardXp: 4000 }
         ];
 
+        const QUEST_POOLS = {
+            daily: [
+                { id: 'daily_open_500', title: 'Pack Apocalypse', description: 'Open 500 packs in a single day. Only the dedicated survive.', type: 'open_packs', target: 500, unit: 'packs opened', rewardType: 'gold_pack', rewardAmount: 1, difficultyScore: 100 },
+                { id: 'daily_clash_100', title: 'Clash Master', description: 'Win 100 card clashes before the daily reset. Prove your dominance.', type: 'win_clashes', target: 100, unit: 'clashes won', rewardType: 'xp', rewardAmount: 150, difficultyScore: 100 },
+                { id: 'daily_sell_200', title: 'Market Purge', description: 'Sell 200 cards from your deck in one day. Liquidate everything.', type: 'sell_cards', target: 200, unit: 'cards sold', rewardType: 'money', rewardAmount: 100, difficultyScore: 100 },
+                { id: 'daily_discover_50', title: 'Archive Explorer', description: 'Discover 50 new unique cards today. Expand your knowledge.', type: 'discover_cards', target: 50, unit: 'cards discovered', rewardType: 'xp', rewardAmount: 120, difficultyScore: 100 },
+                { id: 'daily_earn_500', title: 'Quick Cash', description: 'Earn 500 euros today through any means. Fast money.', type: 'earn_money', target: 500, unit: 'euros earned', progressMode: 'sum_money', rewardType: 'money', rewardAmount: 80, difficultyScore: 100 },
+                { id: 'daily_trade_30', title: 'Trade Hustler', description: 'Execute 30 player trades today. Move the market.', type: 'player_trades', target: 30, unit: 'trades executed', rewardType: 'gold_pack', rewardAmount: 1, difficultyScore: 100 },
+                { id: 'daily_own_300', title: 'Vault Builder', description: 'Own 300 cards simultaneously. Build your collection.', type: 'own_cards', target: 300, unit: 'cards owned', progressMode: 'max', rewardType: 'xp', rewardAmount: 100, difficultyScore: 100 },
+                { id: 'daily_mg_50', title: 'Minigame Ace', description: 'Win 50 math or reaction minigames today. Sharpen your skills.', type: 'minigame_wins', target: 50, unit: 'minigames won', rewardType: 'xp', rewardAmount: 130, difficultyScore: 100 },
+                { id: 'daily_bank_5000', title: 'Bank Secure', description: 'Hold 5,000 euros in your bank simultaneously. Secure your wealth.', type: 'bank_balance', target: 5000, unit: 'euros banked', progressMode: 'max_money', rewardType: 'money', rewardAmount: 90, difficultyScore: 100 },
+                { id: 'daily_snipe_20', title: 'Auction Sniper', description: 'Snipe 20 cards from the global auction today. Strike fast.', type: 'auction_snipes', target: 20, unit: 'cards sniped', rewardType: 'xp', rewardAmount: 110, difficultyScore: 100 },
+                { id: 'daily_duplicate_200', title: 'Duplicate Cleaner', description: 'Fuse or burn 200 duplicate cards today. Clean your vault.', type: 'fuse_or_burn_duplicates', target: 200, unit: 'duplicates fused/burned', rewardType: 'money', rewardAmount: 85, difficultyScore: 100 },
+                { id: 'daily_open_300', title: 'Pack Rush', description: 'Open 300 packs today. Speed opening.', type: 'open_packs', target: 300, unit: 'packs opened', rewardType: 'gold_pack', rewardAmount: 1, difficultyScore: 100 },
+                { id: 'daily_clash_75', title: 'Clash Warrior', description: 'Win 75 card clashes today. Battle tested.', type: 'win_clashes', target: 75, unit: 'clashes won', rewardType: 'xp', rewardAmount: 120, difficultyScore: 100 },
+                { id: 'daily_sell_150', title: 'Market Flow', description: 'Sell 150 cards today. Keep the market moving.', type: 'sell_cards', target: 150, unit: 'cards sold', rewardType: 'money', rewardAmount: 75, difficultyScore: 100 },
+                { id: 'daily_discover_40', title: 'Card Hunter', description: 'Discover 40 new unique cards today. Hunt them down.', type: 'discover_cards', target: 40, unit: 'cards discovered', rewardType: 'xp', rewardAmount: 100, difficultyScore: 100 },
+                { id: 'daily_earn_400', title: 'Income Stream', description: 'Earn 400 euros today. Steady income.', type: 'earn_money', target: 400, unit: 'euros earned', progressMode: 'sum_money', rewardType: 'money', rewardAmount: 70, difficultyScore: 100 },
+                { id: 'daily_trade_25', title: 'Trade Broker', description: 'Execute 25 player trades today. Broker deals.', type: 'player_trades', target: 25, unit: 'trades executed', rewardType: 'gold_pack', rewardAmount: 1, difficultyScore: 100 },
+                { id: 'daily_own_250', title: 'Collection Keeper', description: 'Own 250 cards simultaneously. Maintain your collection.', type: 'own_cards', target: 250, unit: 'cards owned', progressMode: 'max', rewardType: 'xp', rewardAmount: 90, difficultyScore: 100 },
+                { id: 'daily_mg_40', title: 'Minigame Pro', description: 'Win 40 minigames today. Pro level.', type: 'minigame_wins', target: 40, unit: 'minigames won', rewardType: 'xp', rewardAmount: 110, difficultyScore: 100 },
+                { id: 'daily_bank_4000', title: 'Bank Guardian', description: 'Hold 4,000 euros in your bank. Guard your wealth.', type: 'bank_balance', target: 4000, unit: 'euros banked', progressMode: 'max_money', rewardType: 'money', rewardAmount: 80, difficultyScore: 100 },
+                { id: 'daily_snipe_15', title: 'Quick Snipe', description: 'Snipe 15 cards from auction today. Quick strikes.', type: 'auction_snipes', target: 15, unit: 'cards sniped', rewardType: 'xp', rewardAmount: 95, difficultyScore: 100 },
+                { id: 'daily_duplicate_150', title: 'Duplicate Manager', description: 'Fuse or burn 150 duplicates today. Manage excess.', type: 'fuse_or_burn_duplicates', target: 150, unit: 'duplicates fused/burned', rewardType: 'money', rewardAmount: 70, difficultyScore: 100 },
+                { id: 'daily_open_400', title: 'Pack Marathon', description: 'Open 400 packs today. Endurance opening.', type: 'open_packs', target: 400, unit: 'packs opened', rewardType: 'gold_pack', rewardAmount: 1, difficultyScore: 100 },
+                { id: 'daily_clash_80', title: 'Clash Veteran', description: 'Win 80 card clashes today. Veteran status.', type: 'win_clashes', target: 80, unit: 'clashes won', rewardType: 'xp', rewardAmount: 125, difficultyScore: 100 },
+                { id: 'daily_sell_180', title: 'Market Maker', description: 'Sell 180 cards today. Make the market.', type: 'sell_cards', target: 180, unit: 'cards sold', rewardType: 'money', rewardAmount: 85, difficultyScore: 100 },
+                { id: 'daily_discover_45', title: 'Archive Seeker', description: 'Discover 45 new unique cards today. Seek knowledge.', type: 'discover_cards', target: 45, unit: 'cards discovered', rewardType: 'xp', rewardAmount: 105, difficultyScore: 100 },
+                { id: 'daily_earn_450', title: 'Profit Seeker', description: 'Earn 450 euros today. Seek profit.', type: 'earn_money', target: 450, unit: 'euros earned', progressMode: 'sum_money', rewardType: 'money', rewardAmount: 75, difficultyScore: 100 },
+                { id: 'daily_trade_28', title: 'Trade Master', description: 'Execute 28 player trades today. Master trading.', type: 'player_trades', target: 28, unit: 'trades executed', rewardType: 'gold_pack', rewardAmount: 1, difficultyScore: 100 },
+                { id: 'daily_own_280', title: 'Vault Guardian', description: 'Own 280 cards simultaneously. Guard your vault.', type: 'own_cards', target: 280, unit: 'cards owned', progressMode: 'max', rewardType: 'xp', rewardAmount: 95, difficultyScore: 100 },
+                { id: 'daily_mg_45', title: 'Minigame Expert', description: 'Win 45 minigames today. Expert level.', type: 'minigame_wins', target: 45, unit: 'minigames won', rewardType: 'xp', rewardAmount: 115, difficultyScore: 100 },
+                { id: 'daily_bank_4500', title: 'Bank Protector', description: 'Hold 4,500 euros in your bank. Protect your wealth.', type: 'bank_balance', target: 4500, unit: 'euros banked', progressMode: 'max_money', rewardType: 'money', rewardAmount: 85, difficultyScore: 100 },
+                { id: 'daily_snipe_18', title: 'Auction Hunter', description: 'Snipe 18 cards from auction today. Hunt for deals.', type: 'auction_snipes', target: 18, unit: 'cards sniped', rewardType: 'xp', rewardAmount: 100, difficultyScore: 100 },
+                { id: 'daily_duplicate_180', title: 'Duplicate Destroyer', description: 'Fuse or burn 180 duplicates today. Destroy excess.', type: 'fuse_or_burn_duplicates', target: 180, unit: 'duplicates fused/burned', rewardType: 'money', rewardAmount: 75, difficultyScore: 100 }
+            ],
+            weekly: [
+                { id: 'weekly_open_5000', title: 'Pack Tsunami', description: 'Open 5,000 packs this week. Unleash the flood.', type: 'open_packs', target: 5000, unit: 'packs opened', rewardType: 'gold_pack', rewardAmount: 3, difficultyScore: 100 },
+                { id: 'weekly_clash_1000', title: 'Clash Legend', description: 'Win 1,000 card clashes this week. Become unstoppable.', type: 'win_clashes', target: 1000, unit: 'clashes won', rewardType: 'xp', rewardAmount: 350, difficultyScore: 100 },
+                { id: 'weekly_sell_2000', title: 'Mass Liquidation', description: 'Sell 2,000 cards this week. Empty your vault.', type: 'sell_cards', target: 2000, unit: 'cards sold', rewardType: 'money', rewardAmount: 300, difficultyScore: 100 },
+                { id: 'weekly_discover_1000', title: 'Archive Invasion', description: 'Discover 1,000 new unique cards this week. Expand your collection.', type: 'discover_cards', target: 1000, unit: 'cards discovered', rewardType: 'xp', rewardAmount: 300, difficultyScore: 100 },
+                { id: 'weekly_earn_10000', title: 'Fortune Builder', description: 'Earn 10,000 euros this week through any means. Build your empire.', type: 'earn_money', target: 10000, unit: 'euros earned', progressMode: 'sum_money', rewardType: 'money', rewardAmount: 350, difficultyScore: 100 },
+                { id: 'weekly_trade_200', title: 'Trade Tycoon', description: 'Execute 200 player trades this week. Master the market.', type: 'player_trades', target: 200, unit: 'trades executed', rewardType: 'gold_pack', rewardAmount: 2, difficultyScore: 100 },
+                { id: 'weekly_own_1500', title: 'Vault Expansion', description: 'Own 1,500 cards simultaneously. Fill your treasury.', type: 'own_cards', target: 1500, unit: 'cards owned', progressMode: 'max', rewardType: 'xp', rewardAmount: 250, difficultyScore: 100 }
+            ],
+            monthly: [
+                { id: 'monthly_open_50000', title: 'Pack Singularity', description: 'Open 50,000 packs this month. Reach the event horizon.', type: 'open_packs', target: 50000, unit: 'packs opened', rewardType: 'gold_pack', rewardAmount: 5, difficultyScore: 100 },
+                { id: 'monthly_clash_10000', title: 'Clash God', description: 'Win 10,000 card clashes this month. Ascend to divinity.', type: 'win_clashes', target: 10000, unit: 'clashes won', rewardType: 'xp', rewardAmount: 500, difficultyScore: 100 },
+                { id: 'monthly_sell_20000', title: 'Total Liquidation', description: 'Sell 20,000 cards this month. Leave nothing behind.', type: 'sell_cards', target: 20000, unit: 'cards sold', rewardType: 'money', rewardAmount: 500, difficultyScore: 100 },
+                { id: 'monthly_discover_10000', title: 'Complete Archive', description: 'Discover 10,000 new unique cards this month. Complete the collection.', type: 'discover_cards', target: 10000, unit: 'cards discovered', rewardType: 'xp', rewardAmount: 450, difficultyScore: 100 },
+                { id: 'monthly_earn_100000', title: 'Economic Titan', description: 'Earn 100,000 euros this month. Rule the economy.', type: 'earn_money', target: 100000, unit: 'euros earned', progressMode: 'sum_money', rewardType: 'money', rewardAmount: 500, difficultyScore: 100 },
+                { id: 'monthly_trade_1000', title: 'Trade Emperor', description: 'Execute 1,000 player trades this month. Control the market.', type: 'player_trades', target: 1000, unit: 'trades executed', rewardType: 'gold_pack', rewardAmount: 4, difficultyScore: 100 },
+                { id: 'monthly_own_5000', title: 'Vault Master', description: 'Own 5,000 cards simultaneously. Build the ultimate treasury.', type: 'own_cards', target: 5000, unit: 'cards owned', progressMode: 'max', rewardType: 'xp', rewardAmount: 400, difficultyScore: 100 },
+                { id: 'monthly_daily_100', title: 'Daily Quest Champion', description: 'Complete and claim 100 Daily Quests this month. Never miss a day.', type: 'daily_quests_completed', target: 100, unit: 'daily quests claimed', rewardType: 'gold_pack', rewardAmount: 3, difficultyScore: 100 },
+                { id: 'monthly_mg_5000', title: 'Minigame Grandmaster', description: 'Win 5,000 math or reaction minigames this month. Perfect your skills.', type: 'minigame_wins', target: 5000, unit: 'minigames won', rewardType: 'xp', rewardAmount: 350, difficultyScore: 100 },
+                { id: 'monthly_bank_100000', title: 'Bank Fortress', description: 'Hold 100,000 euros in your bank simultaneously. Fortify your wealth.', type: 'bank_balance', target: 100000, unit: 'euros banked', progressMode: 'max_money', rewardType: 'money', rewardAmount: 450, difficultyScore: 100 },
+                { id: 'monthly_snipe_500', title: 'Auction Predator', description: 'Snipe 500 cards from the global auction this month. Strike with precision.', type: 'auction_snipes', target: 500, unit: 'cards sniped', rewardType: 'xp', rewardAmount: 300, difficultyScore: 100 },
+                { id: 'monthly_duplicate_10000', title: 'Duplicate Obliterator', description: 'Fuse or burn 10,000 duplicate cards this month. Purge the excess.', type: 'fuse_or_burn_duplicates', target: 10000, unit: 'duplicates fused/burned', rewardType: 'money', rewardAmount: 400, difficultyScore: 100 }
+            ]
+        };
+
         const HIDDEN_CARDS = [
             { id: 'hidden_1', name: 'zezo AURA', flavour: 'Built the nothing between stars.', baseValue: 200, unlocksAtLevel: 10 },
             { id: 'hidden_2', name: 'PS5', flavour: 'Exists only in the space between commands.', baseValue: 300, unlocksAtLevel: 20 },
@@ -4840,6 +5040,7 @@ const MUTATIONS_LIST = [
         let userInventoryUnsub = null;
         let userCardCustomizationUnsub = null;
         let clashSessionsGlobalUnsub = null;
+        let activeQuestTab = 'daily';
         const PRESENCE_STALE_MS = 3 * 60 * 1000;
         const PRESENCE_HEARTBEAT_MS = 45 * 1000;
         const RAMEZ_CARD_NAME = 'Ramez Level El Ga7sh';
@@ -8236,49 +8437,45 @@ const MUTATIONS_LIST = [
             });
         }
 
+        window.setQuestTab = function(tab) {
+            activeQuestTab = tab;
+            document.querySelectorAll('.quest-tab-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.questTab === tab);
+            });
+            document.querySelectorAll('.quest-tier-panel').forEach(panel => {
+                panel.classList.toggle('active', panel.dataset.questPanel === tab);
+            });
+            renderQuestsUI();
+        };
+
         function renderQuestsUI() {
-            const container = document.getElementById('container-quests');
+            const container = document.getElementById(`quest-slots-${activeQuestTab}`);
             if (!container) return;
             container.innerHTML = '';
 
-            // Find only the player's current active quest
-            let todayQuest = null;
-            for (const q of QUESTS_DATA) {
-                const qd = questsData[q.day] || {};
-                const ua = qd.unlockedAt || 0;
-                const cl = qd.claimed || false;
-                const exp = ua ? (Date.now() - ua) > 24 * 60 * 60 * 1000 : false;
-                if ((q.day === 1 && !ua) || (ua && ua <= Date.now() && !cl && !exp)) { todayQuest = q; break; }
-            }
-
-            if (!todayQuest) {
-                // Check if there's a quest scheduled for tomorrow
-                let nextUnlockTime = null;
-                for (const q of QUESTS_DATA) {
-                    const qd = questsData[q.day] || {};
-                    const ua = qd.unlockedAt || 0;
-                    const cl = qd.claimed || false;
-                    if (ua && ua > Date.now() && !cl) { nextUnlockTime = ua; break; }
-                }
-                let msg = '🏆 No active quest right now.<br><span style="font-size:0.8rem;color:#6b7280;">Complete and claim a quest to unlock the next one.</span>';
-                if (nextUnlockTime) {
-                    const diff = nextUnlockTime - Date.now();
-                    const h = Math.floor(diff / 3600000);
-                    const m = Math.floor((diff % 3600000) / 60000);
-                    msg = `⏳ Next quest unlocks in <strong style="color:#60a5fa;">${h}h ${m}m</strong><br><span style="font-size:0.8rem;color:#6b7280;">Come back tomorrow to continue your journey!</span>`;
-                }
-                container.innerHTML = `<div class="empty-state">${msg}</div>`;
+            let questPool = QUEST_POOLS[activeQuestTab];
+            if (!questPool || questPool.length === 0) {
+                container.innerHTML = `<div class="empty-state">No quests available for this period.</div>`;
                 return;
             }
 
-            // Render just the single current quest
-            const questList = [todayQuest];
-            questList.forEach(quest => {
-                const qData = questsData[quest.day] || {};
+            // For daily quests, select 3 quests based on day of month
+            let selectedQuests = questPool;
+            if (activeQuestTab === 'daily') {
+                const dayOfMonth = new Date().getDate();
+                const startIndex = ((dayOfMonth - 1) * 3) % questPool.length;
+                selectedQuests = [];
+                for (let i = 0; i < 3; i++) {
+                    const index = (startIndex + i) % questPool.length;
+                    selectedQuests.push(questPool[index]);
+                }
+            }
+
+            selectedQuests.forEach((quest, index) => {
+                const qData = questsData[quest.id] || {};
                 const progress = qData.progress || 0;
                 const completed = qData.completed || false;
                 const claimed = qData.claimed || false;
-                const unlockedAt = qData.unlockedAt || 0;
 
                 let status = 'active';
                 if (claimed) {
@@ -8293,8 +8490,6 @@ const MUTATIONS_LIST = [
                 let progressText = '';
                 let progressPercent = 0;
                 let progressBar = '';
-                let timer = '';
-                let timerClass = '';
                 let action = '';
 
                 if (status === 'active') {
@@ -8310,55 +8505,92 @@ const MUTATIONS_LIST = [
                         progressText = `${progress} / ${quest.target} cards discovered`;
                     } else if (quest.type === 'own_cards') {
                         progressText = `${Object.keys(userDeckRecord).length} / ${quest.target} cards owned`;
+                    } else if (quest.type === 'player_trades') {
+                        progressText = `${progress} / ${quest.target} trades executed`;
+                    } else if (quest.type === 'daily_quests_completed') {
+                        progressText = `${progress} / ${quest.target} daily quests claimed`;
+                    } else if (quest.type === 'minigame_wins') {
+                        progressText = `${progress} / ${quest.target} minigames won`;
+                    } else if (quest.type === 'bank_balance') {
+                        progressText = `€${userDataRecord.money || 0} / €${quest.target} bank balance`;
+                    } else if (quest.type === 'auction_snipes') {
+                        progressText = `${progress} / ${quest.target} cards sniped`;
+                    } else if (quest.type === 'fuse_or_burn_duplicates') {
+                        progressText = `${progress} / ${quest.target} duplicates fused/burned`;
                     } else {
                         progressText = `${progress} / ${quest.target}`;
                     }
                     progressPercent = Math.min(100, (progress / quest.target) * 100);
                     progressBar = `<div class="quest-progress-bar"><div class="quest-progress-fill" style="width:${progressPercent}%"></div></div>`;
-                    const countdown = questCountdown(unlockedAt);
-                    timer = countdown;
-                    timerClass = countdown === 'EXPIRED' ? '' : (countdown.includes('h') && !countdown.includes('12h') ? 'urgent' : '');
                 } else if (status === 'completed') {
                     progressBar = `<div class="quest-progress-bar"><div class="quest-progress-fill" style="width:100%"></div></div>`;
-                    const countdown = questCountdown(unlockedAt);
-                    timer = countdown;
                     if (quest.rewardType === 'money') {
-                        action = `<button class="quest-claim-btn" onclick="claimQuestReward(${quest.day})">CLAIM €${quest.rewardMoney.toFixed(2)}</button>`;
-                    } else {
-                        action = `<button class="quest-xp-btn" onclick="claimQuestReward(${quest.day})">CLAIM ${quest.rewardXp} XP</button>`;
+                        action = `<button class="quest-claim-btn" onclick="claimQuestReward('${quest.id}')">CLAIM €${quest.rewardAmount}</button>`;
+                    } else if (quest.rewardType === 'xp') {
+                        action = `<button class="quest-xp-btn" onclick="claimQuestReward('${quest.id}')">CLAIM ${quest.rewardAmount} XP</button>`;
+                    } else if (quest.rewardType === 'gold_pack') {
+                        action = `<button class="quest-claim-btn" onclick="claimQuestReward('${quest.id}')">CLAIM ${quest.rewardAmount}x GOLD PACK</button>`;
                     }
                 } else if (status === 'claimed') {
                     action = `<div class="quest-done-label">✓ REWARD CLAIMED</div>`;
-                } else if (status === 'expired') {
-                    action = `<div class="quest-done-label" style="color:#6b7280;">⏱ EXPIRED</div>`;
-                } else {
-                    action = `<div class="quest-done-label" style="color:#6b7280;">🔒 LOCKED</div>`;
                 }
 
-                const rewardText = quest.rewardType === 'money'
-                    ? `Reward: €${quest.rewardMoney.toFixed(2)}`
-                    : `Reward: ${quest.rewardXp} XP`;
-                const rewardClass = quest.rewardType === 'money' ? 'quest-reward-line' : 'quest-reward-line xp-reward';
+                let rewardText = '';
+                if (quest.rewardType === 'money') {
+                    rewardText = `Reward: €${quest.rewardAmount}`;
+                } else if (quest.rewardType === 'xp') {
+                    rewardText = `Reward: ${quest.rewardAmount} XP`;
+                } else if (quest.rewardType === 'gold_pack') {
+                    rewardText = `Reward: ${quest.rewardAmount}x Gold Pack`;
+                }
 
                 card.innerHTML = `
-                    <div class="quest-day-badge">DAY ${quest.day}</div>
+                    <div class="quest-card-top">
+                        <div class="quest-slot-label">SLOT ${index + 1}</div>
+                        <div class="quest-status-pill">${status.toUpperCase()}</div>
+                    </div>
                     <div class="quest-title">${quest.title}</div>
                     <div class="quest-desc">${quest.description}</div>
                     ${progressBar}
                     <div class="quest-progress-text">${progressText}</div>
-                    <div class="quest-timer ${timerClass}">${timer}</div>
-                    <div class="${rewardClass}">${rewardText}</div>
+                    <div class="quest-reward-line">${rewardText}</div>
                     ${action}
                 `;
                 container.appendChild(card);
             });
 
-            if (!questTimerInterval) {
-                questTimerInterval = setInterval(() => {
-                    if (document.querySelector('.nav-tab[data-target="quests"]')?.classList.contains('active')) {
-                        renderQuestsUI();
-                    }
-                }, 60000);
+            updateQuestCountdown();
+        }
+
+        function updateQuestCountdown() {
+            const now = new Date();
+            let resetTime = '';
+            let resetMs = 0;
+
+            if (activeQuestTab === 'daily') {
+                const tomorrow = new Date(now);
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                tomorrow.setHours(0, 0, 0, 0);
+                resetMs = tomorrow.getTime() - now.getTime();
+                resetTime = 'Daily reset at midnight';
+            } else if (activeQuestTab === 'weekly') {
+                const sunday = new Date(now);
+                sunday.setDate(sunday.getDate() + (7 - sunday.getDay()));
+                sunday.setHours(0, 0, 0, 0);
+                resetMs = sunday.getTime() - now.getTime();
+                resetTime = 'Weekly reset Sunday midnight';
+            } else if (activeQuestTab === 'monthly') {
+                const firstNextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+                firstNextMonth.setHours(0, 0, 0, 0);
+                resetMs = firstNextMonth.getTime() - now.getTime();
+                resetTime = 'Monthly reset 1st of month';
+            }
+
+            const hours = Math.floor(resetMs / 3600000);
+            const minutes = Math.floor((resetMs % 3600000) / 60000);
+            const countdownEl = document.getElementById(`quest-countdown-${activeQuestTab}`);
+            if (countdownEl) {
+                countdownEl.textContent = `${resetTime}: ${hours}h ${minutes}m`;
             }
         }
 
@@ -8376,63 +8608,66 @@ const MUTATIONS_LIST = [
         function trackQuestProgress(type, amount, extra) {
             if (!activeUserSession?.uid) return;
 
-            for (const quest of QUESTS_DATA) {
-                const qData = questsData[quest.day] || {};
-                const unlockedAt = qData.unlockedAt || 0;
-                const claimed = qData.claimed || false;
-                const completed = qData.completed || false;
-                const elapsed = unlockedAt ? Date.now() - unlockedAt : 0;
-                const expired = elapsed > 24 * 60 * 60 * 1000;
+            Object.keys(QUEST_POOLS).forEach(period => {
+                QUEST_POOLS[period].forEach(quest => {
+                    const qData = questsData[quest.id] || {};
+                    const claimed = qData.claimed || false;
+                    const completed = qData.completed || false;
 
-                if (claimed || expired || !unlockedAt || unlockedAt > Date.now()) continue;
-                if (quest.type !== type) continue;
-                if (completed) continue;
+                    if (claimed || completed) return;
+                    if (quest.type !== type) return;
 
-                let shouldTrack = true;
-                if (type === 'open_packs' && extra && quest.packType && quest.packType !== 'mixed' && quest.packType !== extra) {
-                    shouldTrack = false;
-                }
+                    let shouldTrack = true;
+                    if (type === 'open_packs' && extra && quest.packType && quest.packType !== 'mixed' && quest.packType !== extra) {
+                        shouldTrack = false;
+                    }
 
-                if (shouldTrack) {
-                    runTransaction(ref(db, `users/${activeUserSession.uid}/quests/${quest.day}/progress`), current => {
-                        return (current || 0) + amount;
-                    }).then(() => {
-                        const newProgress = (questsData[quest.day]?.progress || 0) + amount;
-                        if (newProgress >= quest.target) {
-                            update(ref(db, `users/${activeUserSession.uid}/quests/${quest.day}`), { completed: true });
-                        }
-                    });
-                    break;
-                }
-            }
+                    if (shouldTrack) {
+                        runTransaction(ref(db, `users/${activeUserSession.uid}/quests/${quest.id}/progress`), current => {
+                            return (current || 0) + amount;
+                        }).then(() => {
+                            const newProgress = (questsData[quest.id]?.progress || 0) + amount;
+                            if (newProgress >= quest.target) {
+                                update(ref(db, `users/${activeUserSession.uid}/quests/${quest.id}`), { completed: true });
+                            }
+                        });
+                    }
+                });
+            });
         }
 
-        window.claimQuestReward = async function (day) {
-            const quest = QUESTS_DATA.find(q => q.day === day);
+        window.claimQuestReward = async function (questId) {
+            let quest = null;
+            let period = null;
+            
+            Object.keys(QUEST_POOLS).forEach(p => {
+                const found = QUEST_POOLS[p].find(q => q.id === questId);
+                if (found) {
+                    quest = found;
+                    period = p;
+                }
+            });
+
             if (!quest) return;
 
-            const qData = questsData[day] || {};
+            const qData = questsData[questId] || {};
             if (qData.claimed) return;
 
             const payload = {};
             if (quest.rewardType === 'money') {
-                payload[`users/${activeUserSession.uid}/money`] = userDataRecord.money + quest.rewardMoney;
-                showToast(`💰 Claimed €${quest.rewardMoney.toFixed(2)}!`, 'success');
-            } else {
-                payload[`users/${activeUserSession.uid}/xp`] = (userDataRecord.xp || 0) + quest.rewardXp;
-                showToast(`⚡ Claimed ${quest.rewardXp} XP!`, 'success');
+                payload[`users/${activeUserSession.uid}/money`] = (userDataRecord.money || 0) + quest.rewardAmount;
+                showToast(`💰 Claimed €${quest.rewardAmount}!`, 'success');
+            } else if (quest.rewardType === 'xp') {
+                payload[`users/${activeUserSession.uid}/xp`] = (userDataRecord.xp || 0) + quest.rewardAmount;
+                showToast(`⚡ Claimed ${quest.rewardAmount} XP!`, 'success');
+            } else if (quest.rewardType === 'gold_pack') {
+                for (let i = 0; i < quest.rewardAmount; i++) {
+                    await openPack('gold');
+                }
+                showToast(`🎁 Claimed ${quest.rewardAmount}x Gold Pack!`, 'success');
             }
 
-            payload[`users/${activeUserSession.uid}/quests/${day}/claimed`] = true;
-
-            if (day < 30) {
-                // Unlock next quest at midnight tonight (start of tomorrow)
-                const tomorrow = new Date();
-                tomorrow.setDate(tomorrow.getDate() + 1);
-                tomorrow.setHours(0, 0, 0, 0);
-                payload[`users/${activeUserSession.uid}/quests/${day + 1}/unlockedAt`] = tomorrow.getTime();
-                showToast(`Day ${day + 1} quest unlocks tomorrow!`, 'info', 4000);
-            }
+            payload[`users/${activeUserSession.uid}/quests/${questId}/claimed`] = true;
 
             await update(ref(db, '/'), payload);
             renderQuestsUI();
@@ -9297,8 +9532,8 @@ const MUTATIONS_LIST = [
 
     </script>
     <div style="position: fixed; top: 12px; left: 12px; z-index: 9999; color: rgba(255, 255, 255, 0.4); font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
-    V:4.0
+    V:5.0
 </div>
 </body>
 
-</html>
+</html>s
