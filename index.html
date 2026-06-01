@@ -3326,6 +3326,208 @@
             display: inline-block;
             margin-left: 8px;
         }
+
+        /* --- MOBILE RESPONSIVENESS --- */
+        @media (max-width: 768px) {
+            /* Broadcast banners - ensure full visibility */
+            .broadcast-inner {
+                margin: 8px 8px 0;
+                padding: 12px 14px;
+                font-size: 0.85rem;
+                line-height: 1.4;
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+            }
+
+            .luck-banner-inner {
+                margin: 52px 8px 0;
+                padding: 10px 12px;
+                font-size: 0.85rem;
+                line-height: 1.4;
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+            }
+
+            /* Trade area - stack vertically on mobile */
+            .trade-offer-area {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .trade-search-box {
+                flex-direction: column;
+            }
+
+            .trade-search-box button {
+                padding: 12px;
+            }
+
+            .trade-items-list {
+                max-height: 150px;
+            }
+
+            .trade-actions {
+                flex-direction: column;
+            }
+
+            .trade-actions button {
+                width: 100%;
+            }
+
+            /* Archive notification - adjust for mobile */
+            .archive-notification {
+                left: 8px;
+                right: 8px;
+                top: 70px;
+                padding: 12px 16px;
+            }
+
+            .archive-notification h3 {
+                font-size: 0.9rem;
+            }
+
+            .archive-notification p {
+                font-size: 0.8rem;
+            }
+
+            /* Navigation tabs - adjust for mobile */
+            .nav-tab {
+                padding: 8px 6px;
+                font-size: 0.75rem;
+            }
+
+            .nav-icon {
+                font-size: 1rem;
+            }
+
+            /* Grid containers - adjust for mobile */
+            .grid-container {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                gap: 10px;
+            }
+
+            /* Modal adjustments */
+            .modal-body {
+                max-width: 95vw;
+                margin: 20px auto;
+                padding: 20px;
+            }
+
+            /* Header adjustments */
+            .top-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .hud-right-col {
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            /* XP row adjustments */
+            .xp-row {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .xp-track {
+                width: 100%;
+            }
+
+            /* Card items - adjust for mobile */
+            .card-item {
+                min-height: 120px;
+            }
+
+            /* Admin panel adjustments */
+            .admin-row {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .admin-row input,
+            .admin-row select,
+            .admin-row button {
+                width: 100%;
+            }
+
+            /* Custom pack forge adjustments */
+            .admin-panel-section > div[style*="display:grid"] {
+                grid-template-columns: 1fr;
+            }
+
+            /* Quest cards - adjust for mobile */
+            .quest-card {
+                padding: 12px;
+            }
+
+            .quest-title {
+                font-size: 0.85rem;
+            }
+
+            .quest-desc {
+                font-size: 0.7rem;
+            }
+
+            /* Toast notifications - adjust for mobile */
+            #toast-host {
+                left: 8px;
+                right: 8px;
+                bottom: 8px;
+            }
+
+            /* Coming soon screen - adjust for mobile */
+            .cs-logo {
+                font-size: clamp(2rem, 15vw, 4rem);
+            }
+
+            .cs-card {
+                padding: 20px 16px;
+                max-width: 90vw;
+            }
+        }
+
+        @media (max-width: 480px) {
+            /* Extra small mobile adjustments */
+            .broadcast-inner {
+                font-size: 0.8rem;
+                padding: 10px 12px;
+            }
+
+            .luck-banner-inner {
+                font-size: 0.8rem;
+                padding: 8px 10px;
+            }
+
+            .grid-container {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 8px;
+            }
+
+            .nav-tab {
+                padding: 6px 4px;
+                font-size: 0.7rem;
+            }
+
+            .nav-icon {
+                font-size: 0.9rem;
+            }
+
+            .trade-panel {
+                padding: 12px;
+            }
+
+            .trade-side {
+                padding: 10px;
+            }
+
+            .modal-body {
+                padding: 16px;
+            }
+        }
     </style>
 </head>
 
@@ -3956,15 +4158,8 @@
                         style="background:var(--bg-surface);border:1px solid var(--border-glow);color:white;padding:10px;border-radius:8px;">
                     <input type="number" id="cp-restock-percent" placeholder="Restock % of max" min="0" max="100" step="1"
                         style="background:var(--bg-surface);border:1px solid var(--border-glow);color:white;padding:10px;border-radius:8px;">
-                    <select id="cp-duration"
+                    <input type="datetime-local" id="cp-expiry"
                         style="background:var(--bg-surface);border:1px solid var(--border-glow);color:white;padding:10px;border-radius:8px;grid-column:1/-1;">
-                        <option value="1">1 Hour</option>
-                        <option value="3">3 Hours</option>
-                        <option value="6">6 Hours</option>
-                        <option value="12">12 Hours</option>
-                        <option value="24" selected>24 Hours</option>
-                        <option value="72">3 Days</option>
-                    </select>
                 </div>
 
                 <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
@@ -8270,7 +8465,7 @@ const MUTATIONS_LIST = [
                 const price = parseFloat(document.getElementById('cp-price').value);
                 const stock = parseInt(document.getElementById('cp-stock').value);
                 const restockPercent = Math.max(0, Math.min(100, parseFloat(document.getElementById('cp-restock-percent')?.value) || 0));
-                const durationHours = parseInt(document.getElementById('cp-duration').value);
+                const expiryDateTime = document.getElementById('cp-expiry').value;
                 const totalChance = cpDraftCards.reduce((s, c) => s + c.chance, 0);
 
                 if (!name) return showToast('Pack name is required.', 'error');
@@ -8278,6 +8473,10 @@ const MUTATIONS_LIST = [
                 if (!stock || stock <= 0) return showToast('Stock must be greater than 0.', 'error');
                 if (cpDraftCards.length === 0) return showToast('Add at least one card.', 'error');
                 if (Math.round(totalChance) !== 100) return showToast(`Total chance must equal 100%. Currently: ${totalChance.toFixed(1)}%`, 'error');
+                if (!expiryDateTime) return showToast('Expiry date and time is required.', 'error');
+
+                const expiryTimestamp = new Date(expiryDateTime).getTime();
+                if (expiryTimestamp <= Date.now()) return showToast('Expiry date must be in the future.', 'error');
 
                 const packId = cpEditingId || push(ref(db, 'custom_packs')).key;
                 const payload = {};
@@ -8285,7 +8484,7 @@ const MUTATIONS_LIST = [
                     name, color, price, stock,
                     originalStock: stock,
                     restockPercent,
-                    expiresAt: Date.now() + durationHours * 3600000,
+                    expiresAt: expiryTimestamp,
                     cards: cpDraftCards,
                     active: true,
                     createdAt: Date.now()
@@ -8372,6 +8571,16 @@ const MUTATIONS_LIST = [
             document.getElementById('cp-stock').value = p.stock;
             if (document.getElementById('cp-restock-percent')) {
                 document.getElementById('cp-restock-percent').value = p.restockPercent ?? 0;
+            }
+            // Convert expiresAt timestamp to datetime-local format
+            if (p.expiresAt) {
+                const expiryDate = new Date(p.expiresAt);
+                const year = expiryDate.getFullYear();
+                const month = String(expiryDate.getMonth() + 1).padStart(2, '0');
+                const day = String(expiryDate.getDate()).padStart(2, '0');
+                const hours = String(expiryDate.getHours()).padStart(2, '0');
+                const minutes = String(expiryDate.getMinutes()).padStart(2, '0');
+                document.getElementById('cp-expiry').value = `${year}-${month}-${day}T${hours}:${minutes}`;
             }
             renderCpDraftList();
             showToast('Pack loaded for editing. Change fields and publish to save.', 'info');
@@ -9089,7 +9298,7 @@ const MUTATIONS_LIST = [
 
     </script>
     <div style="position: fixed; top: 12px; left: 12px; z-index: 9999; color: rgba(255, 255, 255, 0.4); font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
-    V:3.0
+    V:3.5
 </div>
 </body>
 
