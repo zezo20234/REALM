@@ -3076,6 +3076,256 @@
         .btn-contact-admin:active {
             opacity: 0.8;
         }
+
+        /* --- TRADE AREA STYLES --- */
+        .trade-section {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .trade-search-box {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .trade-search-box input {
+            flex: 1;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-glow);
+            padding: 12px;
+            border-radius: 8px;
+            color: white;
+            outline: none;
+        }
+
+        .trade-search-box input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.16);
+        }
+
+        .trade-search-box button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .trade-panel {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-glow);
+            border-radius: 12px;
+            padding: 16px;
+            display: none;
+        }
+
+        .trade-panel.active {
+            display: block;
+        }
+
+        .trade-user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-glow);
+        }
+
+        .trade-user-info .profile-badge {
+            width: 40px;
+            height: 40px;
+        }
+
+        .trade-offer-area {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .trade-side {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-glow);
+            border-radius: 8px;
+            padding: 12px;
+        }
+
+        .trade-side h4 {
+            font-size: 0.85rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+            color: var(--primary);
+        }
+
+        .trade-side.offer-side h4 {
+            color: var(--accent-green);
+        }
+
+        .trade-items-list {
+            min-height: 80px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 12px;
+        }
+
+        .trade-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            background: var(--bg-dark);
+            border-radius: 6px;
+            margin-bottom: 6px;
+            font-size: 0.8rem;
+        }
+
+        .trade-item .remove-btn {
+            color: var(--accent-red);
+            cursor: pointer;
+            font-weight: 900;
+            padding: 4px 8px;
+        }
+
+        .trade-money-input {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .trade-money-input input {
+            flex: 1;
+            background: var(--bg-dark);
+            border: 1px solid var(--border-glow);
+            padding: 8px;
+            border-radius: 6px;
+            color: white;
+            outline: none;
+        }
+
+        .trade-money-input input:focus {
+            border-color: var(--primary);
+        }
+
+        .trade-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .trade-actions button {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .trade-actions .btn-add-card {
+            background: var(--bg-surface);
+            color: white;
+            border: 1px solid var(--border-glow);
+        }
+
+        .trade-actions .btn-lock-trade {
+            background: var(--accent-green);
+            color: white;
+        }
+
+        .trade-actions .btn-lock-trade.locked {
+            background: var(--accent-red);
+        }
+
+        .trade-actions .btn-cancel {
+            background: var(--bg-surface);
+            color: var(--accent-red);
+            border: 1px solid var(--border-glow);
+        }
+
+        .trade-status {
+            text-align: center;
+            padding: 12px;
+            background: var(--bg-dark);
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .trade-status.waiting {
+            color: #fbbf24;
+        }
+
+        .trade-status.ready {
+            color: var(--accent-green);
+        }
+
+        .trade-status.completed {
+            color: var(--primary);
+        }
+
+        .trade-status.cancelled {
+            color: var(--accent-red);
+        }
+
+        /* --- ARCHIVE NOTIFICATION --- */
+        .archive-notification {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #7c3aed, #5b21b6);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 0 30px rgba(124, 58, 237, 0.5);
+            z-index: 2000;
+            display: none;
+            animation: slideDown 0.5s ease-out;
+        }
+
+        .archive-notification.show {
+            display: block;
+        }
+
+        .archive-notification h3 {
+            font-size: 1rem;
+            font-weight: 900;
+            margin-bottom: 4px;
+        }
+
+        .archive-notification p {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateX(-50%) translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* --- SET COMPLETION BADGE --- */
+        .set-completion-badge {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: #111827;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 900;
+            display: inline-block;
+            margin-left: 8px;
+        }
     </style>
 </head>
 
@@ -3135,6 +3385,12 @@
     <div id="luck-event-banner" aria-live="polite">
         <div class="luck-banner-inner" id="luck-banner-text">✨ 4× LUCK EVENT ACTIVE<span class="luck-banner-sub"
                 id="luck-banner-sub">Ends in 2:00</span></div>
+    </div>
+
+    <!-- Archive Set Completion Notification -->
+    <div id="archive-notification" class="archive-notification">
+        <h3>🎉 SET COMPLETED!</h3>
+        <p id="archive-notification-text">You completed the Paper set and received 150 XP!</p>
     </div>
 
     <button type="button" id="btn-admin-lock" title="Admin access">🔒 ADMIN</button>
@@ -3268,6 +3524,54 @@
                 <div id="container-leaderboards"></div>
             </section>
 
+            <section id="view-trade" class="view-panel">
+                <h2 class="section-title">Secure Trade Area</h2>
+                <p class="section-desc">Trade cards and money with other players safely</p>
+                
+                <div class="trade-section">
+                    <div class="trade-search-box">
+                        <input type="text" id="trade-user-search" placeholder="Enter user ID or username...">
+                        <button onclick="searchTradeUser()">SEARCH</button>
+                    </div>
+                    
+                    <div id="trade-panel" class="trade-panel">
+                        <div class="trade-user-info" id="trade-user-info">
+                            <!-- User info will be populated here -->
+                        </div>
+                        
+                        <div class="trade-status" id="trade-status">Search for a user to start trading</div>
+                        
+                        <div class="trade-offer-area">
+                            <div class="trade-side">
+                                <h4>Your Offer</h4>
+                                <div class="trade-items-list" id="trade-my-items"></div>
+                                <div class="trade-money-input">
+                                    <span>€</span>
+                                    <input type="number" id="trade-my-money" placeholder="0" min="0">
+                                </div>
+                                <div class="trade-actions">
+                                    <button class="btn-add-card" onclick="openTradeCardSelector('my')">+ ADD CARD</button>
+                                </div>
+                            </div>
+                            
+                            <div class="trade-side offer-side">
+                                <h4>Their Offer</h4>
+                                <div class="trade-items-list" id="trade-their-items"></div>
+                                <div class="trade-money-input">
+                                    <span>€</span>
+                                    <input type="number" id="trade-their-money" placeholder="0" min="0" disabled>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="trade-actions">
+                            <button class="btn-lock-trade" id="btn-lock-trade" onclick="lockTrade()">LOCK TRADE</button>
+                            <button class="btn-cancel" onclick="cancelTrade()">CANCEL</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <section id="view-shop" class="view-panel">
                 <h2 class="section-title">Hardware Upgrade Utilities</h2>
                 <p class="section-desc">Purchase locks to secure your assets. Apply them from your Deck.</p>
@@ -3363,6 +3667,7 @@
             <div class="nav-tab active" data-target="packs"><span class="nav-icon">📦</span><span>Packs</span></div>
             <div class="nav-tab" data-target="cards"><span class="nav-icon">🃏</span><span>Deck</span></div>
             <div class="nav-tab" data-target="steal"><span class="nav-icon">🥷</span><span>Steal</span></div>
+            <div class="nav-tab" data-target="trade"><span class="nav-icon">🔄</span><span>Trade</span></div>
             <div class="nav-tab" data-target="book"><span class="nav-icon">📖</span><span>Archive</span></div>
             <div class="nav-tab" data-target="ranks"><span class="nav-icon">🏆</span><span>Ranks</span></div>
             <div class="nav-tab" data-target="shop"><span class="nav-icon">🛒</span><span>Shop</span></div>
@@ -3808,8 +4113,7 @@ const MUTATIONS_LIST = [
     { name: "Prismatic Shift", bonusPercent: 25, type: "good", color: "#3b82f6" },
     { name: "Hyper Drive Chromatic", bonusPercent: 35, type: "good", color: "#8b5cf6" },
     { name: "Astral Supernova", bonusPercent: 45, type: "good", color: "#ec4899" },
-    { name: "Overlord Alpha Omega", bonusPercent: 55, type: "good", color: "#f59e0b" },
-    { name: "Dark Antimatter Void", bonusPercent: -55, type: "volatile", color: "#6b7280" }
+    { name: "Overlord Alpha Omega", bonusPercent: 55, type: "good", color: "#f59e0b" }
 ];
 
         // Balanced economy — achievable in 1.5-2 months with regular play
@@ -7319,16 +7623,16 @@ const MUTATIONS_LIST = [
                 if (!currentSessionData) return;
                 if (currentSessionData.sessionState !== 'initialized') return;
 
-                if (currentSessionData.winnerSignaledUid) {
-                    const existingSolveTimeMs = currentSessionData.winnerSolveTimeMs || 0;
-                    if (solveTimeMs < existingSolveTimeMs) {
-                        currentSessionData.winnerSignaledUid = myUid;
-                        currentSessionData.winnerSolveTimeMs = solveTimeMs;
-                        return currentSessionData;
-                    }
+                // CRITICAL FIX: Check if already claimed first to prevent race condition
+                if (currentSessionData.claimed) {
+                    // Already claimed by someone else - abort
                     return;
                 }
 
+                // Set claimed flag atomically - only first transaction succeeds
+                currentSessionData.claimed = true;
+                currentSessionData.claimedBy = myUid;
+                currentSessionData.claimedAt = serverTimestamp();
                 currentSessionData.sessionState = 'terminated_resolved';
                 currentSessionData.winnerSignaledUid = myUid;
                 currentSessionData.winnerSolveTimeMs = solveTimeMs;
@@ -7345,7 +7649,8 @@ const MUTATIONS_LIST = [
 
                 lockClashUiInputs();
 
-                if (resolved.winnerSignaledUid !== myUid) {
+                // Verify I was the one who claimed it
+                if (resolved.claimedBy !== myUid) {
                     showToast('Too late — opponent already won.', 'error');
                     return;
                 }
@@ -8218,7 +8523,574 @@ const MUTATIONS_LIST = [
         // Expose globally so other modules/scripts can call it
         window.openCustomPackSimulated = openCustomPackSimulated;
 
+        // =========================================================
+        // FEATURE 1: FIX MATH QUESTION RACE CONDITION
+        // =========================================================
+        // The issue: If two players answer at the exact same time, both could win
+        // Solution: Modified signalClashVictoryCaptureLock to use atomic transaction with a "claimed" flag
+        // This ensures only the first answer wins - see the modified function above (line 7616)
+
+        // =========================================================
+        // FEATURE 2: SECURE TRADE AREA
+        // =========================================================
+        
+        // Trade state management
+        let tradeState = {
+            active: false,
+            tradeId: null,
+            partnerUid: null,
+            partnerUsername: null,
+            myOffer: { cards: [], money: 0 },
+            theirOffer: { cards: [], money: 0 },
+            myLocked: false,
+            theirLocked: false,
+            listener: null
+        };
+
+        // Card set definitions for archive rewards
+        const CARD_SETS = {
+            paper: {
+                name: 'Paper Collection',
+                requiredCards: GAME_REGISTRY.paper.map(c => c.id),
+                rewardXp: 150
+            },
+            wood: {
+                name: 'Wood Collection',
+                requiredCards: GAME_REGISTRY.wood.map(c => c.id),
+                rewardXp: 300
+            },
+            stone: {
+                name: 'Stone Collection',
+                requiredCards: GAME_REGISTRY.stone.map(c => c.id),
+                rewardXp: 500
+            }
+        };
+
+        // Search for a user to trade with
+        window.searchTradeUser = async function() {
+            const searchInput = document.getElementById('trade-user-search').value.trim();
+            if (!searchInput) return showToast('Enter a user ID or username.', 'error');
+            if (!activeUserSession?.uid) return showToast('Not signed in.', 'error');
+
+            try {
+                // Search by username first
+                const usersSnap = await get(ref(db, 'users'));
+                const users = usersSnap.val() || {};
+                
+                let foundUser = null;
+                let foundUid = null;
+
+                for (const uid in users) {
+                    if (uid === activeUserSession.uid) continue; // Can't trade with self
+                    const user = users[uid];
+                    if (user.username && user.username.toLowerCase() === searchInput.toLowerCase()) {
+                        foundUser = user;
+                        foundUid = uid;
+                        break;
+                    }
+                    if (uid === searchInput) {
+                        foundUser = user;
+                        foundUid = uid;
+                        break;
+                    }
+                }
+
+                if (!foundUser) {
+                    return showToast('User not found.', 'error');
+                }
+
+                // Initialize trade
+                initializeTrade(foundUid, foundUser);
+            } catch (error) {
+                console.error('Trade search error:', error);
+                showToast('Error searching for user.', 'error');
+            }
+        };
+
+        function initializeTrade(partnerUid, partnerUser) {
+            // Cancel any existing trade
+            cancelTrade();
+
+            tradeState.active = true;
+            tradeState.partnerUid = partnerUid;
+            tradeState.partnerUsername = partnerUser.username;
+            tradeState.myOffer = { cards: [], money: 0 };
+            tradeState.theirOffer = { cards: [], money: 0 };
+            tradeState.myLocked = false;
+            tradeState.theirLocked = false;
+
+            // Generate unique trade ID
+            const tradeId = [activeUserSession.uid, partnerUid].sort().join('_');
+            tradeState.tradeId = tradeId;
+
+            // Update UI
+            const userInfo = document.getElementById('trade-user-info');
+            userInfo.innerHTML = `
+                <div class="profile-badge" style="background:${partnerUser.avatarBgColor || 'var(--primary)'}">
+                    ${partnerUser.avatarLetters || partnerUser.username.slice(0, 2).toUpperCase()}
+                </div>
+                <div>
+                    <div style="font-weight:800;">${partnerUser.username}</div>
+                    <div style="font-size:0.75rem;color:#9ca3af;">ID: ${partnerUid.slice(0, 8)}...</div>
+                </div>
+            `;
+
+            document.getElementById('trade-panel').classList.add('active');
+            document.getElementById('trade-status').textContent = 'Add items to your offer and lock when ready';
+            document.getElementById('trade-status').className = 'trade-status waiting';
+
+            renderTradeOffer();
+
+            // Listen for trade updates
+            listenForTradeUpdates();
+        }
+
+        function listenForTradeUpdates() {
+            if (tradeState.listener) {
+                tradeState.listener();
+            }
+
+            const tradeRef = ref(db, `trades/${tradeState.tradeId}`);
+            tradeState.listener = onValue(tradeRef, snapshot => {
+                const tradeData = snapshot.val();
+                if (!tradeData) return;
+
+                // Update their offer from server
+                if (tradeData.offers && tradeData.offers[tradeState.partnerUid]) {
+                    tradeState.theirOffer = tradeData.offers[tradeState.partnerUid];
+                    tradeState.theirLocked = tradeData.locked?.[tradeState.partnerUid] || false;
+                    renderTradeOffer();
+                    updateTradeStatus();
+                }
+
+                // Check if both locked - execute trade
+                if (tradeData.locked?.[activeUserSession.uid] && tradeData.locked?.[tradeState.partnerUid]) {
+                    executeTrade();
+                }
+
+                // Check if cancelled
+                if (tradeData.status === 'cancelled') {
+                    showToast('Trade was cancelled by the other party.', 'error');
+                    cancelTrade();
+                }
+
+                // Check if completed
+                if (tradeData.status === 'completed') {
+                    showToast('Trade completed successfully!', 'success');
+                    cancelTrade();
+                }
+            });
+        }
+
+        function renderTradeOffer() {
+            // Render my items
+            const myItemsList = document.getElementById('trade-my-items');
+            myItemsList.innerHTML = '';
+            tradeState.myOffer.cards.forEach(card => {
+                const div = document.createElement('div');
+                div.className = 'trade-item';
+                div.innerHTML = `
+                    <span>${card.name}</span>
+                    <span class="remove-btn" onclick="removeTradeCard('my', '${card.instanceId}')">✕</span>
+                `;
+                myItemsList.appendChild(div);
+            });
+
+            // Render their items
+            const theirItemsList = document.getElementById('trade-their-items');
+            theirItemsList.innerHTML = '';
+            tradeState.theirOffer.cards.forEach(card => {
+                const div = document.createElement('div');
+                div.className = 'trade-item';
+                div.innerHTML = `<span>${card.name}</span>`;
+                theirItemsList.appendChild(div);
+            });
+
+            // Update money inputs
+            document.getElementById('trade-my-money').value = tradeState.myOffer.money || 0;
+            document.getElementById('trade-their-money').value = tradeState.theirOffer.money || 0;
+
+            // Update lock button
+            const lockBtn = document.getElementById('btn-lock-trade');
+            if (tradeState.myLocked) {
+                lockBtn.textContent = 'LOCKED';
+                lockBtn.classList.add('locked');
+                lockBtn.disabled = true;
+            } else {
+                lockBtn.textContent = 'LOCK TRADE';
+                lockBtn.classList.remove('locked');
+                lockBtn.disabled = false;
+            }
+        }
+
+        function updateTradeStatus() {
+            const statusEl = document.getElementById('trade-status');
+            if (tradeState.myLocked && tradeState.theirLocked) {
+                statusEl.textContent = 'Both locked! Executing trade...';
+                statusEl.className = 'trade-status ready';
+            } else if (tradeState.myLocked) {
+                statusEl.textContent = 'Waiting for partner to lock...';
+                statusEl.className = 'trade-status waiting';
+            } else if (tradeState.theirLocked) {
+                statusEl.textContent = 'Partner has locked. Lock your trade to proceed.';
+                statusEl.className = 'trade-status waiting';
+            } else {
+                statusEl.textContent = 'Add items to your offer and lock when ready';
+                statusEl.className = 'trade-status waiting';
+            }
+        }
+
+        window.lockTrade = async function() {
+            if (!tradeState.active || tradeState.myLocked) return;
+
+            const myMoney = parseFloat(document.getElementById('trade-my-money').value) || 0;
+            tradeState.myOffer.money = myMoney;
+
+            // Validate offer
+            if (tradeState.myOffer.cards.length === 0 && myMoney === 0) {
+                return showToast('Add at least one card or money to your offer.', 'error');
+            }
+
+            // Validate I own the cards and money
+            const myMoneySnap = await get(ref(db, `users/${activeUserSession.uid}/money`));
+            const myCurrentMoney = myMoneySnap.val() || 0;
+            if (myMoney > myCurrentMoney) {
+                return showToast('Insufficient funds.', 'error');
+            }
+
+            for (const card of tradeState.myOffer.cards) {
+                const cardSnap = await get(ref(db, `inventory/${activeUserSession.uid}/${card.instanceId}`));
+                if (!cardSnap.exists()) {
+                    return showToast(`You no longer own ${card.name}.`, 'error');
+                }
+            }
+
+            // Update trade in Firebase
+            const tradeRef = ref(db, `trades/${tradeState.tradeId}`);
+            await update(tradeRef, {
+                [`offers/${activeUserSession.uid}`]: tradeState.myOffer,
+                [`locked/${activeUserSession.uid}`]: true,
+                [`participants/${activeUserSession.uid}`]: userDataRecord.username,
+                status: 'active',
+                updatedAt: serverTimestamp()
+            });
+
+            tradeState.myLocked = true;
+            renderTradeOffer();
+            updateTradeStatus();
+        };
+
+        window.cancelTrade = async function() {
+            if (!tradeState.active) return;
+
+            if (tradeState.listener) {
+                tradeState.listener();
+                tradeState.listener = null;
+            }
+
+            // Update trade status to cancelled if we initiated it
+            if (tradeState.tradeId) {
+                await update(ref(db, `trades/${tradeState.tradeId}`), {
+                    status: 'cancelled',
+                    cancelledBy: activeUserSession.uid
+                });
+            }
+
+            // Reset state
+            tradeState = {
+                active: false,
+                tradeId: null,
+                partnerUid: null,
+                partnerUsername: null,
+                myOffer: { cards: [], money: 0 },
+                theirOffer: { cards: [], money: 0 },
+                myLocked: false,
+                theirLocked: false,
+                listener: null
+            };
+
+            // Reset UI
+            document.getElementById('trade-panel').classList.remove('active');
+            document.getElementById('trade-user-info').innerHTML = '';
+            document.getElementById('trade-my-items').innerHTML = '';
+            document.getElementById('trade-their-items').innerHTML = '';
+            document.getElementById('trade-my-money').value = '';
+            document.getElementById('trade-their-money').value = '';
+            document.getElementById('trade-status').textContent = 'Search for a user to start trading';
+            document.getElementById('trade-status').className = 'trade-status';
+        };
+
+        async function executeTrade() {
+            if (!tradeState.active) return;
+
+            const tradeRef = ref(db, `trades/${tradeState.tradeId}`);
+            
+            // Use transaction to atomically validate and execute trade
+            await runTransaction(tradeRef, (tradeData) => {
+                if (!tradeData || tradeData.status !== 'active') return;
+                if (!tradeData.locked?.[activeUserSession.uid] || !tradeData.locked?.[tradeState.partnerUid]) return;
+
+                // Mark as processing to prevent double execution
+                tradeData.status = 'processing';
+                return tradeData;
+            });
+
+            // Get fresh data and validate ownership
+            const freshSnap = await get(tradeRef);
+            const freshTrade = freshSnap.val();
+            
+            if (!freshTrade || freshTrade.status !== 'processing') {
+                return; // Already processed by someone else
+            }
+
+            // Validate both users still own their items
+            const myUid = activeUserSession.uid;
+            const partnerUid = tradeState.partnerUid;
+            const myOffer = freshTrade.offers[myUid];
+            const theirOffer = freshTrade.offers[partnerUid];
+
+            // Validate my items
+            const myMoneySnap = await get(ref(db, `users/${myUid}/money`));
+            const myCurrentMoney = myMoneySnap.val() || 0;
+            if (myOffer.money > myCurrentMoney) {
+                await update(tradeRef, { status: 'cancelled', reason: 'insufficient_funds' });
+                showToast('Trade cancelled: Insufficient funds.', 'error');
+                cancelTrade();
+                return;
+            }
+
+            for (const card of myOffer.cards) {
+                const cardSnap = await get(ref(db, `inventory/${myUid}/${card.instanceId}`));
+                if (!cardSnap.exists()) {
+                    await update(tradeRef, { status: 'cancelled', reason: 'card_not_owned' });
+                    showToast('Trade cancelled: Card no longer owned.', 'error');
+                    cancelTrade();
+                    return;
+                }
+            }
+
+            // Validate their items
+            const theirMoneySnap = await get(ref(db, `users/${partnerUid}/money`));
+            const theirCurrentMoney = theirMoneySnap.val() || 0;
+            if (theirOffer.money > theirCurrentMoney) {
+                await update(tradeRef, { status: 'cancelled', reason: 'partner_insufficient_funds' });
+                showToast('Trade cancelled: Partner insufficient funds.', 'error');
+                cancelTrade();
+                return;
+            }
+
+            for (const card of theirOffer.cards) {
+                const cardSnap = await get(ref(db, `inventory/${partnerUid}/${card.instanceId}`));
+                if (!cardSnap.exists()) {
+                    await update(tradeRef, { status: 'cancelled', reason: 'partner_card_not_owned' });
+                    showToast('Trade cancelled: Partner card no longer owned.', 'error');
+                    cancelTrade();
+                    return;
+                }
+            }
+
+            // Execute the trade atomically using batch write
+            const operations = {};
+
+            // Transfer cards from me to them
+            myOffer.cards.forEach(card => {
+                operations[`inventory/${myUid}/${card.instanceId}`] = null;
+                operations[`inventory/${partnerUid}/${card.instanceId}`] = {
+                    ...card,
+                    acquiredTimestamp: Date.now()
+                };
+            });
+
+            // Transfer cards from them to me
+            theirOffer.cards.forEach(card => {
+                operations[`inventory/${partnerUid}/${card.instanceId}`] = null;
+                operations[`inventory/${myUid}/${card.instanceId}`] = {
+                    ...card,
+                    acquiredTimestamp: Date.now()
+                };
+            });
+
+            // Transfer money
+            if (myOffer.money > 0) {
+                operations[`users/${myUid}/money`] = myCurrentMoney - myOffer.money;
+                operations[`users/${partnerUid}/money`] = theirCurrentMoney + myOffer.money;
+            }
+
+            if (theirOffer.money > 0) {
+                operations[`users/${partnerUid}/money`] = (theirCurrentMoney + myOffer.money) - theirOffer.money;
+                operations[`users/${myUid}/money`] = (myCurrentMoney - myOffer.money) + theirOffer.money;
+            }
+
+            // Mark trade as completed
+            operations[`trades/${tradeState.tradeId}/status`] = 'completed';
+            operations[`trades/${tradeState.tradeId}/completedAt`] = serverTimestamp();
+
+            await update(ref(db, '/'), operations);
+            showToast('Trade completed successfully!', 'success');
+            cancelTrade();
+        }
+
+        window.openTradeCardSelector = function(side) {
+            // For simplicity, we'll use a prompt to select cards
+            // In a full implementation, this would open a modal with card selection UI
+            if (side !== 'my') return; // Only allow adding to my offer
+
+            const cardIds = Object.keys(userDeckRecord);
+            if (cardIds.length === 0) {
+                return showToast('No cards in your deck.', 'error');
+            }
+
+            // Show available cards
+            const cardList = cardIds.map(id => {
+                const card = userDeckRecord[id];
+                let cardName = 'Unknown';
+                const registry = GAME_REGISTRY[card.packSource];
+                if (registry) {
+                    const meta = registry.find(c => c.id === card.cardId);
+                    if (meta) cardName = meta.name;
+                }
+                return { instanceId: id, cardId: card.cardId, name: cardName, packSource: card.packSource };
+            });
+
+            // Simple prompt-based selection (in production, use a modal)
+            const cardNames = cardList.map((c, i) => `${i + 1}. ${c.name}`).join('\n');
+            const selection = prompt(`Enter card number to add:\n${cardNames}`);
+            
+            if (selection !== null) {
+                const index = parseInt(selection) - 1;
+                if (index >= 0 && index < cardList.length) {
+                    const selectedCard = cardList[index];
+                    // Check if already added
+                    if (tradeState.myOffer.cards.find(c => c.instanceId === selectedCard.instanceId)) {
+                        return showToast('Card already in offer.', 'error');
+                    }
+                    tradeState.myOffer.cards.push(selectedCard);
+                    renderTradeOffer();
+                    showToast(`${selectedCard.name} added to offer.`, 'success');
+                }
+            }
+        };
+
+        window.removeTradeCard = function(side, instanceId) {
+            if (side !== 'my') return;
+            tradeState.myOffer.cards = tradeState.myOffer.cards.filter(c => c.instanceId !== instanceId);
+            renderTradeOffer();
+        };
+
+        // =========================================================
+        // FEATURE 3: ARCHIVE BOOK (MILESTONE XP REWARDS)
+        // =========================================================
+        
+        // Initialize collections tracking in user profile
+        function initializeCollectionsTracking() {
+            if (!userDataRecord.collections) {
+                update(ref(db, `users/${activeUserSession.uid}/collections`), {
+                    paper: { completed: false, rewardClaimed: false, completedAt: null },
+                    wood: { completed: false, rewardClaimed: false, completedAt: null },
+                    stone: { completed: false, rewardClaimed: false, completedAt: null }
+                });
+            }
+        }
+
+        // Check for set completion when a new card is received
+        function checkSetCompletion(newCardId) {
+            const discovered = userDataRecord.discovered || {};
+            const collections = userDataRecord.collections || {};
+
+            for (const [setName, setData] of Object.entries(CARD_SETS)) {
+                // Skip if already rewarded
+                if (collections[setName]?.rewardClaimed) continue;
+
+                // Check if all required cards are owned
+                const allOwned = setData.requiredCards.every(cardId => discovered[cardId]);
+                
+                if (allOwned && !collections[setName]?.completed) {
+                    // Set completed!
+                    awardSetCompletionReward(setName, setData);
+                }
+            }
+        }
+
+        async function awardSetCompletionReward(setName, setData) {
+            const xpReward = setData.rewardXp;
+            
+            try {
+                // Use transaction to atomically award XP and mark as claimed
+                const userRef = ref(db, `users/${activeUserSession.uid}`);
+                await runTransaction(userRef, (userData) => {
+                    if (!userData) return;
+                    
+                    if (!userData.collections) userData.collections = {};
+                    if (!userData.collections[setName]) userData.collections[setName] = {};
+                    
+                    // Double-check not already claimed
+                    if (userData.collections[setName].rewardClaimed) return userData;
+                    
+                    userData.collections[setName].completed = true;
+                    userData.collections[setName].rewardClaimed = true;
+                    userData.collections[setName].completedAt = serverTimestamp();
+                    userData.xp = (userData.xp || 0) + xpReward;
+                    
+                    return userData;
+                });
+
+                // Show notification
+                showArchiveNotification(setData.name, xpReward);
+                
+                // Update local data
+                if (!userDataRecord.collections) userDataRecord.collections = {};
+                userDataRecord.collections[setName] = {
+                    completed: true,
+                    rewardClaimed: true,
+                    completedAt: Date.now()
+                };
+                userDataRecord.xp = (userDataRecord.xp || 0) + xpReward;
+                
+                renderHUDDisplayElements();
+                
+            } catch (error) {
+                console.error('Error awarding set completion:', error);
+            }
+        }
+
+        function showArchiveNotification(setName, xpReward) {
+            const notification = document.getElementById('archive-notification');
+            const text = document.getElementById('archive-notification-text');
+            text.textContent = `You completed the ${setName} and received ${xpReward} XP!`;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 5000);
+        }
+
+        // Hook into existing card acquisition functions
+        // Override the pack purchase function to check for set completion
+        const originalPurchasePackAsset = window.purchasePackAsset;
+        window.purchasePackAsset = async function(packKey) {
+            await originalPurchasePackAsset.call(this, packKey);
+            // Check for set completion after pack opening
+            setTimeout(() => {
+                const discovered = userDataRecord.discovered || {};
+                for (const cardId in discovered) {
+                    checkSetCompletion(cardId);
+                }
+            }, 1000);
+        };
+
+        // Initialize collections on user load
+        const originalInitializeUserEnvironmentCore = initializeUserEnvironmentCore;
+        initializeUserEnvironmentCore = function() {
+            originalInitializeUserEnvironmentCore.call(this);
+            setTimeout(() => {
+                initializeCollectionsTracking();
+            }, 2000);
+        };
+
     </script>
+    <div style="position: fixed; top: 12px; left: 12px; z-index: 9999; color: rgba(255, 255, 255, 0.4); font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
+    V:2.5
+</div>
 </body>
 
 </html>
