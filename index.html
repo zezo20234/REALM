@@ -8828,8 +8828,9 @@ const MUTATIONS_LIST = [
             tradeState.myLocked = false;
             tradeState.theirLocked = false;
 
-            // Generate unique trade ID
-            const tradeId = [activeUserSession.uid, partnerUid].sort().join('_');
+            // Generate unique trade ID with timestamp to prevent conflicts with old trades
+            const timestamp = Date.now();
+            const tradeId = [activeUserSession.uid, partnerUid].sort().join('_') + '_' + timestamp;
             tradeState.tradeId = tradeId;
 
             // Update UI
@@ -8864,6 +8865,16 @@ const MUTATIONS_LIST = [
                 const tradeData = snapshot.val();
                 if (!tradeData) return;
 
+                // Ignore cancelled/completed trades from previous sessions
+                if (tradeData.status === 'cancelled' || tradeData.status === 'completed') {
+                    // Only show cancellation if it was cancelled by the OTHER party after we started listening
+                    if (tradeData.status === 'cancelled' && tradeData.cancelledBy !== activeUserSession.uid && tradeState.active) {
+                        showToast('Trade was cancelled by the other party.', 'error');
+                        cancelTrade();
+                    }
+                    return;
+                }
+
                 // Update their offer from server
                 if (tradeData.offers && tradeData.offers[tradeState.partnerUid]) {
                     tradeState.theirOffer = tradeData.offers[tradeState.partnerUid];
@@ -8875,18 +8886,6 @@ const MUTATIONS_LIST = [
                 // Check if both locked - execute trade
                 if (tradeData.locked?.[activeUserSession.uid] && tradeData.locked?.[tradeState.partnerUid]) {
                     executeTrade();
-                }
-
-                // Check if cancelled
-                if (tradeData.status === 'cancelled') {
-                    showToast('Trade was cancelled by the other party.', 'error');
-                    cancelTrade();
-                }
-
-                // Check if completed
-                if (tradeData.status === 'completed') {
-                    showToast('Trade completed successfully!', 'success');
-                    cancelTrade();
                 }
             });
         }
