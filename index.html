@@ -4013,7 +4013,7 @@
                         
                         <div class="trade-actions">
                             <button class="btn-cancel" onclick="cancelNewTrade()">CANCEL</button>
-                            <button class="btn-accept" id="btn-accept-trade" onclick="acceptTradeOffer()">ACCEPT TRADE</button>
+                            <button class="btn-accept" id="btn-lock-trade" onclick="lockTradeOffer()">LOCK TRADE</button>
                         </div>
                     </div>
                 </div>
@@ -9479,8 +9479,8 @@ const MUTATIONS_LIST = [
             newTradeState.partnerUsername = partnerUsername;
             newTradeState.myOffer = { type: 'money', value: 0, cards: [] };
             newTradeState.theirOffer = { type: 'money', value: 0, cards: [] };
-            newTradeState.myAccepted = false;
-            newTradeState.theirAccepted = false;
+            newTradeState.myLocked = false;
+            newTradeState.theirLocked = false;
             newTradeState.selectedCards = new Set();
 
             // Generate trade ID (use the same ID for both players)
@@ -9544,7 +9544,7 @@ const MUTATIONS_LIST = [
                         [activeUserSession.uid]: newTradeState.myOffer,
                         [partnerUid]: { type: 'money', value: 0, cards: [] }
                     },
-                    accepted: {
+                    locked: {
                         [activeUserSession.uid]: false,
                         [partnerUid]: false
                     },
@@ -9594,11 +9594,11 @@ const MUTATIONS_LIST = [
                     renderTheirOfferContent();
                 }
 
-                // Update acceptance status
-                if (tradeData.accepted) {
-                    newTradeState.myAccepted = tradeData.accepted[activeUserSession.uid] || false;
-                    newTradeState.theirAccepted = tradeData.accepted[newTradeState.partnerUid] || false;
-                    updateTradeAcceptanceUI();
+                // Update lock status
+                if (tradeData.locked) {
+                    newTradeState.myLocked = tradeData.locked[activeUserSession.uid] || false;
+                    newTradeState.theirLocked = tradeData.locked[newTradeState.partnerUid] || false;
+                    updateTradeLockUI();
                 }
             });
         }
@@ -9823,29 +9823,29 @@ const MUTATIONS_LIST = [
             await updateTradeOfferInFirebase();
         };
 
-        // Update trade acceptance UI
-        function updateTradeAcceptanceUI() {
-            const acceptBtn = document.getElementById('btn-accept-trade');
+        // Update trade lock UI
+        function updateTradeLockUI() {
+            const lockBtn = document.getElementById('btn-lock-trade');
             
-            if (newTradeState.myAccepted) {
-                acceptBtn.textContent = 'ACCEPTED';
-                acceptBtn.disabled = true;
-                acceptBtn.style.opacity = '0.5';
+            if (newTradeState.myLocked) {
+                lockBtn.textContent = 'LOCKED';
+                lockBtn.disabled = true;
+                lockBtn.style.opacity = '0.5';
             } else {
-                acceptBtn.textContent = 'ACCEPT TRADE';
-                acceptBtn.disabled = false;
-                acceptBtn.style.opacity = '1';
+                lockBtn.textContent = 'LOCK TRADE';
+                lockBtn.disabled = false;
+                lockBtn.style.opacity = '1';
             }
 
-            // Check if both accepted
-            if (newTradeState.myAccepted && newTradeState.theirAccepted) {
+            // Check if both locked
+            if (newTradeState.myLocked && newTradeState.theirLocked) {
                 executeNewTrade();
             }
         }
 
-        // Accept trade offer
-        window.acceptTradeOffer = async function() {
-            if (!newTradeState.active || newTradeState.myAccepted) return;
+        // Lock trade offer
+        window.lockTradeOffer = async function() {
+            if (!newTradeState.active || newTradeState.myLocked) return;
 
             // Validate offer
             if (newTradeState.myOffer.type === 'money' && newTradeState.myOffer.value === 0) {
@@ -9887,13 +9887,13 @@ const MUTATIONS_LIST = [
             }
 
             try {
-                await update(ref(db, `active_trades/${newTradeState.tradeId}/accepted/${activeUserSession.uid}`), true);
-                newTradeState.myAccepted = true;
-                updateTradeAcceptanceUI();
-                showToast('Trade accepted! Waiting for partner...', 'success');
+                await update(ref(db, `active_trades/${newTradeState.tradeId}/locked/${activeUserSession.uid}`), true);
+                newTradeState.myLocked = true;
+                updateTradeLockUI();
+                showToast('Trade locked! Waiting for partner...', 'success');
             } catch (error) {
-                console.error('Error accepting trade:', error);
-                showToast('Failed to accept trade.', 'error');
+                console.error('Error locking trade:', error);
+                showToast('Failed to lock trade.', 'error');
             }
         };
 
@@ -9907,7 +9907,7 @@ const MUTATIONS_LIST = [
                 // Use transaction to prevent double execution
                 await runTransaction(tradeRef, (tradeData) => {
                     if (!tradeData || tradeData.status !== 'active') return;
-                    if (!tradeData.accepted[activeUserSession.uid] || !tradeData.accepted[newTradeState.partnerUid]) return;
+                    if (!tradeData.locked[activeUserSession.uid] || !tradeData.locked[newTradeState.partnerUid]) return;
                     
                     tradeData.status = 'processing';
                     return tradeData;
@@ -10110,8 +10110,8 @@ const MUTATIONS_LIST = [
                 partnerUsername: null,
                 myOffer: { type: 'money', value: 0, cards: [] },
                 theirOffer: { type: 'money', value: 0, cards: [] },
-                myAccepted: false,
-                theirAccepted: false,
+                myLocked: false,
+                theirLocked: false,
                 listener: null,
                 selectedCards: new Set()
             };
