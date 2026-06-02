@@ -9845,6 +9845,12 @@ const MUTATIONS_LIST = [
 
         // Lock trade offer
         window.lockTradeOffer = async function() {
+            console.log('lockTradeOffer called');
+            console.log('Trade active:', newTradeState.active);
+            console.log('My locked:', newTradeState.myLocked);
+            console.log('Trade ID:', newTradeState.tradeId);
+            console.log('Active user UID:', activeUserSession?.uid);
+            
             if (!newTradeState.active || newTradeState.myLocked) return;
 
             // Validate offer
@@ -9887,13 +9893,39 @@ const MUTATIONS_LIST = [
             }
 
             try {
-                await update(ref(db, `active_trades/${newTradeState.tradeId}/locked/${activeUserSession.uid}`), true);
+                console.log('Updating lock status in Firebase...');
+                console.log('Firebase path:', `active_trades/${newTradeState.tradeId}/locked/${activeUserSession.uid}`);
+                
+                // First check if trade exists
+                const tradeRef = ref(db, `active_trades/${newTradeState.tradeId}`);
+                const tradeSnap = await get(tradeRef);
+                console.log('Trade exists:', tradeSnap.exists());
+                
+                if (!tradeSnap.exists()) {
+                    console.error('Trade does not exist in Firebase');
+                    return showToast('Trade not found. Please try again.', 'error');
+                }
+                
+                const tradeData = tradeSnap.val();
+                console.log('Trade data:', tradeData);
+                
+                // Use a single update operation to set lock status
+                // This ensures the locked field exists and sets the current user's lock
+                const partnerLocked = tradeData.locked ? (tradeData.locked[newTradeState.partnerUid] || false) : false;
+                await update(tradeRef, {
+                    locked: {
+                        [activeUserSession.uid]: true,
+                        [newTradeState.partnerUid]: partnerLocked
+                    }
+                });
+                
                 newTradeState.myLocked = true;
                 updateTradeLockUI();
                 showToast('Trade locked! Waiting for partner...', 'success');
             } catch (error) {
                 console.error('Error locking trade:', error);
-                showToast('Failed to lock trade.', 'error');
+                console.error('Error details:', error.code, error.message);
+                showToast('Failed to lock trade: ' + error.message, 'error');
             }
         };
 
