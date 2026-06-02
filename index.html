@@ -3173,269 +3173,299 @@
             opacity: 0.8;
         }
 
-        /* --- TRADE AREA STYLES --- */
-        .trade-section {
+        /* --- NEW TRADING SYSTEM STYLES --- */
+        .online-players-list {
+            max-height: 400px;
+            overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 10px;
         }
 
-        .trade-search-box {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 16px;
-        }
-
-        .trade-search-box input {
-            flex: 1;
-            background: var(--bg-surface);
-            border: 1px solid var(--border-glow);
-            padding: 12px;
-            border-radius: 8px;
-            color: white;
-            outline: none;
-        }
-
-        .trade-search-box input:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.16);
-        }
-
-        .trade-search-box button {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
-            font-weight: 800;
-            cursor: pointer;
-        }
-
-        .trade-panel {
-            background: var(--bg-panel);
-            border: 1px solid var(--border-glow);
-            border-radius: 12px;
-            padding: 16px;
-            display: none;
-        }
-
-        .trade-panel.active {
-            display: block;
-        }
-
-        .trade-user-info {
+        .online-player-item {
             display: flex;
             align-items: center;
             gap: 12px;
+            padding: 14px;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-glow);
+            border-radius: 10px;
+            transition: all 0.2s;
+        }
+
+        .online-player-item:hover {
+            border-color: var(--primary);
+            transform: translateX(4px);
+        }
+
+        .player-info {
+            flex: 1;
+        }
+
+        .player-name {
+            font-weight: 800;
+            font-size: 0.95rem;
+        }
+
+        .player-id {
+            font-size: 0.75rem;
+            color: #9ca3af;
+        }
+
+        .btn-request-trade {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 800;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-request-trade:hover {
+            background: #2563eb;
+            transform: scale(1.05);
+        }
+
+        .trade-interface {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-glow);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .trade-partner-info {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding-bottom: 16px;
             margin-bottom: 16px;
-            padding-bottom: 12px;
             border-bottom: 1px solid var(--border-glow);
         }
 
-        .trade-user-info .profile-badge {
-            width: 40px;
-            height: 40px;
-        }
-
-        .trade-offer-area {
+        .trade-offers-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 16px;
-            margin-bottom: 16px;
+            margin-bottom: 20px;
         }
 
-        .trade-side {
+        .trade-offer-side {
             background: var(--bg-surface);
             border: 1px solid var(--border-glow);
+            border-radius: 10px;
+            padding: 16px;
+        }
+
+        .trade-item-selector {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .trade-type-btn {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid var(--border-glow);
+            background: var(--bg-dark);
+            color: #9ca3af;
             border-radius: 8px;
-            padding: 12px;
-        }
-
-        .trade-side h4 {
-            font-size: 0.85rem;
             font-weight: 800;
-            margin-bottom: 12px;
-            color: var(--primary);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
         }
 
-        .trade-side.offer-side h4 {
-            color: var(--accent-green);
+        .trade-type-btn:hover {
+            border-color: var(--primary);
+            color: white;
         }
 
-        .trade-items-list {
-            min-height: 80px;
-            max-height: 200px;
-            overflow-y: auto;
-            margin-bottom: 12px;
+        .trade-type-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
         }
 
-        .trade-item {
+        .trade-offer-content {
+            min-height: 100px;
+        }
+
+        .trade-input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .trade-input {
+            background: var(--bg-dark);
+            border: 1px solid var(--border-glow);
+            padding: 12px;
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .trade-input:focus {
+            border-color: var(--primary);
+        }
+
+        .trade-offer-display {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px;
+            background: var(--bg-dark);
+            border-radius: 8px;
+        }
+
+        .btn-select-cards {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-select-cards:hover {
+            background: #2563eb;
+        }
+
+        .selected-card-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 8px;
+            padding: 8px 12px;
             background: var(--bg-dark);
             border-radius: 6px;
             margin-bottom: 6px;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
         }
 
-        .trade-item .remove-btn {
+        .remove-card-btn {
             color: var(--accent-red);
             cursor: pointer;
             font-weight: 900;
             padding: 4px 8px;
         }
 
-        .trade-money-input {
+        .remove-card-btn:hover {
+            background: rgba(239, 68, 68, 0.2);
+            border-radius: 4px;
+        }
+
+        .trade-cards-display {
             display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 12px;
+            flex-direction: column;
+            gap: 6px;
         }
 
-        .trade-money-input input {
-            flex: 1;
+        .trade-card-item {
+            padding: 8px 12px;
             background: var(--bg-dark);
-            border: 1px solid var(--border-glow);
-            padding: 8px;
             border-radius: 6px;
-            color: white;
-            outline: none;
-        }
-
-        .trade-money-input input:focus {
-            border-color: var(--primary);
+            font-size: 0.85rem;
         }
 
         .trade-actions {
             display: flex;
-            gap: 8px;
-        }
-
-        .trade-actions button {
-            flex: 1;
-            padding: 12px;
-            border-radius: 8px;
-            border: none;
-            font-weight: 800;
-            cursor: pointer;
-        }
-
-        .trade-actions .btn-add-card {
-            background: var(--bg-surface);
-            color: white;
-            border: 1px solid var(--border-glow);
-        }
-
-        .trade-actions .btn-lock-trade {
-            background: var(--accent-green);
-            color: white;
-        }
-
-        .trade-actions .btn-lock-trade.locked {
-            background: var(--accent-red);
-        }
-
-        .trade-actions .btn-cancel {
-            background: var(--bg-surface);
-            color: var(--accent-red);
-            border: 1px solid var(--border-glow);
-        }
-
-        .trade-status {
-            text-align: center;
-            padding: 12px;
-            background: var(--bg-dark);
-            border-radius: 8px;
-            margin-bottom: 12px;
-            font-size: 0.85rem;
-            font-weight: 700;
-        }
-
-        .trade-status.waiting {
-            color: #fbbf24;
-        }
-
-        .trade-status.ready {
-            color: var(--accent-green);
-        }
-
-        .trade-status.completed {
-            color: var(--primary);
-        }
-
-        .trade-status.cancelled {
-            color: var(--accent-red);
-        }
-
-        .trade-user-list {
-            max-height: 300px;
-            overflow-y: auto;
-            margin-bottom: 16px;
-        }
-
-        .trade-user-item {
-            display: flex;
-            align-items: center;
             gap: 12px;
-            padding: 12px;
+        }
+
+        .btn-cancel {
+            flex: 1;
+            padding: 14px;
             background: var(--bg-surface);
+            color: var(--accent-red);
             border: 1px solid var(--border-glow);
             border-radius: 8px;
-            margin-bottom: 8px;
+            font-weight: 800;
             cursor: pointer;
             transition: all 0.2s;
         }
 
-        .trade-user-item:hover {
-            border-color: var(--primary);
-            transform: translateX(4px);
+        .btn-cancel:hover {
+            background: rgba(239, 68, 68, 0.2);
         }
 
-        .trade-user-item .profile-badge {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 800;
-            font-size: 0.9rem;
-        }
-
-        .trade-user-item .user-info {
+        .btn-accept {
             flex: 1;
-        }
-
-        .trade-user-item .user-name {
+            padding: 14px;
+            background: var(--accent-green);
+            color: white;
+            border: none;
+            border-radius: 8px;
             font-weight: 800;
-            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
         }
 
-        .trade-user-item .user-id {
-            font-size: 0.75rem;
-            color: #9ca3af;
+        .btn-accept:hover {
+            background: #059669;
+        }
+
+        .btn-accept:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .trade-request-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .card-inventory-list {
+            max-height: 400px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .inventory-card-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-glow);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .inventory-card-item:hover {
+            border-color: var(--primary);
+        }
+
+        .inventory-card-item.selected {
+            border-color: var(--accent-green);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .inventory-card-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
         }
 
         .loading-text {
             text-align: center;
             padding: 20px;
             color: #9ca3af;
-        }
-
-        .trade-popup-actions {
-            display: flex;
-            gap: 12px;
-            margin-top: 20px;
-        }
-
-        .trade-popup-actions button {
-            flex: 1;
-            padding: 12px;
-            border-radius: 8px;
-            font-weight: 800;
-            cursor: pointer;
+            font-size: 0.9rem;
         }
 
         /* Modal Styles */
@@ -3945,63 +3975,78 @@
             </section>
 
             <section id="view-trade" class="view-panel">
-                <h2 class="section-title">Secure Trade Area</h2>
-                <p class="section-desc">Trade cards and money with other players safely</p>
+                <h2 class="section-title">Trading Hub</h2>
+                <p class="section-desc">Trade cards, money, and XP with other players</p>
                 
-                <div class="trade-section">
-                    <div class="trade-user-list" id="trade-user-list">
-                        <div class="loading-text">Loading users...</div>
-                    </div>
-                    
-                    <div id="trade-panel" class="trade-panel">
-                        <div class="trade-user-info" id="trade-user-info">
-                            <!-- User info will be populated here -->
+                <!-- New Trading System -->
+                <div id="new-trade-system">
+                    <!-- Online Players List -->
+                    <div id="online-players-container">
+                        <h3 style="font-size:0.9rem; font-weight:800; margin-bottom:12px; color:var(--primary);">ONLINE PLAYERS</h3>
+                        <div id="online-players-list" class="online-players-list">
+                            <div class="loading-text">Loading online players...</div>
                         </div>
+                    </div>
+
+                    <!-- Trade Interface (hidden by default) -->
+                    <div id="trade-interface" class="trade-interface" style="display:none;">
+                        <div id="trade-partner-info" class="trade-partner-info"></div>
                         
-                        <div class="trade-status" id="trade-status">Search for a user to start trading</div>
-                        
-                        <div class="trade-offer-area">
-                            <div class="trade-side">
-                                <h4>Your Offer</h4>
-                                <div class="trade-items-list" id="trade-my-items"></div>
-                                <div class="trade-money-input">
-                                    <span>€</span>
-                                    <input type="number" id="trade-my-money" placeholder="0" min="0">
+                        <div class="trade-offers-container">
+                            <div class="trade-offer-side">
+                                <h4 style="font-size:0.85rem; font-weight:800; margin-bottom:12px; color:var(--primary);">YOUR OFFER</h4>
+                                <div class="trade-item-selector">
+                                    <button class="trade-type-btn active" data-type="money">MONEY</button>
+                                    <button class="trade-type-btn" data-type="xp">XP</button>
+                                    <button class="trade-type-btn" data-type="cards">CARDS</button>
                                 </div>
-                                <div class="trade-actions">
-                                    <button class="btn-add-card" onclick="openTradeCardSelector('my')">+ ADD CARD</button>
-                                </div>
+                                <div id="my-offer-content" class="trade-offer-content"></div>
                             </div>
                             
-                            <div class="trade-side offer-side">
-                                <h4>Their Offer</h4>
-                                <div class="trade-items-list" id="trade-their-items"></div>
-                                <div class="trade-money-input">
-                                    <span>€</span>
-                                    <input type="number" id="trade-their-money" placeholder="0" min="0" disabled>
+                            <div class="trade-offer-side">
+                                <h4 style="font-size:0.85rem; font-weight:800; margin-bottom:12px; color:var(--accent-green);">THEIR OFFER</h4>
+                                <div id="their-offer-content" class="trade-offer-content">
+                                    <div class="loading-text">Waiting for offer...</div>
                                 </div>
                             </div>
                         </div>
                         
                         <div class="trade-actions">
-                            <button class="btn-lock-trade" id="btn-lock-trade" onclick="lockTrade()">LOCK TRADE</button>
-                            <button class="btn-cancel" onclick="cancelTrade()">CANCEL</button>
+                            <button class="btn-cancel" onclick="cancelNewTrade()">CANCEL</button>
+                            <button class="btn-accept" id="btn-accept-trade" onclick="acceptTradeOffer()">ACCEPT TRADE</button>
                         </div>
                     </div>
                 </div>
 
                 <!-- Trade Request Popup -->
-                <div id="trade-request-popup" class="modal-overlay" style="display:none;">
-                    <div class="modal-content" style="max-width:400px;">
+                <div id="trade-request-modal" class="modal-overlay" style="display:none;">
+                    <div class="modal-content" style="max-width:450px;">
                         <div class="modal-header">
                             <h3>Trade Request</h3>
-                            <button class="modal-close" onclick="closeTradeRequestPopup()">✕</button>
+                            <button class="modal-close" onclick="closeTradeRequestModal()">✕</button>
                         </div>
                         <div class="modal-body">
                             <p id="trade-request-message"></p>
-                            <div class="trade-popup-actions">
-                                <button class="btn-cancel" onclick="closeTradeRequestPopup()">DECLINE</button>
-                                <button class="btn-lock-trade" onclick="acceptTradeRequest()">ACCEPT</button>
+                            <div class="trade-request-actions">
+                                <button class="btn-cancel" onclick="declineTradeRequest()">DECLINE</button>
+                                <button class="btn-accept" onclick="acceptTradeRequest()">ACCEPT</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card Inventory Modal -->
+                <div id="card-inventory-modal" class="modal-overlay" style="display:none;">
+                    <div class="modal-content" style="max-width:600px; max-height:80vh; overflow-y:auto;">
+                        <div class="modal-header">
+                            <h3>Select Cards to Trade</h3>
+                            <button class="modal-close" onclick="closeCardInventoryModal()">✕</button>
+                        </div>
+                        <div class="modal-body">
+                            <div id="card-inventory-list" class="card-inventory-list"></div>
+                            <div class="modal-actions">
+                                <button class="btn-cancel" onclick="closeCardInventoryModal()">CANCEL</button>
+                                <button class="btn-accept" onclick="confirmCardSelection()">CONFIRM SELECTION</button>
                             </div>
                         </div>
                     </div>
@@ -9114,21 +9159,8 @@ const MUTATIONS_LIST = [
         // This ensures only the first answer wins - see the modified function above (line 7616)
 
         // =========================================================
-        // FEATURE 2: SECURE TRADE AREA
+        // NEW TRADING SYSTEM
         // =========================================================
-        
-        // Trade state management
-        let tradeState = {
-            active: false,
-            tradeId: null,
-            partnerUid: null,
-            partnerUsername: null,
-            myOffer: { cards: [], money: 0 },
-            theirOffer: { cards: [], money: 0 },
-            myLocked: false,
-            theirLocked: false,
-            listener: null
-        };
 
         // Card set definitions for archive rewards
         const CARD_SETS = {
@@ -9149,11 +9181,29 @@ const MUTATIONS_LIST = [
             }
         };
 
-        // Load and display users for trading
-        async function loadTradeUsers() {
-            const userList = document.getElementById('trade-user-list');
+        // =========================================================
+        // NEW TRADING SYSTEM IMPLEMENTATION
+        // =========================================================
+
+        // New trading state management
+        let newTradeState = {
+            active: false,
+            tradeId: null,
+            partnerUid: null,
+            partnerUsername: null,
+            myOffer: { type: 'money', value: 0, cards: [] },
+            theirOffer: { type: 'money', value: 0, cards: [] },
+            myAccepted: false,
+            theirAccepted: false,
+            listener: null,
+            selectedCards: new Set()
+        };
+
+        // Load and display online players for trading
+        async function loadOnlinePlayers() {
+            const playersList = document.getElementById('online-players-list');
             if (!activeUserSession?.uid) {
-                userList.innerHTML = '<div class="loading-text">Not signed in.</div>';
+                playersList.innerHTML = '<div class="loading-text">Not signed in.</div>';
                 return;
             }
 
@@ -9161,427 +9211,787 @@ const MUTATIONS_LIST = [
                 const usersSnap = await get(ref(db, 'users'));
                 const users = usersSnap.val() || {};
                 
-                userList.innerHTML = '';
+                playersList.innerHTML = '';
                 
                 for (const uid in users) {
-                    if (uid === activeUserSession.uid) continue; // Skip self
+                    if (uid === activeUserSession.uid) continue;
                     
                     const user = users[uid];
                     if (!user.username) continue;
                     
-                    const userItem = document.createElement('div');
-                    userItem.className = 'trade-user-item';
-                    userItem.innerHTML = `
+                    const playerItem = document.createElement('div');
+                    playerItem.className = 'online-player-item';
+                    playerItem.innerHTML = `
                         <div class="profile-badge" style="background:${user.avatarBgColor || 'var(--primary)'}">
                             ${user.avatarLetters || user.username.slice(0, 2).toUpperCase()}
                         </div>
-                        <div class="user-info">
-                            <div class="user-name">${user.username}</div>
-                            <div class="user-id">ID: ${uid.slice(0, 8)}...</div>
+                        <div class="player-info">
+                            <div class="player-name">${user.username}</div>
+                            <div class="player-id">ID: ${uid.slice(0, 8)}...</div>
                         </div>
+                        <button class="btn-request-trade" onclick="sendTradeRequest('${uid}', '${user.username}', '${user.avatarBgColor || 'var(--primary)'}', '${user.avatarLetters || user.username.slice(0, 2).toUpperCase()}')">TRADE</button>
                     `;
-                    userItem.onclick = () => showTradeRequestPopup(uid, user);
-                    userList.appendChild(userItem);
+                    playersList.appendChild(playerItem);
                 }
                 
-                if (userList.children.length === 0) {
-                    userList.innerHTML = '<div class="loading-text">No other users found.</div>';
+                if (playersList.children.length === 0) {
+                    playersList.innerHTML = '<div class="loading-text">No other players found.</div>';
                 }
             } catch (error) {
-                console.error('Error loading users:', error);
-                userList.innerHTML = '<div class="loading-text">Error loading users.</div>';
+                console.error('Error loading players:', error);
+                playersList.innerHTML = '<div class="loading-text">Error loading players.</div>';
             }
         }
 
-        let pendingTradeUser = null;
+        // Send trade request to a player
+        window.sendTradeRequest = async function(partnerUid, partnerUsername, avatarBgColor, avatarLetters) {
+            if (!activeUserSession?.uid) {
+                return showToast('You must be signed in to trade.', 'error');
+            }
 
-        function showTradeRequestPopup(uid, user) {
-            pendingTradeUser = { uid, user };
-            document.getElementById('trade-request-message').textContent = 
-                `Start a trade with ${user.username}?`;
-            document.getElementById('trade-request-popup').style.display = 'flex';
+            const tradeId = `${activeUserSession.uid}_${partnerUid}_${Date.now()}`;
+            
+            try {
+                // Create trade request in Firebase
+                await set(ref(db, `trade_requests/${partnerUid}/${tradeId}`), {
+                    fromUid: activeUserSession.uid,
+                    fromUsername: userDataRecord.username,
+                    fromAvatarBgColor: userDataRecord.avatarBgColor || 'var(--primary)',
+                    fromAvatarLetters: userDataRecord.avatarLetters || userDataRecord.username.slice(0, 2).toUpperCase(),
+                    toUid: partnerUid,
+                    toUsername: partnerUsername,
+                    status: 'pending',
+                    timestamp: serverTimestamp()
+                });
+
+                showToast(`Trade request sent to ${partnerUsername}!`, 'success');
+            } catch (error) {
+                console.error('Error sending trade request:', error);
+                showToast('Failed to send trade request.', 'error');
+            }
+        };
+
+        // Listen for incoming trade requests
+        function listenForTradeRequests() {
+            if (!activeUserSession?.uid) return;
+
+            const requestsRef = ref(db, `trade_requests/${activeUserSession.uid}`);
+            onValue(requestsRef, snapshot => {
+                const requests = snapshot.val();
+                if (!requests) return;
+
+                // Show the most recent pending request
+                const requestIds = Object.keys(requests).sort((a, b) => {
+                    const timeA = requests[a].timestamp || 0;
+                    const timeB = requests[b].timestamp || 0;
+                    return timeB - timeA;
+                });
+
+                for (const requestId of requestIds) {
+                    const request = requests[requestId];
+                    if (request.status === 'pending') {
+                        showTradeRequestModal(requestId, request);
+                        break; // Only show one at a time
+                    }
+                }
+            });
         }
 
-        window.closeTradeRequestPopup = function() {
-            document.getElementById('trade-request-popup').style.display = 'none';
-            pendingTradeUser = null;
+        // Show trade request modal
+        function showTradeRequestModal(requestId, request) {
+            document.getElementById('trade-request-message').innerHTML = `
+                <strong>${request.fromUsername}</strong> wants to trade with you!<br>
+                <small style="color:#9ca3af;">ID: ${request.fromUid.slice(0, 8)}...</small>
+            `;
+            document.getElementById('trade-request-modal').style.display = 'flex';
+            
+            // Store request data for later use
+            window.pendingTradeRequest = { requestId, request };
+        }
+
+        window.closeTradeRequestModal = function() {
+            document.getElementById('trade-request-modal').style.display = 'none';
+            window.pendingTradeRequest = null;
         };
 
-        window.acceptTradeRequest = function() {
-            if (!pendingTradeUser) return;
-            const { uid, user } = pendingTradeUser;
-            closeTradeRequestPopup();
-            initializeTrade(uid, user);
+        window.declineTradeRequest = async function() {
+            if (!window.pendingTradeRequest) return;
+            
+            const { requestId } = window.pendingTradeRequest;
+            
+            try {
+                await update(ref(db, `trade_requests/${activeUserSession.uid}/${requestId}`), {
+                    status: 'declined'
+                });
+                showToast('Trade request declined.', 'success');
+            } catch (error) {
+                console.error('Error declining request:', error);
+                showToast('Failed to decline request.', 'error');
+            }
+            
+            closeTradeRequestModal();
         };
 
-        function initializeTrade(partnerUid, partnerUser) {
+        window.acceptTradeRequest = async function() {
+            if (!window.pendingTradeRequest) return;
+            
+            const { requestId, request } = window.pendingTradeRequest;
+            
+            try {
+                // Update request status to accepted
+                await update(ref(db, `trade_requests/${activeUserSession.uid}/${requestId}`), {
+                    status: 'accepted'
+                });
+
+                // Initialize trade
+                initializeNewTrade(request.fromUid, request.fromUsername, request.fromAvatarBgColor, request.fromAvatarLetters, requestId);
+            } catch (error) {
+                console.error('Error accepting request:', error);
+                showToast('Failed to accept request.', 'error');
+            }
+            
+            closeTradeRequestModal();
+        };
+
+        // Initialize new trade session
+        async function initializeNewTrade(partnerUid, partnerUsername, partnerAvatarBgColor, partnerAvatarLetters, requestId) {
             // Cancel any existing trade
-            cancelTrade();
+            cancelNewTrade();
 
-            tradeState.active = true;
-            tradeState.partnerUid = partnerUid;
-            tradeState.partnerUsername = partnerUser.username;
-            tradeState.myOffer = { cards: [], money: 0 };
-            tradeState.theirOffer = { cards: [], money: 0 };
-            tradeState.myLocked = false;
-            tradeState.theirLocked = false;
+            newTradeState.active = true;
+            newTradeState.partnerUid = partnerUid;
+            newTradeState.partnerUsername = partnerUsername;
+            newTradeState.myOffer = { type: 'money', value: 0, cards: [] };
+            newTradeState.theirOffer = { type: 'money', value: 0, cards: [] };
+            newTradeState.myAccepted = false;
+            newTradeState.theirAccepted = false;
+            newTradeState.selectedCards = new Set();
 
-            // Generate unique trade ID with timestamp to prevent conflicts with old trades
-            const timestamp = Date.now();
-            const tradeId = [activeUserSession.uid, partnerUid].sort().join('_') + '_' + timestamp;
-            tradeState.tradeId = tradeId;
+            // Generate trade ID
+            const tradeId = requestId || `${activeUserSession.uid}_${partnerUid}_${Date.now()}`;
+            newTradeState.tradeId = tradeId;
 
             // Update UI
-            const userInfo = document.getElementById('trade-user-info');
-            userInfo.innerHTML = `
-                <div class="profile-badge" style="background:${partnerUser.avatarBgColor || 'var(--primary)'}">
-                    ${partnerUser.avatarLetters || partnerUser.username.slice(0, 2).toUpperCase()}
+            const partnerInfo = document.getElementById('trade-partner-info');
+            partnerInfo.innerHTML = `
+                <div class="profile-badge" style="background:${partnerAvatarBgColor}; width:50px; height:50px;">
+                    ${partnerAvatarLetters}
                 </div>
                 <div>
-                    <div style="font-weight:800;">${partnerUser.username}</div>
-                    <div style="font-size:0.75rem;color:#9ca3af;">ID: ${partnerUid.slice(0, 8)}...</div>
+                    <div style="font-weight:800; font-size:1rem;">${partnerUsername}</div>
+                    <div style="font-size:0.75rem; color:#9ca3af;">ID: ${partnerUid.slice(0, 8)}...</div>
                 </div>
             `;
 
-            document.getElementById('trade-panel').classList.add('active');
-            document.getElementById('trade-status').textContent = 'Add items to your offer and lock when ready';
-            document.getElementById('trade-status').className = 'trade-status waiting';
+            document.getElementById('online-players-container').style.display = 'none';
+            document.getElementById('trade-interface').style.display = 'block';
 
-            renderTradeOffer();
+            // Render initial offer content
+            renderMyOfferContent();
+            renderTheirOfferContent();
+
+            // Create trade session in Firebase
+            await set(ref(db, `active_trades/${tradeId}`), {
+                participant1: activeUserSession.uid,
+                participant1Username: userDataRecord.username,
+                participant2: partnerUid,
+                participant2Username: partnerUsername,
+                offers: {
+                    [activeUserSession.uid]: newTradeState.myOffer,
+                    [partnerUid]: { type: 'money', value: 0, cards: [] }
+                },
+                accepted: {
+                    [activeUserSession.uid]: false,
+                    [partnerUid]: false
+                },
+                status: 'active',
+                createdAt: serverTimestamp()
+            });
 
             // Listen for trade updates
-            listenForTradeUpdates();
+            listenForNewTradeUpdates();
         }
 
-        function listenForTradeUpdates() {
-            if (tradeState.listener) {
-                tradeState.listener();
+        // Listen for trade updates
+        function listenForNewTradeUpdates() {
+            if (newTradeState.listener) {
+                newTradeState.listener();
             }
 
-            const tradeRef = ref(db, `trades/${tradeState.tradeId}`);
-            tradeState.listener = onValue(tradeRef, snapshot => {
+            const tradeRef = ref(db, `active_trades/${newTradeState.tradeId}`);
+            newTradeState.listener = onValue(tradeRef, snapshot => {
                 const tradeData = snapshot.val();
                 if (!tradeData) return;
 
-                // Ignore cancelled/completed trades from previous sessions
-                if (tradeData.status === 'cancelled' || tradeData.status === 'completed') {
-                    // Only show cancellation if it was cancelled by the OTHER party after we started listening
-                    if (tradeData.status === 'cancelled' && tradeData.cancelledBy !== activeUserSession.uid && tradeState.active) {
-                        showToast('Trade was cancelled by the other party.', 'error');
-                        cancelTrade();
-                    }
+                if (tradeData.status === 'completed') {
+                    showToast('Trade completed successfully!', 'success');
+                    cancelNewTrade();
                     return;
                 }
 
-                // Update their offer from server
-                if (tradeData.offers && tradeData.offers[tradeState.partnerUid]) {
-                    tradeState.theirOffer = tradeData.offers[tradeState.partnerUid];
-                    tradeState.theirLocked = tradeData.locked?.[tradeState.partnerUid] || false;
-                    renderTradeOffer();
-                    updateTradeStatus();
+                if (tradeData.status === 'cancelled') {
+                    showToast('Trade was cancelled.', 'error');
+                    cancelNewTrade();
+                    return;
                 }
 
-                // Check if both locked - execute trade
-                if (tradeData.locked?.[activeUserSession.uid] && tradeData.locked?.[tradeState.partnerUid]) {
-                    executeTrade();
+                // Update their offer
+                if (tradeData.offers && tradeData.offers[newTradeState.partnerUid]) {
+                    newTradeState.theirOffer = tradeData.offers[newTradeState.partnerUid];
+                    renderTheirOfferContent();
+                }
+
+                // Update acceptance status
+                if (tradeData.accepted) {
+                    newTradeState.myAccepted = tradeData.accepted[activeUserSession.uid] || false;
+                    newTradeState.theirAccepted = tradeData.accepted[newTradeState.partnerUid] || false;
+                    updateTradeAcceptanceUI();
                 }
             });
         }
 
-        function renderTradeOffer() {
-            // Render my items
-            const myItemsList = document.getElementById('trade-my-items');
-            myItemsList.innerHTML = '';
-            tradeState.myOffer.cards.forEach(card => {
-                const div = document.createElement('div');
-                div.className = 'trade-item';
-                div.innerHTML = `
-                    <span>${card.name}</span>
-                    <span class="remove-btn" onclick="removeTradeCard('my', '${card.instanceId}')">✕</span>
+        // Render my offer content based on selected type
+        function renderMyOfferContent() {
+            const content = document.getElementById('my-offer-content');
+            const type = newTradeState.myOffer.type;
+
+            if (type === 'money') {
+                content.innerHTML = `
+                    <div class="trade-input-group">
+                        <label style="font-size:0.8rem; color:#9ca3af; margin-bottom:8px; display:block;">Amount (€)</label>
+                        <input type="number" id="my-money-input" class="trade-input" value="${newTradeState.myOffer.value || 0}" min="0" onchange="updateMyMoneyOffer(this.value)">
+                    </div>
                 `;
-                myItemsList.appendChild(div);
-            });
-
-            // Render their items
-            const theirItemsList = document.getElementById('trade-their-items');
-            theirItemsList.innerHTML = '';
-            tradeState.theirOffer.cards.forEach(card => {
-                const div = document.createElement('div');
-                div.className = 'trade-item';
-                div.innerHTML = `<span>${card.name}</span>`;
-                theirItemsList.appendChild(div);
-            });
-
-            // Update money inputs
-            document.getElementById('trade-my-money').value = tradeState.myOffer.money || 0;
-            document.getElementById('trade-their-money').value = tradeState.theirOffer.money || 0;
-
-            // Update lock button
-            const lockBtn = document.getElementById('btn-lock-trade');
-            if (tradeState.myLocked) {
-                lockBtn.textContent = 'LOCKED';
-                lockBtn.classList.add('locked');
-                lockBtn.disabled = true;
-            } else {
-                lockBtn.textContent = 'LOCK TRADE';
-                lockBtn.classList.remove('locked');
-                lockBtn.disabled = false;
+            } else if (type === 'xp') {
+                content.innerHTML = `
+                    <div class="trade-input-group">
+                        <label style="font-size:0.8rem; color:#9ca3af; margin-bottom:8px; display:block;">XP Amount</label>
+                        <input type="number" id="my-xp-input" class="trade-input" value="${newTradeState.myOffer.value || 0}" min="0" onchange="updateMyXpOffer(this.value)">
+                    </div>
+                `;
+            } else if (type === 'cards') {
+                content.innerHTML = `
+                    <div class="trade-input-group">
+                        <button class="btn-select-cards" onclick="openCardInventoryModal()">SELECT CARDS</button>
+                        <div id="selected-cards-display" style="margin-top:12px;"></div>
+                    </div>
+                `;
+                renderSelectedCards();
             }
         }
 
-        function updateTradeStatus() {
-            const statusEl = document.getElementById('trade-status');
-            if (tradeState.myLocked && tradeState.theirLocked) {
-                statusEl.textContent = 'Both locked! Executing trade...';
-                statusEl.className = 'trade-status ready';
-            } else if (tradeState.myLocked) {
-                statusEl.textContent = 'Waiting for partner to lock...';
-                statusEl.className = 'trade-status waiting';
-            } else if (tradeState.theirLocked) {
-                statusEl.textContent = 'Partner has locked. Lock your trade to proceed.';
-                statusEl.className = 'trade-status waiting';
-            } else {
-                statusEl.textContent = 'Add items to your offer and lock when ready';
-                statusEl.className = 'trade-status waiting';
-            }
-        }
+        // Render their offer content
+        function renderTheirOfferContent() {
+            const content = document.getElementById('their-offer-content');
+            const offer = newTradeState.theirOffer;
 
-        window.lockTrade = async function() {
-            if (!tradeState.active || tradeState.myLocked) return;
-
-            const myMoney = parseFloat(document.getElementById('trade-my-money').value) || 0;
-            tradeState.myOffer.money = myMoney;
-
-            // Validate offer
-            if (tradeState.myOffer.cards.length === 0 && myMoney === 0) {
-                return showToast('Add at least one card or money to your offer.', 'error');
-            }
-
-            // Validate I own the cards and money
-            const myMoneySnap = await get(ref(db, `users/${activeUserSession.uid}/money`));
-            const myCurrentMoney = myMoneySnap.val() || 0;
-            if (myMoney > myCurrentMoney) {
-                return showToast('Insufficient funds.', 'error');
-            }
-
-            for (const card of tradeState.myOffer.cards) {
-                const cardSnap = await get(ref(db, `inventory/${activeUserSession.uid}/${card.instanceId}`));
-                if (!cardSnap.exists()) {
-                    return showToast(`You no longer own ${card.name}.`, 'error');
+            if (offer.type === 'money') {
+                content.innerHTML = `
+                    <div class="trade-offer-display">
+                        <span style="font-size:0.9rem; color:#9ca3af;">Money: </span>
+                        <span style="font-size:1.1rem; font-weight:800; color:var(--accent-green);">€${offer.value || 0}</span>
+                    </div>
+                `;
+            } else if (offer.type === 'xp') {
+                content.innerHTML = `
+                    <div class="trade-offer-display">
+                        <span style="font-size:0.9rem; color:#9ca3af;">XP: </span>
+                        <span style="font-size:1.1rem; font-weight:800; color:#a78bfa;">${offer.value || 0} XP</span>
+                    </div>
+                `;
+            } else if (offer.type === 'cards') {
+                if (offer.cards && offer.cards.length > 0) {
+                    content.innerHTML = `
+                        <div class="trade-cards-display">
+                            ${offer.cards.map(card => `
+                                <div class="trade-card-item">
+                                    <span>${card.name}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                } else {
+                    content.innerHTML = '<div class="loading-text">No cards selected</div>';
                 }
             }
+        }
 
-            // Update trade in Firebase
-            const tradeRef = ref(db, `trades/${tradeState.tradeId}`);
-            await update(tradeRef, {
-                [`offers/${activeUserSession.uid}`]: tradeState.myOffer,
-                [`locked/${activeUserSession.uid}`]: true,
-                [`participants/${activeUserSession.uid}`]: userDataRecord.username,
-                status: 'active',
-                updatedAt: serverTimestamp()
+        // Update trade type buttons (wrapped in DOMContentLoaded to ensure elements exist)
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.trade-type-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.trade-type-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    newTradeState.myOffer.type = this.dataset.type;
+                    newTradeState.myOffer.value = 0;
+                    newTradeState.myOffer.cards = [];
+                    newTradeState.selectedCards = new Set();
+                    
+                    renderMyOfferContent();
+                    updateTradeOfferInFirebase();
+                });
             });
+        });
 
-            tradeState.myLocked = true;
-            renderTradeOffer();
-            updateTradeStatus();
+        // Update my money offer
+        window.updateMyMoneyOffer = async function(value) {
+            newTradeState.myOffer.value = parseFloat(value) || 0;
+            await updateTradeOfferInFirebase();
         };
 
-        window.cancelTrade = async function() {
-            if (!tradeState.active) return;
+        // Update my XP offer
+        window.updateMyXpOffer = async function(value) {
+            newTradeState.myOffer.value = parseFloat(value) || 0;
+            await updateTradeOfferInFirebase();
+        };
 
-            if (tradeState.listener) {
-                tradeState.listener();
-                tradeState.listener = null;
+        // Update trade offer in Firebase
+        async function updateTradeOfferInFirebase() {
+            if (!newTradeState.active) return;
+
+            try {
+                await update(ref(db, `active_trades/${newTradeState.tradeId}/offers/${activeUserSession.uid}`), newTradeState.myOffer);
+            } catch (error) {
+                console.error('Error updating offer:', error);
+            }
+        }
+
+        // Open card inventory modal
+        window.openCardInventoryModal = async function() {
+            const modal = document.getElementById('card-inventory-modal');
+            const list = document.getElementById('card-inventory-list');
+            
+            list.innerHTML = '<div class="loading-text">Loading cards...</div>';
+            modal.style.display = 'flex';
+
+            try {
+                const inventorySnap = await get(ref(db, `inventory/${activeUserSession.uid}`));
+                const inventory = inventorySnap.val() || {};
+
+                list.innerHTML = '';
+
+                if (Object.keys(inventory).length === 0) {
+                    list.innerHTML = '<div class="loading-text">No cards in inventory.</div>';
+                    return;
+                }
+
+                for (const instanceId in inventory) {
+                    const card = inventory[instanceId];
+                    let cardName = 'Unknown Card';
+                    const registry = GAME_REGISTRY[card.packSource];
+                    if (registry) {
+                        const meta = registry.find(c => c.id === card.cardId);
+                        if (meta) cardName = meta.name;
+                    }
+
+                    const isSelected = newTradeState.selectedCards.has(instanceId);
+                    
+                    const cardItem = document.createElement('div');
+                    cardItem.className = `inventory-card-item ${isSelected ? 'selected' : ''}`;
+                    cardItem.innerHTML = `
+                        <span>${cardName}</span>
+                        <input type="checkbox" ${isSelected ? 'checked' : ''} onchange="toggleCardSelection('${instanceId}', '${cardName}', '${card.packSource}', '${card.cardId}')">
+                    `;
+                    list.appendChild(cardItem);
+                }
+            } catch (error) {
+                console.error('Error loading inventory:', error);
+                list.innerHTML = '<div class="loading-text">Error loading cards.</div>';
+            }
+        };
+
+        window.closeCardInventoryModal = function() {
+            document.getElementById('card-inventory-modal').style.display = 'none';
+        };
+
+        // Toggle card selection
+        window.toggleCardSelection = function(instanceId, cardName, packSource, cardId) {
+            if (newTradeState.selectedCards.has(instanceId)) {
+                newTradeState.selectedCards.delete(instanceId);
+            } else {
+                newTradeState.selectedCards.add(instanceId);
+            }
+            
+            // Re-render modal to show selection
+            openCardInventoryModal();
+        };
+
+        // Confirm card selection
+        window.confirmCardSelection = async function() {
+            newTradeState.myOffer.cards = [];
+            
+            for (const instanceId of newTradeState.selectedCards) {
+                try {
+                    const cardSnap = await get(ref(db, `inventory/${activeUserSession.uid}/${instanceId}`));
+                    const card = cardSnap.val();
+                    
+                    let cardName = 'Unknown Card';
+                    const registry = GAME_REGISTRY[card.packSource];
+                    if (registry) {
+                        const meta = registry.find(c => c.id === card.cardId);
+                        if (meta) cardName = meta.name;
+                    }
+                    
+                    newTradeState.myOffer.cards.push({ instanceId, cardId: card.cardId, name: cardName, packSource: card.packSource });
+                } catch (error) {
+                    console.error('Error loading card:', error);
+                }
+            }
+            
+            renderSelectedCards();
+            closeCardInventoryModal();
+            await updateTradeOfferInFirebase();
+        };
+
+        // Render selected cards
+        function renderSelectedCards() {
+            const display = document.getElementById('selected-cards-display');
+            if (!display) return;
+
+            if (newTradeState.myOffer.cards.length === 0) {
+                display.innerHTML = '<div style="font-size:0.8rem; color:#9ca3af;">No cards selected</div>';
+                return;
             }
 
-            // Update trade status to cancelled if we initiated it
-            if (tradeState.tradeId) {
-                await update(ref(db, `trades/${tradeState.tradeId}`), {
-                    status: 'cancelled',
-                    cancelledBy: activeUserSession.uid
+            display.innerHTML = newTradeState.myOffer.cards.map(card => `
+                <div class="selected-card-item">
+                    <span>${card.name}</span>
+                    <span class="remove-card-btn" onclick="removeCardFromOffer('${card.instanceId}')">✕</span>
+                </div>
+            `).join('');
+        }
+
+        // Remove card from offer
+        window.removeCardFromOffer = async function(instanceId) {
+            newTradeState.selectedCards.delete(instanceId);
+            newTradeState.myOffer.cards = newTradeState.myOffer.cards.filter(c => c.instanceId !== instanceId);
+            renderSelectedCards();
+            await updateTradeOfferInFirebase();
+        };
+
+        // Update trade acceptance UI
+        function updateTradeAcceptanceUI() {
+            const acceptBtn = document.getElementById('btn-accept-trade');
+            
+            if (newTradeState.myAccepted) {
+                acceptBtn.textContent = 'ACCEPTED';
+                acceptBtn.disabled = true;
+                acceptBtn.style.opacity = '0.5';
+            } else {
+                acceptBtn.textContent = 'ACCEPT TRADE';
+                acceptBtn.disabled = false;
+                acceptBtn.style.opacity = '1';
+            }
+
+            // Check if both accepted
+            if (newTradeState.myAccepted && newTradeState.theirAccepted) {
+                executeNewTrade();
+            }
+        }
+
+        // Accept trade offer
+        window.acceptTradeOffer = async function() {
+            if (!newTradeState.active || newTradeState.myAccepted) return;
+
+            // Validate offer
+            if (newTradeState.myOffer.type === 'money' && newTradeState.myOffer.value === 0) {
+                return showToast('Please enter an amount.', 'error');
+            }
+
+            if (newTradeState.myOffer.type === 'xp' && newTradeState.myOffer.value === 0) {
+                return showToast('Please enter an XP amount.', 'error');
+            }
+
+            if (newTradeState.myOffer.type === 'cards' && newTradeState.myOffer.cards.length === 0) {
+                return showToast('Please select at least one card.', 'error');
+            }
+
+            // Validate ownership
+            if (newTradeState.myOffer.type === 'money') {
+                const myMoneySnap = await get(ref(db, `users/${activeUserSession.uid}/money`));
+                const myCurrentMoney = myMoneySnap.val() || 0;
+                if (newTradeState.myOffer.value > myCurrentMoney) {
+                    return showToast('Insufficient funds.', 'error');
+                }
+            }
+
+            if (newTradeState.myOffer.type === 'xp') {
+                const myXpSnap = await get(ref(db, `users/${activeUserSession.uid}/xp`));
+                const myCurrentXp = myXpSnap.val() || 0;
+                if (newTradeState.myOffer.value > myCurrentXp) {
+                    return showToast('Insufficient XP.', 'error');
+                }
+            }
+
+            if (newTradeState.myOffer.type === 'cards') {
+                for (const card of newTradeState.myOffer.cards) {
+                    const cardSnap = await get(ref(db, `inventory/${activeUserSession.uid}/${card.instanceId}`));
+                    if (!cardSnap.exists()) {
+                        return showToast(`You no longer own ${card.name}.`, 'error');
+                    }
+                }
+            }
+
+            try {
+                await update(ref(db, `active_trades/${newTradeState.tradeId}/accepted/${activeUserSession.uid}`), true);
+                newTradeState.myAccepted = true;
+                updateTradeAcceptanceUI();
+                showToast('Trade accepted! Waiting for partner...', 'success');
+            } catch (error) {
+                console.error('Error accepting trade:', error);
+                showToast('Failed to accept trade.', 'error');
+            }
+        };
+
+        // Execute the trade
+        async function executeNewTrade() {
+            if (!newTradeState.active) return;
+
+            const tradeRef = ref(db, `active_trades/${newTradeState.tradeId}`);
+            
+            try {
+                // Use transaction to prevent double execution
+                await runTransaction(tradeRef, (tradeData) => {
+                    if (!tradeData || tradeData.status !== 'active') return;
+                    if (!tradeData.accepted[activeUserSession.uid] || !tradeData.accepted[newTradeState.partnerUid]) return;
+                    
+                    tradeData.status = 'processing';
+                    return tradeData;
+                });
+
+                // Get fresh data
+                const freshSnap = await get(tradeRef);
+                const freshTrade = freshSnap.val();
+                
+                if (!freshTrade || freshTrade.status !== 'processing') {
+                    return; // Already processed
+                }
+
+                const myUid = activeUserSession.uid;
+                const partnerUid = newTradeState.partnerUid;
+                const myOffer = freshTrade.offers[myUid];
+                const theirOffer = freshTrade.offers[partnerUid];
+
+                // Validate both still own their items
+                if (myOffer.type === 'money' && myOffer.value > 0) {
+                    const myMoneySnap = await get(ref(db, `users/${myUid}/money`));
+                    const myCurrentMoney = myMoneySnap.val() || 0;
+                    if (myOffer.value > myCurrentMoney) {
+                        await update(tradeRef, { status: 'cancelled', reason: 'insufficient_funds' });
+                        showToast('Trade cancelled: Insufficient funds.', 'error');
+                        cancelNewTrade();
+                        return;
+                    }
+                }
+
+                if (theirOffer.type === 'money' && theirOffer.value > 0) {
+                    const theirMoneySnap = await get(ref(db, `users/${partnerUid}/money`));
+                    const theirCurrentMoney = theirMoneySnap.val() || 0;
+                    if (theirOffer.value > theirCurrentMoney) {
+                        await update(tradeRef, { status: 'cancelled', reason: 'partner_insufficient_funds' });
+                        showToast('Trade cancelled: Partner insufficient funds.', 'error');
+                        cancelNewTrade();
+                        return;
+                    }
+                }
+
+                if (myOffer.type === 'xp' && myOffer.value > 0) {
+                    const myXpSnap = await get(ref(db, `users/${myUid}/xp`));
+                    const myCurrentXp = myXpSnap.val() || 0;
+                    if (myOffer.value > myCurrentXp) {
+                        await update(tradeRef, { status: 'cancelled', reason: 'insufficient_xp' });
+                        showToast('Trade cancelled: Insufficient XP.', 'error');
+                        cancelNewTrade();
+                        return;
+                    }
+                }
+
+                if (theirOffer.type === 'xp' && theirOffer.value > 0) {
+                    const theirXpSnap = await get(ref(db, `users/${partnerUid}/xp`));
+                    const theirCurrentXp = theirXpSnap.val() || 0;
+                    if (theirOffer.value > theirCurrentXp) {
+                        await update(tradeRef, { status: 'cancelled', reason: 'partner_insufficient_xp' });
+                        showToast('Trade cancelled: Partner insufficient XP.', 'error');
+                        cancelNewTrade();
+                        return;
+                    }
+                }
+
+                if (myOffer.type === 'cards' && myOffer.cards) {
+                    for (const card of myOffer.cards) {
+                        const cardSnap = await get(ref(db, `inventory/${myUid}/${card.instanceId}`));
+                        if (!cardSnap.exists()) {
+                            await update(tradeRef, { status: 'cancelled', reason: 'card_not_owned' });
+                            showToast('Trade cancelled: Card no longer owned.', 'error');
+                            cancelNewTrade();
+                            return;
+                        }
+                    }
+                }
+
+                if (theirOffer.type === 'cards' && theirOffer.cards) {
+                    for (const card of theirOffer.cards) {
+                        const cardSnap = await get(ref(db, `inventory/${partnerUid}/${card.instanceId}`));
+                        if (!cardSnap.exists()) {
+                            await update(tradeRef, { status: 'cancelled', reason: 'partner_card_not_owned' });
+                            showToast('Trade cancelled: Partner card no longer owned.', 'error');
+                            cancelNewTrade();
+                            return;
+                        }
+                    }
+                }
+
+                // Execute trade
+                const operations = {};
+
+                // Get current balances for calculation
+                const myMoneySnap = await get(ref(db, `users/${myUid}/money`));
+                const myCurrentMoney = myMoneySnap.val() || 0;
+                const theirMoneySnap = await get(ref(db, `users/${partnerUid}/money`));
+                const theirCurrentMoney = theirMoneySnap.val() || 0;
+                const myXpSnap = await get(ref(db, `users/${myUid}/xp`));
+                const myCurrentXp = myXpSnap.val() || 0;
+                const theirXpSnap = await get(ref(db, `users/${partnerUid}/xp`));
+                const theirCurrentXp = theirXpSnap.val() || 0;
+
+                // Handle money transfer (calculate net transfer)
+                let myMoneyChange = 0;
+                let theirMoneyChange = 0;
+
+                if (myOffer.type === 'money' && myOffer.value > 0) {
+                    myMoneyChange -= myOffer.value;
+                    theirMoneyChange += myOffer.value;
+                }
+
+                if (theirOffer.type === 'money' && theirOffer.value > 0) {
+                    myMoneyChange += theirOffer.value;
+                    theirMoneyChange -= theirOffer.value;
+                }
+
+                if (myMoneyChange !== 0) {
+                    operations[`users/${myUid}/money`] = myCurrentMoney + myMoneyChange;
+                }
+                if (theirMoneyChange !== 0) {
+                    operations[`users/${partnerUid}/money`] = theirCurrentMoney + theirMoneyChange;
+                }
+
+                // Handle XP transfer (calculate net transfer)
+                let myXpChange = 0;
+                let theirXpChange = 0;
+
+                if (myOffer.type === 'xp' && myOffer.value > 0) {
+                    myXpChange -= myOffer.value;
+                    theirXpChange += myOffer.value;
+                }
+
+                if (theirOffer.type === 'xp' && theirOffer.value > 0) {
+                    myXpChange += theirOffer.value;
+                    theirXpChange -= theirOffer.value;
+                }
+
+                if (myXpChange !== 0) {
+                    operations[`users/${myUid}/xp`] = myCurrentXp + myXpChange;
+                }
+                if (theirXpChange !== 0) {
+                    operations[`users/${partnerUid}/xp`] = theirCurrentXp + theirXpChange;
+                }
+
+                // Handle card transfer
+                if (myOffer.type === 'cards' && myOffer.cards) {
+                    for (const card of myOffer.cards) {
+                        operations[`inventory/${myUid}/${card.instanceId}`] = null;
+                        operations[`inventory/${partnerUid}/${card.instanceId}`] = {
+                            ...card,
+                            acquiredTimestamp: Date.now()
+                        };
+                    }
+                }
+
+                if (theirOffer.type === 'cards' && theirOffer.cards) {
+                    for (const card of theirOffer.cards) {
+                        operations[`inventory/${partnerUid}/${card.instanceId}`] = null;
+                        operations[`inventory/${myUid}/${card.instanceId}`] = {
+                            ...card,
+                            acquiredTimestamp: Date.now()
+                        };
+                    }
+                }
+
+                // Mark trade as completed
+                operations[`active_trades/${newTradeState.tradeId}/status`] = 'completed';
+                operations[`active_trades/${newTradeState.tradeId}/completedAt`] = serverTimestamp();
+
+                // Update quest progress for trading
+                await updateQuestProgress('trade', 1);
+
+                await update(ref(db, '/'), operations);
+                showToast('Trade completed successfully!', 'success');
+                cancelNewTrade();
+            } catch (error) {
+                console.error('Error executing trade:', error);
+                showToast('Trade execution failed.', 'error');
+            }
+        }
+
+        // Cancel new trade
+        window.cancelNewTrade = async function() {
+            if (!newTradeState.active) return;
+
+            if (newTradeState.listener) {
+                newTradeState.listener();
+                newTradeState.listener = null;
+            }
+
+            if (newTradeState.tradeId) {
+                await update(ref(db, `active_trades/${newTradeState.tradeId}`), {
+                    status: 'cancelled'
                 });
             }
 
             // Reset state
-            tradeState = {
+            newTradeState = {
                 active: false,
                 tradeId: null,
                 partnerUid: null,
                 partnerUsername: null,
-                myOffer: { cards: [], money: 0 },
-                theirOffer: { cards: [], money: 0 },
-                myLocked: false,
-                theirLocked: false,
-                listener: null
+                myOffer: { type: 'money', value: 0, cards: [] },
+                theirOffer: { type: 'money', value: 0, cards: [] },
+                myAccepted: false,
+                theirAccepted: false,
+                listener: null,
+                selectedCards: new Set()
             };
 
             // Reset UI
-            document.getElementById('trade-panel').classList.remove('active');
-            document.getElementById('trade-user-info').innerHTML = '';
-            document.getElementById('trade-my-items').innerHTML = '';
-            document.getElementById('trade-their-items').innerHTML = '';
-            document.getElementById('trade-my-money').value = '';
-            document.getElementById('trade-their-money').value = '';
-            document.getElementById('trade-status').textContent = 'Search for a user to start trading';
-            document.getElementById('trade-status').className = 'trade-status';
+            document.getElementById('online-players-container').style.display = 'block';
+            document.getElementById('trade-interface').style.display = 'none';
+            document.getElementById('trade-partner-info').innerHTML = '';
+            document.getElementById('my-offer-content').innerHTML = '';
+            document.getElementById('their-offer-content').innerHTML = '<div class="loading-text">Waiting for offer...</div>';
         };
 
-        async function executeTrade() {
-            if (!tradeState.active) return;
+        // Update quest progress
+        async function updateQuestProgress(type, amount) {
+            if (!activeUserSession?.uid) return;
 
-            const tradeRef = ref(db, `trades/${tradeState.tradeId}`);
-            
-            // Use transaction to atomically validate and execute trade
-            await runTransaction(tradeRef, (tradeData) => {
-                if (!tradeData || tradeData.status !== 'active') return;
-                if (!tradeData.locked?.[activeUserSession.uid] || !tradeData.locked?.[tradeState.partnerUid]) return;
+            try {
+                // Track trade count for quests
+                const userQuestsRef = ref(db, `users/${activeUserSession.uid}/quests`);
+                const questsSnap = await get(userQuestsRef);
+                const quests = questsSnap.val() || {};
 
-                // Mark as processing to prevent double execution
-                tradeData.status = 'processing';
-                return tradeData;
-            });
+                // Update trade count
+                const currentTradeCount = quests.tradeCount || 0;
+                await update(userQuestsRef, {
+                    tradeCount: currentTradeCount + amount
+                });
 
-            // Get fresh data and validate ownership
-            const freshSnap = await get(tradeRef);
-            const freshTrade = freshSnap.val();
-            
-            if (!freshTrade || freshTrade.status !== 'processing') {
-                return; // Already processed by someone else
+                console.log(`Quest progress updated: ${type} +${amount}, Total trades: ${currentTradeCount + amount}`);
+            } catch (error) {
+                console.error('Error updating quest progress:', error);
             }
-
-            // Validate both users still own their items
-            const myUid = activeUserSession.uid;
-            const partnerUid = tradeState.partnerUid;
-            const myOffer = freshTrade.offers[myUid];
-            const theirOffer = freshTrade.offers[partnerUid];
-
-            // Validate my items
-            const myMoneySnap = await get(ref(db, `users/${myUid}/money`));
-            const myCurrentMoney = myMoneySnap.val() || 0;
-            if (myOffer.money > myCurrentMoney) {
-                await update(tradeRef, { status: 'cancelled', reason: 'insufficient_funds' });
-                showToast('Trade cancelled: Insufficient funds.', 'error');
-                cancelTrade();
-                return;
-            }
-
-            for (const card of myOffer.cards) {
-                const cardSnap = await get(ref(db, `inventory/${myUid}/${card.instanceId}`));
-                if (!cardSnap.exists()) {
-                    await update(tradeRef, { status: 'cancelled', reason: 'card_not_owned' });
-                    showToast('Trade cancelled: Card no longer owned.', 'error');
-                    cancelTrade();
-                    return;
-                }
-            }
-
-            // Validate their items
-            const theirMoneySnap = await get(ref(db, `users/${partnerUid}/money`));
-            const theirCurrentMoney = theirMoneySnap.val() || 0;
-            if (theirOffer.money > theirCurrentMoney) {
-                await update(tradeRef, { status: 'cancelled', reason: 'partner_insufficient_funds' });
-                showToast('Trade cancelled: Partner insufficient funds.', 'error');
-                cancelTrade();
-                return;
-            }
-
-            for (const card of theirOffer.cards) {
-                const cardSnap = await get(ref(db, `inventory/${partnerUid}/${card.instanceId}`));
-                if (!cardSnap.exists()) {
-                    await update(tradeRef, { status: 'cancelled', reason: 'partner_card_not_owned' });
-                    showToast('Trade cancelled: Partner card no longer owned.', 'error');
-                    cancelTrade();
-                    return;
-                }
-            }
-
-            // Execute the trade atomically using batch write
-            const operations = {};
-
-            // Transfer cards from me to them
-            myOffer.cards.forEach(card => {
-                operations[`inventory/${myUid}/${card.instanceId}`] = null;
-                operations[`inventory/${partnerUid}/${card.instanceId}`] = {
-                    ...card,
-                    acquiredTimestamp: Date.now()
-                };
-            });
-
-            // Transfer cards from them to me
-            theirOffer.cards.forEach(card => {
-                operations[`inventory/${partnerUid}/${card.instanceId}`] = null;
-                operations[`inventory/${myUid}/${card.instanceId}`] = {
-                    ...card,
-                    acquiredTimestamp: Date.now()
-                };
-            });
-
-            // Transfer money
-            if (myOffer.money > 0) {
-                operations[`users/${myUid}/money`] = myCurrentMoney - myOffer.money;
-                operations[`users/${partnerUid}/money`] = theirCurrentMoney + myOffer.money;
-            }
-
-            if (theirOffer.money > 0) {
-                operations[`users/${partnerUid}/money`] = (theirCurrentMoney + myOffer.money) - theirOffer.money;
-                operations[`users/${myUid}/money`] = (myCurrentMoney - myOffer.money) + theirOffer.money;
-            }
-
-            // Mark trade as completed
-            operations[`trades/${tradeState.tradeId}/status`] = 'completed';
-            operations[`trades/${tradeState.tradeId}/completedAt`] = serverTimestamp();
-
-            await update(ref(db, '/'), operations);
-            showToast('Trade completed successfully!', 'success');
-            cancelTrade();
         }
-
-        window.openTradeCardSelector = function(side) {
-            // For simplicity, we'll use a prompt to select cards
-            // In a full implementation, this would open a modal with card selection UI
-            if (side !== 'my') return; // Only allow adding to my offer
-
-            const cardIds = Object.keys(userDeckRecord);
-            if (cardIds.length === 0) {
-                return showToast('No cards in your deck.', 'error');
-            }
-
-            // Show available cards
-            const cardList = cardIds.map(id => {
-                const card = userDeckRecord[id];
-                let cardName = 'Unknown';
-                const registry = GAME_REGISTRY[card.packSource];
-                if (registry) {
-                    const meta = registry.find(c => c.id === card.cardId);
-                    if (meta) cardName = meta.name;
-                }
-                return { instanceId: id, cardId: card.cardId, name: cardName, packSource: card.packSource };
-            });
-
-            // Simple prompt-based selection (in production, use a modal)
-            const cardNames = cardList.map((c, i) => `${i + 1}. ${c.name}`).join('\n');
-            const selection = prompt(`Enter card number to add:\n${cardNames}`);
-            
-            if (selection !== null) {
-                const index = parseInt(selection) - 1;
-                if (index >= 0 && index < cardList.length) {
-                    const selectedCard = cardList[index];
-                    // Check if already added
-                    if (tradeState.myOffer.cards.find(c => c.instanceId === selectedCard.instanceId)) {
-                        return showToast('Card already in offer.', 'error');
-                    }
-                    tradeState.myOffer.cards.push(selectedCard);
-                    renderTradeOffer();
-                    showToast(`${selectedCard.name} added to offer.`, 'success');
-                }
-            }
-        };
-
-        window.removeTradeCard = function(side, instanceId) {
-            if (side !== 'my') return;
-            tradeState.myOffer.cards = tradeState.myOffer.cards.filter(c => c.instanceId !== instanceId);
-            renderTradeOffer();
-        };
 
         // =========================================================
         // FEATURE 3: ARCHIVE BOOK (MILESTONE XP REWARDS)
@@ -9684,12 +10094,14 @@ const MUTATIONS_LIST = [
             }, 1000);
         };
 
-        // Initialize collections on user load
+        // Initialize collections and trading system on user load
         const originalInitializeUserEnvironmentCore = initializeUserEnvironmentCore;
         initializeUserEnvironmentCore = function() {
             originalInitializeUserEnvironmentCore.call(this);
             setTimeout(() => {
                 initializeCollectionsTracking();
+                loadOnlinePlayers();
+                listenForTradeRequests();
             }, 2000);
         };
 
