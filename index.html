@@ -9251,6 +9251,8 @@ const MUTATIONS_LIST = [
 
             const tradeId = `${activeUserSession.uid}_${partnerUid}_${Date.now()}`;
             
+            console.log('Sending trade request to', partnerUsername, 'with ID:', tradeId);
+            
             try {
                 // Create trade request in Firebase
                 await set(ref(db, `trade_requests/${partnerUid}/${tradeId}`), {
@@ -9264,6 +9266,19 @@ const MUTATIONS_LIST = [
                     timestamp: serverTimestamp()
                 });
 
+                // Also store in sender's requests to track it
+                await set(ref(db, `trade_requests/${activeUserSession.uid}/${tradeId}`), {
+                    fromUid: activeUserSession.uid,
+                    fromUsername: userDataRecord.username,
+                    fromAvatarBgColor: userDataRecord.avatarBgColor || 'var(--primary)',
+                    fromAvatarLetters: userDataRecord.avatarLetters || userDataRecord.username.slice(0, 2).toUpperCase(),
+                    toUid: partnerUid,
+                    toUsername: partnerUsername,
+                    status: 'pending_sent',
+                    timestamp: serverTimestamp()
+                });
+
+                console.log('Trade request sent successfully');
                 showToast(`Trade request sent to ${partnerUsername}!`, 'success');
             } catch (error) {
                 console.error('Error sending trade request:', error);
@@ -9275,10 +9290,14 @@ const MUTATIONS_LIST = [
         function listenForTradeRequests() {
             if (!activeUserSession?.uid) return;
 
+            console.log('Listening for trade requests for user:', activeUserSession.uid);
+            
             const requestsRef = ref(db, `trade_requests/${activeUserSession.uid}`);
             onValue(requestsRef, snapshot => {
                 const requests = snapshot.val();
                 if (!requests) return;
+
+                console.log('Trade requests received:', Object.keys(requests));
 
                 // Show the most recent pending request
                 const requestIds = Object.keys(requests).sort((a, b) => {
@@ -9289,9 +9308,37 @@ const MUTATIONS_LIST = [
 
                 for (const requestId of requestIds) {
                     const request = requests[requestId];
-                    if (request.status === 'pending') {
-                        showTradeRequestModal(requestId, request);
+                    
+                    console.log('Processing request:', requestId, 'status:', request.status, 'from:', request.fromUsername, 'to:', request.toUsername);
+                    
+                    // If I received a pending request, show modal (only if modal is not already showing this request)
+                    if (request.status === 'pending' && request.toUid === activeUserSession.uid) {
+                        if (!window.pendingTradeRequest || window.pendingTradeRequest.requestId !== requestId) {
+                            console.log('Showing trade request modal for:', request.fromUsername);
+                            showTradeRequestModal(requestId, request);
+                        }
                         break; // Only show one at a time
+                    }
+                    
+                    // If my sent request was accepted, initialize trade
+                    if (request.status === 'accepted' && request.fromUid === activeUserSession.uid) {
+                        console.log('Trade request accepted by:', request.toUsername);
+                        // Check if we're not already in a trade
+                        if (!newTradeState.active) {
+                            initializeNewTrade(request.toUid, request.toUsername, request.toAvatarBgColor, request.toAvatarLetters, requestId);
+                        }
+                        // Clean up the accepted request
+                        remove(ref(db, `trade_requests/${activeUserSession.uid}/${requestId}`));
+                        break;
+                    }
+                    
+                    // If my sent request was declined, notify me
+                    if (request.status === 'declined' && request.fromUid === activeUserSession.uid) {
+                        console.log('Trade request declined by:', request.toUsername);
+                        showToast(`${request.toUsername} declined your trade request.`, 'error');
+                        // Clean up the declined request
+                        remove(ref(db, `trade_requests/${activeUserSession.uid}/${requestId}`));
+                        break;
                     }
                 }
             });
@@ -9317,12 +9364,19 @@ const MUTATIONS_LIST = [
         window.declineTradeRequest = async function() {
             if (!window.pendingTradeRequest) return;
             
-            const { requestId } = window.pendingTradeRequest;
+            const { requestId, request } = window.pendingTradeRequest;
             
             try {
+                // Update request status to declined in both places
                 await update(ref(db, `trade_requests/${activeUserSession.uid}/${requestId}`), {
                     status: 'declined'
                 });
+                
+                // Also update in sender's requests so they know it was declined
+                await update(ref(db, `trade_requests/${request.fromUid}/${requestId}`), {
+                    status: 'declined'
+                });
+                
                 showToast('Trade request declined.', 'success');
             } catch (error) {
                 console.error('Error declining request:', error);
@@ -9338,8 +9392,13 @@ const MUTATIONS_LIST = [
             const { requestId, request } = window.pendingTradeRequest;
             
             try {
-                // Update request status to accepted
+                // Update request status to accepted in both places
                 await update(ref(db, `trade_requests/${activeUserSession.uid}/${requestId}`), {
+                    status: 'accepted'
+                });
+                
+                // Also update in sender's requests so they know it was accepted
+                await update(ref(db, `trade_requests/${request.fromUid}/${requestId}`), {
                     status: 'accepted'
                 });
 
@@ -9367,8 +9426,8 @@ const MUTATIONS_LIST = [
             newTradeState.theirAccepted = false;
             newTradeState.selectedCards = new Set();
 
-            // Generate trade ID
-            const tradeId = requestId || `${activeUserSession.uid}_${partnerUid}_${Date.now()}`;
+            // Generate trade ID (use the same ID for both players)
+            const tradeId = requestId;
             newTradeState.tradeId = tradeId;
 
             // Update UI
@@ -9390,23 +9449,34 @@ const MUTATIONS_LIST = [
             renderMyOfferContent();
             renderTheirOfferContent();
 
-            // Create trade session in Firebase
-            await set(ref(db, `active_trades/${tradeId}`), {
-                participant1: activeUserSession.uid,
-                participant1Username: userDataRecord.username,
-                participant2: partnerUid,
-                participant2Username: partnerUsername,
-                offers: {
-                    [activeUserSession.uid]: newTradeState.myOffer,
-                    [partnerUid]: { type: 'money', value: 0, cards: [] }
-                },
-                accepted: {
-                    [activeUserSession.uid]: false,
-                    [partnerUid]: false
-                },
-                status: 'active',
-                createdAt: serverTimestamp()
-            });
+            // Check if trade already exists, if not create it
+            const tradeRef = ref(db, `active_trades/${tradeId}`);
+            const tradeSnap = await get(tradeRef);
+            
+            if (!tradeSnap.exists()) {
+                // Create new trade session
+                await set(tradeRef, {
+                    participant1: activeUserSession.uid,
+                    participant1Username: userDataRecord.username,
+                    participant2: partnerUid,
+                    participant2Username: partnerUsername,
+                    offers: {
+                        [activeUserSession.uid]: newTradeState.myOffer,
+                        [partnerUid]: { type: 'money', value: 0, cards: [] }
+                    },
+                    accepted: {
+                        [activeUserSession.uid]: false,
+                        [partnerUid]: false
+                    },
+                    status: 'active',
+                    createdAt: serverTimestamp()
+                });
+            } else {
+                // Trade already exists, just update my initial offer
+                await update(tradeRef, {
+                    [`offers/${activeUserSession.uid}`]: newTradeState.myOffer
+                });
+            }
 
             // Listen for trade updates
             listenForNewTradeUpdates();
