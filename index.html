@@ -9346,6 +9346,9 @@ const MUTATIONS_LIST = [
 
         // Show trade request modal
         function showTradeRequestModal(requestId, request) {
+            console.log('Showing trade request modal for:', request.fromUsername);
+            console.log('Request data:', request);
+            
             document.getElementById('trade-request-message').innerHTML = `
                 <strong>${request.fromUsername}</strong> wants to trade with you!<br>
                 <small style="color:#9ca3af;">ID: ${request.fromUid.slice(0, 8)}...</small>
@@ -9354,6 +9357,12 @@ const MUTATIONS_LIST = [
             
             // Store request data for later use
             window.pendingTradeRequest = { requestId, request };
+            
+            // Re-enable buttons
+            const acceptBtn = document.querySelector('#trade-request-modal .btn-accept');
+            const declineBtn = document.querySelector('#trade-request-modal .btn-cancel');
+            if (acceptBtn) acceptBtn.disabled = false;
+            if (declineBtn) declineBtn.disabled = false;
         }
 
         window.closeTradeRequestModal = function() {
@@ -9387,33 +9396,68 @@ const MUTATIONS_LIST = [
         };
 
         window.acceptTradeRequest = async function() {
-            if (!window.pendingTradeRequest) return;
+            console.log('acceptTradeRequest called');
+            
+            if (!window.pendingTradeRequest) {
+                console.error('No pending trade request');
+                showToast('No pending trade request', 'error');
+                return;
+            }
             
             const { requestId, request } = window.pendingTradeRequest;
             
+            console.log('Accepting trade request from:', request.fromUsername);
+            console.log('Request ID:', requestId);
+            console.log('Active user UID:', activeUserSession?.uid);
+            
+            // Disable buttons to prevent double-click
+            const acceptBtn = document.querySelector('#trade-request-modal .btn-accept');
+            const declineBtn = document.querySelector('#trade-request-modal .btn-cancel');
+            if (acceptBtn) acceptBtn.disabled = true;
+            if (declineBtn) declineBtn.disabled = true;
+            
             try {
                 // Update request status to accepted in both places
+                console.log('Updating recipient request status...');
                 await update(ref(db, `trade_requests/${activeUserSession.uid}/${requestId}`), {
                     status: 'accepted'
                 });
                 
+                console.log('Updated recipient request status to accepted');
+                
                 // Also update in sender's requests so they know it was accepted
+                console.log('Updating sender request status...');
                 await update(ref(db, `trade_requests/${request.fromUid}/${requestId}`), {
                     status: 'accepted'
                 });
+                
+                console.log('Updated sender request status to accepted');
 
                 // Initialize trade
-                initializeNewTrade(request.fromUid, request.fromUsername, request.fromAvatarBgColor, request.fromAvatarLetters, requestId);
+                console.log('Initializing trade...');
+                await initializeNewTrade(request.fromUid, request.fromUsername, request.fromAvatarBgColor, request.fromAvatarLetters, requestId);
+                
+                console.log('Trade initialized successfully');
+                showToast('Trade request accepted!', 'success');
+                
+                // Close modal after successful initialization
+                closeTradeRequestModal();
             } catch (error) {
                 console.error('Error accepting request:', error);
-                showToast('Failed to accept request.', 'error');
+                console.error('Error details:', error.code, error.message);
+                showToast('Failed to accept request: ' + error.message, 'error');
+                
+                // Re-enable buttons on error
+                if (acceptBtn) acceptBtn.disabled = false;
+                if (declineBtn) declineBtn.disabled = false;
             }
-            
-            closeTradeRequestModal();
         };
 
         // Initialize new trade session
         async function initializeNewTrade(partnerUid, partnerUsername, partnerAvatarBgColor, partnerAvatarLetters, requestId) {
+            console.log('Initializing new trade with:', partnerUsername);
+            console.log('Avatar data:', { partnerAvatarBgColor, partnerAvatarLetters });
+            
             // Cancel any existing trade
             cancelNewTrade();
 
@@ -9430,11 +9474,22 @@ const MUTATIONS_LIST = [
             const tradeId = requestId;
             newTradeState.tradeId = tradeId;
 
+            console.log('Trade ID:', tradeId);
+
             // Update UI
             const partnerInfo = document.getElementById('trade-partner-info');
+            if (!partnerInfo) {
+                console.error('Trade partner info element not found');
+                throw new Error('Trade UI element not found');
+            }
+            
+            // Use default values if avatar data is missing
+            const safeAvatarBgColor = partnerAvatarBgColor || 'var(--primary)';
+            const safeAvatarLetters = partnerAvatarLetters || partnerUsername.slice(0, 2).toUpperCase();
+            
             partnerInfo.innerHTML = `
-                <div class="profile-badge" style="background:${partnerAvatarBgColor}; width:50px; height:50px;">
-                    ${partnerAvatarLetters}
+                <div class="profile-badge" style="background:${safeAvatarBgColor}; width:50px; height:50px;">
+                    ${safeAvatarLetters}
                 </div>
                 <div>
                     <div style="font-weight:800; font-size:1rem;">${partnerUsername}</div>
@@ -9442,8 +9497,18 @@ const MUTATIONS_LIST = [
                 </div>
             `;
 
-            document.getElementById('online-players-container').style.display = 'none';
-            document.getElementById('trade-interface').style.display = 'block';
+            const onlinePlayersContainer = document.getElementById('online-players-container');
+            const tradeInterface = document.getElementById('trade-interface');
+            
+            if (!onlinePlayersContainer || !tradeInterface) {
+                console.error('Trade UI elements not found');
+                throw new Error('Trade UI elements not found');
+            }
+            
+            onlinePlayersContainer.style.display = 'none';
+            tradeInterface.style.display = 'block';
+
+            console.log('UI updated');
 
             // Render initial offer content
             renderMyOfferContent();
@@ -9452,6 +9517,8 @@ const MUTATIONS_LIST = [
             // Check if trade already exists, if not create it
             const tradeRef = ref(db, `active_trades/${tradeId}`);
             const tradeSnap = await get(tradeRef);
+            
+            console.log('Trade exists:', tradeSnap.exists());
             
             if (!tradeSnap.exists()) {
                 // Create new trade session
@@ -9471,15 +9538,18 @@ const MUTATIONS_LIST = [
                     status: 'active',
                     createdAt: serverTimestamp()
                 });
+                console.log('Created new trade session');
             } else {
                 // Trade already exists, just update my initial offer
                 await update(tradeRef, {
                     [`offers/${activeUserSession.uid}`]: newTradeState.myOffer
                 });
+                console.log('Updated existing trade session');
             }
 
             // Listen for trade updates
             listenForNewTradeUpdates();
+            console.log('Trade initialization complete');
         }
 
         // Listen for trade updates
