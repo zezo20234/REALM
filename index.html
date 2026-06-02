@@ -9417,21 +9417,13 @@ const MUTATIONS_LIST = [
             if (declineBtn) declineBtn.disabled = true;
             
             try {
-                // Update request status to accepted in both places
-                console.log('Updating recipient request status...');
+                // Update request status to accepted (only in recipient's path)
+                console.log('Updating request status to accepted...');
                 await update(ref(db, `trade_requests/${activeUserSession.uid}/${requestId}`), {
                     status: 'accepted'
                 });
                 
-                console.log('Updated recipient request status to accepted');
-                
-                // Also update in sender's requests so they know it was accepted
-                console.log('Updating sender request status...');
-                await update(ref(db, `trade_requests/${request.fromUid}/${requestId}`), {
-                    status: 'accepted'
-                });
-                
-                console.log('Updated sender request status to accepted');
+                console.log('Request status updated to accepted');
 
                 // Initialize trade
                 console.log('Initializing trade...');
