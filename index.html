@@ -4687,62 +4687,62 @@ const MUTATIONS_LIST = [
 
         const QUEST_POOLS = {
             daily: [
-                { id: 'daily_open_500', title: 'Pack Apocalypse', description: 'Open 500 packs in a single day. Only the dedicated survive.', type: 'open_packs', target: 500, unit: 'packs opened', rewardType: 'gold_pack', rewardAmount: 1, difficultyScore: 100 },
-                { id: 'daily_clash_100', title: 'Clash Master', description: 'Win 100 card clashes before the daily reset. Prove your dominance.', type: 'win_clashes', target: 100, unit: 'clashes won', rewardType: 'xp', rewardAmount: 150, difficultyScore: 100 },
-                { id: 'daily_sell_200', title: 'Market Purge', description: 'Sell 200 cards from your deck in one day. Liquidate everything.', type: 'sell_cards', target: 200, unit: 'cards sold', rewardType: 'money', rewardAmount: 100, difficultyScore: 100 },
-                { id: 'daily_discover_50', title: 'Archive Explorer', description: 'Discover 50 new unique cards today. Expand your knowledge.', type: 'discover_cards', target: 50, unit: 'cards discovered', rewardType: 'xp', rewardAmount: 120, difficultyScore: 100 },
-                { id: 'daily_earn_500', title: 'Quick Cash', description: 'Earn 500 euros today through any means. Fast money.', type: 'earn_money', target: 500, unit: 'euros earned', progressMode: 'sum_money', rewardType: 'money', rewardAmount: 80, difficultyScore: 100 },
-                { id: 'daily_trade_30', title: 'Trade Hustler', description: 'Execute 30 player trades today. Move the market.', type: 'player_trades', target: 30, unit: 'trades executed', rewardType: 'gold_pack', rewardAmount: 1, difficultyScore: 100 },
-                { id: 'daily_own_300', title: 'Vault Builder', description: 'Own 300 cards simultaneously. Build your collection.', type: 'own_cards', target: 300, unit: 'cards owned', progressMode: 'max', rewardType: 'xp', rewardAmount: 100, difficultyScore: 100 },
-                { id: 'daily_mg_50', title: 'Minigame Ace', description: 'Win 50 math or reaction minigames today. Sharpen your skills.', type: 'minigame_wins', target: 50, unit: 'minigames won', rewardType: 'xp', rewardAmount: 130, difficultyScore: 100 },
-                { id: 'daily_bank_5000', title: 'Bank Secure', description: 'Hold 5,000 euros in your bank simultaneously. Secure your wealth.', type: 'bank_balance', target: 5000, unit: 'euros banked', progressMode: 'max_money', rewardType: 'money', rewardAmount: 90, difficultyScore: 100 },
-                { id: 'daily_snipe_20', title: 'Auction Sniper', description: 'Snipe 20 cards from the global auction today. Strike fast.', type: 'auction_snipes', target: 20, unit: 'cards sniped', rewardType: 'xp', rewardAmount: 110, difficultyScore: 100 },
-                { id: 'daily_duplicate_200', title: 'Duplicate Cleaner', description: 'Fuse or burn 200 duplicate cards today. Clean your vault.', type: 'fuse_or_burn_duplicates', target: 200, unit: 'duplicates fused/burned', rewardType: 'money', rewardAmount: 85, difficultyScore: 100 },
-                { id: 'daily_open_300', title: 'Pack Rush', description: 'Open 300 packs today. Speed opening.', type: 'open_packs', target: 300, unit: 'packs opened', rewardType: 'gold_pack', rewardAmount: 1, difficultyScore: 100 },
-                { id: 'daily_clash_75', title: 'Clash Warrior', description: 'Win 75 card clashes today. Battle tested.', type: 'win_clashes', target: 75, unit: 'clashes won', rewardType: 'xp', rewardAmount: 120, difficultyScore: 100 },
-                { id: 'daily_sell_150', title: 'Market Flow', description: 'Sell 150 cards today. Keep the market moving.', type: 'sell_cards', target: 150, unit: 'cards sold', rewardType: 'money', rewardAmount: 75, difficultyScore: 100 },
-                { id: 'daily_discover_40', title: 'Card Hunter', description: 'Discover 40 new unique cards today. Hunt them down.', type: 'discover_cards', target: 40, unit: 'cards discovered', rewardType: 'xp', rewardAmount: 100, difficultyScore: 100 },
-                { id: 'daily_earn_400', title: 'Income Stream', description: 'Earn 400 euros today. Steady income.', type: 'earn_money', target: 400, unit: 'euros earned', progressMode: 'sum_money', rewardType: 'money', rewardAmount: 70, difficultyScore: 100 },
-                { id: 'daily_trade_25', title: 'Trade Broker', description: 'Execute 25 player trades today. Broker deals.', type: 'player_trades', target: 25, unit: 'trades executed', rewardType: 'gold_pack', rewardAmount: 1, difficultyScore: 100 },
-                { id: 'daily_own_250', title: 'Collection Keeper', description: 'Own 250 cards simultaneously. Maintain your collection.', type: 'own_cards', target: 250, unit: 'cards owned', progressMode: 'max', rewardType: 'xp', rewardAmount: 90, difficultyScore: 100 },
-                { id: 'daily_mg_40', title: 'Minigame Pro', description: 'Win 40 minigames today. Pro level.', type: 'minigame_wins', target: 40, unit: 'minigames won', rewardType: 'xp', rewardAmount: 110, difficultyScore: 100 },
-                { id: 'daily_bank_4000', title: 'Bank Guardian', description: 'Hold 4,000 euros in your bank. Guard your wealth.', type: 'bank_balance', target: 4000, unit: 'euros banked', progressMode: 'max_money', rewardType: 'money', rewardAmount: 80, difficultyScore: 100 },
-                { id: 'daily_snipe_15', title: 'Quick Snipe', description: 'Snipe 15 cards from auction today. Quick strikes.', type: 'auction_snipes', target: 15, unit: 'cards sniped', rewardType: 'xp', rewardAmount: 95, difficultyScore: 100 },
-                { id: 'daily_duplicate_150', title: 'Duplicate Manager', description: 'Fuse or burn 150 duplicates today. Manage excess.', type: 'fuse_or_burn_duplicates', target: 150, unit: 'duplicates fused/burned', rewardType: 'money', rewardAmount: 70, difficultyScore: 100 },
-                { id: 'daily_open_400', title: 'Pack Marathon', description: 'Open 400 packs today. Endurance opening.', type: 'open_packs', target: 400, unit: 'packs opened', rewardType: 'gold_pack', rewardAmount: 1, difficultyScore: 100 },
-                { id: 'daily_clash_80', title: 'Clash Veteran', description: 'Win 80 card clashes today. Veteran status.', type: 'win_clashes', target: 80, unit: 'clashes won', rewardType: 'xp', rewardAmount: 125, difficultyScore: 100 },
-                { id: 'daily_sell_180', title: 'Market Maker', description: 'Sell 180 cards today. Make the market.', type: 'sell_cards', target: 180, unit: 'cards sold', rewardType: 'money', rewardAmount: 85, difficultyScore: 100 },
-                { id: 'daily_discover_45', title: 'Archive Seeker', description: 'Discover 45 new unique cards today. Seek knowledge.', type: 'discover_cards', target: 45, unit: 'cards discovered', rewardType: 'xp', rewardAmount: 105, difficultyScore: 100 },
-                { id: 'daily_earn_450', title: 'Profit Seeker', description: 'Earn 450 euros today. Seek profit.', type: 'earn_money', target: 450, unit: 'euros earned', progressMode: 'sum_money', rewardType: 'money', rewardAmount: 75, difficultyScore: 100 },
-                { id: 'daily_trade_28', title: 'Trade Master', description: 'Execute 28 player trades today. Master trading.', type: 'player_trades', target: 28, unit: 'trades executed', rewardType: 'gold_pack', rewardAmount: 1, difficultyScore: 100 },
-                { id: 'daily_own_280', title: 'Vault Guardian', description: 'Own 280 cards simultaneously. Guard your vault.', type: 'own_cards', target: 280, unit: 'cards owned', progressMode: 'max', rewardType: 'xp', rewardAmount: 95, difficultyScore: 100 },
-                { id: 'daily_mg_45', title: 'Minigame Expert', description: 'Win 45 minigames today. Expert level.', type: 'minigame_wins', target: 45, unit: 'minigames won', rewardType: 'xp', rewardAmount: 115, difficultyScore: 100 },
-                { id: 'daily_bank_4500', title: 'Bank Protector', description: 'Hold 4,500 euros in your bank. Protect your wealth.', type: 'bank_balance', target: 4500, unit: 'euros banked', progressMode: 'max_money', rewardType: 'money', rewardAmount: 85, difficultyScore: 100 },
-                { id: 'daily_snipe_18', title: 'Auction Hunter', description: 'Snipe 18 cards from auction today. Hunt for deals.', type: 'auction_snipes', target: 18, unit: 'cards sniped', rewardType: 'xp', rewardAmount: 100, difficultyScore: 100 },
-                { id: 'daily_duplicate_180', title: 'Duplicate Destroyer', description: 'Fuse or burn 180 duplicates today. Destroy excess.', type: 'fuse_or_burn_duplicates', target: 180, unit: 'duplicates fused/burned', rewardType: 'money', rewardAmount: 75, difficultyScore: 100 }
+                { id: 'daily_open_500', title: 'Pack Apocalypse', description: 'Open 500 packs in a single day. Only the dedicated survive.', type: 'open_packs', target: 500, unit: 'packs opened', rewardType: 'platinum_pack', rewardAmount: 2, difficultyScore: 100 },
+                { id: 'daily_clash_100', title: 'Clash Master', description: 'Win 100 card clashes before the daily reset. Prove your dominance.', type: 'win_clashes', target: 100, unit: 'clashes won', rewardType: 'xp', rewardAmount: 900, difficultyScore: 100 },
+                { id: 'daily_sell_200', title: 'Market Purge', description: 'Sell 200 cards from your deck in one day. Liquidate everything.', type: 'sell_cards', target: 200, unit: 'cards sold', rewardType: 'money', rewardAmount: 1000, difficultyScore: 100 },
+                { id: 'daily_discover_50', title: 'Archive Explorer', description: 'Discover 50 new unique cards today. Expand your knowledge.', type: 'discover_cards', target: 50, unit: 'cards discovered', rewardType: 'xp', rewardAmount: 900, difficultyScore: 100 },
+                { id: 'daily_earn_500', title: 'Quick Cash', description: 'Earn 500 euros today through any means. Fast money.', type: 'earn_money', target: 500, unit: 'euros earned', progressMode: 'sum_money', rewardType: 'money', rewardAmount: 1000, difficultyScore: 100 },
+                { id: 'daily_trade_30', title: 'Trade Hustler', description: 'Execute 30 player trades today. Move the market.', type: 'player_trades', target: 30, unit: 'trades executed', rewardType: 'platinum_pack', rewardAmount: 2, difficultyScore: 100 },
+                { id: 'daily_own_300', title: 'Vault Builder', description: 'Own 300 cards simultaneously. Build your collection.', type: 'own_cards', target: 300, unit: 'cards owned', progressMode: 'max', rewardType: 'xp', rewardAmount: 800, difficultyScore: 100 },
+                { id: 'daily_mg_50', title: 'Minigame Ace', description: 'Win 50 math or reaction minigames today. Sharpen your skills.', type: 'minigame_wins', target: 50, unit: 'minigames won', rewardType: 'xp', rewardAmount: 850, difficultyScore: 100 },
+                { id: 'daily_bank_5000', title: 'Bank Secure', description: 'Hold 5,000 euros in your bank simultaneously. Secure your wealth.', type: 'bank_balance', target: 5000, unit: 'euros banked', progressMode: 'max_money', rewardType: 'money', rewardAmount: 950, difficultyScore: 100 },
+                { id: 'daily_snipe_20', title: 'Auction Sniper', description: 'Snipe 20 cards from the global auction today. Strike fast.', type: 'auction_snipes', target: 20, unit: 'cards sniped', rewardType: 'xp', rewardAmount: 800, difficultyScore: 100 },
+                { id: 'daily_duplicate_200', title: 'Duplicate Cleaner', description: 'Fuse or burn 200 duplicate cards today. Clean your vault.', type: 'fuse_or_burn_duplicates', target: 200, unit: 'duplicates fused/burned', rewardType: 'money', rewardAmount: 900, difficultyScore: 100 },
+                { id: 'daily_open_300', title: 'Pack Rush', description: 'Open 300 packs today. Speed opening.', type: 'open_packs', target: 300, unit: 'packs opened', rewardType: 'platinum_pack', rewardAmount: 1, difficultyScore: 100 },
+                { id: 'daily_clash_75', title: 'Clash Warrior', description: 'Win 75 card clashes today. Battle tested.', type: 'win_clashes', target: 75, unit: 'clashes won', rewardType: 'xp', rewardAmount: 750, difficultyScore: 100 },
+                { id: 'daily_sell_150', title: 'Market Flow', description: 'Sell 150 cards today. Keep the market moving.', type: 'sell_cards', target: 150, unit: 'cards sold', rewardType: 'money', rewardAmount: 800, difficultyScore: 100 },
+                { id: 'daily_discover_40', title: 'Card Hunter', description: 'Discover 40 new unique cards today. Hunt them down.', type: 'discover_cards', target: 40, unit: 'cards discovered', rewardType: 'xp', rewardAmount: 700, difficultyScore: 100 },
+                { id: 'daily_earn_400', title: 'Income Stream', description: 'Earn 400 euros today. Steady income.', type: 'earn_money', target: 400, unit: 'euros earned', progressMode: 'sum_money', rewardType: 'money', rewardAmount: 850, difficultyScore: 100 },
+                { id: 'daily_trade_25', title: 'Trade Broker', description: 'Execute 25 player trades today. Broker deals.', type: 'player_trades', target: 25, unit: 'trades executed', rewardType: 'platinum_pack', rewardAmount: 1, difficultyScore: 100 },
+                { id: 'daily_own_250', title: 'Collection Keeper', description: 'Own 250 cards simultaneously. Maintain your collection.', type: 'own_cards', target: 250, unit: 'cards owned', progressMode: 'max', rewardType: 'xp', rewardAmount: 700, difficultyScore: 100 },
+                { id: 'daily_mg_40', title: 'Minigame Pro', description: 'Win 40 minigames today. Pro level.', type: 'minigame_wins', target: 40, unit: 'minigames won', rewardType: 'xp', rewardAmount: 750, difficultyScore: 100 },
+                { id: 'daily_bank_4000', title: 'Bank Guardian', description: 'Hold 4,000 euros in your bank. Guard your wealth.', type: 'bank_balance', target: 4000, unit: 'euros banked', progressMode: 'max_money', rewardType: 'money', rewardAmount: 800, difficultyScore: 100 },
+                { id: 'daily_snipe_15', title: 'Quick Snipe', description: 'Snipe 15 cards from auction today. Quick strikes.', type: 'auction_snipes', target: 15, unit: 'cards sniped', rewardType: 'xp', rewardAmount: 700, difficultyScore: 100 },
+                { id: 'daily_duplicate_150', title: 'Duplicate Manager', description: 'Fuse or burn 150 duplicates today. Manage excess.', type: 'fuse_or_burn_duplicates', target: 150, unit: 'duplicates fused/burned', rewardType: 'money', rewardAmount: 750, difficultyScore: 100 },
+                { id: 'daily_open_400', title: 'Pack Marathon', description: 'Open 400 packs today. Endurance opening.', type: 'open_packs', target: 400, unit: 'packs opened', rewardType: 'platinum_pack', rewardAmount: 2, difficultyScore: 100 },
+                { id: 'daily_clash_80', title: 'Clash Veteran', description: 'Win 80 card clashes today. Veteran status.', type: 'win_clashes', target: 80, unit: 'clashes won', rewardType: 'xp', rewardAmount: 800, difficultyScore: 100 },
+                { id: 'daily_sell_180', title: 'Market Maker', description: 'Sell 180 cards today. Make the market.', type: 'sell_cards', target: 180, unit: 'cards sold', rewardType: 'money', rewardAmount: 900, difficultyScore: 100 },
+                { id: 'daily_discover_45', title: 'Archive Seeker', description: 'Discover 45 new unique cards today. Seek knowledge.', type: 'discover_cards', target: 45, unit: 'cards discovered', rewardType: 'xp', rewardAmount: 800, difficultyScore: 100 },
+                { id: 'daily_earn_450', title: 'Profit Seeker', description: 'Earn 450 euros today. Seek profit.', type: 'earn_money', target: 450, unit: 'euros earned', progressMode: 'sum_money', rewardType: 'money', rewardAmount: 950, difficultyScore: 100 },
+                { id: 'daily_trade_28', title: 'Trade Master', description: 'Execute 28 player trades today. Master trading.', type: 'player_trades', target: 28, unit: 'trades executed', rewardType: 'platinum_pack', rewardAmount: 2, difficultyScore: 100 },
+                { id: 'daily_own_280', title: 'Vault Guardian', description: 'Own 280 cards simultaneously. Guard your vault.', type: 'own_cards', target: 280, unit: 'cards owned', progressMode: 'max', rewardType: 'xp', rewardAmount: 750, difficultyScore: 100 },
+                { id: 'daily_mg_45', title: 'Minigame Expert', description: 'Win 45 minigames today. Expert level.', type: 'minigame_wins', target: 45, unit: 'minigames won', rewardType: 'xp', rewardAmount: 850, difficultyScore: 100 },
+                { id: 'daily_bank_4500', title: 'Bank Protector', description: 'Hold 4,500 euros in your bank. Protect your wealth.', type: 'bank_balance', target: 4500, unit: 'euros banked', progressMode: 'max_money', rewardType: 'money', rewardAmount: 900, difficultyScore: 100 },
+                { id: 'daily_snipe_18', title: 'Auction Hunter', description: 'Snipe 18 cards from auction today. Hunt for deals.', type: 'auction_snipes', target: 18, unit: 'cards sniped', rewardType: 'xp', rewardAmount: 750, difficultyScore: 100 },
+                { id: 'daily_duplicate_180', title: 'Duplicate Destroyer', description: 'Fuse or burn 180 duplicates today. Destroy excess.', type: 'fuse_or_burn_duplicates', target: 180, unit: 'duplicates fused/burned', rewardType: 'money', rewardAmount: 850, difficultyScore: 100 }
             ],
             weekly: [
-                { id: 'weekly_open_5000', title: 'Pack Tsunami', description: 'Open 5,000 packs this week. Unleash the flood.', type: 'open_packs', target: 5000, unit: 'packs opened', rewardType: 'gold_pack', rewardAmount: 3, difficultyScore: 100 },
-                { id: 'weekly_clash_1000', title: 'Clash Legend', description: 'Win 1,000 card clashes this week. Become unstoppable.', type: 'win_clashes', target: 1000, unit: 'clashes won', rewardType: 'xp', rewardAmount: 350, difficultyScore: 100 },
-                { id: 'weekly_sell_2000', title: 'Mass Liquidation', description: 'Sell 2,000 cards this week. Empty your vault.', type: 'sell_cards', target: 2000, unit: 'cards sold', rewardType: 'money', rewardAmount: 300, difficultyScore: 100 },
-                { id: 'weekly_discover_1000', title: 'Archive Invasion', description: 'Discover 1,000 new unique cards this week. Expand your collection.', type: 'discover_cards', target: 1000, unit: 'cards discovered', rewardType: 'xp', rewardAmount: 300, difficultyScore: 100 },
-                { id: 'weekly_earn_10000', title: 'Fortune Builder', description: 'Earn 10,000 euros this week through any means. Build your empire.', type: 'earn_money', target: 10000, unit: 'euros earned', progressMode: 'sum_money', rewardType: 'money', rewardAmount: 350, difficultyScore: 100 },
-                { id: 'weekly_trade_200', title: 'Trade Tycoon', description: 'Execute 200 player trades this week. Master the market.', type: 'player_trades', target: 200, unit: 'trades executed', rewardType: 'gold_pack', rewardAmount: 2, difficultyScore: 100 },
-                { id: 'weekly_own_1500', title: 'Vault Expansion', description: 'Own 1,500 cards simultaneously. Fill your treasury.', type: 'own_cards', target: 1500, unit: 'cards owned', progressMode: 'max', rewardType: 'xp', rewardAmount: 250, difficultyScore: 100 }
+                { id: 'weekly_open_5000', title: 'Pack Tsunami', description: 'Open 5,000 packs this week. Unleash the flood.', type: 'open_packs', target: 5000, unit: 'packs opened', rewardType: 'platinum_pack', rewardAmount: 2, difficultyScore: 100 },
+                { id: 'weekly_clash_1000', title: 'Clash Legend', description: 'Win 1,000 card clashes this week. Become unstoppable.', type: 'win_clashes', target: 1000, unit: 'clashes won', rewardType: 'xp', rewardAmount: 900, difficultyScore: 100 },
+                { id: 'weekly_sell_2000', title: 'Mass Liquidation', description: 'Sell 2,000 cards this week. Empty your vault.', type: 'sell_cards', target: 2000, unit: 'cards sold', rewardType: 'money', rewardAmount: 1000, difficultyScore: 100 },
+                { id: 'weekly_discover_1000', title: 'Archive Invasion', description: 'Discover 1,000 new unique cards this week. Expand your collection.', type: 'discover_cards', target: 1000, unit: 'cards discovered', rewardType: 'xp', rewardAmount: 900, difficultyScore: 100 },
+                { id: 'weekly_earn_10000', title: 'Fortune Builder', description: 'Earn 10,000 euros this week through any means. Build your empire.', type: 'earn_money', target: 10000, unit: 'euros earned', progressMode: 'sum_money', rewardType: 'money', rewardAmount: 1000, difficultyScore: 100 },
+                { id: 'weekly_trade_200', title: 'Trade Tycoon', description: 'Execute 200 player trades this week. Master the market.', type: 'player_trades', target: 200, unit: 'trades executed', rewardType: 'platinum_pack', rewardAmount: 2, difficultyScore: 100 },
+                { id: 'weekly_own_1500', title: 'Vault Expansion', description: 'Own 1,500 cards simultaneously. Fill your treasury.', type: 'own_cards', target: 1500, unit: 'cards owned', progressMode: 'max', rewardType: 'xp', rewardAmount: 900, difficultyScore: 100 }
             ],
             monthly: [
-                { id: 'monthly_open_50000', title: 'Pack Singularity', description: 'Open 50,000 packs this month. Reach the event horizon.', type: 'open_packs', target: 50000, unit: 'packs opened', rewardType: 'gold_pack', rewardAmount: 5, difficultyScore: 100 },
-                { id: 'monthly_clash_10000', title: 'Clash God', description: 'Win 10,000 card clashes this month. Ascend to divinity.', type: 'win_clashes', target: 10000, unit: 'clashes won', rewardType: 'xp', rewardAmount: 500, difficultyScore: 100 },
-                { id: 'monthly_sell_20000', title: 'Total Liquidation', description: 'Sell 20,000 cards this month. Leave nothing behind.', type: 'sell_cards', target: 20000, unit: 'cards sold', rewardType: 'money', rewardAmount: 500, difficultyScore: 100 },
-                { id: 'monthly_discover_10000', title: 'Complete Archive', description: 'Discover 10,000 new unique cards this month. Complete the collection.', type: 'discover_cards', target: 10000, unit: 'cards discovered', rewardType: 'xp', rewardAmount: 450, difficultyScore: 100 },
-                { id: 'monthly_earn_100000', title: 'Economic Titan', description: 'Earn 100,000 euros this month. Rule the economy.', type: 'earn_money', target: 100000, unit: 'euros earned', progressMode: 'sum_money', rewardType: 'money', rewardAmount: 500, difficultyScore: 100 },
-                { id: 'monthly_trade_1000', title: 'Trade Emperor', description: 'Execute 1,000 player trades this month. Control the market.', type: 'player_trades', target: 1000, unit: 'trades executed', rewardType: 'gold_pack', rewardAmount: 4, difficultyScore: 100 },
-                { id: 'monthly_own_5000', title: 'Vault Master', description: 'Own 5,000 cards simultaneously. Build the ultimate treasury.', type: 'own_cards', target: 5000, unit: 'cards owned', progressMode: 'max', rewardType: 'xp', rewardAmount: 400, difficultyScore: 100 },
-                { id: 'monthly_daily_100', title: 'Daily Quest Champion', description: 'Complete and claim 100 Daily Quests this month. Never miss a day.', type: 'daily_quests_completed', target: 100, unit: 'daily quests claimed', rewardType: 'gold_pack', rewardAmount: 3, difficultyScore: 100 },
-                { id: 'monthly_mg_5000', title: 'Minigame Grandmaster', description: 'Win 5,000 math or reaction minigames this month. Perfect your skills.', type: 'minigame_wins', target: 5000, unit: 'minigames won', rewardType: 'xp', rewardAmount: 350, difficultyScore: 100 },
-                { id: 'monthly_bank_100000', title: 'Bank Fortress', description: 'Hold 100,000 euros in your bank simultaneously. Fortify your wealth.', type: 'bank_balance', target: 100000, unit: 'euros banked', progressMode: 'max_money', rewardType: 'money', rewardAmount: 450, difficultyScore: 100 },
-                { id: 'monthly_snipe_500', title: 'Auction Predator', description: 'Snipe 500 cards from the global auction this month. Strike with precision.', type: 'auction_snipes', target: 500, unit: 'cards sniped', rewardType: 'xp', rewardAmount: 300, difficultyScore: 100 },
-                { id: 'monthly_duplicate_10000', title: 'Duplicate Obliterator', description: 'Fuse or burn 10,000 duplicate cards this month. Purge the excess.', type: 'fuse_or_burn_duplicates', target: 10000, unit: 'duplicates fused/burned', rewardType: 'money', rewardAmount: 400, difficultyScore: 100 }
+                { id: 'monthly_open_50000', title: 'Pack Singularity', description: 'Open 50,000 packs this month. Reach the event horizon.', type: 'open_packs', target: 50000, unit: 'packs opened', rewardType: 'platinum_pack', rewardAmount: 2, difficultyScore: 100 },
+                { id: 'monthly_clash_10000', title: 'Clash God', description: 'Win 10,000 card clashes this month. Ascend to divinity.', type: 'win_clashes', target: 10000, unit: 'clashes won', rewardType: 'xp', rewardAmount: 900, difficultyScore: 100 },
+                { id: 'monthly_sell_20000', title: 'Total Liquidation', description: 'Sell 20,000 cards this month. Leave nothing behind.', type: 'sell_cards', target: 20000, unit: 'cards sold', rewardType: 'money', rewardAmount: 1000, difficultyScore: 100 },
+                { id: 'monthly_discover_10000', title: 'Complete Archive', description: 'Discover 10,000 new unique cards this month. Complete the collection.', type: 'discover_cards', target: 10000, unit: 'cards discovered', rewardType: 'xp', rewardAmount: 900, difficultyScore: 100 },
+                { id: 'monthly_earn_100000', title: 'Economic Titan', description: 'Earn 100,000 euros this month. Rule the economy.', type: 'earn_money', target: 100000, unit: 'euros earned', progressMode: 'sum_money', rewardType: 'money', rewardAmount: 1000, difficultyScore: 100 },
+                { id: 'monthly_trade_1000', title: 'Trade Emperor', description: 'Execute 1,000 player trades this month. Control the market.', type: 'player_trades', target: 1000, unit: 'trades executed', rewardType: 'platinum_pack', rewardAmount: 2, difficultyScore: 100 },
+                { id: 'monthly_own_5000', title: 'Vault Master', description: 'Own 5,000 cards simultaneously. Build the ultimate treasury.', type: 'own_cards', target: 5000, unit: 'cards owned', progressMode: 'max', rewardType: 'xp', rewardAmount: 900, difficultyScore: 100 },
+                { id: 'monthly_daily_100', title: 'Daily Quest Champion', description: 'Complete and claim 100 Daily Quests this month. Never miss a day.', type: 'daily_quests_completed', target: 100, unit: 'daily quests claimed', rewardType: 'platinum_pack', rewardAmount: 2, difficultyScore: 100 },
+                { id: 'monthly_mg_5000', title: 'Minigame Grandmaster', description: 'Win 5,000 math or reaction minigames this month. Perfect your skills.', type: 'minigame_wins', target: 5000, unit: 'minigames won', rewardType: 'xp', rewardAmount: 900, difficultyScore: 100 },
+                { id: 'monthly_bank_100000', title: 'Bank Fortress', description: 'Hold 100,000 euros in your bank simultaneously. Fortify your wealth.', type: 'bank_balance', target: 100000, unit: 'euros banked', progressMode: 'max_money', rewardType: 'money', rewardAmount: 1000, difficultyScore: 100 },
+                { id: 'monthly_snipe_500', title: 'Auction Predator', description: 'Snipe 500 cards from the global auction this month. Strike with precision.', type: 'auction_snipes', target: 500, unit: 'cards sniped', rewardType: 'xp', rewardAmount: 900, difficultyScore: 100 },
+                { id: 'monthly_duplicate_10000', title: 'Duplicate Obliterator', description: 'Fuse or burn 10,000 duplicate cards this month. Purge the excess.', type: 'fuse_or_burn_duplicates', target: 10000, unit: 'duplicates fused/burned', rewardType: 'money', rewardAmount: 1000, difficultyScore: 100 }
             ]
         };
 
@@ -6821,7 +6821,7 @@ const MUTATIONS_LIST = [
             }
 
             trackQuestProgress('reach_level', 1);
-            trackQuestProgress('own_cards', 0);
+            trackQuestProgress('own_cards', Object.keys(userDeckRecord).length);
         });
 
         // 10 MINUTE RESTOCK CYCLE WITH CHANCES
@@ -7029,6 +7029,8 @@ const MUTATIONS_LIST = [
                 operationsPayloadBatch[`users/${activeUserSession.uid}/discovered/${capturedSelectedCardObject.id}`] = Date.now();
             }
 
+            const isNewDiscovery = !userDataRecord.discovered || !userDataRecord.discovered[capturedSelectedCardObject.id];
+
             operationsPayloadBatch[`users/${activeUserSession.uid}/lastPackPurchaseTimestamp`] = currentTimestampMarker;
 
             const newCardGeneratedInstanceUid = push(ref(db, `inventory/${activeUserSession.uid}`)).key;
@@ -7056,12 +7058,15 @@ const MUTATIONS_LIST = [
             }
 
             trackQuestProgress('open_packs', 1, packKey);
-            if (!userDataRecord.discovered || !userDataRecord.discovered[capturedSelectedCardObject.id]) {
+            if (isNewDiscovery) {
                 trackQuestProgress('discover_cards', 1);
             }
             if (earnedStreakBonus > 0) {
                 trackQuestProgress('earn_money', earnedStreakBonus);
             }
+            // Track own_cards (max mode) and bank_balance (max_money mode) after any money/inventory change
+            trackQuestProgress('own_cards', Object.keys(userDeckRecord).length + 1);
+            trackQuestProgress('bank_balance', 0);
 
             let streakMsg = null;
             if (earnedStreakBonus > 0) {
@@ -7164,6 +7169,8 @@ const MUTATIONS_LIST = [
                 const liveCalculatedValue = calculateLiveInstanceMarketValue(currentInstanceItem);
                 const currentSystemEpoch = Date.now();
                 const evaluatingSecurityLockIsActive = currentInstanceItem.cryptographicLockExpiry && currentInstanceItem.cryptographicLockExpiry > currentSystemEpoch;
+                const stolenCooldownActive = currentInstanceItem.stolenAt && (currentSystemEpoch - currentInstanceItem.stolenAt) < 7000;
+                const stolenCooldownSecsLeft = stolenCooldownActive ? Math.ceil((7000 - (currentSystemEpoch - currentInstanceItem.stolenAt)) / 1000) : 0;
 
                 const globalRegisteredCopiesCount = globalCopiesTrackerRef[currentInstanceItem.cardId] || 1;
                 const mutationsCount = (currentInstanceItem.activeMutationIndexes || []).length;
@@ -7209,7 +7216,7 @@ const MUTATIONS_LIST = [
                     </div>
                     <div class="card-action-overlay">
                         <div style="display:flex; gap:6px;">
-                            <button class="card-btn" style="flex:1; background:var(--accent-red); color:white;" ${(evaluatingSecurityLockIsActive || protectedCard) ? 'disabled style="opacity:0.3;"' : ''} onclick="liquidateInventoryCardInstance('${instanceIdKey}', ${liveCalculatedValue})">SELL</button>
+                            <button class="card-btn" style="flex:1; background:var(--accent-red); color:white;" ${(evaluatingSecurityLockIsActive || protectedCard || stolenCooldownActive) ? `disabled style="opacity:0.3;"` : ''} onclick="liquidateInventoryCardInstance('${instanceIdKey}', ${liveCalculatedValue})">${stolenCooldownActive ? `SELL (${stolenCooldownSecsLeft}s)` : 'SELL'}</button>
                             <button class="card-btn" style="flex:1; background:var(--bg-surface); border:1px solid var(--border-glow); color:white;" ${evaluatingSecurityLockIsActive ? 'disabled style="opacity:0.3;"' : ''} onclick="initiateAssetTransferProtocol('${instanceIdKey}')">SEND</button>
                         </div>
                         <button class="card-btn" style="background:var(--gold); color:black;" ${evaluatingSecurityLockIsActive ? 'disabled style="opacity:0.3;"' : ''} onclick="openLockSelectionModal('${instanceIdKey}')">🔒 LOCK ASSET</button>
@@ -7245,6 +7252,7 @@ const MUTATIONS_LIST = [
                 if (!card) return false;
                 if (isRamezCard(card)) return false;
                 if (card.unsellable) return false;
+                if (card.stolenAt && (now - card.stolenAt) < 7000) return false;
                 const locked = card.cryptographicLockExpiry && card.cryptographicLockExpiry > now;
                 return !locked;
             });
@@ -7578,6 +7586,14 @@ const MUTATIONS_LIST = [
                 showToast('Ramez Level El Ga7sh cannot be sold.', 'error');
                 return false;
             }
+            if (selectedCard?.stolenAt) {
+                const secondsSinceSteal = (Date.now() - selectedCard.stolenAt) / 1000;
+                if (secondsSinceSteal < 7) {
+                    const remaining = Math.ceil(7 - secondsSinceSteal);
+                    showToast(`Stolen cards can't be sold for ${remaining}s.`, 'error');
+                    return false;
+                }
+            }
             const finalPayout = salePayoutVal;
             if (!confirm(`Verify financial liquidation execution for selected asset? Payout calculated at: €${finalPayout.toFixed(2)}`)) return;
 
@@ -7593,6 +7609,7 @@ const MUTATIONS_LIST = [
             }
             trackQuestProgress('sell_cards', 1);
             trackQuestProgress('earn_money', finalPayout);
+            trackQuestProgress('bank_balance', 0);
         };
 
         window.initiateAssetTransferProtocol = async function (instanceId) {
@@ -7871,7 +7888,8 @@ const MUTATIONS_LIST = [
                 cardId: cardSnapshot.cardId,
                 stolenFromInstanceId: claimedSession.targetCardInstanceKey,
                 stealSessionId: sessionId,
-                acquiredTimestamp: Date.now()
+                acquiredTimestamp: Date.now(),
+                stolenAt: Date.now()
             };
 
             const attackerOnlyPayload = {};
@@ -8714,6 +8732,8 @@ const MUTATIONS_LIST = [
                         action = `<button class="quest-xp-btn" onclick="claimQuestReward('${quest.id}')">CLAIM ${quest.rewardAmount} XP</button>`;
                     } else if (quest.rewardType === 'gold_pack') {
                         action = `<button class="quest-claim-btn" onclick="claimQuestReward('${quest.id}')">CLAIM ${quest.rewardAmount}x GOLD PACK</button>`;
+                    } else if (quest.rewardType === 'platinum_pack') {
+                        action = `<button class="quest-claim-btn" onclick="claimQuestReward('${quest.id}')">CLAIM ${quest.rewardAmount}x PLATINUM PACK</button>`;
                     }
                 } else if (status === 'claimed') {
                     action = `<div class="quest-done-label">✓ REWARD CLAIMED</div>`;
@@ -8726,6 +8746,8 @@ const MUTATIONS_LIST = [
                     rewardText = `Reward: ${quest.rewardAmount} XP`;
                 } else if (quest.rewardType === 'gold_pack') {
                     rewardText = `Reward: ${quest.rewardAmount}x Gold Pack`;
+                } else if (quest.rewardType === 'platinum_pack') {
+                    rewardText = `Reward: ${quest.rewardAmount}x Platinum Pack`;
                 }
 
                 card.innerHTML = `
@@ -8807,14 +8829,32 @@ const MUTATIONS_LIST = [
                     }
 
                     if (shouldTrack) {
-                        runTransaction(ref(db, `users/${activeUserSession.uid}/quests/${quest.id}/progress`), current => {
-                            return (current || 0) + amount;
-                        }).then(() => {
-                            const newProgress = (questsData[quest.id]?.progress || 0) + amount;
-                            if (newProgress >= quest.target) {
-                                update(ref(db, `users/${activeUserSession.uid}/quests/${quest.id}`), { completed: true });
-                            }
-                        });
+                        const progressMode = quest.progressMode;
+
+                        if (progressMode === 'max' || progressMode === 'max_money') {
+                            // For max-mode quests, set progress to the current value if it's higher
+                            const currentValue = progressMode === 'max_money'
+                                ? (userDataRecord.money || 0)
+                                : amount; // amount = current deck count for own_cards
+                            runTransaction(ref(db, `users/${activeUserSession.uid}/quests/${quest.id}/progress`), current => {
+                                return Math.max(current || 0, currentValue);
+                            }).then(result => {
+                                const newProgress = result.snapshot.val() || 0;
+                                if (newProgress >= quest.target) {
+                                    update(ref(db, `users/${activeUserSession.uid}/quests/${quest.id}`), { completed: true });
+                                }
+                            });
+                        } else {
+                            // Default: increment by amount
+                            runTransaction(ref(db, `users/${activeUserSession.uid}/quests/${quest.id}/progress`), current => {
+                                return (current || 0) + amount;
+                            }).then(result => {
+                                const newProgress = result.snapshot.val() || 0;
+                                if (newProgress >= quest.target) {
+                                    update(ref(db, `users/${activeUserSession.uid}/quests/${quest.id}`), { completed: true });
+                                }
+                            });
+                        }
                     }
                 });
             });
@@ -8845,10 +8885,25 @@ const MUTATIONS_LIST = [
                 payload[`users/${activeUserSession.uid}/xp`] = (userDataRecord.xp || 0) + quest.rewardAmount;
                 showToast(`⚡ Claimed ${quest.rewardAmount} XP!`, 'success');
             } else if (quest.rewardType === 'gold_pack') {
+                // Open gold packs for free by temporarily crediting enough money then calling purchasePackAsset
+                const goldPackPrice = PACK_METADATA['gold']?.price || 400;
+                const originalMoney = userDataRecord.money || 0;
                 for (let i = 0; i < quest.rewardAmount; i++) {
-                    await openPack('gold');
+                    userDataRecord.money = originalMoney + goldPackPrice * (quest.rewardAmount - i);
+                    await purchasePackAsset('gold');
                 }
+                userDataRecord.money = originalMoney;
                 showToast(`🎁 Claimed ${quest.rewardAmount}x Gold Pack!`, 'success');
+            } else if (quest.rewardType === 'platinum_pack') {
+                // Open platinum packs for free by temporarily crediting enough money
+                const platPackPrice = PACK_METADATA['platinum']?.price || 1000;
+                const originalMoney = userDataRecord.money || 0;
+                for (let i = 0; i < quest.rewardAmount; i++) {
+                    userDataRecord.money = originalMoney + platPackPrice * (quest.rewardAmount - i);
+                    await purchasePackAsset('platinum');
+                }
+                userDataRecord.money = originalMoney;
+                showToast(`💎 Claimed ${quest.rewardAmount}x Platinum Pack!`, 'success');
             }
 
             payload[`users/${activeUserSession.uid}/quests/${questId}/claimed`] = true;
@@ -9196,7 +9251,8 @@ const MUTATIONS_LIST = [
             myAccepted: false,
             theirAccepted: false,
             listener: null,
-            selectedCards: new Set()
+            selectedCards: new Set(),
+            executing: false
         };
 
         // Load and display online players for trading
@@ -9932,6 +9988,8 @@ const MUTATIONS_LIST = [
         // Execute the trade
         async function executeNewTrade() {
             if (!newTradeState.active) return;
+            if (newTradeState.executing) return;
+            newTradeState.executing = true;
 
             const tradeRef = ref(db, `active_trades/${newTradeState.tradeId}`);
             
@@ -10108,12 +10166,13 @@ const MUTATIONS_LIST = [
                 operations[`active_trades/${newTradeState.tradeId}/completedAt`] = serverTimestamp();
 
                 // Update quest progress for trading
-                await updateQuestProgress('trade', 1);
+                trackQuestProgress('player_trades', 1);
 
                 await update(ref(db, '/'), operations);
                 showToast('Trade completed successfully!', 'success');
                 cancelNewTrade();
             } catch (error) {
+                newTradeState.executing = false;
                 console.error('Error executing trade:', error);
                 showToast('Trade execution failed.', 'error');
             }
@@ -10145,7 +10204,8 @@ const MUTATIONS_LIST = [
                 myLocked: false,
                 theirLocked: false,
                 listener: null,
-                selectedCards: new Set()
+                selectedCards: new Set(),
+                executing: false
             };
 
             // Reset UI
@@ -10155,28 +10215,6 @@ const MUTATIONS_LIST = [
             document.getElementById('my-offer-content').innerHTML = '';
             document.getElementById('their-offer-content').innerHTML = '<div class="loading-text">Waiting for offer...</div>';
         };
-
-        // Update quest progress
-        async function updateQuestProgress(type, amount) {
-            if (!activeUserSession?.uid) return;
-
-            try {
-                // Track trade count for quests
-                const userQuestsRef = ref(db, `users/${activeUserSession.uid}/quests`);
-                const questsSnap = await get(userQuestsRef);
-                const quests = questsSnap.val() || {};
-
-                // Update trade count
-                const currentTradeCount = quests.tradeCount || 0;
-                await update(userQuestsRef, {
-                    tradeCount: currentTradeCount + amount
-                });
-
-                console.log(`Quest progress updated: ${type} +${amount}, Total trades: ${currentTradeCount + amount}`);
-            } catch (error) {
-                console.error('Error updating quest progress:', error);
-            }
-        }
 
         // =========================================================
         // FEATURE 3: ARCHIVE BOOK (MILESTONE XP REWARDS)
@@ -10292,7 +10330,7 @@ const MUTATIONS_LIST = [
 
     </script>
     <div style="position: fixed; top: 12px; left: 12px; z-index: 9999; color: rgba(255, 255, 255, 0.4); font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
-    V:6.0
+    V:6.5
 </div>
 </body>
 
