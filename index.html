@@ -9254,7 +9254,7 @@ const MUTATIONS_LIST = [
             console.log('Sending trade request to', partnerUsername, 'with ID:', tradeId);
             
             try {
-                // Create trade request in Firebase
+                // Create trade request in Firebase (recipient's path)
                 await set(ref(db, `trade_requests/${partnerUid}/${tradeId}`), {
                     fromUid: activeUserSession.uid,
                     fromUsername: userDataRecord.username,
@@ -9276,6 +9276,29 @@ const MUTATIONS_LIST = [
                     toUsername: partnerUsername,
                     status: 'pending_sent',
                     timestamp: serverTimestamp()
+                });
+
+                // Set up listener to detect when recipient accepts
+                const recipientRequestRef = ref(db, `trade_requests/${partnerUid}/${tradeId}`);
+                onValue(recipientRequestRef, snapshot => {
+                    const recipientRequest = snapshot.val();
+                    if (!recipientRequest) return;
+                    
+                    console.log('Recipient request status changed:', recipientRequest.status);
+                    
+                    if (recipientRequest.status === 'accepted' && !newTradeState.active) {
+                        console.log('Recipient accepted the trade request');
+                        initializeNewTrade(partnerUid, partnerUsername, avatarBgColor, avatarLetters, tradeId);
+                        // Clean up both requests
+                        remove(ref(db, `trade_requests/${activeUserSession.uid}/${tradeId}`));
+                        remove(recipientRequestRef);
+                    } else if (recipientRequest.status === 'declined') {
+                        console.log('Recipient declined the trade request');
+                        showToast(`${partnerUsername} declined your trade request.`, 'error');
+                        // Clean up both requests
+                        remove(ref(db, `trade_requests/${activeUserSession.uid}/${tradeId}`));
+                        remove(recipientRequestRef);
+                    }
                 });
 
                 console.log('Trade request sent successfully');
@@ -9375,21 +9398,19 @@ const MUTATIONS_LIST = [
             
             const { requestId, request } = window.pendingTradeRequest;
             
+            console.log('Declining trade request from:', request.fromUsername);
+            
             try {
-                // Update request status to declined in both places
+                // Update request status to declined (only in recipient's path)
                 await update(ref(db, `trade_requests/${activeUserSession.uid}/${requestId}`), {
                     status: 'declined'
                 });
                 
-                // Also update in sender's requests so they know it was declined
-                await update(ref(db, `trade_requests/${request.fromUid}/${requestId}`), {
-                    status: 'declined'
-                });
-                
+                console.log('Request status updated to declined');
                 showToast('Trade request declined.', 'success');
             } catch (error) {
                 console.error('Error declining request:', error);
-                showToast('Failed to decline request.', 'error');
+                showToast('Failed to decline request: ' + error.message, 'error');
             }
             
             closeTradeRequestModal();
