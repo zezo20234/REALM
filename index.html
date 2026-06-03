@@ -8982,7 +8982,7 @@ const MUTATIONS_LIST = [
         //   - Clicking CLAIM gives the reward, resets rank to Bronze, marks claimed.
         // ═══════════════════════════════════════════════════════════════
 
-        const RANK_REWARD_INTERVAL_MS = 5 * 24 * 60 * 60 * 1000; // 5 days
+        const RANK_REWARD_INTERVAL_MS = 3 * 24 * 60 * 60 * 1000; // 3 days
         let globalRankCycleState = { nextRewardAt: 0, cycleId: 0 };
         let rankRewardTimerInterval = null;
         let rankCycleAdvanceInFlight = false; // prevent stampeding tryAdvance calls
@@ -9115,9 +9115,28 @@ const MUTATIONS_LIST = [
 
             const lastClaimed = userDataRecord.clashRankLastCycleClaimed || 0;
 
-            // pendingCycle comes from user node stamp, OR from the global rewardReady flag
+            // pendingCycle: prefer user node stamp, fall back to global cycleId
+            // (the stamp may not have arrived from Firebase yet, but the button
+            //  is only shown when globalRankCycleState confirms reward is ready)
             let pendingCycle = userDataRecord.clashRankPendingReward || 0;
+
+            // Fallback 1: global rewardReady flag says a reward exists for this cycle
             if (pendingCycle <= lastClaimed && globalRankCycleState.rewardReady && globalRankCycleState.cycleId > lastClaimed) {
+                pendingCycle = globalRankCycleState.cycleId;
+            }
+
+            // Fallback 2: button is visible (meaning the tick confirmed reward ready),
+            // but globalRankCycleState.rewardReady was already cleared by advanceCycleAfterClaim.
+            // In this case use cycleId directly — it's still the correct pending cycle.
+            const claimBtn = document.getElementById('hud-rank-claim-btn');
+            if (pendingCycle <= lastClaimed && claimBtn && claimBtn.style.display !== 'none' && globalRankCycleState.cycleId > lastClaimed) {
+                pendingCycle = globalRankCycleState.cycleId;
+            }
+
+            // Last resort: if cycleId itself hasn't advanced yet (first cycle edge case),
+            // treat cycleId 1 as pending for users who have never claimed
+            if (pendingCycle <= lastClaimed && lastClaimed === 0 && globalRankCycleState.cycleId >= 1 &&
+                claimBtn && claimBtn.style.display !== 'none') {
                 pendingCycle = globalRankCycleState.cycleId;
             }
 
@@ -9127,7 +9146,7 @@ const MUTATIONS_LIST = [
             }
 
             // Disable button immediately so double-clicks do nothing
-            const btn = document.getElementById('hud-rank-claim-btn');
+            const btn = claimBtn;
             if (btn) { btn.disabled = true; btn.textContent = 'Claiming…'; }
 
             const pts = userDataRecord.clashRankPoints || 0;
@@ -11215,7 +11234,7 @@ const MUTATIONS_LIST = [
 
     </script>
     <div style="position: fixed; top: 12px; left: 12px; z-index: 9999; color: rgba(255, 255, 255, 0.4); font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
-    V:9.7
+    V:9.8
 </div>
 </body>
 
