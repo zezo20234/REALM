@@ -8899,6 +8899,25 @@ const MUTATIONS_LIST = [
             }
         });
 
+        // Document-level Enter key listener for math modal — fires even if input loses focus
+        document.addEventListener('keydown', (e) => {
+            if (e.key !== 'Enter') return;
+            const mathModal = document.getElementById('modal-game-math');
+            if (!mathModal || !mathModal.classList.contains('is-open')) return;
+            e.preventDefault();
+            if (clashUiLocked || !activeStealSequenceId) return;
+            const mathInputEl = document.getElementById('math-player-input');
+            if (!mathInputEl) return;
+            const parsedPlayerInputVal = parseInt(mathInputEl.value.trim(), 10);
+            const calculatedExpectedTargetResult = parseInt(mathInputEl.dataset.expectedResult, 10);
+            if (parsedPlayerInputVal === calculatedExpectedTargetResult) {
+                const solveTimeMs = Date.now() - mathChallengeStartTime;
+                signalClashVictoryCaptureLock(solveTimeMs);
+            } else {
+                showToast('Wrong answer — try again.', 'error');
+            }
+        });
+
         // Reaction mini-game removed.
 
         // ── CLASH SOLVE TIME SUBMISSION ─────────────────────────────
