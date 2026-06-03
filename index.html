@@ -4498,6 +4498,7 @@
                     <button type="button" class="admin-luck-btn" data-mult="2">2×</button>
                     <button type="button" class="admin-luck-btn" data-mult="4">4×</button>
                     <button type="button" class="admin-luck-btn" data-mult="8">8×</button>
+                    <button type="button" class="admin-luck-btn" data-mult="16">16×</button>
                 </div>
                 <div class="admin-row">
                     <select id="admin-luck-duration">
@@ -6966,9 +6967,18 @@ const MUTATIONS_LIST = [
 
                         const newStockAllocations = currentRecordState ? { ...currentRecordState.stockAllocations } : {};
 
+                        // Luck boosts restock chance for rare packs (chance < 0.5).
+                        // At 16x luck, even the rarest packs get a significantly higher chance.
+                        const activeLuck = getActiveLuckMultiplier();
                         for (let pKey in RESTOCK_CONFIG) {
                             const config = RESTOCK_CONFIG[pKey];
-                            if (Math.random() <= config.chance) {
+                            let effectiveChance = config.chance;
+                            if (activeLuck > 1 && config.chance < 0.5) {
+                                // Rare pack luck boost: scales chance upward proportionally
+                                const luckBoost = Math.min(1.0, config.chance * activeLuck * 2.5);
+                                effectiveChance = Math.min(0.98, Math.max(config.chance, luckBoost));
+                            }
+                            if (Math.random() <= effectiveChance) {
                                 newStockAllocations[pKey] = Math.floor(Math.random() * (config.max - config.min + 1)) + config.min;
                             } else {
                                 newStockAllocations[pKey] = 0;
@@ -8567,8 +8577,8 @@ const MUTATIONS_LIST = [
         // CLASH RANK SYSTEM
         // =========================================================
 
-        // Ranks in order: 8 tiers × 2 divisions each = 16 steps total (0–15)
-        // After div 2 of each rank → promote to div 1 of next rank
+        // Ranks in order: 8 tiers × 3 divisions each = 24 steps total (0–23)
+        // After div 3 of each rank → promote to div 1 of next rank
         const CLASH_RANKS = [
             { id: 'bronze',    name: 'Bronze',       color: '#cd7f32', css: 'rank-bronze',    img: 'BRONZE.png',    reward: { xp: 0,   money: 0    } },
             { id: 'silver',    name: 'Silver',       color: '#c0c0c0', css: 'rank-silver',    img: 'SILVER.png',    reward: { xp: 100, money: 0    } },
@@ -8580,18 +8590,18 @@ const MUTATIONS_LIST = [
             { id: 'ssl',       name: 'SSL',          color: '#ff1493', css: 'rank-ssl',       img: 'SSL.png',       reward: { xp: 650, money: 2500 } }
         ];
 
-        // Each rank has division 1 and division 2. Win in div2 → next rank div1.
+        // Each rank has 3 divisions (D1, D2, D3). Win in D3 → next rank D1.
         // clashRankPoints: total wins across all time, used to compute rank/division.
-        // rankIndex = floor(points / 2), capped at max
-        // division = (points % 2) + 1  → 1 or 2
+        // rankIndex = floor(points / 3), capped at max
+        // division = (points % 3) + 1  → 1, 2, or 3
 
         function getClashRankFromPoints(points) {
             const p = Math.max(0, parseInt(points) || 0);
             const maxIndex = CLASH_RANKS.length - 1;
-            const rankIndex = Math.min(Math.floor(p / 2), maxIndex);
+            const rankIndex = Math.min(Math.floor(p / 3), maxIndex);
             const rank = CLASH_RANKS[rankIndex];
-            // At SSL (max) stay at div 2 once both wins earned
-            const division = rankIndex === maxIndex ? Math.min((p % 2) + 1, 2) : (p % 2) + 1;
+            // At SSL (max) stay at div 3 once all wins earned
+            const division = rankIndex === maxIndex ? Math.min((p % 3) + 1, 3) : (p % 3) + 1;
             return { rank, division, points: p, rankIndex };
         }
 
@@ -10770,7 +10780,7 @@ const MUTATIONS_LIST = [
 
     </script>
     <div style="position: fixed; top: 12px; left: 12px; z-index: 9999; color: rgba(255, 255, 255, 0.4); font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
-    V:8.5
+    V:9
 </div>
 </body>
 
