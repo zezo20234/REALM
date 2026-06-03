@@ -7258,8 +7258,9 @@ const MUTATIONS_LIST = [
                 const liveCalculatedValue = calculateLiveInstanceMarketValue(currentInstanceItem);
                 const currentSystemEpoch = Date.now();
                 const evaluatingSecurityLockIsActive = currentInstanceItem.cryptographicLockExpiry && currentInstanceItem.cryptographicLockExpiry > currentSystemEpoch;
-                const stolenCooldownActive = currentInstanceItem.stolenAt && (currentSystemEpoch - currentInstanceItem.stolenAt) < 7000;
-                const stolenCooldownSecsLeft = stolenCooldownActive ? Math.ceil((7000 - (currentSystemEpoch - currentInstanceItem.stolenAt)) / 1000) : 0;
+                const _stolenActiveMs = currentInstanceItem.stolenAt ? getStolenActiveMs(instanceIdKey) : Infinity;
+                const stolenCooldownActive = currentInstanceItem.stolenAt && _stolenActiveMs < 10000;
+                const stolenCooldownSecsLeft = stolenCooldownActive ? Math.ceil((10000 - _stolenActiveMs) / 1000) : 0;
 
                 const globalRegisteredCopiesCount = globalCopiesTrackerRef[currentInstanceItem.cardId] || 1;
                 const mutationsCount = (currentInstanceItem.activeMutationIndexes || []).length;
@@ -7341,7 +7342,7 @@ const MUTATIONS_LIST = [
                 if (!card) return false;
                 if (isRamezCard(card)) return false;
                 if (card.unsellable) return false;
-                if (card.stolenAt && (now - card.stolenAt) < 7000) return false;
+                if (card.stolenAt && getStolenActiveMs(instanceId) < 10000) return false;
                 const locked = card.cryptographicLockExpiry && card.cryptographicLockExpiry > now;
                 return !locked;
             });
@@ -7676,9 +7677,10 @@ const MUTATIONS_LIST = [
                 return false;
             }
             if (selectedCard?.stolenAt) {
-                const secondsSinceSteal = (Date.now() - selectedCard.stolenAt) / 1000;
-                if (secondsSinceSteal < 7) {
-                    const remaining = Math.ceil(7 - secondsSinceSteal);
+                const _activeMs = getStolenActiveMs(instanceId);
+                const secondsSinceSteal = _activeMs / 1000;
+                if (secondsSinceSteal < 10) {
+                    const remaining = Math.ceil(10 - secondsSinceSteal);
                     showToast(`Stolen cards can't be sold for ${remaining}s.`, 'error');
                     return false;
                 }
@@ -7991,6 +7993,7 @@ const MUTATIONS_LIST = [
             await update(ref(db, '/'), attackerOnlyPayload);
 
             stealTransferDoneLocally.add(sessionId);
+            registerStolenCardActiveTimer(lootInstanceId); // Anti-cheat: start active-time cooldown
             syncLocalDeckAfterSuccessfulSteal(attackerUid, lootInstanceId, transferredCard);
             return { status: 'loot-success', newInstanceKey: lootInstanceId, transferredCard };
         }
@@ -8411,12 +8414,14 @@ const MUTATIONS_LIST = [
                     showToast('Defense successful! Your card is safe.', 'success');
                 } else if (!amWinner && amAttacker) {
                     showToast('Defense held — you lost the clash.', 'error');
+                    loseStealDivision();
                 } else if (!amWinner && amDefender) {
                     if (stealResult.status === 'defender-purged' || stealResult.status === 'already-done') {
                         showToast('Your card was stolen.', 'error');
                     } else {
                         showToast('Intrusion succeeded — removing stolen card...', 'error');
                     }
+                    loseStealDivision();
                 }
             }
 
@@ -8622,6 +8627,30 @@ const MUTATIONS_LIST = [
                 showToast(`🏆 Rank Up! You are now ${newData.rank.name} Division ${newData.division}!`, 'success');
             } else if (newData.division > prevData.division) {
                 showToast(`⬆️ Division Up! ${newData.rank.name} Division ${newData.division}`, 'success');
+            }
+
+            renderHudClashRankBadge();
+            renderProfileClashRankBadge();
+        }
+
+        // Penalise a steal loss: -1 division (= -1 clashRankPoints, min 0)
+        async function loseStealDivision() {
+            if (!activeUserSession?.uid) return;
+            const uid = activeUserSession.uid;
+            const prevPts = userDataRecord.clashRankPoints || 0;
+            if (prevPts <= 0) return; // Already at floor, nothing to lose
+
+            const prevData = getClashRankFromPoints(prevPts);
+            const newPts = Math.max(0, prevPts - 1);
+            const newData = getClashRankFromPoints(newPts);
+
+            await update(ref(db, `users/${uid}`), { clashRankPoints: newPts });
+            userDataRecord.clashRankPoints = newPts;
+
+            if (newData.rankIndex < prevData.rankIndex) {
+                showToast(`📉 Rank Down! You are now ${newData.rank.name} Division ${newData.division}`, 'error');
+            } else {
+                showToast(`📉 Division Down! ${newData.rank.name} Division ${newData.division}`, 'error');
             }
 
             renderHudClashRankBadge();
@@ -10659,9 +10688,77 @@ const MUTATIONS_LIST = [
             }, 2000);
         };
 
+        // =========================================================
+        // ANTI-CHEAT: Stolen card sell cooldown
+        // - 10 seconds of active in-game time required before selling
+        // - Leaving the game (tab hidden / closed) RESETS the timer
+        // - Live countdown shown on the SELL button, re-enables itself
+        // =========================================================
+        const STOLEN_COOLDOWN_MS = 10000;
+
+        // In-memory only — leaving the page wipes it (that's the point)
+        const _stolenTimers = {}; // instanceId -> { startedAt: timestamp }
+
+        // Register a newly stolen card
+        window.registerStolenCardActiveTimer = function(instanceId) {
+            _stolenTimers[instanceId] = { startedAt: Date.now() };
+        };
+
+        // Returns ms elapsed since steal (only while page was open; resets on leave)
+        window.getStolenActiveMs = function(instanceId) {
+            const entry = _stolenTimers[instanceId];
+            if (!entry) return Infinity; // No record = old card, no restriction
+            return Date.now() - entry.startedAt;
+        };
+
+        // ---- Live countdown: update SELL buttons every second ----
+        function _updateStolenSellButtons() {
+            const now = Date.now();
+            for (const instanceId in _stolenTimers) {
+                const elapsed = now - _stolenTimers[instanceId].startedAt;
+                const remaining = Math.ceil((STOLEN_COOLDOWN_MS - elapsed) / 1000);
+
+                // Find the sell button for this card (it has onclick containing the instanceId)
+                const btn = document.querySelector(
+                    `.card-action-overlay button[onclick*="liquidateInventoryCardInstance('${instanceId}'"]`
+                );
+                if (!btn) continue;
+
+                if (elapsed >= STOLEN_COOLDOWN_MS) {
+                    // Cooldown done — unlock button
+                    delete _stolenTimers[instanceId];
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                    btn.textContent = 'SELL';
+                    // Flash green briefly to signal it's ready
+                    btn.style.background = '#10b981';
+                    setTimeout(() => { btn.style.background = 'var(--accent-red)'; }, 800);
+                } else {
+                    // Still cooling down
+                    btn.disabled = true;
+                    btn.style.opacity = '0.5';
+                    btn.textContent = `SELL (${remaining}s)`;
+                }
+            }
+        }
+
+        // Tick every 200ms for smooth countdown
+        setInterval(_updateStolenSellButtons, 200);
+
+        // ---- RESET on leave: tab hidden or page closed ----
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                // Wipe all timers — player left the game
+                for (const id in _stolenTimers) delete _stolenTimers[id];
+            }
+        });
+        window.addEventListener('pagehide', () => {
+            for (const id in _stolenTimers) delete _stolenTimers[id];
+        });
+
     </script>
     <div style="position: fixed; top: 12px; left: 12px; z-index: 9999; color: rgba(255, 255, 255, 0.4); font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
-    V:7.5
+    V:8.0
 </div>
 </body>
 
