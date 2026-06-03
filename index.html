@@ -4445,14 +4445,23 @@
     <div class="modal-mask" id="modal-game-math">
         <div class="modal-body" style="text-align:center;">
             <h2 style="color:var(--gold); font-weight:900;">INTRUSION ENCRYPTION INTERCEPT</h2>
-            <p style="font-size:0.8rem; color:#9ca3af; margin-bottom:24px;">Solve the calculation sequence instantly to
+            <p style="font-size:0.8rem; color:#9ca3af; margin-bottom:16px;">Solve the calculation sequence instantly to
                 compromise or defend the card!</p>
+            <!-- Live stopwatch -->
+            <div id="math-stopwatch" style="font-family:'Orbitron',monospace; font-size:1.1rem; font-weight:700; color:#60a5fa; letter-spacing:2px; margin-bottom:16px; opacity:0.85;">
+                00:00<span style="font-size:0.75rem; color:#6b7280;">.</span><span id="math-stopwatch-ms" style="font-size:0.85rem; color:#6b7280;">000</span>
+            </div>
             <div style="font-size:3.5rem; font-weight:900; letter-spacing:2px; margin-bottom:24px;"
                 id="math-equation-prompt">-- + --</div>
             <input type="number" id="math-player-input"
                 style="background:var(--bg-dark); border:2px solid var(--border-glow); font-size:1.8rem; text-align:center; padding:12px; width:80%; border-radius:12px; color:white; outline:none; margin-bottom:24px;"
                 placeholder="Result">
             <button class="btn-action btn-blue" id="math-submit-response">TRANSMIT DECRYPTION</button>
+            <!-- Solve time result shown after submission -->
+            <div id="math-solve-result" style="display:none; margin-top:16px; padding:12px 20px; border-radius:12px; background:rgba(16,185,129,0.12); border:1px solid rgba(16,185,129,0.3);">
+                <div style="font-size:0.75rem; color:#9ca3af; font-weight:600; letter-spacing:0.05em; text-transform:uppercase; margin-bottom:4px;">Your Solve Time</div>
+                <div id="math-solve-result-time" style="font-family:'Orbitron',monospace; font-size:1.6rem; font-weight:900; color:#10b981; letter-spacing:2px;">--</div>
+            </div>
         </div>
     </div>
 
@@ -8383,6 +8392,7 @@ const MUTATIONS_LIST = [
                 targetInputField.dataset.expectedResult = String(expectedResult);
 
                 mathChallengeStartTime = Date.now();
+                startMathStopwatch();
             }
 
             activeStealSessionUnsub = onValue(ref(db, `clash_sessions/${sessionId}`), snapshot => {
@@ -8429,6 +8439,62 @@ const MUTATIONS_LIST = [
             activeStealSessionUnsub = () => { clearTimeout(clashAutoJudgeTimer); _origUnsub(); };
         }
 
+        // ── MATH CHALLENGE STOPWATCH ───────────────────────────────
+        let _mathStopwatchRaf = null;
+
+        function startMathStopwatch() {
+            // Reset display
+            const solveResult = document.getElementById('math-solve-result');
+            if (solveResult) solveResult.style.display = 'none';
+            const stopwatchEl = document.getElementById('math-stopwatch');
+            if (stopwatchEl) stopwatchEl.style.display = 'block';
+
+            function tick() {
+                if (!mathChallengeStartTime) return;
+                const elapsed = Date.now() - mathChallengeStartTime;
+                const mins = Math.floor(elapsed / 60000);
+                const secs = Math.floor((elapsed % 60000) / 1000);
+                const ms = elapsed % 1000;
+
+                const stopwatch = document.getElementById('math-stopwatch');
+                const msEl = document.getElementById('math-stopwatch-ms');
+                if (stopwatch) {
+                    const mmss = `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+                    stopwatch.childNodes[0].textContent = mmss;
+                }
+                if (msEl) msEl.textContent = String(ms).padStart(3,'0');
+
+                _mathStopwatchRaf = requestAnimationFrame(tick);
+            }
+            _mathStopwatchRaf = requestAnimationFrame(tick);
+        }
+
+        function stopMathStopwatch(solveTimeMs) {
+            if (_mathStopwatchRaf) {
+                cancelAnimationFrame(_mathStopwatchRaf);
+                _mathStopwatchRaf = null;
+            }
+
+            // Hide running stopwatch
+            const stopwatchEl = document.getElementById('math-stopwatch');
+            if (stopwatchEl) stopwatchEl.style.display = 'none';
+
+            // Format: Xm Xs XXXms  or  Xs XXXms  or  XXXms
+            const mins = Math.floor(solveTimeMs / 60000);
+            const secs = Math.floor((solveTimeMs % 60000) / 1000);
+            const ms = solveTimeMs % 1000;
+
+            let formatted = '';
+            if (mins > 0) formatted += `${mins}m `;
+            if (mins > 0 || secs > 0) formatted += `${secs}s `;
+            formatted += `${String(ms).padStart(3,'0')}ms`;
+
+            const resultBox = document.getElementById('math-solve-result');
+            const resultTime = document.getElementById('math-solve-result-time');
+            if (resultTime) resultTime.textContent = formatted.trim();
+            if (resultBox) resultBox.style.display = 'block';
+        }
+
         document.getElementById('math-submit-response')?.addEventListener('click', () => {
             if (clashUiLocked || !activeStealSequenceId) return;
 
@@ -8437,6 +8503,7 @@ const MUTATIONS_LIST = [
 
             if (parsedPlayerInputVal === calculatedExpectedTargetResult) {
                 const solveTimeMs = Date.now() - mathChallengeStartTime;
+                stopMathStopwatch(solveTimeMs);
                 signalClashVictoryCaptureLock(solveTimeMs);
             } else {
                 showToast('Wrong answer — try again.', 'error');
@@ -8556,6 +8623,7 @@ const MUTATIONS_LIST = [
             const alreadyHandledUi = processedStealSessionIds.has(uiKey);
 
             closeModal('modal-game-math');
+            if (_mathStopwatchRaf) { cancelAnimationFrame(_mathStopwatchRaf); _mathStopwatchRaf = null; }
             if (reactionSequenceTimer) {
                 clearTimeout(reactionSequenceTimer);
                 reactionSequenceTimer = null;
@@ -10940,7 +11008,7 @@ const MUTATIONS_LIST = [
 
     </script>
     <div style="position: fixed; top: 12px; left: 12px; z-index: 9999; color: rgba(255, 255, 255, 0.4); font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
-    V:9.6
+    V:9.7
 </div>
 </body>
 
