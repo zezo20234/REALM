@@ -6680,11 +6680,14 @@ const MUTATIONS_LIST = [
 
         function formatNum(n) {
             n = parseFloat(n) || 0;
-            const sign = n < 0 ? '-' : '';
             const abs = Math.abs(n);
-            // Always show the full number — no K / M / B shortcuts
-            if (Number.isInteger(abs)) return sign + abs.toLocaleString('en-US');
-            return sign + abs.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            const sign = n < 0 ? '-' : '';
+            if (abs >= 1e15)  return sign + (abs / 1e15).toFixed(abs % 1e15 === 0 ? 0 : 2).replace(/\.?0+$/, '') + 'Q';
+            if (abs >= 1e12)  return sign + (abs / 1e12).toFixed(abs % 1e12 === 0 ? 0 : 2).replace(/\.?0+$/, '') + 'T';
+            if (abs >= 1e9)   return sign + (abs / 1e9 ).toFixed(abs % 1e9  === 0 ? 0 : 2).replace(/\.?0+$/, '') + 'B';
+            if (abs >= 1e6)   return sign + (abs / 1e6 ).toFixed(abs % 1e6  === 0 ? 0 : 2).replace(/\.?0+$/, '') + 'M';
+            if (abs >= 1e3)   return sign + (abs / 1e3 ).toFixed(abs % 1e3  === 0 ? 0 : 2).replace(/\.?0+$/, '') + 'K';
+            return sign + abs.toFixed(2);
         }
 
         function renderHUDDisplayElements() {
@@ -8239,53 +8242,37 @@ const MUTATIONS_LIST = [
         };
 
         function executeSystemicCardMutationTick() {
-            // Guard: don't run until the user's inventory is fully loaded
-            if (!userProfileHydrated || !activeUserSession?.uid) return;
+            const arrayKeysOfInventory = Object.keys(userDeckRecord);
+            if (arrayKeysOfInventory.length === 0) return;
 
-            const now = Date.now();
-            const allKeys = Object.keys(userDeckRecord);
-            if (allKeys.length === 0) return;
+            // If a Mutation Magnet is active on any card, direct all mutations there
+            const magnetInstanceKey = Object.keys(userDeckRecord).find(k => userDeckRecord[k].mutationMagnet === true);
 
-            // Pick the new mutation index now (same for any candidate card)
-            const newMutationIndex = pickWeightedMutationIndex();
-            const newMutation = MUTATIONS_LIST[newMutationIndex];
-            if (newMutation && newMutation.bonusPercent > MAX_MUTATION_BONUS_PERCENT) return;
+            let targetInstanceKey;
+            let targetCardInstance;
 
-            // If a Mutation Magnet is active, use that card — otherwise pick a random eligible card.
-            // "Eligible" = not cryptographically locked, and has fewer than 10 mutations.
-            // We try up to all cards before giving up so a single locked/full card never blocks everyone.
-            const magnetKey = allKeys.find(k => userDeckRecord[k].mutationMagnet === true);
-
-            let targetKey = null;
-            if (magnetKey) {
-                const mc = userDeckRecord[magnetKey];
-                const magnetLocked = mc.cryptographicLockExpiry && mc.cryptographicLockExpiry > now;
-                const magnetFull   = (mc.activeMutationIndexes || []).length >= 10;
-                if (!magnetLocked && !magnetFull) targetKey = magnetKey;
+            if (magnetInstanceKey) {
+                targetInstanceKey = magnetInstanceKey;
+                targetCardInstance = userDeckRecord[magnetInstanceKey];
+            } else {
+                targetInstanceKey = arrayKeysOfInventory[Math.floor(Math.random() * arrayKeysOfInventory.length)];
+                targetCardInstance = userDeckRecord[targetInstanceKey];
             }
 
-            if (!targetKey) {
-                // Shuffle the keys so we don't always hit the same card
-                const shuffled = allKeys.slice().sort(() => Math.random() - 0.5);
-                for (const k of shuffled) {
-                    const c = userDeckRecord[k];
-                    const locked = c.cryptographicLockExpiry && c.cryptographicLockExpiry > now;
-                    const full   = (c.activeMutationIndexes || []).length >= 10;
-                    if (!locked && !full) { targetKey = k; break; }
-                }
-            }
+            if (targetCardInstance.cryptographicLockExpiry && targetCardInstance.cryptographicLockExpiry > Date.now()) return;
 
-            if (!targetKey) return; // every card is locked or maxed — nothing to do
+            const trackingMutationsListIndexes = targetCardInstance.activeMutationIndexes || [];
+            if (trackingMutationsListIndexes.length >= 10) return;
 
-            // Use a Firebase transaction so we always append to the real server array,
-            // never the potentially-stale local cache. This is what prevented mutations
-            // from showing up — a stale local write was silently dropping the update.
-            runTransaction(ref(db, `inventory/${activeUserSession.uid}/${targetKey}/activeMutationIndexes`), (currentIndexes) => {
-                const arr = Array.isArray(currentIndexes) ? currentIndexes : [];
-                if (arr.length >= 10) return; // abort if already full on the server side
-                return [...arr, newMutationIndex];
-            }).catch(err => {
-                console.error('Mutation transaction failed:', err);
+            const generatedRandomMutationIndex = pickWeightedMutationIndex();
+            const generatedMutation = MUTATIONS_LIST[generatedRandomMutationIndex];
+            if (generatedMutation && generatedMutation.bonusPercent > MAX_MUTATION_BONUS_PERCENT) return;
+            trackingMutationsListIndexes.push(generatedRandomMutationIndex);
+
+            update(ref(db, `inventory/${activeUserSession.uid}/${targetInstanceKey}`), {
+                activeMutationIndexes: trackingMutationsListIndexes
+            }).catch(error => {
+                console.error('Mutation tick failed:', error);
             });
         }
 
@@ -8829,22 +8816,12 @@ const MUTATIONS_LIST = [
                 const targetInputField = document.getElementById('math-player-input');
                 targetInputField.value = '';
                 targetInputField.dataset.expectedResult = String(expectedResult);
-
-                // Aggressively focus the input across all browsers/mobile.
-                // Mobile browsers need the element to be visible+painted before focus works,
-                // so we retry at multiple intervals after the modal CSS transition settles.
-                function _tryFocusMathInput() {
+                // Focus immediately and also after a brief delay for mobile browsers
+                targetInputField.focus();
+                setTimeout(() => {
                     targetInputField.focus();
-                    if (document.activeElement !== targetInputField) {
-                        targetInputField.setAttribute('readonly', 'readonly');
-                        targetInputField.removeAttribute('readonly');
-                        targetInputField.focus();
-                    }
-                }
-                _tryFocusMathInput();
-                setTimeout(_tryFocusMathInput, 80);
-                setTimeout(_tryFocusMathInput, 200);
-                setTimeout(_tryFocusMathInput, 400);
+                    targetInputField.click();
+                }, 150);
 
                 mathChallengeStartTime = Date.now();
             }
@@ -8893,43 +8870,32 @@ const MUTATIONS_LIST = [
             activeStealSessionUnsub = () => { clearTimeout(clashAutoJudgeTimer); _origUnsub(); };
         }
 
-        // Shared submit logic for clash math challenge
-        function _submitMathAnswer() {
+        document.getElementById('math-submit-response')?.addEventListener('click', () => {
             if (clashUiLocked || !activeStealSequenceId) return;
-            const inputEl = document.getElementById('math-player-input');
-            const parsedPlayerInputVal = parseInt(inputEl.value.trim(), 10);
-            const calculatedExpectedTargetResult = parseInt(inputEl.dataset.expectedResult, 10);
-            if (isNaN(parsedPlayerInputVal)) return; // nothing typed yet
+
+            const parsedPlayerInputVal = parseInt(document.getElementById('math-player-input').value.trim(), 10);
+            const calculatedExpectedTargetResult = parseInt(document.getElementById('math-player-input').dataset.expectedResult, 10);
+
             if (parsedPlayerInputVal === calculatedExpectedTargetResult) {
                 const solveTimeMs = Date.now() - mathChallengeStartTime;
                 signalClashVictoryCaptureLock(solveTimeMs);
             } else {
                 showToast('Wrong answer — try again.', 'error');
             }
-        }
+        });
 
-        // Click (desktop) — keep as-is
-        document.getElementById('math-submit-response')?.addEventListener('click', _submitMathAnswer);
-
-        // touchstart fires ~300ms faster than click on mobile — critical for steal speed
-        document.getElementById('math-submit-response')?.addEventListener('touchstart', (e) => {
-            e.preventDefault(); // prevent the subsequent click from double-firing
-            _submitMathAnswer();
-        }, { passive: false });
-
-        // Enter key on the input field
         document.getElementById('math-player-input')?.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                _submitMathAnswer();
-            }
-        });
-
-        // Re-focus the math input if the modal is visible but focus drifted away (e.g. user tapped elsewhere)
-        document.getElementById('modal-game-math')?.addEventListener('click', (e) => {
-            const inputEl = document.getElementById('math-player-input');
-            if (e.target !== document.getElementById('math-submit-response')) {
-                inputEl?.focus();
+                if (clashUiLocked || !activeStealSequenceId) return;
+                const parsedPlayerInputVal = parseInt(document.getElementById('math-player-input').value.trim(), 10);
+                const calculatedExpectedTargetResult = parseInt(document.getElementById('math-player-input').dataset.expectedResult, 10);
+                if (parsedPlayerInputVal === calculatedExpectedTargetResult) {
+                    const solveTimeMs = Date.now() - mathChallengeStartTime;
+                    signalClashVictoryCaptureLock(solveTimeMs);
+                } else {
+                    showToast('Wrong answer — try again.', 'error');
+                }
             }
         });
 
@@ -11649,7 +11615,7 @@ const MUTATIONS_LIST = [
         });
 
     </script>
-    <div style="position: fixed; top: 12px; left: 12px; z-index: 9999; color: rgba(255, 255, 255, 0.4); font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
+    <div style="position: fixed; top: 12px; left: 12px; z-index: 9999999999999; color: rgba(255, 255, 255, 0.4); font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
     V:9.9.7
 </div>
 </body>
