@@ -4295,6 +4295,19 @@
                     <button class="btn-lvlup" style="background:var(--primary)"
                         onclick="buyLockItem(60, 75)">€75.00</button>
                 </div>
+
+                <div style="margin-top:20px; padding-top:16px; border-top:1px solid var(--border-glow);">
+                    <div style="font-size:0.7rem; font-weight:800; letter-spacing:0.08em; color:#a855f7; margin-bottom:10px;">⚗️ MUTATION TOOLS</div>
+                    <div class="player-row">
+                        <div>
+                            <div style="font-weight:bold;">🧲 Mutation Magnet</div>
+                            <div style="font-size:0.75rem; color:#9ca3af; margin-top:2px;">Forces all mutations onto one card. Removable anytime.</div>
+                            <div style="font-size:0.75rem; color:#9ca3af; margin-top:2px;">Inventory: <span id="shop-magnets-count" style="color:white; font-weight:bold;">0</span></div>
+                        </div>
+                        <button class="btn-lvlup" style="background:linear-gradient(135deg,#7c3aed,#a855f7);"
+                            onclick="buyMutationMagnet()">€150.00</button>
+                    </div>
+                </div>
             </section>
 
             <section id="view-quests" class="view-panel">
@@ -4438,7 +4451,9 @@
             <button class="btn-action btn-blue" id="cd-customize-btn"
                 style="display:none; margin-bottom:16px;">CUSTOMIZE</button>
             <button class="btn-action btn-outline" id="cd-add-to-collection-btn"
-                style="display:none; margin-bottom:16px; border-color:var(--gold); color:var(--gold);">⭐ ADD TO COLLECTION</button>
+                style="display:none; margin-bottom:16px; border-color:var(--gold); color:var(--gold);">⭐ ADD TO COLLECTION (€2500)</button>
+            <button class="btn-action btn-outline" id="cd-remove-from-collection-btn"
+                style="display:none; margin-bottom:16px; border-color:var(--accent-red); color:var(--accent-red);">🔓 REMOVE FROM COLLECTION (€5000)</button>
 
             <div
                 style="border-top:1px solid var(--border-glow); padding-top:16px; display:flex; justify-content:space-between; align-items:center;">
@@ -4714,6 +4729,17 @@
                 <div style="font-size:0.75rem;color:#9ca3af;font-weight:700;margin-bottom:8px;letter-spacing:0.5px;">
                     ACTIVE CUSTOM PACKS</div>
                 <div id="cp-active-list"></div>
+            </div>
+
+            <div class="admin-panel-section">
+                <h4>STEALING CONTROL</h4>
+                <p style="font-size:0.78rem;color:#94a3b8;margin-bottom:10px;">Enable or disable stealing for all players globally.</p>
+                <div style="display:flex;gap:8px;">
+                    <button class="admin-restock-btn" style="background:var(--accent-green);color:white;flex:1;"
+                        id="admin-enable-stealing">ENABLE STEALING</button>
+                    <button class="admin-restock-btn" style="background:var(--accent-red);color:white;flex:1;"
+                        id="admin-disable-stealing">DISABLE STEALING</button>
+                </div>
             </div>
 
             <div class="admin-panel-section" style="border:none;">
@@ -6066,6 +6092,16 @@ const MUTATIONS_LIST = [
                 showToast('Luck boost cleared.', 'info');
             });
 
+            document.getElementById('admin-enable-stealing')?.addEventListener('click', async () => {
+                await update(ref(db, 'system/adminState'), { stealingEnabled: true });
+                showToast('Stealing enabled for all players.', 'success');
+            });
+
+            document.getElementById('admin-disable-stealing')?.addEventListener('click', async () => {
+                await update(ref(db, 'system/adminState'), { stealingEnabled: false });
+                showToast('Stealing disabled for all players.', 'info');
+            });
+
             document.getElementById('admin-send-broadcast')?.addEventListener('click', async () => {
                 const text = document.getElementById('admin-broadcast-text').value.trim();
                 if (!text) return showToast('Enter a message.', 'error');
@@ -6685,6 +6721,10 @@ const MUTATIONS_LIST = [
                     countNode.innerText = (userDataRecord.locks && userDataRecord.locks[mins]) || 0;
                 }
             });
+            const magnetCountNode = document.getElementById('shop-magnets-count');
+            if (magnetCountNode) {
+                magnetCountNode.innerText = (userDataRecord.magnets) || 0;
+            }
         }
 
         // ─────────────────────────────────────────────────────────────────────
@@ -7222,7 +7262,11 @@ const MUTATIONS_LIST = [
             const mSecondsField = Math.floor((localizedRemainingMutationTick % 60000) / 1000);
             document.getElementById('timer-mutation').innerText = `${mMinutesField.toString().padStart(2, '0')}:${mSecondsField.toString().padStart(2, '0')}`;
 
-            if (mMinutesField === 0 && mSecondsField === 0) {
+            // Fire mutation once per minute using a reliable minute-bucket tracker
+            const currentMutationMinuteBucket = Math.floor(currentSystemEpochTime / mutationFrequencyInterval);
+            if (typeof window._lastMutationMinuteBucket === 'undefined') window._lastMutationMinuteBucket = currentMutationMinuteBucket;
+            if (currentMutationMinuteBucket > window._lastMutationMinuteBucket) {
+                window._lastMutationMinuteBucket = currentMutationMinuteBucket;
                 executeSystemicCardMutationTick();
             }
 
@@ -7496,8 +7540,8 @@ const MUTATIONS_LIST = [
                 const currentSystemEpoch = Date.now();
                 const evaluatingSecurityLockIsActive = currentInstanceItem.cryptographicLockExpiry && currentInstanceItem.cryptographicLockExpiry > currentSystemEpoch;
                 const _stolenActiveMs = currentInstanceItem.stolenAt ? getStolenActiveMs(instanceIdKey) : Infinity;
-                const stolenCooldownActive = currentInstanceItem.stolenAt && _stolenActiveMs < 10000;
-                const stolenCooldownSecsLeft = stolenCooldownActive ? Math.ceil((10000 - _stolenActiveMs) / 1000) : 0;
+                const stolenCooldownActive = currentInstanceItem.stolenAt && _stolenActiveMs < 15000;
+                const stolenCooldownSecsLeft = stolenCooldownActive ? Math.ceil((15000 - _stolenActiveMs) / 1000) : 0;
 
                 const globalRegisteredCopiesCount = globalCopiesTrackerRef[currentInstanceItem.cardId] || 1;
                 const mutationsCount = (currentInstanceItem.activeMutationIndexes || []).length;
@@ -7537,16 +7581,19 @@ const MUTATIONS_LIST = [
                             <div class="card-instance-id">#${instanceIdKey.slice(0, 10)}</div>
                         </div>
                         <div class="card-badge-bottom">
-                            <span class="mutations-indicator">🧬 M:${mutationsCount}</span>
+                            <span class="mutations-indicator">🧬 M:${mutationsCount}${currentInstanceItem.mutationMagnet ? " 🧲" : ""}</span>
                             <span style="color:var(--accent-green);">€${formatNum(liveCalculatedValue)}</span>
                         </div>
                     </div>
                     <div class="card-action-overlay">
                         <div style="display:flex; gap:6px;">
                             <button class="card-btn" style="flex:1; background:var(--accent-red); color:white;" ${(evaluatingSecurityLockIsActive || protectedCard || stolenCooldownActive) ? `disabled style="opacity:0.3;"` : ''} onclick="liquidateInventoryCardInstance('${instanceIdKey}', ${liveCalculatedValue})">${stolenCooldownActive ? `SELL (${stolenCooldownSecsLeft}s)` : 'SELL'}</button>
-                            <button class="card-btn" style="flex:1; background:var(--bg-surface); border:1px solid var(--border-glow); color:white;" ${evaluatingSecurityLockIsActive ? 'disabled style="opacity:0.3;"' : ''} onclick="initiateAssetTransferProtocol('${instanceIdKey}')">SEND</button>
+                            <button class="card-btn" style="flex:1; background:var(--bg-surface); border:1px solid var(--border-glow); color:white;" ${(evaluatingSecurityLockIsActive || stolenCooldownActive) ? 'disabled style="opacity:0.3;"' : ''} onclick="initiateAssetTransferProtocol('${instanceIdKey}')">${stolenCooldownActive ? `SEND (${stolenCooldownSecsLeft}s)` : 'SEND'}</button>
                         </div>
-                        <button class="card-btn" style="background:var(--gold); color:black;" ${evaluatingSecurityLockIsActive ? 'disabled style="opacity:0.3;"' : ''} onclick="openLockSelectionModal('${instanceIdKey}')">🔒 LOCK ASSET</button>
+                        <div style="display:flex; gap:6px;">
+                            <button class="card-btn" style="flex:1; background:var(--gold); color:black;" ${(evaluatingSecurityLockIsActive || stolenCooldownActive) ? 'disabled style="opacity:0.3;"' : ''} onclick="openLockSelectionModal('${instanceIdKey}')">${stolenCooldownActive ? `🔒 COOLDOWN (${stolenCooldownSecsLeft}s)` : '🔒 LOCK ASSET'}</button>
+                            ${currentInstanceItem.mutationMagnet ? `<button class="card-btn" style="flex:1; background:linear-gradient(135deg,#7c3aed,#a855f7); color:white;" onclick="removeMutationMagnet('${instanceIdKey}')">🧲 REMOVE</button>` : `<button class="card-btn" style="flex:1; background:var(--bg-surface); border:1px solid #7c3aed; color:#a855f7;" ${((userDataRecord.magnets || 0) <= 0) ? 'disabled style="opacity:0.3;"' : ''} onclick="applyMutationMagnet('${instanceIdKey}')">🧲 MAGNET</button>`}
+                        </div>
                     </div>
                 `;
                 targetGridDisplayNode.appendChild(cardUiNodeElement);
@@ -7576,15 +7623,57 @@ const MUTATIONS_LIST = [
             const card = userDeckRecord?.[instanceId];
             if (!card) return;
             if (card.isCollection) return;
+            if (card.collectionToggled) return showToast('This card has already been toggled in/out of collection.', 'error');
 
-            await update(ref(db, `inventory/${activeUserSession.uid}/${instanceId}`), {
-                isCollection: true,
-                unsellable: true
+            const cost = 2500;
+            if ((userDataRecord.money || 0) < cost) {
+                return showToast(`You need €${cost} to add this card to collection.`, 'error');
+            }
+
+            await update(ref(db, '/'), {
+                [`inventory/${activeUserSession.uid}/${instanceId}`]: {
+                    ...card,
+                    isCollection: true,
+                    unsellable: true,
+                    collectionToggled: true
+                },
+                [`users/${activeUserSession.uid}/money`]: (userDataRecord.money || 0) - cost
             });
-            showToast('Card added to collection!', 'success');
+            userDataRecord.money = (userDataRecord.money || 0) - cost;
+            showToast('Card added to collection for €2500!', 'success');
             closeModal('modal-card-details');
             renderUserInventoryDeckGrid();
             renderCollectionCardsGrid();
+            renderHUDDisplayElements();
+        };
+
+        window.removeFromCollection = async function (instanceId) {
+            if (!activeUserSession?.uid || !instanceId) return;
+            const card = userDeckRecord?.[instanceId];
+            if (!card) return;
+            if (!card.isCollection) return;
+            if (card.collectionToggled) return showToast('This card has already been toggled in/out of collection.', 'error');
+
+            const cost = 5000;
+            if ((userDataRecord.money || 0) < cost) {
+                return showToast(`You need €${cost} to remove this card from collection.`, 'error');
+            }
+
+            await update(ref(db, '/'), {
+                [`inventory/${activeUserSession.uid}/${instanceId}`]: {
+                    ...card,
+                    isCollection: false,
+                    unsellable: false,
+                    collectionToggled: true
+                },
+                [`users/${activeUserSession.uid}/money`]: (userDataRecord.money || 0) - cost
+            });
+            userDataRecord.money = (userDataRecord.money || 0) - cost;
+            showToast('Card removed from collection for €5000!', 'success');
+            closeModal('modal-card-details');
+            renderUserInventoryDeckGrid();
+            renderCollectionCardsGrid();
+            renderHUDDisplayElements();
         };
 
         function renderCollectionCardsGrid() {
@@ -7695,7 +7784,7 @@ const MUTATIONS_LIST = [
                 if (!card) return false;
                 if (isRamezCard(card)) return false;
                 if (card.unsellable) return false;
-                if (card.stolenAt && getStolenActiveMs(instanceId) < 10000) return false;
+                if (card.stolenAt && getStolenActiveMs(instanceId) < 15000) return false;
                 const locked = card.cryptographicLockExpiry && card.cryptographicLockExpiry > now;
                 return !locked;
             });
@@ -7790,11 +7879,19 @@ const MUTATIONS_LIST = [
             document.getElementById('cd-customize-btn').onclick = () => openCardCustomizationModal(instanceId, cardName, cardColor);
             
             const addToCollectionBtn = document.getElementById('cd-add-to-collection-btn');
-            if (instanceData.isCollection) {
+            const removeFromCollectionBtn = document.getElementById('cd-remove-from-collection-btn');
+            
+            if (instanceData.collectionToggled) {
                 addToCollectionBtn.style.display = 'none';
+                removeFromCollectionBtn.style.display = 'none';
+            } else if (instanceData.isCollection) {
+                addToCollectionBtn.style.display = 'none';
+                removeFromCollectionBtn.style.display = 'block';
+                removeFromCollectionBtn.onclick = () => removeFromCollection(instanceId);
             } else {
                 addToCollectionBtn.style.display = 'block';
                 addToCollectionBtn.onclick = () => addToCollection(instanceId);
+                removeFromCollectionBtn.style.display = 'none';
             }
 
             const mutsListContainer = document.getElementById('cd-mutations-list');
@@ -8019,7 +8116,45 @@ const MUTATIONS_LIST = [
         };
 
 
-        // --- CLOSING MODALS (ARCHIVE) ---
+        window.buyMutationMagnet = async function () {
+            const price = 150;
+            if (userDataRecord.money < price) return showToast("Insufficient funds.", "error");
+            const currentMagnets = (userDataRecord.magnets) || 0;
+            const payload = {};
+            payload[`users/${activeUserSession.uid}/money`] = userDataRecord.money - price;
+            payload[`users/${activeUserSession.uid}/magnets`] = currentMagnets + 1;
+            await update(ref(db, '/'), payload);
+            showToast("Purchased 1× Mutation Magnet.", "success");
+        };
+
+        window.applyMutationMagnet = async function (instanceId) {
+            const availableMagnets = (userDataRecord.magnets) || 0;
+            if (availableMagnets <= 0) return showToast("No Mutation Magnets in inventory.", "error");
+
+            // Remove magnet from any card that currently has it
+            const currentMagnetKey = Object.keys(userDeckRecord).find(k => userDeckRecord[k].mutationMagnet === true);
+            const payload = {};
+            if (currentMagnetKey && currentMagnetKey !== instanceId) {
+                payload[`inventory/${activeUserSession.uid}/${currentMagnetKey}/mutationMagnet`] = null;
+            }
+
+            payload[`users/${activeUserSession.uid}/magnets`] = availableMagnets - 1;
+            payload[`inventory/${activeUserSession.uid}/${instanceId}/mutationMagnet`] = true;
+
+            await update(ref(db, '/'), payload);
+            closeModal('modal-apply-lock');
+            showToast("🧲 Mutation Magnet applied! All mutations will come here.", "success");
+        };
+
+        window.removeMutationMagnet = async function (instanceId) {
+            const payload = {};
+            payload[`inventory/${activeUserSession.uid}/${instanceId}/mutationMagnet`] = null;
+            payload[`users/${activeUserSession.uid}/magnets`] = ((userDataRecord.magnets) || 0) + 1;
+            await update(ref(db, '/'), payload);
+            showToast("🧲 Mutation Magnet removed. Returned to inventory.", "info");
+        };
+
+                // --- CLOSING MODALS (ARCHIVE) ---
         document.getElementById('close-archive-modal')?.addEventListener('click', () => {
             closeModal('modal-archive-details');
         });
@@ -8040,8 +8175,8 @@ const MUTATIONS_LIST = [
             if (selectedCard?.stolenAt) {
                 const _activeMs = getStolenActiveMs(instanceId);
                 const secondsSinceSteal = _activeMs / 1000;
-                if (secondsSinceSteal < 10) {
-                    const remaining = Math.ceil(10 - secondsSinceSteal);
+                if (secondsSinceSteal < 15) {
+                    const remaining = Math.ceil(15 - secondsSinceSteal);
                     showToast(`Stolen cards can't be sold for ${remaining}s.`, 'error');
                     return false;
                 }
@@ -8086,6 +8221,10 @@ const MUTATIONS_LIST = [
             if (sourceCardMovingObjectInstance.cryptographicLockExpiry && sourceCardMovingObjectInstance.cryptographicLockExpiry > Date.now()) {
                 return showToast("Card is locked — transfer blocked.", "error");
             }
+            if (sourceCardMovingObjectInstance.stolenAt && getStolenActiveMs(instanceId) < 15000) {
+                const remaining = Math.ceil((15000 - getStolenActiveMs(instanceId)) / 1000);
+                return showToast(`Stolen cards can't be sent for ${remaining}s.`, 'error');
+            }
 
             const assetRoutingTransferPayload = {};
             assetRoutingTransferPayload[`inventory/${activeUserSession.uid}/${instanceId}`] = null;
@@ -8106,12 +8245,23 @@ const MUTATIONS_LIST = [
             const arrayKeysOfInventory = Object.keys(userDeckRecord);
             if (arrayKeysOfInventory.length === 0) return;
 
-            const randomlySelectedTargetInstanceKey = arrayKeysOfInventory[Math.floor(Math.random() * arrayKeysOfInventory.length)];
-            const targetSelectedCardInstance = userDeckRecord[randomlySelectedTargetInstanceKey];
+            // If a Mutation Magnet is active on any card, direct all mutations there
+            const magnetInstanceKey = Object.keys(userDeckRecord).find(k => userDeckRecord[k].mutationMagnet === true);
 
-            if (targetSelectedCardInstance.cryptographicLockExpiry && targetSelectedCardInstance.cryptographicLockExpiry > Date.now()) return;
+            let targetInstanceKey;
+            let targetCardInstance;
 
-            const trackingMutationsListIndexes = targetSelectedCardInstance.activeMutationIndexes || [];
+            if (magnetInstanceKey) {
+                targetInstanceKey = magnetInstanceKey;
+                targetCardInstance = userDeckRecord[magnetInstanceKey];
+            } else {
+                targetInstanceKey = arrayKeysOfInventory[Math.floor(Math.random() * arrayKeysOfInventory.length)];
+                targetCardInstance = userDeckRecord[targetInstanceKey];
+            }
+
+            if (targetCardInstance.cryptographicLockExpiry && targetCardInstance.cryptographicLockExpiry > Date.now()) return;
+
+            const trackingMutationsListIndexes = targetCardInstance.activeMutationIndexes || [];
             if (trackingMutationsListIndexes.length >= 10) return;
 
             const generatedRandomMutationIndex = pickWeightedMutationIndex();
@@ -8119,8 +8269,10 @@ const MUTATIONS_LIST = [
             if (generatedMutation && generatedMutation.bonusPercent > MAX_MUTATION_BONUS_PERCENT) return;
             trackingMutationsListIndexes.push(generatedRandomMutationIndex);
 
-            update(ref(db, `inventory/${activeUserSession.uid}/${randomlySelectedTargetInstanceKey}`), {
+            update(ref(db, `inventory/${activeUserSession.uid}/${targetInstanceKey}`), {
                 activeMutationIndexes: trackingMutationsListIndexes
+            }).catch(error => {
+                console.error('Mutation tick failed:', error);
             });
         }
 
@@ -11370,7 +11522,7 @@ const MUTATIONS_LIST = [
         // - Leaving the game (tab hidden / closed) RESETS the timer
         // - Live countdown shown on the SELL button, re-enables itself
         // =========================================================
-        const STOLEN_COOLDOWN_MS = 10000;
+        const STOLEN_COOLDOWN_MS = 15000;
 
         // In-memory only — leaving the page wipes it (that's the point)
         const _stolenTimers = {}; // instanceId -> { startedAt: timestamp }
@@ -11387,33 +11539,63 @@ const MUTATIONS_LIST = [
             return Date.now() - entry.startedAt;
         };
 
-        // ---- Live countdown: update SELL buttons every second ----
+        // ---- Live countdown: update SELL/SEND/LOCK buttons every second ----
         function _updateStolenSellButtons() {
             const now = Date.now();
             for (const instanceId in _stolenTimers) {
                 const elapsed = now - _stolenTimers[instanceId].startedAt;
                 const remaining = Math.ceil((STOLEN_COOLDOWN_MS - elapsed) / 1000);
 
-                // Find the sell button for this card (it has onclick containing the instanceId)
-                const btn = document.querySelector(
+                // Find the sell button for this card
+                const sellBtn = document.querySelector(
                     `.card-action-overlay button[onclick*="liquidateInventoryCardInstance('${instanceId}'"]`
                 );
-                if (!btn) continue;
+                // Find the send button
+                const sendBtn = document.querySelector(
+                    `.card-action-overlay button[onclick*="initiateAssetTransferProtocol('${instanceId}'"]`
+                );
+                // Find the lock button
+                const lockBtn = document.querySelector(
+                    `.card-action-overlay button[onclick*="openLockSelectionModal('${instanceId}'"]`
+                );
 
                 if (elapsed >= STOLEN_COOLDOWN_MS) {
-                    // Cooldown done — unlock button
+                    // Cooldown done — unlock all buttons
                     delete _stolenTimers[instanceId];
-                    btn.disabled = false;
-                    btn.style.opacity = '1';
-                    btn.textContent = 'SELL';
-                    // Flash green briefly to signal it's ready
-                    btn.style.background = '#10b981';
-                    setTimeout(() => { btn.style.background = 'var(--accent-red)'; }, 800);
+                    if (sellBtn) {
+                        sellBtn.disabled = false;
+                        sellBtn.style.opacity = '1';
+                        sellBtn.textContent = 'SELL';
+                        sellBtn.style.background = '#10b981';
+                        setTimeout(() => { sellBtn.style.background = 'var(--accent-red)'; }, 800);
+                    }
+                    if (sendBtn) {
+                        sendBtn.disabled = false;
+                        sendBtn.style.opacity = '1';
+                        sendBtn.textContent = 'SEND';
+                    }
+                    if (lockBtn) {
+                        lockBtn.disabled = false;
+                        lockBtn.style.opacity = '1';
+                        lockBtn.textContent = '🔒 LOCK ASSET';
+                    }
                 } else {
                     // Still cooling down
-                    btn.disabled = true;
-                    btn.style.opacity = '0.5';
-                    btn.textContent = `SELL (${remaining}s)`;
+                    if (sellBtn) {
+                        sellBtn.disabled = true;
+                        sellBtn.style.opacity = '0.3';
+                        sellBtn.textContent = `SELL (${remaining}s)`;
+                    }
+                    if (sendBtn) {
+                        sendBtn.disabled = true;
+                        sendBtn.style.opacity = '0.3';
+                        sendBtn.textContent = `SEND (${remaining}s)`;
+                    }
+                    if (lockBtn) {
+                        lockBtn.disabled = true;
+                        lockBtn.style.opacity = '0.3';
+                        lockBtn.textContent = `🔒 COOLDOWN (${remaining}s)`;
+                    }
                 }
             }
         }
@@ -11433,8 +11615,8 @@ const MUTATIONS_LIST = [
         });
 
     </script>
-    <div style="position: fixed; top: 12px; left: 12px; z-index: 9999; color: rgba(255, 255, 255, 0.4); font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
-    V:9.9.5
+    <div style="position: fixed; top: 12px; left: 12px; z-index: 9999999999999; color: rgba(255, 255, 255, 0.4); font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
+    V:9.9.7
 </div>
 </body>
 
