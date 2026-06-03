@@ -3977,6 +3977,7 @@
             <div class="rank-row" id="hud-rank-row">
                 <span id="hud-clash-rank-badge"></span>
                 <span id="hud-rank-reward-timer" style="font-size:0.68rem;font-weight:700;color:#6b7280;margin-left:4px;"></span>
+                <button id="hud-rank-claim-btn" onclick="claimClashRankReward()" style="display:none;margin-left:8px;padding:4px 12px;border-radius:999px;border:none;background:linear-gradient(135deg,#10b981,#059669);color:#fff;font-size:0.72rem;font-weight:900;letter-spacing:0.04em;cursor:pointer;box-shadow:0 0 12px rgba(16,185,129,0.55);animation:claimGlow 1.5s ease-in-out infinite;">🎁 CLAIM REWARD</button>
             </div>
             <div class="xp-row">
                 <div class="level-tag" id="hud-level">LV 1</div>
@@ -4445,23 +4446,14 @@
     <div class="modal-mask" id="modal-game-math">
         <div class="modal-body" style="text-align:center;">
             <h2 style="color:var(--gold); font-weight:900;">INTRUSION ENCRYPTION INTERCEPT</h2>
-            <p style="font-size:0.8rem; color:#9ca3af; margin-bottom:16px;">Solve the calculation sequence instantly to
+            <p style="font-size:0.8rem; color:#9ca3af; margin-bottom:24px;">Solve the calculation sequence instantly to
                 compromise or defend the card!</p>
-            <!-- Live stopwatch -->
-            <div id="math-stopwatch" style="font-family:'Orbitron',monospace; font-size:1.1rem; font-weight:700; color:#60a5fa; letter-spacing:2px; margin-bottom:16px; opacity:0.85;">
-                00:00<span style="font-size:0.75rem; color:#6b7280;">.</span><span id="math-stopwatch-ms" style="font-size:0.85rem; color:#6b7280;">000</span>
-            </div>
             <div style="font-size:3.5rem; font-weight:900; letter-spacing:2px; margin-bottom:24px;"
                 id="math-equation-prompt">-- + --</div>
             <input type="number" id="math-player-input"
                 style="background:var(--bg-dark); border:2px solid var(--border-glow); font-size:1.8rem; text-align:center; padding:12px; width:80%; border-radius:12px; color:white; outline:none; margin-bottom:24px;"
                 placeholder="Result">
             <button class="btn-action btn-blue" id="math-submit-response">TRANSMIT DECRYPTION</button>
-            <!-- Solve time result shown after submission -->
-            <div id="math-solve-result" style="display:none; margin-top:16px; padding:12px 20px; border-radius:12px; background:rgba(16,185,129,0.12); border:1px solid rgba(16,185,129,0.3);">
-                <div style="font-size:0.75rem; color:#9ca3af; font-weight:600; letter-spacing:0.05em; text-transform:uppercase; margin-bottom:4px;">Your Solve Time</div>
-                <div id="math-solve-result-time" style="font-family:'Orbitron',monospace; font-size:1.6rem; font-weight:900; color:#10b981; letter-spacing:2px;">--</div>
-            </div>
         </div>
     </div>
 
@@ -8392,7 +8384,6 @@ const MUTATIONS_LIST = [
                 targetInputField.dataset.expectedResult = String(expectedResult);
 
                 mathChallengeStartTime = Date.now();
-                startMathStopwatch();
             }
 
             activeStealSessionUnsub = onValue(ref(db, `clash_sessions/${sessionId}`), snapshot => {
@@ -8439,62 +8430,6 @@ const MUTATIONS_LIST = [
             activeStealSessionUnsub = () => { clearTimeout(clashAutoJudgeTimer); _origUnsub(); };
         }
 
-        // ── MATH CHALLENGE STOPWATCH ───────────────────────────────
-        let _mathStopwatchRaf = null;
-
-        function startMathStopwatch() {
-            // Reset display
-            const solveResult = document.getElementById('math-solve-result');
-            if (solveResult) solveResult.style.display = 'none';
-            const stopwatchEl = document.getElementById('math-stopwatch');
-            if (stopwatchEl) stopwatchEl.style.display = 'block';
-
-            function tick() {
-                if (!mathChallengeStartTime) return;
-                const elapsed = Date.now() - mathChallengeStartTime;
-                const mins = Math.floor(elapsed / 60000);
-                const secs = Math.floor((elapsed % 60000) / 1000);
-                const ms = elapsed % 1000;
-
-                const stopwatch = document.getElementById('math-stopwatch');
-                const msEl = document.getElementById('math-stopwatch-ms');
-                if (stopwatch) {
-                    const mmss = `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
-                    stopwatch.childNodes[0].textContent = mmss;
-                }
-                if (msEl) msEl.textContent = String(ms).padStart(3,'0');
-
-                _mathStopwatchRaf = requestAnimationFrame(tick);
-            }
-            _mathStopwatchRaf = requestAnimationFrame(tick);
-        }
-
-        function stopMathStopwatch(solveTimeMs) {
-            if (_mathStopwatchRaf) {
-                cancelAnimationFrame(_mathStopwatchRaf);
-                _mathStopwatchRaf = null;
-            }
-
-            // Hide running stopwatch
-            const stopwatchEl = document.getElementById('math-stopwatch');
-            if (stopwatchEl) stopwatchEl.style.display = 'none';
-
-            // Format: Xm Xs XXXms  or  Xs XXXms  or  XXXms
-            const mins = Math.floor(solveTimeMs / 60000);
-            const secs = Math.floor((solveTimeMs % 60000) / 1000);
-            const ms = solveTimeMs % 1000;
-
-            let formatted = '';
-            if (mins > 0) formatted += `${mins}m `;
-            if (mins > 0 || secs > 0) formatted += `${secs}s `;
-            formatted += `${String(ms).padStart(3,'0')}ms`;
-
-            const resultBox = document.getElementById('math-solve-result');
-            const resultTime = document.getElementById('math-solve-result-time');
-            if (resultTime) resultTime.textContent = formatted.trim();
-            if (resultBox) resultBox.style.display = 'block';
-        }
-
         document.getElementById('math-submit-response')?.addEventListener('click', () => {
             if (clashUiLocked || !activeStealSequenceId) return;
 
@@ -8503,7 +8438,6 @@ const MUTATIONS_LIST = [
 
             if (parsedPlayerInputVal === calculatedExpectedTargetResult) {
                 const solveTimeMs = Date.now() - mathChallengeStartTime;
-                stopMathStopwatch(solveTimeMs);
                 signalClashVictoryCaptureLock(solveTimeMs);
             } else {
                 showToast('Wrong answer — try again.', 'error');
@@ -8623,7 +8557,6 @@ const MUTATIONS_LIST = [
             const alreadyHandledUi = processedStealSessionIds.has(uiKey);
 
             closeModal('modal-game-math');
-            if (_mathStopwatchRaf) { cancelAnimationFrame(_mathStopwatchRaf); _mathStopwatchRaf = null; }
             if (reactionSequenceTimer) {
                 clearTimeout(reactionSequenceTimer);
                 reactionSequenceTimer = null;
@@ -8849,6 +8782,7 @@ const MUTATIONS_LIST = [
             // Always show the row (timer is always useful); badge only if ranked
             if (row) row.style.display = 'flex';
             el.innerHTML = pts ? buildClashRankBadgeHTML(pts) : '';
+            checkClashRankReward();
         }
 
         function renderProfileClashRankBadge() {
@@ -8907,10 +8841,26 @@ const MUTATIONS_LIST = [
             renderProfileClashRankBadge();
         }
 
-        // 5-day reward check — runs on login, checks if 5 days have passed since last reward
-        // Global 5-day rank reward cycle
-        // system/clashRankRewardCycle = { nextRewardAt: <timestamp>, cycleId: <number> }
-        // users/{uid}/clashRankLastCycleClaimed = <cycleId>  (tracks which cycle user already got)
+        // ═══════════════════════════════════════════════════════════════
+        // CLASH RANK REWARD CYCLE  — redesigned
+        //
+        // Firebase layout:
+        //   system/clashRankRewardCycle  = { nextRewardAt, cycleId }
+        //   users/{uid}/clashRankLastCycleClaimed  = <cycleId already claimed>
+        //   users/{uid}/clashRankPendingReward     = <cycleId owed but not yet claimed>
+        //
+        // Flow:
+        //  1. Global timer counts down.  When it hits 0 → tryAdvanceGlobalRankCycle()
+        //     writes the next cycle AND stamps pendingRewardCycleId onto EVERY user node.
+        //  2. On login (or any onValue fire) → checkClashRankReward() sees a pending
+        //     reward → shows the green CLAIM button.  Works for players who were offline.
+        //  3. Player clicks CLAIM → claimClashRankReward():
+        //       • gives XP / money for their rank
+        //       • resets clashRankPoints to 0  (back to Bronze D1)
+        //       • marks clashRankLastCycleClaimed = pendingRewardCycleId
+        //       • clears pendingRewardCycleId
+        //       • hides the button
+        // ═══════════════════════════════════════════════════════════════
 
         const RANK_REWARD_INTERVAL_MS = 5 * 24 * 60 * 60 * 1000; // 5 days
         let globalRankCycleState = { nextRewardAt: 0, cycleId: 0 };
@@ -8920,7 +8870,7 @@ const MUTATIONS_LIST = [
             onValue(ref(db, 'system/clashRankRewardCycle'), async snap => {
                 const data = snap.val();
                 if (!data || !data.nextRewardAt) {
-                    // First time — initialize the cycle starting from now
+                    // First-ever initialisation
                     const initNext = Date.now() + RANK_REWARD_INTERVAL_MS;
                     await set(ref(db, 'system/clashRankRewardCycle'), { nextRewardAt: initNext, cycleId: 1 });
                     return;
@@ -8932,92 +8882,159 @@ const MUTATIONS_LIST = [
         }
 
         function updateRankRewardTimerDisplay() {
-            const el = document.getElementById('hud-rank-reward-timer');
+            const el    = document.getElementById('hud-rank-reward-timer');
+            const btn   = document.getElementById('hud-rank-claim-btn');
             if (!el) return;
 
             if (rankRewardTimerInterval) clearInterval(rankRewardTimerInterval);
 
             function tick() {
                 const msLeft = globalRankCycleState.nextRewardAt - Date.now();
-                if (msLeft <= 0) {
-                    el.textContent = '🎁 Rewards ready!';
-                    el.style.color = '#10b981';
+
+                // If time is up AND there is a pending unclaimed reward → show button, hide text
+                const hasPending = (userDataRecord.clashRankPendingReward || 0) >
+                                   (userDataRecord.clashRankLastCycleClaimed || 0);
+
+                if (msLeft <= 0 || hasPending) {
+                    el.textContent  = '';
+                    el.style.color  = '#10b981';
+                    if (btn) btn.style.display = 'inline-block';
+                    // Attempt to advance cycle + stamp pending rewards if we're the first online
+                    if (msLeft <= 0) tryAdvanceGlobalRankCycle(globalRankCycleState.cycleId, globalRankCycleState.nextRewardAt);
                     return;
                 }
+
+                if (btn) btn.style.display = 'none';
                 const totalSecs = Math.ceil(msLeft / 1000);
-                const days = Math.floor(totalSecs / 86400);
+                const days  = Math.floor(totalSecs / 86400);
                 const hours = Math.floor((totalSecs % 86400) / 3600);
-                const mins = Math.floor((totalSecs % 3600) / 60);
-                const secs = totalSecs % 60;
+                const mins  = Math.floor((totalSecs % 3600) / 60);
+                const secs  = totalSecs % 60;
                 let label = '🏆 Rewards in ';
-                if (days > 0) label += `${days}d ${hours}h`;
+                if (days > 0)       label += `${days}d ${hours}h`;
                 else if (hours > 0) label += `${hours}h ${mins}m`;
-                else if (mins > 0) label += `${mins}m ${secs}s`;
-                else label += `${secs}s`;
-                el.textContent = label;
-                el.style.color = msLeft < 3600000 ? '#f59e0b' : '#6b7280'; // amber when < 1h
+                else if (mins > 0)  label += `${mins}m ${secs}s`;
+                else                label += `${secs}s`;
+                el.textContent  = label;
+                el.style.color  = msLeft < 3600000 ? '#f59e0b' : '#6b7280';
             }
 
             tick();
             rankRewardTimerInterval = setInterval(tick, 1000);
         }
 
+        // Called on login + every time cycle data changes from Firebase
         async function checkClashRankReward() {
             if (!activeUserSession?.uid) return;
+            const btn = document.getElementById('hud-rank-claim-btn');
+
+            const pendingCycle = userDataRecord.clashRankPendingReward  || 0;
+            const lastClaimed  = userDataRecord.clashRankLastCycleClaimed || 0;
+
+            if (pendingCycle > lastClaimed) {
+                // There's an unclaimed reward — show the button
+                if (btn) btn.style.display = 'inline-block';
+                const el = document.getElementById('hud-rank-reward-timer');
+                if (el) { el.textContent = ''; }
+            } else {
+                if (btn) btn.style.display = 'none';
+            }
+        }
+
+        // Called when the player clicks the green CLAIM button
+        window.claimClashRankReward = async function() {
+            if (!activeUserSession?.uid) return;
             const uid = activeUserSession.uid;
-            const now = Date.now();
-            const { nextRewardAt, cycleId } = globalRankCycleState;
 
-            if (!nextRewardAt || now < nextRewardAt) return; // Not time yet
+            const pendingCycle = userDataRecord.clashRankPendingReward  || 0;
+            const lastClaimed  = userDataRecord.clashRankLastCycleClaimed || 0;
+            if (pendingCycle <= lastClaimed) return; // Nothing to claim
 
-            const lastClaimed = userDataRecord.clashRankLastCycleClaimed || 0;
-            if (lastClaimed >= cycleId) return; // Already claimed this cycle
+            const btn = document.getElementById('hud-rank-claim-btn');
+            if (btn) { btn.disabled = true; btn.textContent = 'Claiming…'; }
 
-            const pts = userDataRecord.clashRankPoints || 0;
-            if (pts === 0) {
-                // Unranked — still mark as claimed so they don't get backlogged
-                await update(ref(db, `users/${uid}`), { clashRankLastCycleClaimed: cycleId });
-                userDataRecord.clashRankLastCycleClaimed = cycleId;
-                // Advance global cycle using transaction (only first user to trigger advances it)
-                tryAdvanceGlobalRankCycle(cycleId, nextRewardAt);
+            const pts  = userDataRecord.clashRankPoints || 0;
+            const { rank } = getClashRankFromPoints(pts);
+            const reward   = rank.reward;
+
+            const payload = {};
+            // Give reward
+            if (reward.xp    > 0) payload[`users/${uid}/xp`]    = (userDataRecord.xp    || 0) + reward.xp;
+            if (reward.money > 0) payload[`users/${uid}/money`]  = parseFloat(((userDataRecord.money || 0) + reward.money).toFixed(2));
+            // Mark claimed
+            payload[`users/${uid}/clashRankLastCycleClaimed`] = pendingCycle;
+            // Reset rank back to Bronze D1
+            payload[`users/${uid}/clashRankPoints`] = 0;
+            // Clear the pending flag
+            payload[`users/${uid}/clashRankPendingReward`] = null;
+
+            try {
+                await update(ref(db, '/'), payload);
+            } catch (err) {
+                showToast('Could not claim reward — check connection.', 'error');
+                if (btn) { btn.disabled = false; btn.textContent = '🎁 CLAIM REWARD'; }
                 return;
             }
 
-            const { rank } = getClashRankFromPoints(pts);
-            const reward = rank.reward;
+            // Update local record
+            userDataRecord.clashRankLastCycleClaimed = pendingCycle;
+            userDataRecord.clashRankPendingReward    = null;
+            if (reward.xp    > 0) userDataRecord.xp    = (userDataRecord.xp    || 0) + reward.xp;
+            if (reward.money > 0) userDataRecord.money  = parseFloat(((userDataRecord.money || 0) + reward.money).toFixed(2));
+            userDataRecord.clashRankPoints = 0; // reset to bronze
 
-            // Give reward + mark cycle claimed atomically
-            const payload = {};
-            if (reward.xp > 0) payload[`users/${uid}/xp`] = (userDataRecord.xp || 0) + reward.xp;
-            if (reward.money > 0) payload[`users/${uid}/money`] = parseFloat(((userDataRecord.money || 0) + reward.money).toFixed(2));
-            payload[`users/${uid}/clashRankLastCycleClaimed`] = cycleId;
+            // Hide button + show toast
+            if (btn) btn.style.display = 'none';
+            const timerEl = document.getElementById('hud-rank-reward-timer');
+            if (timerEl) timerEl.textContent = '';
 
-            await update(ref(db, '/'), payload);
-            userDataRecord.clashRankLastCycleClaimed = cycleId;
-            if (reward.xp > 0) userDataRecord.xp = (userDataRecord.xp || 0) + reward.xp;
-            if (reward.money > 0) userDataRecord.money = parseFloat(((userDataRecord.money || 0) + reward.money).toFixed(2));
+            const rewardParts = [];
+            if (reward.xp    > 0) rewardParts.push(`+${reward.xp} XP`);
+            if (reward.money > 0) rewardParts.push(`€${reward.money}`);
+            const rewardStr = rewardParts.length ? rewardParts.join(' & ') : 'no bonus';
+            showToast(`🎁 ${rank.name} reward claimed: ${rewardStr}! Rank reset to Bronze.`, 'success');
 
-            if (reward.xp > 0 || reward.money > 0) {
-                showToast(`🎁 ${rank.name} rank reward: ${reward.xp > 0 ? `+${reward.xp} XP` : ''}${reward.xp > 0 && reward.money > 0 ? ' & ' : ''}${reward.money > 0 ? `€${reward.money}` : ''}!`, 'success');
-            }
             renderHUDDisplayElements();
+            renderHudClashRankBadge();
+            renderProfileClashRankBadge();
+        };
 
-            // Advance global cycle (transaction ensures only one user advances it)
-            tryAdvanceGlobalRankCycle(cycleId, nextRewardAt);
-        }
-
+        // Advance the global cycle — ALSO stamps pendingRewardCycleId onto all user nodes
+        // so offline players see their reward the moment they log back in.
         function tryAdvanceGlobalRankCycle(cycleId, nextRewardAt) {
             const cycleRef = ref(db, 'system/clashRankRewardCycle');
             runTransaction(cycleRef, current => {
                 if (!current) return;
-                // Only advance if cycle hasn't already been bumped
-                if (current.cycleId !== cycleId) return; // Already advanced, abort
+                if (current.cycleId !== cycleId) return; // Already advanced by another client
                 return {
-                    cycleId: cycleId + 1,
-                    nextRewardAt: nextRewardAt + RANK_REWARD_INTERVAL_MS,
+                    cycleId:        cycleId + 1,
+                    nextRewardAt:   nextRewardAt + RANK_REWARD_INTERVAL_MS,
                     lastAdvancedAt: Date.now()
                 };
-            }).catch(() => {}); // Silently ignore if another user already advanced it
+            }).then(async result => {
+                if (!result.committed) return; // Another client already did this — skip
+
+                // We were first: stamp clashRankPendingReward on every registered user
+                // so they see the claim button even if they come online days later.
+                try {
+                    const usersSnap = await get(ref(db, 'users'));
+                    const allUsers  = usersSnap.val() || {};
+                    const stampPayload = {};
+                    for (const uid in allUsers) {
+                        const u = allUsers[uid];
+                        const lastClaimed = u.clashRankLastCycleClaimed || 0;
+                        if (lastClaimed < cycleId) {
+                            // Only stamp if they haven't already claimed this cycle
+                            stampPayload[`users/${uid}/clashRankPendingReward`] = cycleId;
+                        }
+                    }
+                    if (Object.keys(stampPayload).length) {
+                        await update(ref(db, '/'), stampPayload);
+                    }
+                } catch (e) {
+                    console.warn('[RankCycle] Could not stamp pending rewards:', e);
+                }
+            }).catch(() => {});
         }
 
         // Render clash rank leaderboard
@@ -11008,7 +11025,7 @@ const MUTATIONS_LIST = [
 
     </script>
     <div style="position: fixed; top: 12px; left: 12px; z-index: 9999; color: rgba(255, 255, 255, 0.4); font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
-    V:9.7
+    V:9.8
 </div>
 </body>
 
