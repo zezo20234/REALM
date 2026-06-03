@@ -8395,10 +8395,38 @@ const MUTATIONS_LIST = [
                     return;
                 }
 
-                if (updatedSessionData.winnerSignaledUid && updatedSessionData.winnerSignaledUid !== myUid) {
-                    lockClashUiInputs();
+                // Show live feedback when opponent submits their answer
+                const opponentSolveKey = (myUid === updatedSessionData.attackerUid) ? 'defenderSolveMs' : 'attackerSolveMs';
+                const mySolveKey = (myUid === updatedSessionData.attackerUid) ? 'attackerSolveMs' : 'defenderSolveMs';
+                if (updatedSessionData[opponentSolveKey] !== undefined && updatedSessionData[opponentSolveKey] !== null
+                    && (updatedSessionData[mySolveKey] === undefined || updatedSessionData[mySolveKey] === null)) {
+                    // Opponent answered but I haven't yet — show urgency
+                    document.getElementById('math-equation-prompt') && (document.getElementById('math-equation-prompt').style.color = '#ef4444');
                 }
             });
+
+            // Fallback: if opponent never answers within 30s, auto-judge in favour of whoever answered
+            const clashAutoJudgeTimer = setTimeout(() => {
+                const sessRef = ref(db, `clash_sessions/${sessionId}`);
+                runTransaction(sessRef, (sess) => {
+                    if (!sess || sess.sessionState !== 'initialized') return;
+                    // If neither answered, session stays open. If one answered, award them.
+                    const atkMs = (sess.attackerSolveMs !== undefined && sess.attackerSolveMs !== null) ? sess.attackerSolveMs : null;
+                    const defMs = (sess.defenderSolveMs !== undefined && sess.defenderSolveMs !== null) ? sess.defenderSolveMs : null;
+                    if (atkMs === null && defMs === null) return; // no one answered, leave it
+                    const winner = (atkMs !== null && (defMs === null || atkMs <= defMs)) ? sess.attackerUid : sess.defenderUid;
+                    sess.sessionState = 'terminated_resolved';
+                    sess.winnerSignaledUid = winner;
+                    sess.claimed = true;
+                    sess.claimedBy = winner;
+                    sess.winnerSolveTimeMs = atkMs !== null ? atkMs : defMs;
+                    return sess;
+                }).catch(() => {});
+            }, 30000);
+
+            // Clear the auto-judge timer if we unsub before it fires
+            const _origUnsub = activeStealSessionUnsub;
+            activeStealSessionUnsub = () => { clearTimeout(clashAutoJudgeTimer); _origUnsub(); };
         }
 
         document.getElementById('math-submit-response')?.addEventListener('click', () => {
@@ -8417,57 +8445,97 @@ const MUTATIONS_LIST = [
 
         // Reaction mini-game removed.
 
+        // ── CLASH SOLVE TIME SUBMISSION ─────────────────────────────
+        // Phase 1: Both players submit their solve time atomically.
+        //          The session collects times for a short window (CLASH_JUDGE_WINDOW_MS)
+        //          then judges whoever was fastest.
+        // Phase 2: After the window, whoever submitted first triggers the judge
+        //          transaction that declares the winner by comparing solve times.
+        // This completely prevents the double-award bug — card only ever goes
+        // to one winner determined by actual speed, not Firebase write order.
+
+        const CLASH_JUDGE_WINDOW_MS = 500; // ms to wait for both answers before judging
+
         function signalClashVictoryCaptureLock(solveTimeMs) {
             if (!activeStealSequenceId || clashUiLocked || !activeUserSession?.uid) return;
 
+            lockClashUiInputs();
+
             const myUid = activeUserSession.uid;
-            const victoryVerificationSessionRef = ref(db, `clash_sessions/${activeStealSequenceId}`);
+            const sessionId = activeStealSequenceId;
+            const sessionRef = ref(db, `clash_sessions/${sessionId}`);
+            const role = activeClashRole; // 'attacker' or 'defender'
+            const solveKey = role === 'attacker' ? 'attackerSolveMs' : 'defenderSolveMs';
 
-            runTransaction(victoryVerificationSessionRef, (currentSessionData) => {
-                if (!currentSessionData) return;
-                if (currentSessionData.sessionState !== 'initialized') return;
-
-                // CRITICAL FIX: Check if already claimed first to prevent race condition
-                if (currentSessionData.claimed) {
-                    // Already claimed by someone else - abort
-                    return;
-                }
-
-                // Set claimed flag atomically - only first transaction succeeds
-                currentSessionData.claimed = true;
-                currentSessionData.claimedBy = myUid;
-                currentSessionData.claimedAt = serverTimestamp();
-                currentSessionData.sessionState = 'terminated_resolved';
-                currentSessionData.winnerSignaledUid = myUid;
-                currentSessionData.winnerSolveTimeMs = solveTimeMs;
-                return currentSessionData;
-            }).then(async result => {
+            // Phase 1: Record my solve time atomically (only if not already set)
+            runTransaction(sessionRef, (sess) => {
+                if (!sess) return;
+                if (sess.sessionState !== 'initialized') return; // already judged, abort
+                if (sess[solveKey] !== undefined && sess[solveKey] !== null) return; // already submitted
+                sess[solveKey] = solveTimeMs;
+                return sess;
+            }).then(result => {
                 if (!result.committed) {
-                    lockClashUiInputs();
-                    showToast('Too late — opponent already won.', 'error');
+                    // Either session gone or I already submitted
                     return;
                 }
+                const sess = result.snapshot.val();
+                if (!sess) return;
 
-                const resolved = result.snapshot.val();
-                if (!resolved) return;
+                showToast('⚡ Answer submitted — judging speed…', 'info');
 
-                lockClashUiInputs();
+                // Phase 2: After the collection window, run the judge transaction.
+                // Both players try this; only the first commit wins (idempotent).
+                setTimeout(() => {
+                    runTransaction(sessionRef, (sess) => {
+                        if (!sess) return;
+                        if (sess.sessionState !== 'initialized') return; // already resolved
+                        if (sess.attackerSolveMs === undefined && sess.attackerSolveMs === null &&
+                            sess.defenderSolveMs === undefined && sess.defenderSolveMs === null) return; // no one answered yet
 
-                // Verify I was the one who claimed it
-                if (resolved.claimedBy !== myUid) {
-                    showToast('Too late — opponent already won.', 'error');
-                    return;
-                }
+                        const atkMs = (sess.attackerSolveMs !== undefined && sess.attackerSolveMs !== null)
+                            ? sess.attackerSolveMs : Infinity;
+                        const defMs = (sess.defenderSolveMs !== undefined && sess.defenderSolveMs !== null)
+                            ? sess.defenderSolveMs : Infinity;
 
-                const winMsg = activeClashRole === 'defender'
-                    ? 'Defense registered first!'
-                    : 'Intrusion registered first!';
-                showToast(winMsg, 'success');
-                trackQuestProgress('win_clashes', 1);
-                awardClashRankPoint();
+                        // Pick winner: lower solve time wins. Ties go to attacker.
+                        let winner;
+                        if (atkMs <= defMs) {
+                            winner = sess.attackerUid;
+                        } else {
+                            winner = sess.defenderUid;
+                        }
+
+                        sess.sessionState = 'terminated_resolved';
+                        sess.winnerSignaledUid = winner;
+                        sess.claimed = true;
+                        sess.claimedBy = winner;
+                        sess.winnerSolveTimeMs = Math.min(atkMs, defMs);
+                        sess.loserSolveTimeMs = Math.max(atkMs === Infinity ? defMs : atkMs, defMs === Infinity ? atkMs : defMs);
+                        return sess;
+                    }).then(judgeResult => {
+                        if (!judgeResult.committed) return; // another client already judged
+                        const resolved = judgeResult.snapshot.val();
+                        if (!resolved) return;
+
+                        const iWon = resolved.winnerSignaledUid === myUid;
+                        if (iWon) {
+                            const winMsg = role === 'defender'
+                                ? `Defense wins! You solved it faster ⚡`
+                                : `Intrusion wins! You solved it faster ⚡`;
+                            showToast(winMsg, 'success');
+                            trackQuestProgress('win_clashes', 1);
+                            awardClashRankPoint();
+                        }
+                        // concludeLiveChallenge is triggered by the onValue listener watching sessionState
+                    }).catch(err => {
+                        logFirebaseStealError('signalClashVictoryCaptureLock.judge', err);
+                    });
+                }, CLASH_JUDGE_WINDOW_MS);
+
             }).catch(error => {
-                logFirebaseStealError('signalClashVictoryCaptureLock', error);
-                showToast('Could not register victory. Check console.', 'error');
+                logFirebaseStealError('signalClashVictoryCaptureLock.submit', error);
+                showToast('Could not submit answer. Check connection.', 'error');
             });
         }
 
@@ -10872,7 +10940,7 @@ const MUTATIONS_LIST = [
 
     </script>
     <div style="position: fixed; top: 12px; left: 12px; z-index: 9999; color: rgba(255, 255, 255, 0.4); font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
-    V:9.5
+    V:9.6
 </div>
 </body>
 
