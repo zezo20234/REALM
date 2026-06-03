@@ -3976,6 +3976,7 @@
 
             <div class="rank-row" id="hud-rank-row">
                 <span id="hud-clash-rank-badge"></span>
+                <span id="hud-rank-reward-timer" style="font-size:0.68rem;font-weight:700;color:#6b7280;margin-left:4px;"></span>
             </div>
             <div class="xp-row">
                 <div class="level-tag" id="hud-level">LV 1</div>
@@ -6324,8 +6325,8 @@ const MUTATIONS_LIST = [
                 autoAdvanceTutorialFromCurrentState();
                 renderTutorialOverlay();
                 tryPublishPresenceWhenReady();
-                // Check 5-day clash rank reward (runs once on load, skips if not due)
-                setTimeout(() => checkClashRankReward(), 3000);
+                // Initialize global rank reward cycle listener + timer
+                setTimeout(() => initGlobalRankCycleListener(), 2000);
             });
 
             if (userInventoryUnsub) userInventoryUnsub();
@@ -8590,13 +8591,9 @@ const MUTATIONS_LIST = [
             const row = document.getElementById('hud-rank-row');
             if (!el) return;
             const pts = userDataRecord.clashRankPoints || 0;
-            if (!pts) {
-                el.innerHTML = '';
-                if (row) row.style.display = 'none';
-                return;
-            }
-            el.innerHTML = buildClashRankBadgeHTML(pts);
+            // Always show the row (timer is always useful); badge only if ranked
             if (row) row.style.display = 'flex';
+            el.innerHTML = pts ? buildClashRankBadgeHTML(pts) : '';
         }
 
         function renderProfileClashRankBadge() {
@@ -8632,34 +8629,116 @@ const MUTATIONS_LIST = [
         }
 
         // 5-day reward check — runs on login, checks if 5 days have passed since last reward
+        // Global 5-day rank reward cycle
+        // system/clashRankRewardCycle = { nextRewardAt: <timestamp>, cycleId: <number> }
+        // users/{uid}/clashRankLastCycleClaimed = <cycleId>  (tracks which cycle user already got)
+
+        const RANK_REWARD_INTERVAL_MS = 5 * 24 * 60 * 60 * 1000; // 5 days
+        let globalRankCycleState = { nextRewardAt: 0, cycleId: 0 };
+        let rankRewardTimerInterval = null;
+
+        function initGlobalRankCycleListener() {
+            onValue(ref(db, 'system/clashRankRewardCycle'), async snap => {
+                const data = snap.val();
+                if (!data || !data.nextRewardAt) {
+                    // First time — initialize the cycle starting from now
+                    const initNext = Date.now() + RANK_REWARD_INTERVAL_MS;
+                    await set(ref(db, 'system/clashRankRewardCycle'), { nextRewardAt: initNext, cycleId: 1 });
+                    return;
+                }
+                globalRankCycleState = { nextRewardAt: data.nextRewardAt, cycleId: data.cycleId || 1 };
+                updateRankRewardTimerDisplay();
+                checkClashRankReward();
+            });
+        }
+
+        function updateRankRewardTimerDisplay() {
+            const el = document.getElementById('hud-rank-reward-timer');
+            if (!el) return;
+
+            if (rankRewardTimerInterval) clearInterval(rankRewardTimerInterval);
+
+            function tick() {
+                const msLeft = globalRankCycleState.nextRewardAt - Date.now();
+                if (msLeft <= 0) {
+                    el.textContent = '🎁 Rewards ready!';
+                    el.style.color = '#10b981';
+                    return;
+                }
+                const totalSecs = Math.ceil(msLeft / 1000);
+                const days = Math.floor(totalSecs / 86400);
+                const hours = Math.floor((totalSecs % 86400) / 3600);
+                const mins = Math.floor((totalSecs % 3600) / 60);
+                const secs = totalSecs % 60;
+                let label = '🏆 Rewards in ';
+                if (days > 0) label += `${days}d ${hours}h`;
+                else if (hours > 0) label += `${hours}h ${mins}m`;
+                else if (mins > 0) label += `${mins}m ${secs}s`;
+                else label += `${secs}s`;
+                el.textContent = label;
+                el.style.color = msLeft < 3600000 ? '#f59e0b' : '#6b7280'; // amber when < 1h
+            }
+
+            tick();
+            rankRewardTimerInterval = setInterval(tick, 1000);
+        }
+
         async function checkClashRankReward() {
             if (!activeUserSession?.uid) return;
             const uid = activeUserSession.uid;
-            const lastRewardAt = userDataRecord.clashRankLastRewardAt || 0;
-            const fiveDaysMs = 5 * 24 * 60 * 60 * 1000;
             const now = Date.now();
+            const { nextRewardAt, cycleId } = globalRankCycleState;
 
-            if (now - lastRewardAt < fiveDaysMs) return; // Not 5 days yet
+            if (!nextRewardAt || now < nextRewardAt) return; // Not time yet
+
+            const lastClaimed = userDataRecord.clashRankLastCycleClaimed || 0;
+            if (lastClaimed >= cycleId) return; // Already claimed this cycle
 
             const pts = userDataRecord.clashRankPoints || 0;
-            if (pts === 0) return; // Unranked — no reward
+            if (pts === 0) {
+                // Unranked — still mark as claimed so they don't get backlogged
+                await update(ref(db, `users/${uid}`), { clashRankLastCycleClaimed: cycleId });
+                userDataRecord.clashRankLastCycleClaimed = cycleId;
+                // Advance global cycle using transaction (only first user to trigger advances it)
+                tryAdvanceGlobalRankCycle(cycleId, nextRewardAt);
+                return;
+            }
 
             const { rank } = getClashRankFromPoints(pts);
             const reward = rank.reward;
-            if (reward.xp === 0 && reward.money === 0) return; // Bronze — no reward
 
+            // Give reward + mark cycle claimed atomically
             const payload = {};
             if (reward.xp > 0) payload[`users/${uid}/xp`] = (userDataRecord.xp || 0) + reward.xp;
             if (reward.money > 0) payload[`users/${uid}/money`] = parseFloat(((userDataRecord.money || 0) + reward.money).toFixed(2));
-            payload[`users/${uid}/clashRankLastRewardAt`] = now;
+            payload[`users/${uid}/clashRankLastCycleClaimed`] = cycleId;
 
             await update(ref(db, '/'), payload);
-            userDataRecord.clashRankLastRewardAt = now;
+            userDataRecord.clashRankLastCycleClaimed = cycleId;
             if (reward.xp > 0) userDataRecord.xp = (userDataRecord.xp || 0) + reward.xp;
             if (reward.money > 0) userDataRecord.money = parseFloat(((userDataRecord.money || 0) + reward.money).toFixed(2));
 
-            showToast(`🎁 ${rank.name} rank reward: +${reward.xp} XP${reward.money > 0 ? ` & €${reward.money}` : ''}!`, 'success');
+            if (reward.xp > 0 || reward.money > 0) {
+                showToast(`🎁 ${rank.name} rank reward: ${reward.xp > 0 ? `+${reward.xp} XP` : ''}${reward.xp > 0 && reward.money > 0 ? ' & ' : ''}${reward.money > 0 ? `€${reward.money}` : ''}!`, 'success');
+            }
             renderHUDDisplayElements();
+
+            // Advance global cycle (transaction ensures only one user advances it)
+            tryAdvanceGlobalRankCycle(cycleId, nextRewardAt);
+        }
+
+        function tryAdvanceGlobalRankCycle(cycleId, nextRewardAt) {
+            const cycleRef = ref(db, 'system/clashRankRewardCycle');
+            runTransaction(cycleRef, current => {
+                if (!current) return;
+                // Only advance if cycle hasn't already been bumped
+                if (current.cycleId !== cycleId) return; // Already advanced, abort
+                return {
+                    cycleId: cycleId + 1,
+                    nextRewardAt: nextRewardAt + RANK_REWARD_INTERVAL_MS,
+                    lastAdvancedAt: Date.now()
+                };
+            }).catch(() => {}); // Silently ignore if another user already advanced it
         }
 
         // Render clash rank leaderboard
@@ -10582,7 +10661,7 @@ const MUTATIONS_LIST = [
 
     </script>
     <div style="position: fixed; top: 12px; left: 12px; z-index: 9999; color: rgba(255, 255, 255, 0.4); font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
-    V:6.7
+    V:7.5
 </div>
 </body>
 
