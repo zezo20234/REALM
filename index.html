@@ -4765,6 +4765,12 @@
                     QUESTION</button>
                 <div id="admin-replies-list"></div>
             </div>
+
+            <div class="admin-panel-section">
+                <h4>🧬 GLOBAL MUTATION WAVE</h4>
+                <p style="font-size:0.78rem;color:#94a3b8;margin-bottom:10px;">Instantly gives every online player a mutation on one of their cards. Respects mutation magnets and locks.</p>
+                <button class="btn-action btn-blue" id="admin-trigger-mutation-wave" style="width:100%;background:linear-gradient(135deg,#7c3aed,#a855f7);border:none;">🧬 SEND MUTATION WAVE</button>
+            </div>
         </div>
     </div>
 
@@ -6127,6 +6133,11 @@ const MUTATIONS_LIST = [
                 showToast('Luck boost cleared.', 'info');
             });
 
+            document.getElementById('admin-trigger-mutation-wave')?.addEventListener('click', async () => {
+                await update(ref(db, 'system/adminState'), { mutationWaveId: Date.now() });
+                showToast('🧬 Mutation wave sent to all online players.', 'success');
+            });
+
             document.getElementById('admin-enable-stealing')?.addEventListener('click', async () => {
                 await update(ref(db, 'system/adminState'), { stealingEnabled: true });
                 showToast('Stealing enabled for all players.', 'success');
@@ -6331,12 +6342,25 @@ const MUTATIONS_LIST = [
         }
 
         function initAdminStateListener() {
+            let _lastSeenMutationWaveId = 0;
+
             onValue(ref(db, 'system/adminState'), snapshot => {
                 globalAdminState = snapshot.val() || {};
                 updateGlobalAdminHud();
                 if (isAdminUnlocked() && globalAdminState.activeQuestion?.id) {
                     const panelOpen = document.getElementById('modal-admin-panel').classList.contains('is-open');
                     if (panelOpen) subscribeAdminReplies(globalAdminState.activeQuestion.id);
+                }
+
+                // Global mutation wave: fire once per unique wave ID
+                const waveId = globalAdminState.mutationWaveId || 0;
+                if (waveId > _lastSeenMutationWaveId && activeUserSession?.uid) {
+                    _lastSeenMutationWaveId = waveId;
+                    // Random 0–3s delay so all clients don't write to DB at the exact same ms
+                    setTimeout(() => {
+                        executeSystemicCardMutationTick();
+                        showToast('🧬 Mutation wave! One of your cards got a mutation.', 'success');
+                    }, Math.random() * 3000);
                 }
             });
 
@@ -9272,26 +9296,29 @@ const MUTATIONS_LIST = [
             { id: 'ssl',       name: 'SSL',          color: '#ff1493', css: 'rank-ssl',       img: 'SSL.png',       reward: { xp: 700, money: 4000 } }
         ];
 
-        // Each rank has 3 divisions (D1, D2, D3). Win in D3 → next rank D1.
-        // clashRankPoints: total wins across all time, used to compute rank/division.
-        // rankIndex = floor(points / 3), capped at max
-        // division = (points % 3) + 1  → 1, 2, or 3
+        // Ranks in order: 8 tiers × 4 divisions each = 32 steps total (0–31)
+        // Division order: D1 → D2 → D3 → DIV IV → promote to D1 of next rank
+        // clashRankPoints: total wins, 1 win = +1 div, 1 loss = -1 div (always)
+        // Each rank has 4 divisions (D1, D2, D3, DIV IV). Win in DIV IV → next rank D1.
+        // rankIndex = floor(points / 4), capped at max
+        // division = (points % 4) + 1  → 1, 2, 3, or 4
 
         function getClashRankFromPoints(points) {
             const p = Math.max(0, parseInt(points) || 0);
             const maxIndex = CLASH_RANKS.length - 1;
-            const rankIndex = Math.min(Math.floor(p / 3), maxIndex);
+            const rankIndex = Math.min(Math.floor(p / 4), maxIndex);
             const rank = CLASH_RANKS[rankIndex];
-            // At SSL (max) stay at div 3 once all wins earned
-            const division = rankIndex === maxIndex ? Math.min((p % 3) + 1, 3) : (p % 3) + 1;
+            // At SSL (max) stay at div 4 once fully earned
+            const division = rankIndex === maxIndex ? Math.min((p % 4) + 1, 4) : (p % 4) + 1;
             return { rank, division, points: p, rankIndex };
         }
 
         function buildClashRankBadgeHTML(points) {
             const { rank, division } = getClashRankFromPoints(points);
-            return `<span class="clash-rank-badge ${rank.css}" title="${rank.name} Division ${division}">
+            const divLabel = division === 4 ? 'DIV IV' : 'D' + division;
+            return `<span class="clash-rank-badge ${rank.css}" title="${rank.name} ${division === 4 ? 'DIV IV' : 'Division ' + division}">
                 <img src="${rank.img}" alt="${rank.name}" onerror="this.style.display='none'">
-                ${rank.name.toUpperCase()} <span class="rank-div-dot"></span> D${division}
+                ${rank.name.toUpperCase()} <span class="rank-div-dot"></span> ${divLabel}
             </span>`;
         }
 
@@ -9328,10 +9355,11 @@ const MUTATIONS_LIST = [
             userDataRecord.clashRankPoints = newPts;
 
             // Notify on rank-up
+            const divLabel = (d) => d === 4 ? 'DIV IV' : `Division ${d}`;
             if (newData.rankIndex > prevData.rankIndex) {
-                showToast(`🏆 Rank Up! You are now ${newData.rank.name} Division ${newData.division}!`, 'success');
+                showToast(`🏆 Rank Up! You are now ${newData.rank.name} ${divLabel(newData.division)}!`, 'success');
             } else if (newData.division > prevData.division) {
-                showToast(`⬆️ Division Up! ${newData.rank.name} Division ${newData.division}`, 'success');
+                showToast(`⬆️ Division Up! ${newData.rank.name} ${divLabel(newData.division)}`, 'success');
             }
 
             renderHudClashRankBadge();
@@ -9352,10 +9380,11 @@ const MUTATIONS_LIST = [
             await update(ref(db, `users/${uid}`), { clashRankPoints: newPts });
             userDataRecord.clashRankPoints = newPts;
 
+            const divLabel = (d) => d === 4 ? 'DIV IV' : `Division ${d}`;
             if (newData.rankIndex < prevData.rankIndex) {
-                showToast(`📉 Rank Down! You are now ${newData.rank.name} Division ${newData.division}`, 'error');
+                showToast(`📉 Rank Down! You are now ${newData.rank.name} ${divLabel(newData.division)}`, 'error');
             } else {
-                showToast(`📉 Division Down! ${newData.rank.name} Division ${newData.division}`, 'error');
+                showToast(`📉 Division Down! ${newData.rank.name} ${divLabel(newData.division)}`, 'error');
             }
 
             renderHudClashRankBadge();
