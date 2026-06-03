@@ -4027,6 +4027,26 @@
 
     <button type="button" id="btn-admin-lock" title="Admin access">🔒 ADMIN</button>
 
+    <!-- BAN SCREEN -->
+    <div id="ban-screen" style="display:none; position:fixed; inset:0; z-index:999999; background:#0a0000; align-items:center; justify-content:center; padding:24px; flex-direction:column; text-align:center;">
+        <div style="max-width:420px; width:100%;">
+            <div style="font-size:5rem; margin-bottom:16px; animation:banPulse 1.5s ease-in-out infinite;">🚫</div>
+            <div style="font-family:'Orbitron',sans-serif; font-size:2.2rem; font-weight:900; color:#ff1a1a; letter-spacing:4px; margin-bottom:12px; text-shadow:0 0 30px rgba(255,26,26,0.8);">BANNED</div>
+            <div style="width:100%; height:3px; background:linear-gradient(90deg, transparent, #ff1a1a, transparent); margin-bottom:24px;"></div>
+            <div style="background:rgba(255,26,26,0.1); border:2px solid rgba(255,26,26,0.5); border-radius:16px; padding:24px 20px; margin-bottom:20px;">
+                <div style="font-size:1.1rem; font-weight:800; color:#ff6666; margin-bottom:10px;">Your account has been suspended.</div>
+                <div style="font-size:0.88rem; color:#cc4444; line-height:1.6;">You have been banned from Realm by an administrator. You cannot access the game or your assets until your ban is lifted.</div>
+            </div>
+            <div style="font-size:0.75rem; color:#661111; font-weight:600;">If you believe this is a mistake, contact support.</div>
+        </div>
+    </div>
+    <style>
+        @keyframes banPulse {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 10px rgba(255,26,26,0.4)); }
+            50% { transform: scale(1.08); filter: drop-shadow(0 0 30px rgba(255,26,26,0.9)); }
+        }
+    </style>
+
     <div id="auth-screen">
         <div class="auth-container glass">
             <div class="auth-logo">REALM</div>
@@ -4285,6 +4305,15 @@
                     </div>
                     <button class="btn-lvlup" style="background:var(--primary)"
                         onclick="buyLockItem(45, 60)">€60.00</button>
+                </div>
+                <div class="player-row">
+                    <div>
+                        <div style="font-weight:bold;">1-Hour Cryptographic Lock</div>
+                        <div style="font-size:0.75rem; color:#9ca3af;">Inventory: <span id="shop-locks-60"
+                                style="color:white; font-weight:bold;">0</span></div>
+                    </div>
+                    <button class="btn-lvlup" style="background:var(--primary)"
+                        onclick="buyLockItem(60, 75)">€75.00</button>
                 </div>
 
                 <div style="margin-top:20px; padding-top:16px; border-top:1px solid var(--border-glow);">
@@ -6459,7 +6488,13 @@ const MUTATIONS_LIST = [
             if (!emailInput || !passInput) return showToast("All credential fields are required.", "error");
 
             if (currentAuthScreenIsLogin) {
-                signInWithEmailAndPassword(auth, emailInput, passInput).catch(err => showToast(`Operational Error: ${err.message}`, "error"));
+                signInWithEmailAndPassword(auth, emailInput, passInput).catch(err => {
+                    if (err.code === 'auth/user-disabled') {
+                        showBanScreen();
+                    } else {
+                        showToast(`Operational Error: ${err.message}`, "error");
+                    }
+                });
             } else {
                 createUserWithEmailAndPassword(auth, emailInput, passInput).then(userCredential => {
                     const generatedColorValue = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
@@ -6479,7 +6514,7 @@ const MUTATIONS_LIST = [
                         avatarBgColor: generatedColorValue,
                         tutorial: { completed: false, step: 0, createdAt: Date.now() },
                         discovered: {}, // Permanent Archive registry
-                        locks: { '15': 0, '30': 0, '45': 0 } // Inventory array for locks
+                        locks: { '15': 0, '30': 0, '45': 0, '60': 0 } // Inventory array for locks
                     });
                 }).catch(err => showToast(`Operational Error: ${err.message}`, "error"));
             }
@@ -6487,8 +6522,26 @@ const MUTATIONS_LIST = [
 
         document.getElementById('action-signout')?.addEventListener('click', () => signOut(auth));
 
-        onAuthStateChanged(auth, userEntity => {
+        function showBanScreen() {
+            // Hide everything else, show ban screen — no way out
+            document.getElementById('ban-screen').style.display = 'flex';
+            document.getElementById('auth-screen').style.display = 'none';
+            document.getElementById('app-workspace').style.display = 'none';
+            // Sign them out silently so they can't use cached tokens
+            signOut(auth).catch(() => {});
+        }
+
+        onAuthStateChanged(auth, async userEntity => {
             if (userEntity) {
+                // Force token refresh to detect if account was disabled mid-session
+                try {
+                    await userEntity.getIdToken(true);
+                } catch (err) {
+                    if (err.code === 'auth/user-disabled') {
+                        showBanScreen();
+                        return;
+                    }
+                }
                 activeUserSession = userEntity;
                 userAnsweredQuestionId = null;
                 document.getElementById('auth-screen').style.display = 'none';
@@ -6741,7 +6794,7 @@ const MUTATIONS_LIST = [
         }
 
         function renderShopLockCounts() {
-            [15, 30, 45].forEach(mins => {
+            [15, 30, 45, 60].forEach(mins => {
                 const countNode = document.getElementById(`shop-locks-${mins}`);
                 if (countNode) {
                     countNode.innerText = (userDataRecord.locks && userDataRecord.locks[mins]) || 0;
@@ -7617,13 +7670,7 @@ const MUTATIONS_LIST = [
                             <button class="card-btn" style="flex:1; background:var(--bg-surface); border:1px solid var(--border-glow); color:white;" ${(evaluatingSecurityLockIsActive || stolenCooldownActive) ? 'disabled style="opacity:0.3;"' : ''} onclick="initiateAssetTransferProtocol('${instanceIdKey}')">${stolenCooldownActive ? `SEND (${stolenCooldownSecsLeft}s)` : 'SEND'}</button>
                         </div>
                         <div style="display:flex; gap:6px;">
-                            ${(() => {
-                                const lockUsed = (currentInstanceItem.lockCount) || 0;
-                                const lockMaxed = lockUsed >= 2;
-                                const lockDisabled = evaluatingSecurityLockIsActive || stolenCooldownActive || lockMaxed;
-                                const lockLabel = stolenCooldownActive ? `🔒 COOLDOWN (${stolenCooldownSecsLeft}s)` : lockMaxed ? '🔒 MAX LOCKS' : `🔒 LOCK (${lockUsed}/2)`;
-                                return `<button class="card-btn" style="flex:1; background:var(--gold); color:black;" ${lockDisabled ? 'disabled style="opacity:0.3;"' : ''} onclick="openLockSelectionModal('${instanceIdKey}')">${lockLabel}</button>`;
-                            })()}
+                            <button class="card-btn" style="flex:1; background:var(--gold); color:black;" ${(evaluatingSecurityLockIsActive || stolenCooldownActive) ? 'disabled style="opacity:0.3;"' : ''} onclick="openLockSelectionModal('${instanceIdKey}')">${stolenCooldownActive ? `🔒 COOLDOWN (${stolenCooldownSecsLeft}s)` : '🔒 LOCK ASSET'}</button>
                             ${currentInstanceItem.mutationMagnet ? `<button class="card-btn" style="flex:1; background:linear-gradient(135deg,#7c3aed,#a855f7); color:white;" onclick="removeMutationMagnet('${instanceIdKey}')">🧲 REMOVE</button>` : `<button class="card-btn" style="flex:1; background:var(--bg-surface); border:1px solid #7c3aed; color:#a855f7;" ${((userDataRecord.magnets || 0) <= 0) ? 'disabled style="opacity:0.3;"' : ''} onclick="applyMutationMagnet('${instanceIdKey}')">🧲 MAGNET</button>`}
                         </div>
                     </div>
@@ -8075,22 +8122,7 @@ const MUTATIONS_LIST = [
             const containerNode = document.getElementById('lock-options-container');
             containerNode.innerHTML = '';
 
-            // Check if this card has already been locked the maximum number of times
-            const card = userDeckRecord[instanceId];
-            const timesLocked = (card && card.lockCount) || 0;
-            if (timesLocked >= 2) {
-                containerNode.innerHTML = `
-                    <div style="text-align:center; padding:24px; color:#6b7280;">
-                        <div style="font-size:2rem; margin-bottom:12px;">🔒</div>
-                        <div style="font-weight:bold;">Lock limit reached.</div>
-                        <div style="font-size:0.8rem; margin-top:4px;">This card has been locked the maximum of 2 times.</div>
-                    </div>
-                `;
-                openModal('modal-apply-lock');
-                return;
-            }
-
-            const lockTiers = [15, 30, 45];
+            const lockTiers = [15, 30, 45, 60];
             let hasAnyLocksAvailable = false;
 
             lockTiers.forEach(mins => {
@@ -8130,17 +8162,11 @@ const MUTATIONS_LIST = [
             const currentCount = (userDataRecord.locks && userDataRecord.locks[minutes]) || 0;
             if (currentCount <= 0) return showToast("No locks available in inventory.", "error");
 
-            // Enforce max 2 locks per card
-            const card = userDeckRecord[instanceId];
-            const timesLocked = (card && card.lockCount) || 0;
-            if (timesLocked >= 2) return showToast("This card has reached its lock limit (2).", "error");
-
             const calculatedEpochLockExpiryTime = Date.now() + (minutes * 60 * 1000);
 
             const lockApplicationPayload = {};
             lockApplicationPayload[`users/${activeUserSession.uid}/locks/${minutes}`] = currentCount - 1;
             lockApplicationPayload[`inventory/${activeUserSession.uid}/${instanceId}/cryptographicLockExpiry`] = calculatedEpochLockExpiryTime;
-            lockApplicationPayload[`inventory/${activeUserSession.uid}/${instanceId}/lockCount`] = timesLocked + 1;
 
             await update(ref(db, '/'), lockApplicationPayload);
             // Tutorial step 6/12: applying a lock.
@@ -8148,7 +8174,7 @@ const MUTATIONS_LIST = [
                 advanceTutorialTo(6, { appliedLock: true, appliedLockAt: Date.now() });
             }
             closeModal('modal-apply-lock');
-            showToast(`Asset secured for ${minutes} minutes. (${timesLocked + 1}/2 locks used)`, "success");
+            showToast(`Asset secured for ${minutes} minutes.`, "success");
         };
 
         window.buyLockItem = async function (minutesCountValue, executionPriceInEuros) {
@@ -11691,7 +11717,7 @@ const MUTATIONS_LIST = [
 
     </script>
     <div style="position: fixed; top: 12px; left: 12px; z-index: 9999999999999; color: rgba(255, 255, 255, 0.4); font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
-    V:9.9.8
+    V:9.9.9
 </div>
 </body>
 
