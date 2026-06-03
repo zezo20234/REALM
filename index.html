@@ -4028,22 +4028,22 @@
     <button type="button" id="btn-admin-lock" title="Admin access">🔒 ADMIN</button>
 
     <!-- BAN SCREEN -->
-    <div id="ban-screen" style="display:none; position:fixed; inset:0; z-index:999999; background:#0a0000; align-items:center; justify-content:center; padding:24px; flex-direction:column; text-align:center;">
-        <div style="max-width:420px; width:100%;">
-            <div style="font-size:5rem; margin-bottom:16px; animation:banPulse 1.5s ease-in-out infinite;">🚫</div>
-            <div style="font-family:'Orbitron',sans-serif; font-size:2.2rem; font-weight:900; color:#ff1a1a; letter-spacing:4px; margin-bottom:12px; text-shadow:0 0 30px rgba(255,26,26,0.8);">BANNED</div>
-            <div style="width:100%; height:3px; background:linear-gradient(90deg, transparent, #ff1a1a, transparent); margin-bottom:24px;"></div>
-            <div style="background:rgba(255,26,26,0.1); border:2px solid rgba(255,26,26,0.5); border-radius:16px; padding:24px 20px; margin-bottom:20px;">
-                <div style="font-size:1.1rem; font-weight:800; color:#ff6666; margin-bottom:10px;">Your account has been suspended.</div>
-                <div style="font-size:0.88rem; color:#cc4444; line-height:1.6;">You have been banned from Realm by an administrator. You cannot access the game or your assets until your ban is lifted.</div>
+    <div id="ban-screen" style="display:none; position:fixed; inset:0; z-index:999999; background:#060000; align-items:center; justify-content:center; padding:24px; flex-direction:column; text-align:center;">
+        <div style="max-width:440px; width:100%;">
+            <div style="font-size:5rem; margin-bottom:16px; animation:banPulse 1.4s ease-in-out infinite;">🚫</div>
+            <div style="font-family:'Orbitron',sans-serif; font-size:2.4rem; font-weight:900; color:#ff1a1a; letter-spacing:5px; margin-bottom:10px; text-shadow:0 0 40px rgba(255,26,26,0.9), 0 0 80px rgba(255,26,26,0.4);">BANNED</div>
+            <div style="width:100%; height:3px; background:linear-gradient(90deg, transparent, #ff1a1a, transparent); margin-bottom:28px;"></div>
+            <div style="background:rgba(255,0,0,0.08); border:2px solid rgba(255,26,26,0.6); border-radius:16px; padding:28px 24px; margin-bottom:24px; box-shadow:0 0 40px rgba(255,0,0,0.2), inset 0 0 30px rgba(255,0,0,0.05);">
+                <div style="font-size:1.2rem; font-weight:900; color:#ff4444; margin-bottom:14px; letter-spacing:1px;">YOUR ACCOUNT HAS BEEN SUSPENDED</div>
+                <div style="font-size:0.9rem; color:#cc3333; line-height:1.7; font-weight:600;">An administrator has banned you from Realm.<br>You cannot access the game or your assets<br>until your ban is lifted.</div>
             </div>
-            <div style="font-size:0.75rem; color:#661111; font-weight:600;">If you believe this is a mistake, contact support.</div>
+            <div style="font-size:0.72rem; color:#551111; font-weight:700; letter-spacing:0.5px;">CONTACT SUPPORT IF YOU BELIEVE THIS IS A MISTAKE</div>
         </div>
     </div>
     <style>
         @keyframes banPulse {
-            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 10px rgba(255,26,26,0.4)); }
-            50% { transform: scale(1.08); filter: drop-shadow(0 0 30px rgba(255,26,26,0.9)); }
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 12px rgba(255,26,26,0.5)); }
+            50% { transform: scale(1.1); filter: drop-shadow(0 0 35px rgba(255,26,26,1)); }
         }
     </style>
 
@@ -6522,36 +6522,57 @@ const MUTATIONS_LIST = [
 
         document.getElementById('action-signout')?.addEventListener('click', () => signOut(auth));
 
+        // ── BAN DETECTION ──────────────────────────────────────────────────────
+        let _banCheckInterval = null;
+
         function showBanScreen() {
-            // Hide everything else, show ban screen — no way out
             document.getElementById('ban-screen').style.display = 'flex';
             document.getElementById('auth-screen').style.display = 'none';
             document.getElementById('app-workspace').style.display = 'none';
-            // Sign them out silently so they can't use cached tokens
+            if (_banCheckInterval) { clearInterval(_banCheckInterval); _banCheckInterval = null; }
             signOut(auth).catch(() => {});
         }
 
-        onAuthStateChanged(auth, async userEntity => {
-            if (userEntity) {
-                // Force token refresh to detect if account was disabled mid-session
+        function startBanPolling(user) {
+            if (_banCheckInterval) clearInterval(_banCheckInterval);
+            // Force-refresh token every 8 seconds — Firebase throws auth/user-disabled instantly
+            _banCheckInterval = setInterval(async () => {
+                if (!auth.currentUser) return;
                 try {
-                    await userEntity.getIdToken(true);
+                    await auth.currentUser.getIdToken(true);
                 } catch (err) {
                     if (err.code === 'auth/user-disabled') {
+                        clearInterval(_banCheckInterval);
+                        _banCheckInterval = null;
                         showBanScreen();
-                        return;
                     }
                 }
+            }, 8000);
+        }
+
+        function stopBanPolling() {
+            if (_banCheckInterval) { clearInterval(_banCheckInterval); _banCheckInterval = null; }
+        }
+        // ──────────────────────────────────────────────────────────────────────
+
+        onAuthStateChanged(auth, userEntity => {
+            if (userEntity) {
                 activeUserSession = userEntity;
                 userAnsweredQuestionId = null;
                 document.getElementById('auth-screen').style.display = 'none';
                 document.getElementById('app-workspace').style.display = 'flex';
                 requestAnimationFrame(updateNavIndicator);
                 initializeUserEnvironmentCore();
+                startBanPolling(userEntity);
             } else {
                 activeUserSession = null;
                 userAnsweredQuestionId = null;
-                document.getElementById('auth-screen').style.display = 'flex';
+                stopBanPolling();
+                // Only show auth screen if ban screen isn't already showing
+                if (document.getElementById('ban-screen').style.display === 'none' ||
+                    document.getElementById('ban-screen').style.display === '') {
+                    document.getElementById('auth-screen').style.display = 'flex';
+                }
                 document.getElementById('app-workspace').style.display = 'none';
                 deconstructUserEnvironmentCore();
             }
