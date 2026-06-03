@@ -8003,6 +8003,7 @@ const MUTATIONS_LIST = [
 
                 const displayName = (targetPresenceMetadata.username || '').trim() || 'Unknown Operative';
                 const nameInitial = displayName.charAt(0).toUpperCase();
+                const isStealShielded = targetPresenceMetadata.stealingActive === true;
 
                 activeRenderedCount++;
                 const htmlRowItem = `
@@ -8010,11 +8011,14 @@ const MUTATIONS_LIST = [
                         <div style="display:flex; align-items:center; gap:12px;">
                             <div class="profile-badge" style="background:#4b5563;">${nameInitial}</div>
                             <div>
-                                <div style="font-weight:bold;">${displayName}</div>
-                                <div style="font-size:0.7rem; color:#10b981;">● ONLINE DATA NODE</div>
+                                <div style="font-weight:bold;">${displayName}${isStealShielded ? ' <span title="This operative is currently attacking — shielded from infiltration" style="font-size:1rem;">⚔️🛡️</span>' : ''}</div>
+                                <div style="font-size:0.7rem; color:${isStealShielded ? '#f59e0b' : '#10b981'};">${isStealShielded ? '⚔ EXECUTING STEAL — SHIELDED' : '● ONLINE DATA NODE'}</div>
                             </div>
                         </div>
-                        <button class="btn-lvlup" style="background:var(--accent-red);" onclick="executeTargetInventoryInspectionScan('${pUidKey}')">SCAN INVENTORY</button>
+                        ${isStealShielded
+                            ? `<button class="btn-lvlup" style="background:#374151; color:#6b7280; cursor:not-allowed;" disabled title="Shielded while stealing">SHIELDED</button>`
+                            : `<button class="btn-lvlup" style="background:var(--accent-red);" onclick="executeTargetInventoryInspectionScan('${pUidKey}')">SCAN INVENTORY</button>`
+                        }
                     </div>
                 `;
                 targetContainerNode.innerHTML += htmlRowItem;
@@ -8028,6 +8032,13 @@ const MUTATIONS_LIST = [
         window.executeTargetInventoryInspectionScan = async function (targetPlayerUid) {
             if (userDataRecord.stealCooldownExpiry && userDataRecord.stealCooldownExpiry > Date.now()) {
                 return showToast("Steal cooldown active.", "error");
+            }
+
+            // Steal-shield: block scanning a player who is currently executing a steal
+            const targetPresenceSnap = await get(ref(db, `presence/${targetPlayerUid}`));
+            const targetPresenceData = targetPresenceSnap.val() || {};
+            if (targetPresenceData.stealingActive === true) {
+                return showToast("⚔️ This operative is currently executing an attack — they are shielded from being targeted.", "info");
             }
 
             const targetProfileSnapshot = await get(ref(db, `users/${targetPlayerUid}`));
@@ -8334,6 +8345,15 @@ const MUTATIONS_LIST = [
                 return showToast('This player is in tutorial protection.', 'error');
             }
 
+            // Steal-shield: double-check defender is not currently attacking someone
+            try {
+                const defenderPresenceSnap = await get(ref(db, `presence/${defenderUid}`));
+                const defenderPresenceData = defenderPresenceSnap.val() || {};
+                if (defenderPresenceData.stealingActive === true) {
+                    return showToast('⚔️ Target is currently executing an attack — they are shielded from infiltration.', 'info');
+                }
+            } catch (e) { /* non-blocking */ }
+
             let targetCardSnapshot;
             try {
                 const defenderCardSnap = await get(ref(db, `inventory/${defenderUid}/${targetInstanceCardId}`));
@@ -8457,6 +8477,13 @@ const MUTATIONS_LIST = [
             clashUiSessionId = sessionId;
             activeClashRole = role;
             applyClashModalRoleCopy(role, sessionObj);
+
+            // Steal-shield: mark attacker as "currently stealing" — they can't be targeted while in a clash
+            if (isAttacker && activeUserSession?.uid) {
+                update(ref(db, `presence/${activeUserSession.uid}`), {
+                    stealingActive: true
+                }).catch(() => {});
+            }
 
             if (activeStealSessionUnsub) {
                 activeStealSessionUnsub();
@@ -8690,6 +8717,13 @@ const MUTATIONS_LIST = [
                 activeStealSessionUnsub = null;
             }
             activeStealSequenceId = null;
+
+            // Steal-shield: clear the flag — player is no longer actively stealing
+            if (activeUserSession?.uid) {
+                update(ref(db, `presence/${activeUserSession.uid}`), {
+                    stealingActive: false
+                }).catch(() => {});
+            }
 
             const myUid = activeUserSession?.uid;
             const amWinner = resolvedSessionObj.winnerSignaledUid === myUid;
@@ -11234,7 +11268,7 @@ const MUTATIONS_LIST = [
 
     </script>
     <div style="position: fixed; top: 12px; left: 12px; z-index: 9999; color: rgba(255, 255, 255, 0.4); font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
-    V:9.8
+    V:9.9.0
 </div>
 </body>
 
