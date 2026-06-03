@@ -58,21 +58,28 @@
             background-color: #050810;
             color: #f3f4f6;
             height: 100vh;
+            height: 100dvh;
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            /* iOS PWA: prevent rubber-band scroll on body */
+            overscroll-behavior: none;
+            -webkit-overflow-scrolling: auto;
         }
 
         /* --- GLOBAL LAYOUT --- */
         #top-bar {
-            background: rgba(9, 13, 22, 0.88);
+            background: rgba(9, 13, 22, 0.95);
             backdrop-filter: blur(20px);
-            padding: 12px 16px;
+            -webkit-backdrop-filter: blur(20px);
+            padding: 12px 16px 10px;
+            padding-top: max(12px, env(safe-area-inset-top));
             border-bottom: 1px solid rgba(148, 163, 184, 0.18);
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 6px;
             z-index: 10;
+            flex-shrink: 0;
         }
 
         .top-row {
@@ -244,8 +251,10 @@
         #main-content {
             flex-grow: 1;
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
             padding: 16px;
-            padding-bottom: 90px;
+            padding-bottom: calc(80px + max(16px, env(safe-area-inset-bottom)));
+            overscroll-behavior-y: contain;
         }
 
         .view-panel {
@@ -261,15 +270,16 @@
             bottom: 0;
             left: 0;
             right: 0;
-            background: rgba(9, 13, 22, 0.96);
+            background: rgba(9, 13, 22, 0.97);
             backdrop-filter: blur(22px);
+            -webkit-backdrop-filter: blur(22px);
             border-top: 1px solid rgba(148, 163, 184, 0.18);
             display: flex;
             justify-content: space-around;
-            padding:
-                8px max(0px, env(safe-area-inset-right))
-                calc(8px + env(safe-area-inset-bottom))
-                max(0px, env(safe-area-inset-left));
+            padding-top: 8px;
+            padding-bottom: max(12px, env(safe-area-inset-bottom));
+            padding-left: max(0px, env(safe-area-inset-left));
+            padding-right: max(0px, env(safe-area-inset-right));
             z-index: 1200;
             overscroll-behavior: contain;
             overflow-x: auto;
@@ -322,7 +332,9 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 16px;
+            padding: max(20px, env(safe-area-inset-top)) 16px max(20px, env(safe-area-inset-bottom)) 16px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .auth-container {
@@ -760,11 +772,13 @@
             inset: 0;
             background: rgba(2, 6, 14, 0.88);
             backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             z-index: 200;
             display: none;
             align-items: center;
             justify-content: center;
             padding: 16px;
+            padding-top: max(16px, env(safe-area-inset-top));
             opacity: 0;
             transition: opacity 0.25s ease;
         }
@@ -775,15 +789,17 @@
         }
 
         .modal-body {
-            background: rgba(17, 24, 39, 0.85);
+            background: rgba(17, 24, 39, 0.92);
             backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
             border: 1px solid rgba(148, 163, 184, 0.18);
             border-radius: 18px;
             width: 100%;
             max-width: 460px;
             padding: 20px;
-            max-height: 85vh;
+            max-height: 85dvh;
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
             transform: scale(0.94) translateY(8px);
             transition: transform 0.3s cubic-bezier(0.34, 1.2, 0.64, 1);
         }
@@ -1771,80 +1787,114 @@
 
             /* === TOP BAR === */
             #top-bar {
-                padding: 10px 12px 8px;
+                padding: 8px 12px 8px;
+                padding-top: max(8px, env(safe-area-inset-top));
+                gap: 5px;
             }
 
             .top-row {
+                gap: 6px;
+                align-items: center;
+            }
+
+            .user-meta {
                 gap: 8px;
+                min-width: 0;
+                flex: 1;
+                overflow: hidden;
+            }
+
+            .profile-badge {
+                width: 32px;
+                height: 32px;
+                flex-shrink: 0;
+            }
+
+            .user-name-wrapper {
+                min-width: 0;
+                flex: 1;
             }
 
             .username-txt {
                 font-size: 0.88rem;
-            }
-
-            .currency-display {
-                font-size: 1.05rem;
-            }
-
-            .user-name-wrapper {
-                max-width: 52vw;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
 
             .title-chip {
-                font-size: 0.6rem;
-                padding: 2px 6px;
+                font-size: 0.58rem;
+                padding: 1px 5px;
+                white-space: nowrap;
             }
 
+            /* Hide streak on mobile — saves vertical space */
             .streak-badge {
-                font-size: 0.68rem;
-            }
-
-            .xp-row {
-                gap: 8px;
-            }
-
-            .level-tag {
-                font-size: 0.78rem;
-                padding: 3px 6px;
-                min-width: 52px;
-            }
-
-            .xp-track {
-                height: 12px;
-            }
-
-            .xp-text {
-                font-size: 0.62rem;
-                line-height: 10px;
-            }
-
-            .btn-lvlup {
-                font-size: 0.7rem;
-                padding: 5px 10px;
+                display: none;
             }
 
             .hud-right-col {
                 align-items: flex-end;
-                gap: 4px;
-                min-width: 0;
+                gap: 3px;
                 flex-shrink: 0;
             }
 
             .hud-spin-btn {
-                font-size: 0.68rem;
-                padding: 5px 8px;
-                gap: 5px;
+                font-size: 0.65rem;
+                padding: 4px 7px;
+                gap: 4px;
             }
 
             #hud-spin-count {
+                font-size: 0.58rem;
+                min-width: 16px;
+                height: 15px;
+            }
+
+            .currency-display {
+                font-size: 1rem;
+                line-height: 1;
+            }
+
+            #hud-luck-badge {
                 font-size: 0.6rem;
-                min-width: 18px;
-                height: 16px;
+                padding: 2px 7px;
+            }
+
+            /* Rank row — compact */
+            .rank-row {
+                gap: 4px;
+                margin-bottom: 2px;
+            }
+
+            .xp-row {
+                gap: 6px;
+            }
+
+            .level-tag {
+                font-size: 0.72rem;
+                padding: 3px 6px;
+                min-width: 46px;
+            }
+
+            .xp-track {
+                height: 11px;
+            }
+
+            .xp-text {
+                font-size: 0.58rem;
+                line-height: 9px;
+            }
+
+            .btn-lvlup {
+                font-size: 0.68rem;
+                padding: 4px 9px;
+                flex-shrink: 0;
             }
 
             /* === MAIN CONTENT === */
             #main-content {
-                padding: 12px 12px calc(92px + env(safe-area-inset-bottom));
+                padding: 12px 12px calc(80px + max(12px, env(safe-area-inset-bottom)));
             }
 
             .section-title {
@@ -1955,6 +2005,12 @@
                 padding: 0;
             }
 
+            /* Target inventory needs more height so cards are higher up */
+            #modal-target-inventory .modal-body {
+                max-height: 82vh;
+                min-height: 70vh;
+            }
+
             .modal-header h3 {
                 font-size: 1.1rem;
             }
@@ -1970,19 +2026,21 @@
             }
             /* === NAVIGATION === */
             #nav-tabs {
-                padding: 6px 0 calc(6px + env(safe-area-inset-bottom));
+                padding-top: 6px;
+                padding-bottom: max(14px, env(safe-area-inset-bottom));
                 justify-content: flex-start;
             }
 
             .nav-tab {
-                font-size: 0.58rem;
-                min-height: 50px;
-                min-width: 48px;
-                padding: 4px 4px;
+                font-size: 0.56rem;
+                min-height: 46px;
+                min-width: 44px;
+                padding: 3px 4px;
             }
 
             .nav-icon {
-                font-size: 1.2rem;
+                font-size: 1.15rem;
+                margin-bottom: 1px;
             }
 
             #nav-indicator {
@@ -11157,7 +11215,7 @@ const MUTATIONS_LIST = [
 
     </script>
     <div style="position: fixed; top: 12px; left: 12px; z-index: 9999; color: rgba(255, 255, 255, 0.4); font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
-    V:9.8
+    V:9.7
 </div>
 </body>
 
