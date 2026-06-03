@@ -10429,7 +10429,10 @@ const MUTATIONS_LIST = [
             if (!cards || cards.length === 0) return null;
             const totalWeight = cards.reduce((sum, c) => sum + (c.chance || 0), 0);
             if (totalWeight <= 0) return null;
-            const roll = Math.random() * totalWeight;
+            // Use luck-biased roll so global luck events affect limited packs too
+            const luck = getActiveLuckMultiplier();
+            const rawRoll = luck > 1 ? Math.pow(Math.random(), 1 / luck) : Math.random();
+            const roll = rawRoll * totalWeight;
             let cumulative = 0;
             for (const c of cards) {
                 cumulative += (c.chance || 0);
