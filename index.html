@@ -3976,8 +3976,7 @@
 
             <div class="rank-row" id="hud-rank-row">
                 <span id="hud-clash-rank-badge"></span>
-                <span id="hud-rank-reward-timer" style="font-size:0.68rem;font-weight:700;color:#6b7280;margin-left:4px;"></span>
-                <button id="hud-rank-claim-btn" onclick="claimClashRankReward()" style="display:none;margin-left:8px;padding:4px 12px;border-radius:999px;border:none;background:linear-gradient(135deg,#10b981,#059669);color:#fff;font-size:0.72rem;font-weight:900;letter-spacing:0.04em;cursor:pointer;box-shadow:0 0 12px rgba(16,185,129,0.55);animation:claimGlow 1.5s ease-in-out infinite;">🎁 CLAIM REWARD</button>
+                <span id="hud-rank-reward-timer" style="font-size:0.68rem;font-weight:700;color:#6b7280;margin-left:4px;"><button id="hud-rank-claim-btn" onclick="claimClashRankReward()" style="display:none;padding:3px 10px;border-radius:999px;border:none;background:linear-gradient(135deg,#10b981,#059669);color:#fff;font-size:0.72rem;font-weight:900;letter-spacing:0.04em;cursor:pointer;box-shadow:0 0 12px rgba(16,185,129,0.55);animation:claimGlow 1.5s ease-in-out infinite;">🎁 CLAIM REWARD</button></span>
             </div>
             <div class="xp-row">
                 <div class="level-tag" id="hud-level">LV 1</div>
@@ -8891,20 +8890,30 @@ const MUTATIONS_LIST = [
             function tick() {
                 const msLeft = globalRankCycleState.nextRewardAt - Date.now();
 
-                // If time is up AND there is a pending unclaimed reward → show button, hide text
                 const hasPending = (userDataRecord.clashRankPendingReward || 0) >
                                    (userDataRecord.clashRankLastCycleClaimed || 0);
 
-                if (msLeft <= 0 || hasPending) {
-                    el.textContent  = '';
-                    el.style.color  = '#10b981';
+                if (hasPending) {
+                    // Show button, hide text
+                    el.dataset.timerText = '';
                     if (btn) btn.style.display = 'inline-block';
-                    // Attempt to advance cycle + stamp pending rewards if we're the first online
-                    if (msLeft <= 0) tryAdvanceGlobalRankCycle(globalRankCycleState.cycleId, globalRankCycleState.nextRewardAt);
+                    // Clear any text nodes but leave the button element
+                    for (const node of [...el.childNodes]) {
+                        if (node.nodeType === Node.TEXT_NODE) node.remove();
+                    }
                     return;
                 }
 
+                // Hide button, show text
                 if (btn) btn.style.display = 'none';
+
+                if (msLeft <= 0) {
+                    // Kick off cycle advance, show brief label while Firebase writes
+                    setTimerText(el, '⏳ Preparing…', '#10b981');
+                    tryAdvanceGlobalRankCycle(globalRankCycleState.cycleId, globalRankCycleState.nextRewardAt);
+                    return;
+                }
+
                 const totalSecs = Math.ceil(msLeft / 1000);
                 const days  = Math.floor(totalSecs / 86400);
                 const hours = Math.floor((totalSecs % 86400) / 3600);
@@ -8915,8 +8924,16 @@ const MUTATIONS_LIST = [
                 else if (hours > 0) label += `${hours}h ${mins}m`;
                 else if (mins > 0)  label += `${mins}m ${secs}s`;
                 else                label += `${secs}s`;
-                el.textContent  = label;
-                el.style.color  = msLeft < 3600000 ? '#f59e0b' : '#6b7280';
+                setTimerText(el, label, msLeft < 3600000 ? '#f59e0b' : '#6b7280');
+            }
+
+            function setTimerText(el, text, color) {
+                // Remove existing text nodes only, leave child elements (the button)
+                for (const node of [...el.childNodes]) {
+                    if (node.nodeType === Node.TEXT_NODE) node.remove();
+                }
+                el.insertAdjacentText('afterbegin', text);
+                el.style.color = color;
             }
 
             tick();
@@ -8927,15 +8944,19 @@ const MUTATIONS_LIST = [
         async function checkClashRankReward() {
             if (!activeUserSession?.uid) return;
             const btn = document.getElementById('hud-rank-claim-btn');
+            const el  = document.getElementById('hud-rank-reward-timer');
 
             const pendingCycle = userDataRecord.clashRankPendingReward  || 0;
             const lastClaimed  = userDataRecord.clashRankLastCycleClaimed || 0;
 
             if (pendingCycle > lastClaimed) {
-                // There's an unclaimed reward — show the button
+                // Show button, clear timer text nodes only
+                if (el) {
+                    for (const node of [...el.childNodes]) {
+                        if (node.nodeType === Node.TEXT_NODE) node.remove();
+                    }
+                }
                 if (btn) btn.style.display = 'inline-block';
-                const el = document.getElementById('hud-rank-reward-timer');
-                if (el) { el.textContent = ''; }
             } else {
                 if (btn) btn.style.display = 'none';
             }
@@ -8985,8 +9006,13 @@ const MUTATIONS_LIST = [
 
             // Hide button + show toast
             if (btn) btn.style.display = 'none';
+            // Clear timer text nodes so the interval tick writes the next countdown cleanly
             const timerEl = document.getElementById('hud-rank-reward-timer');
-            if (timerEl) timerEl.textContent = '';
+            if (timerEl) {
+                for (const node of [...timerEl.childNodes]) {
+                    if (node.nodeType === Node.TEXT_NODE) node.remove();
+                }
+            }
 
             const rewardParts = [];
             if (reward.xp    > 0) rewardParts.push(`+${reward.xp} XP`);
