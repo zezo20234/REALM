@@ -1524,6 +1524,7 @@
             transform: translateY(-110%);
             transition: transform 0.55s cubic-bezier(0.34, 1.4, 0.64, 1);
             pointer-events: none;
+            padding-top: max(0px, env(safe-area-inset-top));
         }
 
         #global-broadcast-banner.show {
@@ -1677,7 +1678,7 @@
             }
         }
         .broadcast-inner {
-            margin: 10px 14px 0;
+            margin: max(75px, calc(65px + env(safe-area-inset-top))) 14px 0;
             padding: 14px 18px;
             background: linear-gradient(135deg, rgba(37, 99, 235, 0.95), rgba(124, 58, 237, 0.9));
             border: 1px solid rgba(255, 255, 255, 0.25);
@@ -2329,7 +2330,7 @@
 
             /* === BROADCAST & LUCK BANNERS === */
             .broadcast-inner {
-                margin: 8px 10px 0;
+                margin: max(70px, calc(60px + env(safe-area-inset-top))) 10px 0;
                 padding: 12px 14px;
                 font-size: 0.84rem;
             }
@@ -3682,7 +3683,7 @@
         @media (max-width: 768px) {
             /* Broadcast banners - ensure full visibility */
             .broadcast-inner {
-                margin: 8px 8px 0;
+                margin: max(70px, calc(60px + env(safe-area-inset-top))) 8px 0;
                 padding: 12px 14px;
                 font-size: 0.85rem;
                 line-height: 1.4;
@@ -11013,9 +11014,13 @@ const MUTATIONS_LIST = [
                 // Handle card transfer
                 if (myOffer.type === 'cards' && myOffer.cards) {
                     for (const card of myOffer.cards) {
+                        // Fetch the full card instance to preserve all fields
+                        const myCardSnap2 = await get(ref(db, `inventory/${myUid}/${card.instanceId}`));
+                        const myCardData = myCardSnap2.exists() ? myCardSnap2.val() : card;
                         operations[`inventory/${myUid}/${card.instanceId}`] = null;
                         operations[`inventory/${partnerUid}/${card.instanceId}`] = {
-                            ...card,
+                            ...myCardData,
+                            activeMutationIndexes: [],
                             acquiredTimestamp: Date.now()
                         };
                     }
@@ -11023,9 +11028,13 @@ const MUTATIONS_LIST = [
 
                 if (theirOffer.type === 'cards' && theirOffer.cards) {
                     for (const card of theirOffer.cards) {
+                        // Fetch the full card instance to preserve all fields
+                        const theirCardSnap2 = await get(ref(db, `inventory/${partnerUid}/${card.instanceId}`));
+                        const theirCardData = theirCardSnap2.exists() ? theirCardSnap2.val() : card;
                         operations[`inventory/${partnerUid}/${card.instanceId}`] = null;
                         operations[`inventory/${myUid}/${card.instanceId}`] = {
-                            ...card,
+                            ...theirCardData,
+                            activeMutationIndexes: [],
                             acquiredTimestamp: Date.now()
                         };
                     }
@@ -11268,7 +11277,7 @@ const MUTATIONS_LIST = [
 
     </script>
     <div style="position: fixed; top: 12px; left: 12px; z-index: 9999; color: rgba(255, 255, 255, 0.4); font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
-    V:9.9.0
+    V:9.9.2
 </div>
 </body>
 
