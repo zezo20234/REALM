@@ -8301,38 +8301,50 @@ const MUTATIONS_LIST = [
         };
 
         function executeSystemicCardMutationTick() {
-            const arrayKeysOfInventory = Object.keys(userDeckRecord);
-            if (arrayKeysOfInventory.length === 0) return;
+            const allKeys = Object.keys(userDeckRecord);
+            if (allKeys.length === 0) return;
 
-            // If a Mutation Magnet is active on any card, direct all mutations there
-            const magnetInstanceKey = Object.keys(userDeckRecord).find(k => userDeckRecord[k].mutationMagnet === true);
-
-            let targetInstanceKey;
-            let targetCardInstance;
+            // If a Mutation Magnet is active, direct all mutations there (ignore collection check)
+            const magnetInstanceKey = allKeys.find(k => userDeckRecord[k].mutationMagnet === true);
 
             if (magnetInstanceKey) {
-                targetInstanceKey = magnetInstanceKey;
-                targetCardInstance = userDeckRecord[magnetInstanceKey];
-            } else {
-                targetInstanceKey = arrayKeysOfInventory[Math.floor(Math.random() * arrayKeysOfInventory.length)];
-                targetCardInstance = userDeckRecord[targetInstanceKey];
+                const magnetCard = userDeckRecord[magnetInstanceKey];
+                if (magnetCard.cryptographicLockExpiry && magnetCard.cryptographicLockExpiry > Date.now()) return;
+                const mutations = magnetCard.activeMutationIndexes || [];
+                if (mutations.length >= 10) return;
+                const mutIdx = pickWeightedMutationIndex();
+                const mut = MUTATIONS_LIST[mutIdx];
+                if (mut && mut.bonusPercent > MAX_MUTATION_BONUS_PERCENT) return;
+                mutations.push(mutIdx);
+                update(ref(db, `inventory/${activeUserSession.uid}/${magnetInstanceKey}`), {
+                    activeMutationIndexes: mutations
+                }).catch(err => console.error('Mutation tick failed:', err));
+                return;
             }
 
-            if (targetCardInstance.cryptographicLockExpiry && targetCardInstance.cryptographicLockExpiry > Date.now()) return;
-
-            const trackingMutationsListIndexes = targetCardInstance.activeMutationIndexes || [];
-            if (trackingMutationsListIndexes.length >= 10) return;
-
-            const generatedRandomMutationIndex = pickWeightedMutationIndex();
-            const generatedMutation = MUTATIONS_LIST[generatedRandomMutationIndex];
-            if (generatedMutation && generatedMutation.bonusPercent > MAX_MUTATION_BONUS_PERCENT) return;
-            trackingMutationsListIndexes.push(generatedRandomMutationIndex);
-
-            update(ref(db, `inventory/${activeUserSession.uid}/${targetInstanceKey}`), {
-                activeMutationIndexes: trackingMutationsListIndexes
-            }).catch(error => {
-                console.error('Mutation tick failed:', error);
+            // Build eligible pool: exclude collection cards, locked cards, and fully-mutated cards
+            const now = Date.now();
+            const eligibleKeys = allKeys.filter(k => {
+                const c = userDeckRecord[k];
+                if (c.isCollection) return false;
+                if (c.cryptographicLockExpiry && c.cryptographicLockExpiry > now) return false;
+                if ((c.activeMutationIndexes || []).length >= 10) return false;
+                return true;
             });
+
+            if (eligibleKeys.length === 0) return; // no eligible cards, skip silently
+
+            const targetKey = eligibleKeys[Math.floor(Math.random() * eligibleKeys.length)];
+            const targetCard = userDeckRecord[targetKey];
+            const mutations = [...(targetCard.activeMutationIndexes || [])];
+            const mutIdx = pickWeightedMutationIndex();
+            const mut = MUTATIONS_LIST[mutIdx];
+            if (mut && mut.bonusPercent > MAX_MUTATION_BONUS_PERCENT) return;
+            mutations.push(mutIdx);
+
+            update(ref(db, `inventory/${activeUserSession.uid}/${targetKey}`), {
+                activeMutationIndexes: mutations
+            }).catch(err => console.error('Mutation tick failed:', err));
         }
 
         let globalContinuousPresenceListSnapshot = {};
