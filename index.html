@@ -4535,14 +4535,14 @@
 
             <div class="admin-panel-section">
                 <h4>PACK RESTOCK</h4>
-                <p style="font-size:0.78rem;color:#94a3b8;margin-bottom:10px;">Trigger immediate restock of all pack
-                    types.</p>
-                <div class="admin-restock-grid">
-                    <button class="admin-restock-btn" style="background:var(--accent-green);color:white;"
+                <p style="font-size:0.78rem;color:#94a3b8;margin-bottom:10px;">Click a pack to force restock it with a custom amount, or restock all at once.</p>
+                <div style="display:flex;gap:8px;margin-bottom:10px;">
+                    <button class="admin-restock-btn" style="background:var(--accent-green);color:white;flex:1;"
                         onclick="triggerManualRestock()">RESTOCK ALL</button>
-                    <button class="admin-restock-btn" style="background:var(--accent-red);color:white;"
+                    <button class="admin-restock-btn" style="background:var(--accent-red);color:white;flex:1;"
                         onclick="clearAllStock()">CLEAR STOCK</button>
                 </div>
+                <div id="admin-pack-restock-list" style="display:flex;flex-direction:column;gap:6px;"></div>
             </div>
 
             <div class="admin-panel-section">
@@ -5958,17 +5958,53 @@ const MUTATIONS_LIST = [
             });
 
             document.getElementById('admin-restock-all')?.addEventListener('click', () => adminRestockPacks('all'));
-            const restockGrid = document.getElementById('admin-restock-grid');
-            if (restockGrid) {
+
+            // Build per-pack restock list
+            const restockList = document.getElementById('admin-pack-restock-list');
+            if (restockList) {
                 PACK_TYPES.forEach(pKey => {
+                    const cfg = RESTOCK_CONFIG[pKey];
+                    const color = PACK_COLOR_HEX[pKey];
+                    const isDark = ['divine','platinum','silver','paper','celestial'].includes(pKey);
+                    const textColor = isDark ? '#111' : '#fff';
+
+                    const row = document.createElement('div');
+                    row.style.cssText = 'display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:8px 10px;';
+
+                    const dot = document.createElement('span');
+                    dot.style.cssText = `width:10px;height:10px;border-radius:50%;background:${color};flex-shrink:0;box-shadow:0 0 6px ${color};`;
+
+                    const label = document.createElement('span');
+                    label.style.cssText = 'flex:1;font-weight:700;font-size:0.85rem;text-transform:uppercase;letter-spacing:0.04em;';
+                    label.textContent = pKey;
+
+                    const stockEl = document.createElement('span');
+                    stockEl.id = `admin-restock-stock-${pKey}`;
+                    stockEl.style.cssText = 'font-size:0.75rem;color:#6b7280;margin-right:4px;';
+                    stockEl.textContent = '…';
+
                     const btn = document.createElement('button');
-                    btn.className = 'admin-restock-btn';
-                    btn.style.background = PACK_COLOR_HEX[pKey];
-                    btn.style.color = '#050810';
-                    btn.innerText = `+${pKey}`;
-                    btn.addEventListener('click', () => adminRestockPacks(pKey));
-                    restockGrid.appendChild(btn);
+                    btn.style.cssText = `background:${color};color:${textColor};border:none;padding:5px 12px;border-radius:6px;font-weight:800;font-size:0.78rem;cursor:pointer;white-space:nowrap;`;
+                    btn.textContent = 'RESTOCK';
+                    btn.addEventListener('click', () => adminPromptRestock(pKey));
+
+                    row.appendChild(dot);
+                    row.appendChild(label);
+                    row.appendChild(stockEl);
+                    row.appendChild(btn);
+                    restockList.appendChild(row);
                 });
+
+                // Keep stock counts updated live
+                function refreshRestockStockDisplay() {
+                    const alloc = sharedGlobalPacks?.stockAllocations || {};
+                    PACK_TYPES.forEach(pKey => {
+                        const el = document.getElementById(`admin-restock-stock-${pKey}`);
+                        if (el) el.textContent = `Stock: ${alloc[pKey] ?? 0}`;
+                    });
+                }
+                setInterval(refreshRestockStockDisplay, 2000);
+                refreshRestockStockDisplay();
             }
 
             document.getElementById('admin-send-question')?.addEventListener('click', async () => {
@@ -6009,8 +6045,64 @@ const MUTATIONS_LIST = [
             });
         }
 
-        async function adminRestockPacks(packKey) {
-            const qty = parseInt(document.getElementById('admin-restock-qty').value, 10) || 10;
+        // Show a small inline modal asking for quantity, then restock that specific pack
+        function adminPromptRestock(packKey) {
+            // Remove any existing prompt
+            const existing = document.getElementById('admin-restock-prompt-modal');
+            if (existing) existing.remove();
+
+            const cfg = RESTOCK_CONFIG[packKey];
+            const color = PACK_COLOR_HEX[packKey];
+            const isDark = ['divine','platinum','silver','paper','celestial'].includes(packKey);
+
+            const overlay = document.createElement('div');
+            overlay.id = 'admin-restock-prompt-modal';
+            overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:9000;display:flex;align-items:center;justify-content:center;padding:16px;';
+
+            overlay.innerHTML = `
+                <div style="background:#111827;border:1px solid rgba(255,255,255,0.12);border-radius:14px;padding:24px;max-width:320px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.6);">
+                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+                        <span style="width:14px;height:14px;border-radius:50%;background:${color};box-shadow:0 0 8px ${color};flex-shrink:0;"></span>
+                        <span style="font-weight:900;font-size:1rem;text-transform:uppercase;letter-spacing:0.06em;">${packKey} Restock</span>
+                    </div>
+                    <p style="color:#94a3b8;font-size:0.82rem;margin-bottom:14px;">How many copies to add to stock?<br><span style="color:#6b7280;">Normal range: ${cfg.min}–${cfg.max}</span></p>
+                    <input id="admin-restock-prompt-qty" type="number" min="1" value="${cfg.min}"
+                        style="width:100%;background:#1f2937;border:1px solid rgba(255,255,255,0.18);color:white;padding:11px;border-radius:8px;font-size:1rem;font-weight:700;margin-bottom:14px;outline:none;text-align:center;">
+                    <div style="display:flex;gap:8px;">
+                        <button id="admin-restock-prompt-cancel" style="flex:1;padding:11px;background:transparent;border:1px solid rgba(255,255,255,0.15);color:white;border-radius:8px;font-weight:700;cursor:pointer;">CANCEL</button>
+                        <button id="admin-restock-prompt-confirm" style="flex:2;padding:11px;background:${color};color:${isDark ? '#111' : '#fff'};border:none;border-radius:8px;font-weight:900;cursor:pointer;">RESTOCK</button>
+                    </div>
+                </div>`;
+
+            document.body.appendChild(overlay);
+
+            const input = document.getElementById('admin-restock-prompt-qty');
+            input.focus();
+            input.select();
+
+            document.getElementById('admin-restock-prompt-cancel').addEventListener('click', () => overlay.remove());
+            overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+
+            document.getElementById('admin-restock-prompt-confirm').addEventListener('click', async () => {
+                const qty = parseInt(input.value, 10);
+                if (!qty || qty < 1) return showToast('Enter a valid quantity.', 'error');
+                overlay.remove();
+                await adminRestockPacks(packKey, qty);
+            });
+
+            input.addEventListener('keydown', async e => {
+                if (e.key === 'Enter') {
+                    const qty = parseInt(input.value, 10);
+                    if (!qty || qty < 1) return showToast('Enter a valid quantity.', 'error');
+                    overlay.remove();
+                    await adminRestockPacks(packKey, qty);
+                } else if (e.key === 'Escape') {
+                    overlay.remove();
+                }
+            });
+        }
+
+        async function adminRestockPacks(packKey, qty = 10) {
             const snap = await get(ref(db, 'system/packs'));
             const packs = snap.val() || { stockAllocations: {} };
             const stock = { ...(packs.stockAllocations || {}) };
@@ -6023,7 +6115,7 @@ const MUTATIONS_LIST = [
                 stock[packKey] = (stock[packKey] || 0) + qty;
             }
             await update(ref(db, 'system/packs'), { stockAllocations: stock, lastRestockTime: packs.lastRestockTime || Date.now() });
-            showToast(packKey === 'all' ? 'All packs restocked.' : `${packKey} +${qty} stock.`, 'success');
+            showToast(packKey === 'all' ? 'All packs restocked.' : `${packKey} +${qty} stock added.`, 'success');
         }
 
         function subscribeAdminReplies(questionId) {
@@ -10780,7 +10872,7 @@ const MUTATIONS_LIST = [
 
     </script>
     <div style="position: fixed; top: 12px; left: 12px; z-index: 9999; color: rgba(255, 255, 255, 0.4); font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
-    V:9
+    V:8.6
 </div>
 </body>
 
