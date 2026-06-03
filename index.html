@@ -6680,14 +6680,11 @@ const MUTATIONS_LIST = [
 
         function formatNum(n) {
             n = parseFloat(n) || 0;
-            const abs = Math.abs(n);
             const sign = n < 0 ? '-' : '';
-            if (abs >= 1e15)  return sign + (abs / 1e15).toFixed(abs % 1e15 === 0 ? 0 : 2).replace(/\.?0+$/, '') + 'Q';
-            if (abs >= 1e12)  return sign + (abs / 1e12).toFixed(abs % 1e12 === 0 ? 0 : 2).replace(/\.?0+$/, '') + 'T';
-            if (abs >= 1e9)   return sign + (abs / 1e9 ).toFixed(abs % 1e9  === 0 ? 0 : 2).replace(/\.?0+$/, '') + 'B';
-            if (abs >= 1e6)   return sign + (abs / 1e6 ).toFixed(abs % 1e6  === 0 ? 0 : 2).replace(/\.?0+$/, '') + 'M';
-            if (abs >= 1e3)   return sign + (abs / 1e3 ).toFixed(abs % 1e3  === 0 ? 0 : 2).replace(/\.?0+$/, '') + 'K';
-            return sign + abs.toFixed(2);
+            const abs = Math.abs(n);
+            // Always show the full number — no K / M / B shortcuts
+            if (Number.isInteger(abs)) return sign + abs.toLocaleString('en-US');
+            return sign + abs.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         }
 
         function renderHUDDisplayElements() {
@@ -8242,37 +8239,53 @@ const MUTATIONS_LIST = [
         };
 
         function executeSystemicCardMutationTick() {
-            const arrayKeysOfInventory = Object.keys(userDeckRecord);
-            if (arrayKeysOfInventory.length === 0) return;
+            // Guard: don't run until the user's inventory is fully loaded
+            if (!userProfileHydrated || !activeUserSession?.uid) return;
 
-            // If a Mutation Magnet is active on any card, direct all mutations there
-            const magnetInstanceKey = Object.keys(userDeckRecord).find(k => userDeckRecord[k].mutationMagnet === true);
+            const now = Date.now();
+            const allKeys = Object.keys(userDeckRecord);
+            if (allKeys.length === 0) return;
 
-            let targetInstanceKey;
-            let targetCardInstance;
+            // Pick the new mutation index now (same for any candidate card)
+            const newMutationIndex = pickWeightedMutationIndex();
+            const newMutation = MUTATIONS_LIST[newMutationIndex];
+            if (newMutation && newMutation.bonusPercent > MAX_MUTATION_BONUS_PERCENT) return;
 
-            if (magnetInstanceKey) {
-                targetInstanceKey = magnetInstanceKey;
-                targetCardInstance = userDeckRecord[magnetInstanceKey];
-            } else {
-                targetInstanceKey = arrayKeysOfInventory[Math.floor(Math.random() * arrayKeysOfInventory.length)];
-                targetCardInstance = userDeckRecord[targetInstanceKey];
+            // If a Mutation Magnet is active, use that card — otherwise pick a random eligible card.
+            // "Eligible" = not cryptographically locked, and has fewer than 10 mutations.
+            // We try up to all cards before giving up so a single locked/full card never blocks everyone.
+            const magnetKey = allKeys.find(k => userDeckRecord[k].mutationMagnet === true);
+
+            let targetKey = null;
+            if (magnetKey) {
+                const mc = userDeckRecord[magnetKey];
+                const magnetLocked = mc.cryptographicLockExpiry && mc.cryptographicLockExpiry > now;
+                const magnetFull   = (mc.activeMutationIndexes || []).length >= 10;
+                if (!magnetLocked && !magnetFull) targetKey = magnetKey;
             }
 
-            if (targetCardInstance.cryptographicLockExpiry && targetCardInstance.cryptographicLockExpiry > Date.now()) return;
+            if (!targetKey) {
+                // Shuffle the keys so we don't always hit the same card
+                const shuffled = allKeys.slice().sort(() => Math.random() - 0.5);
+                for (const k of shuffled) {
+                    const c = userDeckRecord[k];
+                    const locked = c.cryptographicLockExpiry && c.cryptographicLockExpiry > now;
+                    const full   = (c.activeMutationIndexes || []).length >= 10;
+                    if (!locked && !full) { targetKey = k; break; }
+                }
+            }
 
-            const trackingMutationsListIndexes = targetCardInstance.activeMutationIndexes || [];
-            if (trackingMutationsListIndexes.length >= 10) return;
+            if (!targetKey) return; // every card is locked or maxed — nothing to do
 
-            const generatedRandomMutationIndex = pickWeightedMutationIndex();
-            const generatedMutation = MUTATIONS_LIST[generatedRandomMutationIndex];
-            if (generatedMutation && generatedMutation.bonusPercent > MAX_MUTATION_BONUS_PERCENT) return;
-            trackingMutationsListIndexes.push(generatedRandomMutationIndex);
-
-            update(ref(db, `inventory/${activeUserSession.uid}/${targetInstanceKey}`), {
-                activeMutationIndexes: trackingMutationsListIndexes
-            }).catch(error => {
-                console.error('Mutation tick failed:', error);
+            // Use a Firebase transaction so we always append to the real server array,
+            // never the potentially-stale local cache. This is what prevented mutations
+            // from showing up — a stale local write was silently dropping the update.
+            runTransaction(ref(db, `inventory/${activeUserSession.uid}/${targetKey}/activeMutationIndexes`), (currentIndexes) => {
+                const arr = Array.isArray(currentIndexes) ? currentIndexes : [];
+                if (arr.length >= 10) return; // abort if already full on the server side
+                return [...arr, newMutationIndex];
+            }).catch(err => {
+                console.error('Mutation transaction failed:', err);
             });
         }
 
@@ -9215,7 +9228,7 @@ const MUTATIONS_LIST = [
             { id: 'diamond',   name: 'Diamond',      color: '#7df9ff', css: 'rank-diamond',   img: 'DIAMOND.png',   reward: { xp: 400, money: 1000 } },
             { id: 'champion',  name: 'Champion',     color: '#f59e0b', css: 'rank-champion',  img: 'CHAMPION.png',  reward: { xp: 450, money: 1250 } },
             { id: 'grandchamp',name: 'Grand Champion',color: '#a855f7',css: 'rank-grandchamp',img: 'GRAND_CHAMPION.png',        reward: { xp: 550, money: 2000 } },
-            { id: 'ssl',       name: 'SSL',          color: '#ff1493', css: 'rank-ssl',       img: 'SSL.png',       reward: { xp: 650, money: 2500 } }
+            { id: 'ssl',       name: 'SSL',          color: '#ff1493', css: 'rank-ssl',       img: 'SSL.png',       reward: { xp: 700, money: 4000 } }
         ];
 
         // Each rank has 3 divisions (D1, D2, D3). Win in D3 → next rank D1.
@@ -11615,8 +11628,8 @@ const MUTATIONS_LIST = [
         });
 
     </script>
-    <div style="position: fixed; top: 12px; left: 12px; z-index: 9999999999999; color: rgba(255, 255, 255, 0.4); font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
-    V:9.9.7
+    <div style="position: fixed; top: 12px; left: 12px; z-index: 9999; color: rgba(255, 255, 255, 0.4); font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
+    V:9.9.8
 </div>
 </body>
 
