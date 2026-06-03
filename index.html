@@ -4128,6 +4128,20 @@
                     </div>
                 </div>
                 <div class="grid-container" id="container-inventory"></div>
+                
+                <div class="flex-between mb-4 mt-6">
+                    <div>
+                        <h2 class="section-title">⭐ My Collection</h2>
+                        <p class="section-desc">Cards saved to collection cannot be sold</p>
+                    </div>
+                </div>
+                <div class="collection-sticker" style="background:linear-gradient(135deg,#fbbf24,#f59e0b); padding:12px 16px; border-radius:8px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; border:2px solid #fff;">
+                    <div style="display:flex; gap:16px; align-items:center;">
+                        <span style="font-weight:900; color:#111827; font-size:0.9rem;">🏷️ COLLECTION INFO</span>
+                        <span style="font-weight:700; color:#111827; font-size:0.85rem;">Base Price & Pack Chance displayed on cards</span>
+                    </div>
+                </div>
+                <div class="grid-container" id="container-collection"></div>
             </section>
 
             <section id="view-steal" class="view-panel">
@@ -4423,6 +4437,8 @@
             <div id="cd-mutations-list" style="display:flex; flex-direction:column; gap:6px; margin-bottom:16px;"></div>
             <button class="btn-action btn-blue" id="cd-customize-btn"
                 style="display:none; margin-bottom:16px;">CUSTOMIZE</button>
+            <button class="btn-action btn-outline" id="cd-add-to-collection-btn"
+                style="display:none; margin-bottom:16px; border-color:var(--gold); color:var(--gold);">⭐ ADD TO COLLECTION</button>
 
             <div
                 style="border-top:1px solid var(--border-glow); padding-top:16px; display:flex; justify-content:space-between; align-items:center;">
@@ -6531,6 +6547,7 @@ const MUTATIONS_LIST = [
             userInventoryUnsub = onValue(ref(db, `inventory/${activeUserSession.uid}`), snapshot => {
                 userDeckRecord = snapshot.val() || {};
                 renderUserInventoryDeckGrid();
+                renderCollectionCardsGrid();
                 autoAdvanceTutorialFromCurrentState();
                 renderTutorialOverlay();
             });
@@ -6539,6 +6556,7 @@ const MUTATIONS_LIST = [
             userCardCustomizationUnsub = onValue(ref(db, `card_customization/${activeUserSession.uid}`), snapshot => {
                 userCardCustomizationRecord = snapshot.val() || {};
                 renderUserInventoryDeckGrid();
+                renderCollectionCardsGrid();
             });
 
             onValue(ref(db, 'system/packs'), snapshot => {
@@ -7423,7 +7441,7 @@ const MUTATIONS_LIST = [
             const targetGridDisplayNode = document.getElementById('container-inventory');
             targetGridDisplayNode.innerHTML = '';
 
-            const activeDeckKeys = Object.keys(userDeckRecord);
+            const activeDeckKeys = Object.keys(userDeckRecord).filter(instanceIdKey => !userDeckRecord[instanceIdKey]?.isCollection);
             if (activeDeckKeys.length === 0) {
                 targetGridDisplayNode.innerHTML = `<div class="empty-state">No cards yet — open packs to build your deck.</div>`;
                 return;
@@ -7553,6 +7571,122 @@ const MUTATIONS_LIST = [
             showToast('Card unlocked.', 'success');
         };
 
+        window.addToCollection = async function (instanceId) {
+            if (!activeUserSession?.uid || !instanceId) return;
+            const card = userDeckRecord?.[instanceId];
+            if (!card) return;
+            if (card.isCollection) return;
+
+            await update(ref(db, `inventory/${activeUserSession.uid}/${instanceId}`), {
+                isCollection: true,
+                unsellable: true
+            });
+            showToast('Card added to collection!', 'success');
+            closeModal('modal-card-details');
+            renderUserInventoryDeckGrid();
+            renderCollectionCardsGrid();
+        };
+
+        function renderCollectionCardsGrid() {
+            const targetGridDisplayNode = document.getElementById('container-collection');
+            if (!targetGridDisplayNode) return;
+            targetGridDisplayNode.innerHTML = '';
+
+            const collectionCards = Object.entries(userDeckRecord || {}).filter(([, card]) => card?.isCollection);
+            
+            if (collectionCards.length === 0) {
+                targetGridDisplayNode.innerHTML = `<div class="empty-state">No collection cards yet — add cards from your deck to build your collection.</div>`;
+                return;
+            }
+
+            collectionCards.forEach(([instanceIdKey, currentInstanceItem]) => {
+                let staticRegistryItemMeta = null;
+                let cardColor = PACK_METADATA[currentInstanceItem.packSource]?.color;
+                let cardName = '';
+                let cardChance = 0;
+                let cardIndex = 0;
+                let cardBaseValue = 0;
+
+                if (isRamezCard(currentInstanceItem)) {
+                    staticRegistryItemMeta = { id: RAMEZ_CARD_ID, name: RAMEZ_CARD_NAME, chance: 100, index: 100, baseValue: RAMEZ_CARD_VALUE };
+                    cardColor = '#fbbf24';
+                    cardName = RAMEZ_CARD_NAME;
+                    cardChance = 100;
+                    cardIndex = 100;
+                    cardBaseValue = RAMEZ_CARD_VALUE;
+                } else if (currentInstanceItem.packSource === 'hidden') {
+                    const hiddenCard = HIDDEN_CARDS.find(hc => hc.id === currentInstanceItem.cardId);
+                    if (hiddenCard) {
+                        staticRegistryItemMeta = hiddenCard;
+                        cardColor = '#a855f7';
+                        cardName = hiddenCard.name;
+                        cardChance = 100;
+                        cardIndex = hiddenCard.unlocksAtLevel;
+                        cardBaseValue = hiddenCard.baseValue;
+                    }
+                } else if (currentInstanceItem.packSource === '__custom__' && currentInstanceItem.customCardMeta) {
+                    staticRegistryItemMeta = {
+                        id: currentInstanceItem.cardId,
+                        name: currentInstanceItem.customCardMeta.name,
+                        chance: currentInstanceItem.customCardMeta.chance,
+                        index: 0,
+                        baseValue: currentInstanceItem.customCardMeta.baseValue
+                    };
+                    cardColor = currentInstanceItem.customCardMeta.color || '#60a5fa';
+                    cardName = staticRegistryItemMeta.name;
+                    cardChance = parseFloat(staticRegistryItemMeta.chance) || 0;
+                    cardIndex = 0;
+                    cardBaseValue = parseFloat(staticRegistryItemMeta.baseValue) || 0;
+                } else {
+                    staticRegistryItemMeta = GAME_REGISTRY[currentInstanceItem.packSource]?.find(x => x.id === currentInstanceItem.cardId);
+                    if (staticRegistryItemMeta) {
+                        cardName = staticRegistryItemMeta.name;
+                        cardChance = staticRegistryItemMeta.chance;
+                        cardIndex = staticRegistryItemMeta.index;
+                        cardBaseValue = staticRegistryItemMeta.baseValue;
+                    }
+                }
+                if (!staticRegistryItemMeta) return;
+
+                const liveCalculatedValue = calculateLiveInstanceMarketValue(currentInstanceItem);
+                const customization = getCardCustomization(instanceIdKey);
+                const displayCardName = customization.customName || cardName;
+                const displayCardColor = customization.textColor || cardColor;
+                const displayCardPhoto = sanitizeImageSource(customization.photoUrl || '');
+
+                const cardUiNodeElement = document.createElement('div');
+                cardUiNodeElement.className = `card-item`;
+                cardUiNodeElement.style.setProperty('--rarity-color', cardColor);
+                applyCardCustomizationToNode(cardUiNodeElement, customization);
+
+                cardUiNodeElement.innerHTML = `
+                    <div class="collection-card-sticker" style="background:linear-gradient(135deg,#fbbf24,#f59e0b); padding:8px 12px; border-radius:6px; margin-bottom:8px; border:2px solid #fff;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                            <span style="font-weight:900; color:#111827; font-size:0.75rem;">💰 Base: €${formatNum(cardBaseValue)}</span>
+                            <span style="font-weight:900; color:#111827; font-size:0.75rem;">🎯 ${cardChance}% from ${currentInstanceItem.packSource}</span>
+                        </div>
+                    </div>
+                    <div class="card-clickable-area" onclick="openCardInspectionDetails('${instanceIdKey}')">
+                        <div class="card-body">
+                            ${displayCardPhoto ? `<img class="card-photo-media" src="${escapeAttribute(displayCardPhoto)}" alt="">` : ''}
+                            <div class="card-title" style="color:${displayCardColor};">${displayCardName}</div>
+                            <div class="card-rarity-lbl" style="color:#6b7280;">${currentInstanceItem.packSource}</div>
+                            <div class="card-instance-id">#${instanceIdKey.slice(0, 10)}</div>
+                        </div>
+                        <div class="card-badge-bottom">
+                            <span style="color:var(--accent-green);">€${formatNum(liveCalculatedValue)}</span>
+                        </div>
+                    </div>
+                    <div class="card-action-overlay">
+                        <div style="display:flex; gap:6px;">
+                            <button class="card-btn" style="flex:1; background:var(--bg-surface); border:1px solid var(--border-glow); color:#9ca3af;" disabled>COLLECTION</button>
+                        </div>
+                    </div>
+                `;
+                targetGridDisplayNode.appendChild(cardUiNodeElement);
+            });
+        }
+
         window.sellAllUnlockedCards = async function () {
             if (!activeUserSession?.uid) return showToast('Not signed in.', 'error');
 
@@ -7654,6 +7788,14 @@ const MUTATIONS_LIST = [
             }
             document.getElementById('cd-customize-btn').style.display = isPrestigeUser() ? 'block' : 'none';
             document.getElementById('cd-customize-btn').onclick = () => openCardCustomizationModal(instanceId, cardName, cardColor);
+            
+            const addToCollectionBtn = document.getElementById('cd-add-to-collection-btn');
+            if (instanceData.isCollection) {
+                addToCollectionBtn.style.display = 'none';
+            } else {
+                addToCollectionBtn.style.display = 'block';
+                addToCollectionBtn.onclick = () => addToCollection(instanceId);
+            }
 
             const mutsListContainer = document.getElementById('cd-mutations-list');
             mutsListContainer.innerHTML = '';
@@ -11277,7 +11419,7 @@ const MUTATIONS_LIST = [
 
     </script>
     <div style="position: fixed; top: 12px; left: 12px; z-index: 9999; color: rgba(255, 255, 255, 0.4); font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
-    V:9.9.2
+    V:9.9.3
 </div>
 </body>
 
