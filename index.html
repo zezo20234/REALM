@@ -3738,6 +3738,84 @@
             }
         }
 
+        /* ── CLASH RANK SYSTEM ───────────────────────────────────── */
+        .clash-rank-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px 4px 5px;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 900;
+            letter-spacing: 0.04em;
+            border: 1.5px solid currentColor;
+            opacity: 0.95;
+            vertical-align: middle;
+            white-space: nowrap;
+            box-shadow: 0 0 8px rgba(0,0,0,0.25);
+        }
+        .clash-rank-badge img {
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
+            border-radius: 3px;
+            flex-shrink: 0;
+        }
+        .clash-rank-badge .rank-div-dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: currentColor;
+            opacity: 0.6;
+            flex-shrink: 0;
+        }
+        /* Row that holds the rank badge above the XP bar */
+        .rank-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        /* Rank colors */
+        .rank-bronze   { color: #cd7f32; background: rgba(205,127,50,0.12); }
+        .rank-silver   { color: #c0c0c0; background: rgba(192,192,192,0.12); }
+        .rank-gold     { color: #ffd700; background: rgba(255,215,0,0.12); }
+        .rank-platinum { color: #e5e4e2; background: rgba(229,228,226,0.12); }
+        .rank-diamond  { color: #7df9ff; background: rgba(125,249,255,0.12); }
+        .rank-champion { color: #f59e0b; background: rgba(245,158,11,0.12); }
+        .rank-grandchamp { color: #a855f7; background: rgba(168,85,247,0.12); }
+        .rank-ssl      { color: #ff1493; background: rgba(255,20,147,0.12); }
+
+        /* Clash Rank leaderboard tab */
+        .clash-rank-leaderboard-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--bg-panel);
+            border: 1px solid var(--border-glow);
+            border-radius: 10px;
+            padding: 10px 14px;
+            margin-bottom: 8px;
+        }
+        .clash-rank-leaderboard-row .cr-num {
+            font-size: 0.8rem;
+            font-weight: 900;
+            color: #6b7280;
+            min-width: 22px;
+        }
+        .clash-rank-leaderboard-row .cr-name {
+            flex: 1;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+        .clash-rank-leaderboard-row .cr-pts {
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+
+        /* ── END CLASH RANK ─────────────────────────────────────── */
+
         @media (max-width: 480px) {
             /* Extra small mobile adjustments */
             .broadcast-inner {
@@ -3896,11 +3974,14 @@
                 </div>
             </div>
 
+            <div class="rank-row" id="hud-rank-row">
+                <span id="hud-clash-rank-badge"></span>
+            </div>
             <div class="xp-row">
                 <div class="level-tag" id="hud-level">LV 1</div>
                 <div class="xp-track">
                     <div class="xp-fill" id="hud-xp-fill"></div>
-                    <div class="xp-text" id="hud-xp-text">0/100 XP</div>
+                    <div class="xp-text" id="hud-xp-text">0/25 XP</div>
                 </div>
                 <button class="btn-lvlup" id="hud-lvlup-btn">LEVEL UP</button>
             </div>
@@ -3970,6 +4051,7 @@
                     <div class="sub-tab active" data-rank="money">RICHEST</div>
                     <div class="sub-tab" data-rank="level">HIGHEST LEVEL</div>
                     <div class="sub-tab" data-rank="collection">ARCHIVE MASTERS</div>
+                    <div class="sub-tab" data-rank="clash">CLASH RANK</div>
                 </div>
                 <div id="container-leaderboards"></div>
             </section>
@@ -4160,6 +4242,9 @@
                     <div id="prof-avatar" class="profile-badge"
                         style="width:72px; height:72px; font-size:2rem; margin:0 auto 16px auto;">U</div>
                     <h3 id="prof-username" style="font-size:1.4rem; font-weight:800;">---</h3>
+                    <div style="display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:4px;">
+                        <span id="prof-clash-rank-badge"></span>
+                    </div>
                     <div id="prof-title" class="title-chip" style="margin:6px auto 10px auto;">Rookie</div>
                     <p id="prof-email" style="font-size:0.85rem; color:#9ca3af; margin-bottom:24px;">---</p>
 
@@ -4694,7 +4779,7 @@ const MUTATIONS_LIST = [
                 { id: 'daily_earn_500', title: 'Quick Cash', description: 'Earn 500 euros today through any means. Fast money.', type: 'earn_money', target: 500, unit: 'euros earned', progressMode: 'sum_money', rewardType: 'money', rewardAmount: 1000, difficultyScore: 100 },
                 { id: 'daily_trade_30', title: 'Trade Hustler', description: 'Execute 30 player trades today. Move the market.', type: 'player_trades', target: 30, unit: 'trades executed', rewardType: 'platinum_pack', rewardAmount: 2, difficultyScore: 100 },
                 { id: 'daily_own_300', title: 'Vault Builder', description: 'Own 300 cards simultaneously. Build your collection.', type: 'own_cards', target: 300, unit: 'cards owned', progressMode: 'max', rewardType: 'xp', rewardAmount: 800, difficultyScore: 100 },
-                { id: 'daily_mg_50', title: 'Steal Ace', description: 'Successfully steal 50 cards today. Master the art of infiltration.', type: 'steal_cards', target: 50, unit: 'cards stolen', rewardType: 'xp', rewardAmount: 850, difficultyScore: 100 },
+                { id: 'daily_mg_50', title: 'Minigame Ace', description: 'Win 50 math or reaction minigames today. Sharpen your skills.', type: 'minigame_wins', target: 50, unit: 'minigames won', rewardType: 'xp', rewardAmount: 850, difficultyScore: 100 },
                 { id: 'daily_bank_5000', title: 'Bank Secure', description: 'Hold 5,000 euros in your bank simultaneously. Secure your wealth.', type: 'bank_balance', target: 5000, unit: 'euros banked', progressMode: 'max_money', rewardType: 'money', rewardAmount: 950, difficultyScore: 100 },
                 { id: 'daily_snipe_20', title: 'Auction Sniper', description: 'Snipe 20 cards from the global auction today. Strike fast.', type: 'auction_snipes', target: 20, unit: 'cards sniped', rewardType: 'xp', rewardAmount: 800, difficultyScore: 100 },
                 { id: 'daily_duplicate_200', title: 'Duplicate Cleaner', description: 'Fuse or burn 200 duplicate cards today. Clean your vault.', type: 'fuse_or_burn_duplicates', target: 200, unit: 'duplicates fused/burned', rewardType: 'money', rewardAmount: 900, difficultyScore: 100 },
@@ -4705,7 +4790,7 @@ const MUTATIONS_LIST = [
                 { id: 'daily_earn_400', title: 'Income Stream', description: 'Earn 400 euros today. Steady income.', type: 'earn_money', target: 400, unit: 'euros earned', progressMode: 'sum_money', rewardType: 'money', rewardAmount: 850, difficultyScore: 100 },
                 { id: 'daily_trade_25', title: 'Trade Broker', description: 'Execute 25 player trades today. Broker deals.', type: 'player_trades', target: 25, unit: 'trades executed', rewardType: 'platinum_pack', rewardAmount: 1, difficultyScore: 100 },
                 { id: 'daily_own_250', title: 'Collection Keeper', description: 'Own 250 cards simultaneously. Maintain your collection.', type: 'own_cards', target: 250, unit: 'cards owned', progressMode: 'max', rewardType: 'xp', rewardAmount: 700, difficultyScore: 100 },
-                { id: 'daily_mg_40', title: 'Steal Pro', description: 'Successfully steal 40 cards today. Pro level infiltration.', type: 'steal_cards', target: 40, unit: 'cards stolen', rewardType: 'xp', rewardAmount: 750, difficultyScore: 100 },
+                { id: 'daily_mg_40', title: 'Minigame Pro', description: 'Win 40 minigames today. Pro level.', type: 'minigame_wins', target: 40, unit: 'minigames won', rewardType: 'xp', rewardAmount: 750, difficultyScore: 100 },
                 { id: 'daily_bank_4000', title: 'Bank Guardian', description: 'Hold 4,000 euros in your bank. Guard your wealth.', type: 'bank_balance', target: 4000, unit: 'euros banked', progressMode: 'max_money', rewardType: 'money', rewardAmount: 800, difficultyScore: 100 },
                 { id: 'daily_snipe_15', title: 'Quick Snipe', description: 'Snipe 15 cards from auction today. Quick strikes.', type: 'auction_snipes', target: 15, unit: 'cards sniped', rewardType: 'xp', rewardAmount: 700, difficultyScore: 100 },
                 { id: 'daily_duplicate_150', title: 'Duplicate Manager', description: 'Fuse or burn 150 duplicates today. Manage excess.', type: 'fuse_or_burn_duplicates', target: 150, unit: 'duplicates fused/burned', rewardType: 'money', rewardAmount: 750, difficultyScore: 100 },
@@ -4716,7 +4801,7 @@ const MUTATIONS_LIST = [
                 { id: 'daily_earn_450', title: 'Profit Seeker', description: 'Earn 450 euros today. Seek profit.', type: 'earn_money', target: 450, unit: 'euros earned', progressMode: 'sum_money', rewardType: 'money', rewardAmount: 950, difficultyScore: 100 },
                 { id: 'daily_trade_28', title: 'Trade Master', description: 'Execute 28 player trades today. Master trading.', type: 'player_trades', target: 28, unit: 'trades executed', rewardType: 'platinum_pack', rewardAmount: 2, difficultyScore: 100 },
                 { id: 'daily_own_280', title: 'Vault Guardian', description: 'Own 280 cards simultaneously. Guard your vault.', type: 'own_cards', target: 280, unit: 'cards owned', progressMode: 'max', rewardType: 'xp', rewardAmount: 750, difficultyScore: 100 },
-                { id: 'daily_mg_45', title: 'Steal Expert', description: 'Successfully steal 45 cards today. Expert infiltration.', type: 'steal_cards', target: 45, unit: 'cards stolen', rewardType: 'xp', rewardAmount: 850, difficultyScore: 100 },
+                { id: 'daily_mg_45', title: 'Minigame Expert', description: 'Win 45 minigames today. Expert level.', type: 'minigame_wins', target: 45, unit: 'minigames won', rewardType: 'xp', rewardAmount: 850, difficultyScore: 100 },
                 { id: 'daily_bank_4500', title: 'Bank Protector', description: 'Hold 4,500 euros in your bank. Protect your wealth.', type: 'bank_balance', target: 4500, unit: 'euros banked', progressMode: 'max_money', rewardType: 'money', rewardAmount: 900, difficultyScore: 100 },
                 { id: 'daily_snipe_18', title: 'Auction Hunter', description: 'Snipe 18 cards from auction today. Hunt for deals.', type: 'auction_snipes', target: 18, unit: 'cards sniped', rewardType: 'xp', rewardAmount: 750, difficultyScore: 100 },
                 { id: 'daily_duplicate_180', title: 'Duplicate Destroyer', description: 'Fuse or burn 180 duplicates today. Destroy excess.', type: 'fuse_or_burn_duplicates', target: 180, unit: 'duplicates fused/burned', rewardType: 'money', rewardAmount: 850, difficultyScore: 100 }
@@ -4739,7 +4824,7 @@ const MUTATIONS_LIST = [
                 { id: 'monthly_trade_1000', title: 'Trade Emperor', description: 'Execute 1,000 player trades this month. Control the market.', type: 'player_trades', target: 1000, unit: 'trades executed', rewardType: 'platinum_pack', rewardAmount: 2, difficultyScore: 100 },
                 { id: 'monthly_own_5000', title: 'Vault Master', description: 'Own 5,000 cards simultaneously. Build the ultimate treasury.', type: 'own_cards', target: 5000, unit: 'cards owned', progressMode: 'max', rewardType: 'xp', rewardAmount: 900, difficultyScore: 100 },
                 { id: 'monthly_daily_100', title: 'Daily Quest Champion', description: 'Complete and claim 100 Daily Quests this month. Never miss a day.', type: 'daily_quests_completed', target: 100, unit: 'daily quests claimed', rewardType: 'platinum_pack', rewardAmount: 2, difficultyScore: 100 },
-                { id: 'monthly_mg_5000', title: 'Steal Grandmaster', description: 'Successfully steal 5,000 cards this month. The ultimate thief.', type: 'steal_cards', target: 5000, unit: 'cards stolen', rewardType: 'xp', rewardAmount: 900, difficultyScore: 100 },
+                { id: 'monthly_mg_5000', title: 'Minigame Grandmaster', description: 'Win 5,000 math or reaction minigames this month. Perfect your skills.', type: 'minigame_wins', target: 5000, unit: 'minigames won', rewardType: 'xp', rewardAmount: 900, difficultyScore: 100 },
                 { id: 'monthly_bank_100000', title: 'Bank Fortress', description: 'Hold 100,000 euros in your bank simultaneously. Fortify your wealth.', type: 'bank_balance', target: 100000, unit: 'euros banked', progressMode: 'max_money', rewardType: 'money', rewardAmount: 1000, difficultyScore: 100 },
                 { id: 'monthly_snipe_500', title: 'Auction Predator', description: 'Snipe 500 cards from the global auction this month. Strike with precision.', type: 'auction_snipes', target: 500, unit: 'cards sniped', rewardType: 'xp', rewardAmount: 900, difficultyScore: 100 },
                 { id: 'monthly_duplicate_10000', title: 'Duplicate Obliterator', description: 'Fuse or burn 10,000 duplicate cards this month. Purge the excess.', type: 'fuse_or_burn_duplicates', target: 10000, unit: 'duplicates fused/burned', rewardType: 'money', rewardAmount: 1000, difficultyScore: 100 }
@@ -5698,33 +5783,6 @@ const MUTATIONS_LIST = [
             return Math.pow(Math.random(), 1 / luck) * 100;
         }
 
-        // Pick a card from a pack pool, with luck biasing toward the rare "good" cards
-        // Good cards = last 10 cards (or floor(pool.length/2) for smaller packs)
-        function pickCardWithLuck(pool) {
-            if (!pool || !pool.length) return null;
-            const luck = getActiveLuckMultiplier();
-
-            if (luck > 1) {
-                const goodCount = pool.length >= 10 ? 10 : Math.floor(pool.length / 2);
-                // Luck bias chance: scales with luck multiplier, capped at 85%
-                const luckBiasChance = Math.min(0.85, (luck - 1) * 0.18);
-                if (goodCount > 0 && Math.random() < luckBiasChance) {
-                    // Pick randomly from the last goodCount cards
-                    const goodCards = pool.slice(pool.length - goodCount);
-                    return goodCards[Math.floor(Math.random() * goodCards.length)];
-                }
-            }
-
-            // Normal weighted pick
-            const roll = getBiasedPackRoll();
-            let cum = 0;
-            for (const c of pool) {
-                cum += c.chance;
-                if (roll <= cum) return c;
-            }
-            return pool[pool.length - 1];
-        }
-
         function pickWeightedMutationIndex() {
             const luck = getActiveLuckMultiplier();
             const goodIndexes = [];
@@ -6266,6 +6324,8 @@ const MUTATIONS_LIST = [
                 autoAdvanceTutorialFromCurrentState();
                 renderTutorialOverlay();
                 tryPublishPresenceWhenReady();
+                // Check 5-day clash rank reward (runs once on load, skips if not due)
+                setTimeout(() => checkClashRankReward(), 3000);
             });
 
             if (userInventoryUnsub) userInventoryUnsub();
@@ -6386,6 +6446,7 @@ const MUTATIONS_LIST = [
             avatarNode.classList.toggle('prestige-avatar', prestigeCount > 0);
 
             updateSpinHudUi();
+            renderHudClashRankBadge();
         }
 
         function renderShopLockCounts() {
@@ -6715,7 +6776,13 @@ const MUTATIONS_LIST = [
         function pickCardFromPackPool(packKey) {
             const pool = GAME_REGISTRY[packKey] || [];
             if (!pool.length) return null;
-            return pickCardWithLuck(pool);
+            const roll = getBiasedPackRoll();
+            let cum = 0;
+            for (const c of pool) {
+                cum += c.chance;
+                if (roll <= cum) return c;
+            }
+            return pool[pool.length - 1];
         }
 
         async function finalizePendingSpinReward() {
@@ -7010,7 +7077,18 @@ const MUTATIONS_LIST = [
             }
 
             const internalPackPool = GAME_REGISTRY[packKey];
-            const capturedSelectedCardObject = pickCardWithLuck(internalPackPool) || internalPackPool[internalPackPool.length - 1];
+            const generationRollFactor = getBiasedPackRoll();
+            let dynamicWeightAccumulationCounter = 0;
+            let capturedSelectedCardObject = null;
+
+            for (let cardItem of internalPackPool) {
+                dynamicWeightAccumulationCounter += cardItem.chance;
+                if (generationRollFactor <= dynamicWeightAccumulationCounter) {
+                    capturedSelectedCardObject = cardItem;
+                    break;
+                }
+            }
+            if (!capturedSelectedCardObject) capturedSelectedCardObject = internalPackPool[internalPackPool.length - 1];
 
             const currentTimestampMarker = Date.now();
             const lastPurchaseDateObj = new Date(userDataRecord.lastPackPurchaseTimestamp || 0);
@@ -7179,8 +7257,8 @@ const MUTATIONS_LIST = [
                 const liveCalculatedValue = calculateLiveInstanceMarketValue(currentInstanceItem);
                 const currentSystemEpoch = Date.now();
                 const evaluatingSecurityLockIsActive = currentInstanceItem.cryptographicLockExpiry && currentInstanceItem.cryptographicLockExpiry > currentSystemEpoch;
-                const stolenCooldownActive = currentInstanceItem.stolenAt && (currentSystemEpoch - currentInstanceItem.stolenAt) < 10000;
-                const stolenCooldownSecsLeft = stolenCooldownActive ? Math.ceil((10000 - (currentSystemEpoch - currentInstanceItem.stolenAt)) / 1000) : 0;
+                const stolenCooldownActive = currentInstanceItem.stolenAt && (currentSystemEpoch - currentInstanceItem.stolenAt) < 7000;
+                const stolenCooldownSecsLeft = stolenCooldownActive ? Math.ceil((7000 - (currentSystemEpoch - currentInstanceItem.stolenAt)) / 1000) : 0;
 
                 const globalRegisteredCopiesCount = globalCopiesTrackerRef[currentInstanceItem.cardId] || 1;
                 const mutationsCount = (currentInstanceItem.activeMutationIndexes || []).length;
@@ -7262,7 +7340,7 @@ const MUTATIONS_LIST = [
                 if (!card) return false;
                 if (isRamezCard(card)) return false;
                 if (card.unsellable) return false;
-                if (card.stolenAt && (now - card.stolenAt) < 10000) return false;
+                if (card.stolenAt && (now - card.stolenAt) < 7000) return false;
                 const locked = card.cryptographicLockExpiry && card.cryptographicLockExpiry > now;
                 return !locked;
             });
@@ -7598,8 +7676,8 @@ const MUTATIONS_LIST = [
             }
             if (selectedCard?.stolenAt) {
                 const secondsSinceSteal = (Date.now() - selectedCard.stolenAt) / 1000;
-                if (secondsSinceSteal < 10) {
-                    const remaining = Math.ceil(10 - secondsSinceSteal);
+                if (secondsSinceSteal < 7) {
+                    const remaining = Math.ceil(7 - secondsSinceSteal);
                     showToast(`Stolen cards can't be sold for ${remaining}s.`, 'error');
                     return false;
                 }
@@ -8033,15 +8111,6 @@ const MUTATIONS_LIST = [
             if (isUserStillInTutorial(defenderProfileSnap.val() || {})) {
                 return showToast('This player is in tutorial protection.', 'error');
             }
-            // Block steal if defender is currently in an active trade
-            const defenderActiveTradesSnap = await get(ref(db, `active_trades`));
-            const allActiveTrades = defenderActiveTradesSnap.val() || {};
-            const defenderInTrade = Object.values(allActiveTrades).some(t =>
-                t && t.status === 'active' && (t.participant1 === defenderUid || t.participant2 === defenderUid)
-            );
-            if (defenderInTrade) {
-                return showToast('Cannot steal from a player who is currently in a trade.', 'error');
-            }
 
             let targetCardSnapshot;
             try {
@@ -8277,6 +8346,7 @@ const MUTATIONS_LIST = [
                     : 'Intrusion registered first!';
                 showToast(winMsg, 'success');
                 trackQuestProgress('win_clashes', 1);
+                awardClashRankPoint();
             }).catch(error => {
                 logFirebaseStealError('signalClashVictoryCaptureLock', error);
                 showToast('Could not register victory. Check console.', 'error');
@@ -8329,7 +8399,6 @@ const MUTATIONS_LIST = [
                 if (amWinner && amAttacker) {
                     if (stealResult.status === 'loot-success' || stealResult.status === 'already-done') {
                         showToast('Intrusion successful! Card secured.', 'success');
-                        trackQuestProgress('steal_cards', 1);
                     } else if (stealResult.status === 'in-flight' || stealResult.status === 'claim-failed') {
                         showToast('Resolving steal…', 'info');
                     } else if (stealResult.status === 'missing-card-data') {
@@ -8476,6 +8545,165 @@ const MUTATIONS_LIST = [
             });
         }
 
+        // =========================================================
+        // CLASH RANK SYSTEM
+        // =========================================================
+
+        // Ranks in order: 8 tiers × 2 divisions each = 16 steps total (0–15)
+        // After div 2 of each rank → promote to div 1 of next rank
+        const CLASH_RANKS = [
+            { id: 'bronze',    name: 'Bronze',       color: '#cd7f32', css: 'rank-bronze',    img: 'BRONZE.png',    reward: { xp: 0,   money: 0    } },
+            { id: 'silver',    name: 'Silver',       color: '#c0c0c0', css: 'rank-silver',    img: 'SILVER.png',    reward: { xp: 100, money: 0    } },
+            { id: 'gold',      name: 'Gold',         color: '#ffd700', css: 'rank-gold',      img: 'GOLD.png',      reward: { xp: 200, money: 500  } },
+            { id: 'platinum',  name: 'Platinum',     color: '#e5e4e2', css: 'rank-platinum',  img: 'PLATINUM.png',  reward: { xp: 300, money: 750  } },
+            { id: 'diamond',   name: 'Diamond',      color: '#7df9ff', css: 'rank-diamond',   img: 'DIAMOND.png',   reward: { xp: 400, money: 1000 } },
+            { id: 'champion',  name: 'Champion',     color: '#f59e0b', css: 'rank-champion',  img: 'CHAMPION.png',  reward: { xp: 450, money: 1250 } },
+            { id: 'grandchamp',name: 'Grand Champion',color: '#a855f7',css: 'rank-grandchamp',img: 'GRAND_CHAMPION.png',        reward: { xp: 550, money: 2000 } },
+            { id: 'ssl',       name: 'SSL',          color: '#ff1493', css: 'rank-ssl',       img: 'SSL.png',       reward: { xp: 650, money: 2500 } }
+        ];
+
+        // Each rank has division 1 and division 2. Win in div2 → next rank div1.
+        // clashRankPoints: total wins across all time, used to compute rank/division.
+        // rankIndex = floor(points / 2), capped at max
+        // division = (points % 2) + 1  → 1 or 2
+
+        function getClashRankFromPoints(points) {
+            const p = Math.max(0, parseInt(points) || 0);
+            const maxIndex = CLASH_RANKS.length - 1;
+            const rankIndex = Math.min(Math.floor(p / 2), maxIndex);
+            const rank = CLASH_RANKS[rankIndex];
+            // At SSL (max) stay at div 2 once both wins earned
+            const division = rankIndex === maxIndex ? Math.min((p % 2) + 1, 2) : (p % 2) + 1;
+            return { rank, division, points: p, rankIndex };
+        }
+
+        function buildClashRankBadgeHTML(points) {
+            const { rank, division } = getClashRankFromPoints(points);
+            return `<span class="clash-rank-badge ${rank.css}" title="${rank.name} Division ${division}">
+                <img src="${rank.img}" alt="${rank.name}" onerror="this.style.display='none'">
+                ${rank.name.toUpperCase()} <span class="rank-div-dot"></span> D${division}
+            </span>`;
+        }
+
+        function renderHudClashRankBadge() {
+            const el = document.getElementById('hud-clash-rank-badge');
+            const row = document.getElementById('hud-rank-row');
+            if (!el) return;
+            const pts = userDataRecord.clashRankPoints || 0;
+            if (!pts) {
+                el.innerHTML = '';
+                if (row) row.style.display = 'none';
+                return;
+            }
+            el.innerHTML = buildClashRankBadgeHTML(pts);
+            if (row) row.style.display = 'flex';
+        }
+
+        function renderProfileClashRankBadge() {
+            const el = document.getElementById('prof-clash-rank-badge');
+            if (!el) return;
+            const pts = userDataRecord.clashRankPoints || 0;
+            const { rank, division } = getClashRankFromPoints(pts);
+            el.innerHTML = buildClashRankBadgeHTML(pts);
+        }
+
+        // Award a clash rank point when user wins a clash (attacker or defender)
+        async function awardClashRankPoint() {
+            if (!activeUserSession?.uid) return;
+            const uid = activeUserSession.uid;
+            const prevPts = userDataRecord.clashRankPoints || 0;
+            const prevData = getClashRankFromPoints(prevPts);
+
+            const newPts = prevPts + 1;
+            const newData = getClashRankFromPoints(newPts);
+
+            await update(ref(db, `users/${uid}`), { clashRankPoints: newPts });
+            userDataRecord.clashRankPoints = newPts;
+
+            // Notify on rank-up
+            if (newData.rankIndex > prevData.rankIndex) {
+                showToast(`🏆 Rank Up! You are now ${newData.rank.name} Division ${newData.division}!`, 'success');
+            } else if (newData.division > prevData.division) {
+                showToast(`⬆️ Division Up! ${newData.rank.name} Division ${newData.division}`, 'success');
+            }
+
+            renderHudClashRankBadge();
+            renderProfileClashRankBadge();
+        }
+
+        // 5-day reward check — runs on login, checks if 5 days have passed since last reward
+        async function checkClashRankReward() {
+            if (!activeUserSession?.uid) return;
+            const uid = activeUserSession.uid;
+            const lastRewardAt = userDataRecord.clashRankLastRewardAt || 0;
+            const fiveDaysMs = 5 * 24 * 60 * 60 * 1000;
+            const now = Date.now();
+
+            if (now - lastRewardAt < fiveDaysMs) return; // Not 5 days yet
+
+            const pts = userDataRecord.clashRankPoints || 0;
+            if (pts === 0) return; // Unranked — no reward
+
+            const { rank } = getClashRankFromPoints(pts);
+            const reward = rank.reward;
+            if (reward.xp === 0 && reward.money === 0) return; // Bronze — no reward
+
+            const payload = {};
+            if (reward.xp > 0) payload[`users/${uid}/xp`] = (userDataRecord.xp || 0) + reward.xp;
+            if (reward.money > 0) payload[`users/${uid}/money`] = parseFloat(((userDataRecord.money || 0) + reward.money).toFixed(2));
+            payload[`users/${uid}/clashRankLastRewardAt`] = now;
+
+            await update(ref(db, '/'), payload);
+            userDataRecord.clashRankLastRewardAt = now;
+            if (reward.xp > 0) userDataRecord.xp = (userDataRecord.xp || 0) + reward.xp;
+            if (reward.money > 0) userDataRecord.money = parseFloat(((userDataRecord.money || 0) + reward.money).toFixed(2));
+
+            showToast(`🎁 ${rank.name} rank reward: +${reward.xp} XP${reward.money > 0 ? ` & €${reward.money}` : ''}!`, 'success');
+            renderHUDDisplayElements();
+        }
+
+        // Render clash rank leaderboard
+        async function renderClashRankLeaderboard() {
+            const container = document.getElementById('container-leaderboards');
+            container.innerHTML = '<div style="text-align:center;padding:16px;color:#6b7280;">Loading clash ranks...</div>';
+
+            const snap = await get(ref(db, 'users'));
+            const users = snap.val() || {};
+
+            const rows = [];
+            for (const uid in users) {
+                const u = users[uid];
+                const pts = u.clashRankPoints || 0;
+                if (!u.username) continue;
+                rows.push({ username: u.username, pts, avatarBgColor: u.avatarBgColor || 'var(--primary)', avatarLetters: u.avatarLetters || u.username.slice(0,2).toUpperCase(), prestige: getPrestigeCount(u) });
+            }
+            rows.sort((a, b) => b.pts - a.pts);
+
+            container.innerHTML = '';
+            if (!rows.length) {
+                container.innerHTML = '<div style="text-align:center;padding:24px;color:#6b7280;">No ranked players yet.</div>';
+                return;
+            }
+
+            rows.slice(0, 50).forEach((row, i) => {
+                const { rank, division } = getClashRankFromPoints(row.pts);
+                const div = document.createElement('div');
+                div.className = 'clash-rank-leaderboard-row';
+                div.innerHTML = `
+                    <span class="cr-num">#${i + 1}</span>
+                    <div class="profile-badge ${row.prestige > 0 ? 'prestige-avatar' : ''}" style="background:${row.avatarBgColor};width:28px;height:28px;font-size:0.75rem;">${row.avatarLetters}</div>
+                    <span class="cr-name">${row.username}</span>
+                    ${buildClashRankBadgeHTML(row.pts)}
+                    <span class="cr-pts">${row.pts} wins</span>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // =========================================================
+        // END CLASH RANK SYSTEM
+        // =========================================================
+
         // --- GLOBAL LEADERBOARDS INFRASTRUCTURE ---
         document.querySelectorAll('[data-rank]').forEach(subTabNode => {
             subTabNode.addEventListener('click', () => {
@@ -8486,6 +8714,9 @@ const MUTATIONS_LIST = [
         });
 
         window.handleLeaderboardQuery = async function (metricSortingKey) {
+            if (metricSortingKey === 'clash') {
+                return renderClashRankLeaderboard();
+            }
             const targetLeaderboardsContainer = document.getElementById('container-leaderboards');
             targetLeaderboardsContainer.innerHTML = '<div style="text-align:center; padding:16px; color:#6b7280;">Querying sequence array indices...</div>';
 
@@ -8563,6 +8794,7 @@ const MUTATIONS_LIST = [
 
             document.getElementById('prof-stat-wealth').innerText = `€${aggregateWealthValuation.toFixed(2)}`;
             document.getElementById('prof-stat-discovery').innerText = `${uniqueDiscoveredCount} / 375`;
+            renderProfileClashRankBadge();
 
             const prestigePanel = document.getElementById('prestige-profile-panel');
             if (!prestigePanel) return;
@@ -8731,8 +8963,6 @@ const MUTATIONS_LIST = [
                         progressText = `${progress} / ${quest.target} trades executed`;
                     } else if (quest.type === 'daily_quests_completed') {
                         progressText = `${progress} / ${quest.target} daily quests claimed`;
-                    } else if (quest.type === 'steal_cards') {
-                        progressText = `${progress} / ${quest.target} cards stolen`;
                     } else if (quest.type === 'minigame_wins') {
                         progressText = `${progress} / ${quest.target} minigames won`;
                     } else if (quest.type === 'bank_balance') {
@@ -10352,7 +10582,7 @@ const MUTATIONS_LIST = [
 
     </script>
     <div style="position: fixed; top: 12px; left: 12px; z-index: 9999; color: rgba(255, 255, 255, 0.4); font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
-    V:7.0
+    V:6.7
 </div>
 </body>
 
