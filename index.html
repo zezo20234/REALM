@@ -8829,12 +8829,22 @@ const MUTATIONS_LIST = [
                 const targetInputField = document.getElementById('math-player-input');
                 targetInputField.value = '';
                 targetInputField.dataset.expectedResult = String(expectedResult);
-                // Focus immediately and also after a brief delay for mobile browsers
-                targetInputField.focus();
-                setTimeout(() => {
+
+                // Aggressively focus the input across all browsers/mobile.
+                // Mobile browsers need the element to be visible+painted before focus works,
+                // so we retry at multiple intervals after the modal CSS transition settles.
+                function _tryFocusMathInput() {
                     targetInputField.focus();
-                    targetInputField.click();
-                }, 150);
+                    if (document.activeElement !== targetInputField) {
+                        targetInputField.setAttribute('readonly', 'readonly');
+                        targetInputField.removeAttribute('readonly');
+                        targetInputField.focus();
+                    }
+                }
+                _tryFocusMathInput();
+                setTimeout(_tryFocusMathInput, 80);
+                setTimeout(_tryFocusMathInput, 200);
+                setTimeout(_tryFocusMathInput, 400);
 
                 mathChallengeStartTime = Date.now();
             }
@@ -8883,32 +8893,43 @@ const MUTATIONS_LIST = [
             activeStealSessionUnsub = () => { clearTimeout(clashAutoJudgeTimer); _origUnsub(); };
         }
 
-        document.getElementById('math-submit-response')?.addEventListener('click', () => {
+        // Shared submit logic for clash math challenge
+        function _submitMathAnswer() {
             if (clashUiLocked || !activeStealSequenceId) return;
-
-            const parsedPlayerInputVal = parseInt(document.getElementById('math-player-input').value.trim(), 10);
-            const calculatedExpectedTargetResult = parseInt(document.getElementById('math-player-input').dataset.expectedResult, 10);
-
+            const inputEl = document.getElementById('math-player-input');
+            const parsedPlayerInputVal = parseInt(inputEl.value.trim(), 10);
+            const calculatedExpectedTargetResult = parseInt(inputEl.dataset.expectedResult, 10);
+            if (isNaN(parsedPlayerInputVal)) return; // nothing typed yet
             if (parsedPlayerInputVal === calculatedExpectedTargetResult) {
                 const solveTimeMs = Date.now() - mathChallengeStartTime;
                 signalClashVictoryCaptureLock(solveTimeMs);
             } else {
                 showToast('Wrong answer — try again.', 'error');
             }
-        });
+        }
 
+        // Click (desktop) — keep as-is
+        document.getElementById('math-submit-response')?.addEventListener('click', _submitMathAnswer);
+
+        // touchstart fires ~300ms faster than click on mobile — critical for steal speed
+        document.getElementById('math-submit-response')?.addEventListener('touchstart', (e) => {
+            e.preventDefault(); // prevent the subsequent click from double-firing
+            _submitMathAnswer();
+        }, { passive: false });
+
+        // Enter key on the input field
         document.getElementById('math-player-input')?.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                if (clashUiLocked || !activeStealSequenceId) return;
-                const parsedPlayerInputVal = parseInt(document.getElementById('math-player-input').value.trim(), 10);
-                const calculatedExpectedTargetResult = parseInt(document.getElementById('math-player-input').dataset.expectedResult, 10);
-                if (parsedPlayerInputVal === calculatedExpectedTargetResult) {
-                    const solveTimeMs = Date.now() - mathChallengeStartTime;
-                    signalClashVictoryCaptureLock(solveTimeMs);
-                } else {
-                    showToast('Wrong answer — try again.', 'error');
-                }
+                _submitMathAnswer();
+            }
+        });
+
+        // Re-focus the math input if the modal is visible but focus drifted away (e.g. user tapped elsewhere)
+        document.getElementById('modal-game-math')?.addEventListener('click', (e) => {
+            const inputEl = document.getElementById('math-player-input');
+            if (e.target !== document.getElementById('math-submit-response')) {
+                inputEl?.focus();
             }
         });
 
@@ -11629,7 +11650,7 @@ const MUTATIONS_LIST = [
 
     </script>
     <div style="position: fixed; top: 12px; left: 12px; z-index: 9999; color: rgba(255, 255, 255, 0.4); font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
-    V:9.9.8
+    V:9.9.7
 </div>
 </body>
 
