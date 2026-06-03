@@ -272,7 +272,13 @@
                 max(0px, env(safe-area-inset-left));
             z-index: 1200;
             overscroll-behavior: contain;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            gap: 0;
         }
+
+        #nav-tabs::-webkit-scrollbar { display: none; }
 
         .nav-tab {
             display: flex;
@@ -284,11 +290,12 @@
             font-weight: 600;
             text-decoration: none;
             cursor: pointer;
-            min-width: 44px;
+            min-width: 52px;
             min-height: 44px;
-            width: 14%;
+            flex-shrink: 0;
+            width: auto;
             transition: color 0.2s;
-            padding: 4px 0;
+            padding: 4px 6px;
         }
 
         .nav-tab.active {
@@ -1925,11 +1932,14 @@
                 flex-direction: column;
                 align-items: stretch;
                 gap: 10px;
+                padding: 14px;
             }
 
-            .player-row .btn-lvlup {
+            .player-row .btn-lvlup,
+            .player-row button {
                 width: 100%;
-                min-height: 44px;
+                min-height: 48px;
+                font-size: 0.9rem;
             }
 
             /* === MODALS — Bottom Sheet Style === */
@@ -1961,17 +1971,18 @@
             /* === NAVIGATION === */
             #nav-tabs {
                 padding: 6px 0 calc(6px + env(safe-area-inset-bottom));
+                justify-content: flex-start;
             }
 
             .nav-tab {
-                font-size: 0.62rem;
-                min-height: 44px;
-                width: auto;
-                padding: 4px 0;
+                font-size: 0.58rem;
+                min-height: 50px;
+                min-width: 48px;
+                padding: 4px 4px;
             }
 
             .nav-icon {
-                font-size: 1.1rem;
+                font-size: 1.2rem;
             }
 
             #nav-indicator {
@@ -2316,6 +2327,22 @@
                 padding: 20px 16px calc(20px + env(safe-area-inset-bottom));
             }
 
+            #math-player-input {
+                width: 90% !important;
+                font-size: 2.4rem !important;
+                padding: 16px !important;
+                min-height: 72px;
+            }
+
+            #math-equation-prompt {
+                font-size: 2.8rem !important;
+            }
+
+            #math-submit-response {
+                min-height: 52px;
+                font-size: 1rem;
+            }
+
             /* === EMPTY STATE === */
             .empty-state {
                 padding: 30px 16px;
@@ -2483,6 +2510,15 @@
         }
 
         .player-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            background: var(--bg-panel);
+            border: 1px solid var(--border-glow);
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin-bottom: 10px;
             transition: transform 0.2s ease, border-color 0.2s ease;
         }
 
@@ -2574,6 +2610,7 @@
             justify-content: space-between;
             gap: 12px;
             margin-bottom: 14px;
+            flex-wrap: wrap;
         }
 
         .quest-tier-title {
@@ -2590,7 +2627,7 @@
         }
 
         .quest-reset-timer {
-            min-width: 150px;
+            min-width: 120px;
             border: 1px solid rgba(96, 165, 250, 0.24);
             border-radius: 8px;
             padding: 8px 10px;
@@ -2600,6 +2637,7 @@
             font-weight: 900;
             text-align: right;
             text-transform: uppercase;
+            white-space: nowrap;
         }
 
         .quest-grid {
@@ -2612,8 +2650,15 @@
             grid-template-columns: repeat(3, minmax(0, 1fr));
         }
 
+        @media (max-width: 640px) {
+            .quest-grid,
+            .quest-grid.daily {
+                grid-template-columns: 1fr;
+            }
+        }
+
         .quest-card {
-            min-height: 220px;
+            min-height: 180px;
             display: flex;
             flex-direction: column;
             gap: 10px;
@@ -3976,7 +4021,8 @@
 
             <div class="rank-row" id="hud-rank-row">
                 <span id="hud-clash-rank-badge"></span>
-                <span id="hud-rank-reward-timer" style="font-size:0.68rem;font-weight:700;color:#6b7280;margin-left:4px;"><button id="hud-rank-claim-btn" onclick="claimClashRankReward()" style="display:none;padding:3px 10px;border-radius:999px;border:none;background:linear-gradient(135deg,#10b981,#059669);color:#fff;font-size:0.72rem;font-weight:900;letter-spacing:0.04em;cursor:pointer;box-shadow:0 0 12px rgba(16,185,129,0.55);animation:claimGlow 1.5s ease-in-out infinite;">🎁 CLAIM REWARD</button></span>
+                <span id="hud-rank-reward-timer" style="font-size:0.68rem;font-weight:700;color:#6b7280;margin-left:4px;"></span>
+                <button id="hud-rank-claim-btn" onclick="claimClashRankReward()" style="display:none;margin-left:4px;padding:3px 10px;border-radius:999px;border:none;background:linear-gradient(135deg,#10b981,#059669);color:#fff;font-size:0.72rem;font-weight:900;letter-spacing:0.04em;cursor:pointer;box-shadow:0 0 12px rgba(16,185,129,0.55);animation:claimGlow 1.5s ease-in-out infinite;">🎁 CLAIM REWARD</button>
             </div>
             <div class="xp-row">
                 <div class="level-tag" id="hud-level">LV 1</div>
@@ -4451,7 +4497,7 @@
                 id="math-equation-prompt">-- + --</div>
             <input type="number" id="math-player-input"
                 style="background:var(--bg-dark); border:2px solid var(--border-glow); font-size:1.8rem; text-align:center; padding:12px; width:80%; border-radius:12px; color:white; outline:none; margin-bottom:24px;"
-                placeholder="Result">
+                placeholder="Result" inputmode="numeric" pattern="[0-9]*" autocomplete="off" autocorrect="off" autocapitalize="off">
             <button class="btn-action btn-blue" id="math-submit-response">TRANSMIT DECRYPTION</button>
         </div>
     </div>
@@ -8379,8 +8425,13 @@ const MUTATIONS_LIST = [
                 document.getElementById('math-equation-prompt').innerText = `${leftOperand} ${mathOp} ${rightOperand}`;
                 const targetInputField = document.getElementById('math-player-input');
                 targetInputField.value = '';
-                targetInputField.focus();
                 targetInputField.dataset.expectedResult = String(expectedResult);
+                // Focus immediately and also after a brief delay for mobile browsers
+                targetInputField.focus();
+                setTimeout(() => {
+                    targetInputField.focus();
+                    targetInputField.click();
+                }, 150);
 
                 mathChallengeStartTime = Date.now();
             }
@@ -8440,6 +8491,21 @@ const MUTATIONS_LIST = [
                 signalClashVictoryCaptureLock(solveTimeMs);
             } else {
                 showToast('Wrong answer — try again.', 'error');
+            }
+        });
+
+        document.getElementById('math-player-input')?.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (clashUiLocked || !activeStealSequenceId) return;
+                const parsedPlayerInputVal = parseInt(document.getElementById('math-player-input').value.trim(), 10);
+                const calculatedExpectedTargetResult = parseInt(document.getElementById('math-player-input').dataset.expectedResult, 10);
+                if (parsedPlayerInputVal === calculatedExpectedTargetResult) {
+                    const solveTimeMs = Date.now() - mathChallengeStartTime;
+                    signalClashVictoryCaptureLock(solveTimeMs);
+                } else {
+                    showToast('Wrong answer — try again.', 'error');
+                }
             }
         });
 
@@ -8841,79 +8907,113 @@ const MUTATIONS_LIST = [
         }
 
         // ═══════════════════════════════════════════════════════════════
-        // CLASH RANK REWARD CYCLE  — redesigned
+        // CLASH RANK REWARD CYCLE
         //
         // Firebase layout:
-        //   system/clashRankRewardCycle  = { nextRewardAt, cycleId }
+        //   system/clashRankRewardCycle            = { nextRewardAt, cycleId }
         //   users/{uid}/clashRankLastCycleClaimed  = <cycleId already claimed>
-        //   users/{uid}/clashRankPendingReward     = <cycleId owed but not yet claimed>
+        //   users/{uid}/clashRankPendingReward     = <cycleId owed, not yet claimed>
         //
-        // Flow:
-        //  1. Global timer counts down.  When it hits 0 → tryAdvanceGlobalRankCycle()
-        //     writes the next cycle AND stamps pendingRewardCycleId onto EVERY user node.
-        //  2. On login (or any onValue fire) → checkClashRankReward() sees a pending
-        //     reward → shows the green CLAIM button.  Works for players who were offline.
-        //  3. Player clicks CLAIM → claimClashRankReward():
-        //       • gives XP / money for their rank
-        //       • resets clashRankPoints to 0  (back to Bronze D1)
-        //       • marks clashRankLastCycleClaimed = pendingRewardCycleId
-        //       • clears pendingRewardCycleId
-        //       • hides the button
+        // How it works:
+        //   - A global countdown ticks on every client.
+        //   - When it hits 0, the first client to see it runs tryAdvanceGlobalRankCycle(),
+        //     which atomically bumps the cycle and writes clashRankPendingReward onto
+        //     EVERY user node — so players who were offline get it the moment they log in.
+        //   - checkClashRankReward() runs on every userDataRecord update (login, Firebase
+        //     push, etc.) and shows/hides the button based purely on pending > lastClaimed.
+        //   - Clicking CLAIM gives the reward, resets rank to Bronze, marks claimed.
         // ═══════════════════════════════════════════════════════════════
 
         const RANK_REWARD_INTERVAL_MS = 5 * 24 * 60 * 60 * 1000; // 5 days
         let globalRankCycleState = { nextRewardAt: 0, cycleId: 0 };
         let rankRewardTimerInterval = null;
+        let rankCycleAdvanceInFlight = false; // prevent stampeding tryAdvance calls
 
+        // ── helpers ──────────────────────────────────────────────────
+        function _showTimerText(text, color) {
+            const el = document.getElementById('hud-rank-reward-timer');
+            const btn = document.getElementById('hud-rank-claim-btn');
+            if (!el) return;
+            el.textContent = text;
+            el.style.display = 'inline';
+            el.style.color = color || '#6b7280';
+            if (btn) btn.style.display = 'none';
+        }
+
+        function _showClaimButton() {
+            const el = document.getElementById('hud-rank-reward-timer');
+            const btn = document.getElementById('hud-rank-claim-btn');
+            if (el) { el.textContent = ''; el.style.display = 'none'; }
+            if (btn) {
+                btn.style.display = 'inline-block';
+                btn.disabled = false;
+                btn.textContent = '🎁 CLAIM REWARD';
+            }
+        }
+
+        function _hideRewardUI() {
+            const el = document.getElementById('hud-rank-reward-timer');
+            const btn = document.getElementById('hud-rank-claim-btn');
+            if (el) { el.textContent = ''; el.style.display = 'none'; }
+            if (btn) btn.style.display = 'none';
+        }
+
+        // ── init ──────────────────────────────────────────────────────
         function initGlobalRankCycleListener() {
             onValue(ref(db, 'system/clashRankRewardCycle'), async snap => {
                 const data = snap.val();
                 if (!data || !data.nextRewardAt) {
-                    // First-ever initialisation
                     const initNext = Date.now() + RANK_REWARD_INTERVAL_MS;
-                    await set(ref(db, 'system/clashRankRewardCycle'), { nextRewardAt: initNext, cycleId: 1 });
+                    await set(ref(db, 'system/clashRankRewardCycle'), { nextRewardAt: initNext, cycleId: 1, rewardReady: false });
                     return;
                 }
-                globalRankCycleState = { nextRewardAt: data.nextRewardAt, cycleId: data.cycleId || 1 };
-                updateRankRewardTimerDisplay();
+                globalRankCycleState = {
+                    nextRewardAt: data.nextRewardAt,
+                    cycleId:      data.cycleId || 1,
+                    rewardReady:  data.rewardReady || false
+                };
+                rankCycleAdvanceInFlight = false;
+                startRankRewardCountdown();
                 checkClashRankReward();
             });
         }
 
-        function updateRankRewardTimerDisplay() {
-            const el    = document.getElementById('hud-rank-reward-timer');
-            const btn   = document.getElementById('hud-rank-claim-btn');
-            if (!el) return;
-
+        // ── countdown ticker ─────────────────────────────────────────
+        function startRankRewardCountdown() {
             if (rankRewardTimerInterval) clearInterval(rankRewardTimerInterval);
 
             function tick() {
+                // Priority 1: confirmed pending reward stamped on this user's node
+                const pending = userDataRecord.clashRankPendingReward || 0;
+                const claimed = userDataRecord.clashRankLastCycleClaimed || 0;
+                if (pending > claimed) {
+                    _showClaimButton();
+                    return;
+                }
+
+                // Priority 2: cycle is marked rewardReady globally but stamp hasn't arrived yet
+                if (globalRankCycleState.rewardReady) {
+                    // Stamp ourselves locally so the button shows immediately
+                    if (!userDataRecord.clashRankPendingReward ||
+                        userDataRecord.clashRankPendingReward < globalRankCycleState.cycleId) {
+                        userDataRecord.clashRankPendingReward = globalRankCycleState.cycleId;
+                    }
+                    _showClaimButton();
+                    return;
+                }
+
                 const msLeft = globalRankCycleState.nextRewardAt - Date.now();
 
-                const hasPending = (userDataRecord.clashRankPendingReward || 0) >
-                                   (userDataRecord.clashRankLastCycleClaimed || 0);
-
-                if (hasPending) {
-                    // Show button, hide text
-                    el.dataset.timerText = '';
-                    if (btn) btn.style.display = 'inline-block';
-                    // Clear any text nodes but leave the button element
-                    for (const node of [...el.childNodes]) {
-                        if (node.nodeType === Node.TEXT_NODE) node.remove();
+                if (msLeft <= 0) {
+                    _showTimerText('⏳ Preparing reward…', '#10b981');
+                    if (!rankCycleAdvanceInFlight) {
+                        rankCycleAdvanceInFlight = true;
+                        tryAdvanceGlobalRankCycle(globalRankCycleState.cycleId, globalRankCycleState.nextRewardAt);
                     }
                     return;
                 }
 
-                // Hide button, show text
-                if (btn) btn.style.display = 'none';
-
-                if (msLeft <= 0) {
-                    // Kick off cycle advance, show brief label while Firebase writes
-                    setTimerText(el, '⏳ Preparing…', '#10b981');
-                    tryAdvanceGlobalRankCycle(globalRankCycleState.cycleId, globalRankCycleState.nextRewardAt);
-                    return;
-                }
-
+                // Normal countdown
                 const totalSecs = Math.ceil(msLeft / 1000);
                 const days  = Math.floor(totalSecs / 86400);
                 const hours = Math.floor((totalSecs % 86400) / 3600);
@@ -8924,70 +9024,64 @@ const MUTATIONS_LIST = [
                 else if (hours > 0) label += `${hours}h ${mins}m`;
                 else if (mins > 0)  label += `${mins}m ${secs}s`;
                 else                label += `${secs}s`;
-                setTimerText(el, label, msLeft < 3600000 ? '#f59e0b' : '#6b7280');
-            }
-
-            function setTimerText(el, text, color) {
-                // Remove existing text nodes only, leave child elements (the button)
-                for (const node of [...el.childNodes]) {
-                    if (node.nodeType === Node.TEXT_NODE) node.remove();
-                }
-                el.insertAdjacentText('afterbegin', text);
-                el.style.color = color;
+                _showTimerText(label, msLeft < 3600000 ? '#f59e0b' : '#6b7280');
             }
 
             tick();
             rankRewardTimerInterval = setInterval(tick, 1000);
         }
 
-        // Called on login + every time cycle data changes from Firebase
-        async function checkClashRankReward() {
+        // ── check on every userDataRecord update ──────────────────────
+        function checkClashRankReward() {
             if (!activeUserSession?.uid) return;
-            const btn = document.getElementById('hud-rank-claim-btn');
-            const el  = document.getElementById('hud-rank-reward-timer');
+            const pending = userDataRecord.clashRankPendingReward || 0;
+            const claimed = userDataRecord.clashRankLastCycleClaimed || 0;
 
-            const pendingCycle = userDataRecord.clashRankPendingReward  || 0;
-            const lastClaimed  = userDataRecord.clashRankLastCycleClaimed || 0;
+            // Check both the user's stamped pending reward AND the global rewardReady flag
+            const globalReady = globalRankCycleState.rewardReady &&
+                                 globalRankCycleState.cycleId > claimed;
 
-            if (pendingCycle > lastClaimed) {
-                // Show button, clear timer text nodes only
-                if (el) {
-                    for (const node of [...el.childNodes]) {
-                        if (node.nodeType === Node.TEXT_NODE) node.remove();
-                    }
+            if (pending > claimed || globalReady) {
+                // Ensure local record reflects the pending reward so button stays visible
+                if (globalReady && pending < globalRankCycleState.cycleId) {
+                    userDataRecord.clashRankPendingReward = globalRankCycleState.cycleId;
                 }
-                if (btn) btn.style.display = 'inline-block';
-            } else {
-                if (btn) btn.style.display = 'none';
+                _showClaimButton();
             }
         }
 
-        // Called when the player clicks the green CLAIM button
+        // ── claim handler ─────────────────────────────────────────────
         window.claimClashRankReward = async function() {
             if (!activeUserSession?.uid) return;
             const uid = activeUserSession.uid;
 
-            const pendingCycle = userDataRecord.clashRankPendingReward  || 0;
-            const lastClaimed  = userDataRecord.clashRankLastCycleClaimed || 0;
-            if (pendingCycle <= lastClaimed) return; // Nothing to claim
+            const lastClaimed = userDataRecord.clashRankLastCycleClaimed || 0;
 
+            // pendingCycle comes from user node stamp, OR from the global rewardReady flag
+            let pendingCycle = userDataRecord.clashRankPendingReward || 0;
+            if (pendingCycle <= lastClaimed && globalRankCycleState.rewardReady && globalRankCycleState.cycleId > lastClaimed) {
+                pendingCycle = globalRankCycleState.cycleId;
+            }
+
+            if (pendingCycle <= lastClaimed) {
+                showToast('No reward ready to claim.', 'info');
+                return;
+            }
+
+            // Disable button immediately so double-clicks do nothing
             const btn = document.getElementById('hud-rank-claim-btn');
             if (btn) { btn.disabled = true; btn.textContent = 'Claiming…'; }
 
-            const pts  = userDataRecord.clashRankPoints || 0;
+            const pts = userDataRecord.clashRankPoints || 0;
             const { rank } = getClashRankFromPoints(pts);
-            const reward   = rank.reward;
+            const reward = rank.reward;
 
             const payload = {};
-            // Give reward
             if (reward.xp    > 0) payload[`users/${uid}/xp`]    = (userDataRecord.xp    || 0) + reward.xp;
             if (reward.money > 0) payload[`users/${uid}/money`]  = parseFloat(((userDataRecord.money || 0) + reward.money).toFixed(2));
-            // Mark claimed
             payload[`users/${uid}/clashRankLastCycleClaimed`] = pendingCycle;
-            // Reset rank back to Bronze D1
-            payload[`users/${uid}/clashRankPoints`] = 0;
-            // Clear the pending flag
-            payload[`users/${uid}/clashRankPendingReward`] = null;
+            payload[`users/${uid}/clashRankPoints`]           = 0;  // reset to Bronze D1
+            payload[`users/${uid}/clashRankPendingReward`]    = null;
 
             try {
                 await update(ref(db, '/'), payload);
@@ -8997,60 +9091,57 @@ const MUTATIONS_LIST = [
                 return;
             }
 
-            // Update local record
+            // Mirror to local record so UI updates instantly without waiting for Firebase echo
             userDataRecord.clashRankLastCycleClaimed = pendingCycle;
             userDataRecord.clashRankPendingReward    = null;
+            userDataRecord.clashRankPoints           = 0;
             if (reward.xp    > 0) userDataRecord.xp    = (userDataRecord.xp    || 0) + reward.xp;
             if (reward.money > 0) userDataRecord.money  = parseFloat(((userDataRecord.money || 0) + reward.money).toFixed(2));
-            userDataRecord.clashRankPoints = 0; // reset to bronze
 
-            // Hide button + show toast
-            if (btn) btn.style.display = 'none';
-            // Clear timer text nodes so the interval tick writes the next countdown cleanly
-            const timerEl = document.getElementById('hud-rank-reward-timer');
-            if (timerEl) {
-                for (const node of [...timerEl.childNodes]) {
-                    if (node.nodeType === Node.TEXT_NODE) node.remove();
-                }
-            }
+            // Hide the button — the countdown ticker will now show the next cycle timer
+            _hideRewardUI();
 
             const rewardParts = [];
             if (reward.xp    > 0) rewardParts.push(`+${reward.xp} XP`);
             if (reward.money > 0) rewardParts.push(`€${reward.money}`);
-            const rewardStr = rewardParts.length ? rewardParts.join(' & ') : 'no bonus';
+            const rewardStr = rewardParts.length ? rewardParts.join(' & ') : 'participation reward';
             showToast(`🎁 ${rank.name} reward claimed: ${rewardStr}! Rank reset to Bronze.`, 'success');
+
+            // Now advance the cycle so the next 5-day countdown starts
+            advanceCycleAfterClaim(globalRankCycleState.cycleId, globalRankCycleState.nextRewardAt);
 
             renderHUDDisplayElements();
             renderHudClashRankBadge();
             renderProfileClashRankBadge();
         };
 
-        // Advance the global cycle — ALSO stamps pendingRewardCycleId onto all user nodes
-        // so offline players see their reward the moment they log back in.
+        // ── advance cycle + stamp all users ───────────────────────────
+        // Strategy: when timer hits 0, mark the cycle as "reward ready" (rewardReady: true)
+        // WITHOUT advancing nextRewardAt yet. nextRewardAt only advances after the user claims.
+        // This way the onValue listener doesn't reset the countdown before the button appears.
         function tryAdvanceGlobalRankCycle(cycleId, nextRewardAt) {
             const cycleRef = ref(db, 'system/clashRankRewardCycle');
             runTransaction(cycleRef, current => {
                 if (!current) return;
-                if (current.cycleId !== cycleId) return; // Already advanced by another client
+                if (current.cycleId !== cycleId) return; // another client already handled it
+                if (current.rewardReady) return; // already marked ready
                 return {
-                    cycleId:        cycleId + 1,
-                    nextRewardAt:   nextRewardAt + RANK_REWARD_INTERVAL_MS,
+                    cycleId,
+                    nextRewardAt,   // keep the same — don't advance yet
+                    rewardReady: true,
                     lastAdvancedAt: Date.now()
                 };
             }).then(async result => {
-                if (!result.committed) return; // Another client already did this — skip
+                if (!result.committed) return;
 
-                // We were first: stamp clashRankPendingReward on every registered user
-                // so they see the claim button even if they come online days later.
+                // Stamp clashRankPendingReward onto every user who hasn't claimed this cycle
                 try {
                     const usersSnap = await get(ref(db, 'users'));
                     const allUsers  = usersSnap.val() || {};
                     const stampPayload = {};
                     for (const uid in allUsers) {
                         const u = allUsers[uid];
-                        const lastClaimed = u.clashRankLastCycleClaimed || 0;
-                        if (lastClaimed < cycleId) {
-                            // Only stamp if they haven't already claimed this cycle
+                        if ((u.clashRankLastCycleClaimed || 0) < cycleId) {
                             stampPayload[`users/${uid}/clashRankPendingReward`] = cycleId;
                         }
                     }
@@ -9060,6 +9151,21 @@ const MUTATIONS_LIST = [
                 } catch (e) {
                     console.warn('[RankCycle] Could not stamp pending rewards:', e);
                 }
+            }).catch(() => {});
+        }
+
+        // Called after a user claims — advances the cycle for the next 5-day window
+        function advanceCycleAfterClaim(cycleId, nextRewardAt) {
+            const cycleRef = ref(db, 'system/clashRankRewardCycle');
+            runTransaction(cycleRef, current => {
+                if (!current) return;
+                if (current.cycleId !== cycleId) return; // already advanced by another claimer
+                return {
+                    cycleId:      cycleId + 1,
+                    nextRewardAt: nextRewardAt + RANK_REWARD_INTERVAL_MS,
+                    rewardReady:  false,
+                    lastAdvancedAt: Date.now()
+                };
             }).catch(() => {});
         }
 
