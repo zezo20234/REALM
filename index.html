@@ -3,18 +3,20 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Realm - Card Economy</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
         href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Outfit:wght@400;600;700;800&display=swap"
         rel="stylesheet">
-        <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#090d16"> <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Realm">
-<link rel="apple-touch-icon" href="LOGO.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#090d16">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Realm">
+    <link rel="apple-touch-icon" href="LOGO.png">
     <style>
         :root {
             --bg-dark: #090d16;
@@ -288,7 +290,9 @@
             gap: 0;
         }
 
-        #nav-tabs::-webkit-scrollbar { display: none; }
+        #nav-tabs::-webkit-scrollbar {
+            display: none;
+        }
 
         .nav-tab {
             display: flex;
@@ -732,7 +736,596 @@
             cursor: pointer;
         }
 
-        /* --- PACKS SYSTEM --- */
+        /* ══════════════════════════════════════════
+           BATTLE PASS — PREMIUM REDESIGN
+        ══════════════════════════════════════════ */
+
+        @keyframes bpSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        @keyframes bpPulseRing {
+            0%, 100% { opacity: 0.5; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.15); }
+        }
+        @keyframes bpHeroFloat {
+            0%, 100% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-8px) scale(1.02); }
+        }
+        @keyframes bpOrbDrift {
+            0% { transform: translate(0,0) scale(1); }
+            33% { transform: translate(12px,-18px) scale(1.1); }
+            66% { transform: translate(-8px,10px) scale(0.9); }
+            100% { transform: translate(0,0) scale(1); }
+        }
+        @keyframes bpShine {
+            0% { left: -120%; }
+            100% { left: 140%; }
+        }
+        @keyframes bpProgressPulse {
+            0%, 100% { box-shadow: 0 0 12px rgba(220,38,38,0.5), 0 0 24px rgba(220,38,38,0.2); }
+            50% { box-shadow: 0 0 20px rgba(255,68,68,0.8), 0 0 40px rgba(220,38,38,0.4); }
+        }
+        @keyframes bpClaimPulse {
+            0%, 100% { box-shadow: 0 0 16px rgba(16,185,129,0.4); transform: scale(1); }
+            50% { box-shadow: 0 0 28px rgba(16,185,129,0.7); transform: scale(1.01); }
+        }
+        @keyframes bpNodePop {
+            0% { transform: scale(0.5); opacity: 0; }
+            70% { transform: scale(1.15); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes bpScanline {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100vh); }
+        }
+        @keyframes bpFadeSlideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── HERO ── */
+        .bp-hero {
+            position: relative;
+            overflow: hidden;
+            min-height: 190px;
+            background: #0a0d14;
+        }
+        .bp-hero-bg {
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 80% 60% at 20% 50%, rgba(220,38,38,0.22) 0%, transparent 65%),
+                radial-gradient(ellipse 50% 80% at 90% 20%, rgba(255,68,68,0.12) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 40% at 60% 100%, rgba(180,20,20,0.18) 0%, transparent 55%),
+                linear-gradient(160deg, #0f0d14 0%, #12080e 40%, #0a0c12 100%);
+        }
+        .bp-hero-scanlines {
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 3px,
+                rgba(0,0,0,0.06) 3px,
+                rgba(0,0,0,0.06) 4px
+            );
+            pointer-events: none;
+        }
+        .bp-hero-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(40px);
+            pointer-events: none;
+        }
+        .bp-orb-1 {
+            width: 160px; height: 160px;
+            background: rgba(220,38,38,0.18);
+            top: -40px; left: -30px;
+            animation: bpOrbDrift 8s ease-in-out infinite;
+        }
+        .bp-orb-2 {
+            width: 120px; height: 120px;
+            background: rgba(255,80,60,0.12);
+            bottom: -20px; right: 30px;
+            animation: bpOrbDrift 11s ease-in-out infinite reverse;
+        }
+        .bp-orb-3 {
+            width: 80px; height: 80px;
+            background: rgba(251,191,36,0.08);
+            top: 30px; right: 80px;
+            animation: bpOrbDrift 6s ease-in-out infinite 2s;
+        }
+        .bp-hero-content {
+            position: relative;
+            z-index: 2;
+            padding: 20px 16px 18px;
+        }
+        .bp-hero-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        .bp-hero-left {
+            flex: 1;
+        }
+        .bp-season-label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.18em;
+            color: #ef4444;
+            background: rgba(220,38,38,0.12);
+            border: 1px solid rgba(220,38,38,0.3);
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            margin-bottom: 8px;
+        }
+        .bp-hero-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.4rem;
+            font-weight: 900;
+            line-height: 1.0;
+            letter-spacing: 0.04em;
+            background: linear-gradient(135deg, #fff 30%, #ef4444 70%, #ff6b6b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 20px rgba(220,38,38,0.4));
+            margin-bottom: 6px;
+        }
+        .bp-hero-subtitle {
+            font-size: 0.68rem;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            color: rgba(255,255,255,0.35);
+            text-transform: uppercase;
+        }
+        .bp-hero-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+        }
+        .bp-credits-pill {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px;
+            padding: 8px 10px;
+            backdrop-filter: blur(8px);
+        }
+        .bp-credits-icon {
+            font-size: 1.2rem;
+            color: #ef4444;
+            filter: drop-shadow(0 0 6px rgba(239,68,68,0.6));
+        }
+        .bp-credits-label {
+            font-size: 0.6rem;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            color: rgba(255,255,255,0.4);
+        }
+        .bp-credits-value {
+            font-size: 0.95rem;
+            font-weight: 900;
+            color: #fff;
+            font-family: 'Orbitron', sans-serif;
+        }
+        .bp-buy-btn {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, #b91c1c 0%, #dc2626 45%, #ef4444 100%);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 0;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-width: 100px;
+            box-shadow: 0 4px 20px rgba(220,38,38,0.45), inset 0 1px 0 rgba(255,255,255,0.15);
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+        .bp-buy-btn:not([disabled]):active {
+            transform: scale(0.96);
+            box-shadow: 0 2px 10px rgba(220,38,38,0.4);
+        }
+        .bp-buy-btn[disabled] {
+            background: linear-gradient(135deg, #166534, #16a34a);
+            box-shadow: 0 4px 16px rgba(16,185,129,0.4);
+            cursor: default;
+        }
+        .bp-buy-shine {
+            position: absolute;
+            top: 0; bottom: 0;
+            width: 40px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+            left: -120%;
+            animation: bpShine 3s ease-in-out infinite 1s;
+            pointer-events: none;
+        }
+        .bp-buy-text {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            padding: 8px 14px 2px;
+        }
+        .bp-buy-price {
+            font-size: 0.85rem;
+            font-weight: 900;
+            padding: 0px 14px 8px;
+            opacity: 0.88;
+        }
+        .bp-refresh-btn {
+            background: rgba(220,38,38,0.08);
+            border: 1px solid rgba(220,38,38,0.2);
+            color: rgba(255,255,255,0.4);
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .bp-refresh-btn:hover {
+            color: #ef4444;
+            border-color: rgba(220,38,38,0.5);
+            background: rgba(220,38,38,0.15);
+        }
+
+        /* ── PROGRESS CARD ── */
+        .bp-progress-card {
+            background: linear-gradient(145deg, rgba(17,24,39,0.95), rgba(12,14,22,0.98));
+            border: 1px solid rgba(220,38,38,0.2);
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 16px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04);
+        }
+        .bp-progress-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(220,38,38,0.6), transparent);
+        }
+        .bp-progress-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+        .bp-tier-badge {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: rgba(220,38,38,0.12);
+            border: 1px solid rgba(220,38,38,0.35);
+            border-radius: 10px;
+            padding: 8px 16px;
+            min-width: 70px;
+        }
+        .bp-tier-badge-label {
+            font-size: 0.58rem;
+            font-weight: 900;
+            letter-spacing: 0.18em;
+            color: rgba(239,68,68,0.7);
+            text-transform: uppercase;
+        }
+        .bp-tier-badge-num {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 900;
+            line-height: 1.1;
+            color: #ef4444;
+            text-shadow: 0 0 16px rgba(239,68,68,0.5);
+        }
+        .bp-xpb-info {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px;
+        }
+        .bp-xpb-label {
+            font-size: 0.6rem;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            color: rgba(255,255,255,0.3);
+            text-transform: uppercase;
+        }
+        .bp-xpb-nums {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #fff;
+        }
+        .bp-progress-track {
+            width: 100%;
+            height: 10px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 5px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.06);
+            position: relative;
+        }
+        .bp-progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #7f1d1d, #dc2626, #ff4444, #ff6b6b);
+            border-radius: 5px;
+            transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            animation: bpProgressPulse 2s ease-in-out infinite;
+            position: relative;
+        }
+        .bp-progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0; right: 0;
+            width: 20px; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4));
+            border-radius: 0 5px 5px 0;
+        }
+        .bp-claim-btn {
+            margin-top: 12px;
+            width: 100%;
+            background: linear-gradient(135deg, #065f46, #10b981);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 14px 20px;
+            font-weight: 900;
+            font-size: 0.88rem;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            animation: bpClaimPulse 2s ease-in-out infinite;
+            font-family: 'Orbitron', sans-serif;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.15);
+        }
+        .bp-claim-arrow {
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+
+        /* ── TIER TRACK ── */
+        .bp-track-wrapper {
+            position: relative;
+            padding: 0 16px 16px;
+        }
+        .bp-track-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .bp-track-label {
+            font-size: 0.65rem;
+            font-weight: 900;
+            letter-spacing: 0.18em;
+            color: rgba(255,255,255,0.3);
+            text-transform: uppercase;
+        }
+        .bp-track-hint {
+            font-size: 0.6rem;
+            color: rgba(255,255,255,0.2);
+            font-weight: 600;
+        }
+        .bp-tier-track {
+            display: flex;
+            align-items: center;
+            overflow-x: auto;
+            padding: 16px 4px;
+            gap: 6px;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+            background: linear-gradient(145deg, rgba(15,18,28,0.9), rgba(10,12,20,0.95));
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px;
+        }
+        .bp-tier-track::-webkit-scrollbar { display: none; }
+        .bp-track-fade-l, .bp-track-fade-r {
+            position: absolute;
+            top: 36px;
+            width: 30px;
+            bottom: 16px;
+            pointer-events: none;
+            z-index: 2;
+        }
+        .bp-track-fade-l {
+            left: 16px;
+            background: linear-gradient(90deg, rgba(10,12,20,1), transparent);
+            border-radius: 12px 0 0 12px;
+        }
+        .bp-track-fade-r {
+            right: 16px;
+            background: linear-gradient(-90deg, rgba(10,12,20,1), transparent);
+            border-radius: 0 12px 12px 0;
+        }
+
+        /* ── REWARDS SHEET ── */
+        .bp-sheet-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            z-index: 9998;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .bp-sheet-backdrop.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .bp-rewards-sheet {
+            position: fixed;
+            bottom: -100%;
+            left: 0; right: 0;
+            background: linear-gradient(170deg, #111827 0%, #0d1117 100%);
+            border-top: 1px solid rgba(220,38,38,0.25);
+            border-radius: 22px 22px 0 0;
+            padding: 8px 20px 32px;
+            z-index: 9999;
+            transition: bottom 0.35s cubic-bezier(0.34, 1.2, 0.64, 1);
+            max-height: 70vh;
+            overflow-y: auto;
+            box-shadow: 0 -20px 60px rgba(0,0,0,0.7), 0 -1px 0 rgba(220,38,38,0.15);
+        }
+        .bp-rewards-sheet::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(220,38,38,0.5), transparent);
+        }
+        .bp-sheet-handle {
+            width: 36px;
+            height: 4px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 2px;
+            margin: 10px auto 16px;
+        }
+        .bp-sheet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+        .bp-sheet-eyebrow {
+            font-size: 0.6rem;
+            font-weight: 900;
+            letter-spacing: 0.18em;
+            color: rgba(239,68,68,0.7);
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        .bp-sheet-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 900;
+            color: #fff;
+        }
+        .bp-sheet-close {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.5);
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.15s;
+        }
+        .bp-sheet-close:hover {
+            background: rgba(220,38,38,0.15);
+            border-color: rgba(220,38,38,0.3);
+            color: #ef4444;
+        }
+        .bp-sheet-content {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .bp-reward-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 12px;
+            padding: 14px 16px;
+            animation: bpFadeSlideIn 0.3s ease forwards;
+        }
+        .bp-reward-row.milestone {
+            border-color: rgba(220,38,38,0.25);
+            background: rgba(220,38,38,0.05);
+        }
+        .bp-reward-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            flex-shrink: 0;
+        }
+        .bp-reward-icon.money { background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.2); }
+        .bp-reward-icon.xp { background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.2); }
+        .bp-reward-icon.pack { background: rgba(168,85,247,0.12); border: 1px solid rgba(168,85,247,0.2); }
+        .bp-reward-icon.credits { background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.2); }
+        .bp-reward-name {
+            font-weight: 900;
+            font-size: 1rem;
+            color: #f3f4f6;
+        }
+        .bp-reward-desc {
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.35);
+            font-weight: 600;
+            margin-top: 2px;
+        }
+        .bp-lock-content {
+            text-align: center;
+            padding: 32px 20px;
+        }
+        .bp-lock-icon {
+            font-size: 3rem;
+            margin-bottom: 12px;
+            filter: grayscale(0.3);
+        }
+        .bp-lock-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            font-weight: 900;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 8px;
+        }
+        .bp-lock-desc {
+            font-size: 0.82rem;
+            color: rgba(255,255,255,0.25);
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        .bp-lock-buy-btn {
+            background: linear-gradient(135deg, #b91c1c, #ef4444);
+            color: #fff;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 10px;
+            font-weight: 900;
+            font-size: 0.88rem;
+            cursor: pointer;
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 0.05em;
+            box-shadow: 0 4px 16px rgba(220,38,38,0.35);
+        }
+
+        /* ── BP refresh btn override ── */
+        #bp-refresh-btn:hover {
+            background: rgba(220,38,38,0.15) !important;
+        }
+
+        /* --- PACK SYSTEM --- */
         .pack-box {
             background: var(--bg-panel);
             border: 1px solid var(--border-glow);
@@ -996,6 +1589,7 @@
             color: #9ca3af;
             padding: 4px 12px;
         }
+
         /* --- LEADERBOARDS --- */
         .tab-sub-row {
             display: flex;
@@ -1677,6 +2271,7 @@
                 opacity: 1;
             }
         }
+
         .broadcast-inner {
             margin: max(75px, calc(65px + env(safe-area-inset-top))) 14px 0;
             padding: 14px 18px;
@@ -2025,6 +2620,7 @@
                 align-items: center;
                 justify-content: center;
             }
+
             /* === NAVIGATION === */
             #nav-tabs {
                 padding-top: 6px;
@@ -2350,6 +2946,7 @@
                 font-size: 0.6rem;
                 padding: 6px 10px;
             }
+
             /* === COMING SOON SCREEN === */
             #coming-soon-screen {
                 padding: 16px;
@@ -2710,6 +3307,7 @@
         }
 
         @media (max-width: 640px) {
+
             .quest-grid,
             .quest-grid.daily {
                 grid-template-columns: 1fr;
@@ -3661,6 +4259,7 @@
                 transform: translateX(-50%) translateY(-20px);
                 opacity: 0;
             }
+
             to {
                 transform: translateX(-50%) translateY(0);
                 opacity: 1;
@@ -3681,6 +4280,7 @@
 
         /* --- MOBILE RESPONSIVENESS --- */
         @media (max-width: 768px) {
+
             /* Broadcast banners - ensure full visibility */
             .broadcast-inner {
                 margin: max(70px, calc(60px + env(safe-area-inset-top))) 8px 0;
@@ -3807,7 +4407,7 @@
             }
 
             /* Custom pack forge adjustments */
-            .admin-panel-section > div[style*="display:grid"] {
+            .admin-panel-section>div[style*="display:grid"] {
                 grid-template-columns: 1fr;
             }
 
@@ -3856,8 +4456,9 @@
             opacity: 0.95;
             vertical-align: middle;
             white-space: nowrap;
-            box-shadow: 0 0 8px rgba(0,0,0,0.25);
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.25);
         }
+
         .clash-rank-badge img {
             width: 20px;
             height: 20px;
@@ -3865,6 +4466,7 @@
             border-radius: 3px;
             flex-shrink: 0;
         }
+
         .clash-rank-badge .rank-div-dot {
             width: 5px;
             height: 5px;
@@ -3873,6 +4475,7 @@
             opacity: 0.6;
             flex-shrink: 0;
         }
+
         /* Row that holds the rank badge above the XP bar */
         .rank-row {
             display: flex;
@@ -3882,14 +4485,45 @@
         }
 
         /* Rank colors */
-        .rank-bronze   { color: #cd7f32; background: rgba(205,127,50,0.12); }
-        .rank-silver   { color: #c0c0c0; background: rgba(192,192,192,0.12); }
-        .rank-gold     { color: #ffd700; background: rgba(255,215,0,0.12); }
-        .rank-platinum { color: #e5e4e2; background: rgba(229,228,226,0.12); }
-        .rank-diamond  { color: #7df9ff; background: rgba(125,249,255,0.12); }
-        .rank-champion { color: #f59e0b; background: rgba(245,158,11,0.12); }
-        .rank-grandchamp { color: #a855f7; background: rgba(168,85,247,0.12); }
-        .rank-ssl      { color: #ff1493; background: rgba(255,20,147,0.12); }
+        .rank-bronze {
+            color: #cd7f32;
+            background: rgba(205, 127, 50, 0.12);
+        }
+
+        .rank-silver {
+            color: #c0c0c0;
+            background: rgba(192, 192, 192, 0.12);
+        }
+
+        .rank-gold {
+            color: #ffd700;
+            background: rgba(255, 215, 0, 0.12);
+        }
+
+        .rank-platinum {
+            color: #e5e4e2;
+            background: rgba(229, 228, 226, 0.12);
+        }
+
+        .rank-diamond {
+            color: #7df9ff;
+            background: rgba(125, 249, 255, 0.12);
+        }
+
+        .rank-champion {
+            color: #f59e0b;
+            background: rgba(245, 158, 11, 0.12);
+        }
+
+        .rank-grandchamp {
+            color: #a855f7;
+            background: rgba(168, 85, 247, 0.12);
+        }
+
+        .rank-ssl {
+            color: #ff1493;
+            background: rgba(255, 20, 147, 0.12);
+        }
 
         /* Clash Rank leaderboard tab */
         .clash-rank-leaderboard-row {
@@ -3902,17 +4536,20 @@
             padding: 10px 14px;
             margin-bottom: 8px;
         }
+
         .clash-rank-leaderboard-row .cr-num {
             font-size: 0.8rem;
             font-weight: 900;
             color: #6b7280;
             min-width: 22px;
         }
+
         .clash-rank-leaderboard-row .cr-name {
             flex: 1;
             font-weight: 700;
             font-size: 0.9rem;
         }
+
         .clash-rank-leaderboard-row .cr-pts {
             font-size: 0.75rem;
             color: #6b7280;
@@ -3921,6 +4558,7 @@
         /* ── END CLASH RANK ─────────────────────────────────────── */
 
         @media (max-width: 480px) {
+
             /* Extra small mobile adjustments */
             .broadcast-inner {
                 font-size: 0.8rem;
@@ -3962,6 +4600,1006 @@
 </head>
 
 <body>
+
+    <!-- LOADING SCREEN -->
+    <div id="loading-screen" style="position:fixed; inset:0; background:#050810; z-index:9999999; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+        <canvas id="loading-particles" style="position:absolute; inset:0; width:100%; height:100%;"></canvas>
+        <div style="position:relative; z-index:10; text-align:center; display:flex; flex-direction:column; align-items:center;">
+            <h1 style="font-family:'Orbitron',sans-serif; font-size:4rem; font-weight:900; color:#dc2626; text-shadow:0 0 40px #ff4444, 0 0 80px #dc2626; margin:0 0 20px 0; letter-spacing:8px;">REALM</h1>
+            <div id="season-badge" style="font-family:'Orbitron',sans-serif; font-size:1.2rem; font-weight:700; color:#ff4444; margin-bottom:8px; letter-spacing:2px;">SEASON 1</div>
+            <div id="season-countdown" style="font-family:'Orbitron',sans-serif; font-size:0.9rem; color:#888; margin-bottom:30px; letter-spacing:1px;">Loading season data...</div>
+            <div style="width:300px; height:6px; background:#1f2937; border-radius:3px; overflow:hidden; margin-bottom:12px;">
+                <div id="loading-progress" style="height:100%; width:0%; background:linear-gradient(90deg,#dc2626,#ff4444); transition:width 0.3s ease; box-shadow:0 0 20px #dc2626;"></div>
+            </div>
+            <div id="loading-status" style="font-family:'Orbitron',sans-serif; font-size:0.85rem; color:#6b7280; letter-spacing:1px;">Connecting to servers...</div>
+        </div>
+    </div>
+    <style>
+        #loading-screen.fade-out {
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            pointer-events: none;
+        }
+        #loading-screen.hidden {
+            display: none !important;
+        }
+    </style>
+
+    <script>
+        // Loading Screen Logic
+        (function() {
+            const loadingScreen = document.getElementById('loading-screen');
+            const loadingProgress = document.getElementById('loading-progress');
+            const loadingStatus = document.getElementById('loading-status');
+            const seasonBadge = document.getElementById('season-badge');
+            const seasonCountdown = document.getElementById('season-countdown');
+            const canvas = document.getElementById('loading-particles');
+            const ctx = canvas.getContext('2d');
+
+            let loadingDismissed = false;
+            let currentProgress = 0;
+
+            // Season calculation
+            const EPOCH = new Date('2026-06-04T00:00:00Z').getTime();
+            const daysSince = Math.floor((Date.now() - EPOCH) / 86400000);
+            const pos = ((daysSince % 70) + 70) % 70;
+            const seasonIdx = Math.floor(pos / 14);
+            const daysLeft = 14 - (pos % 14);
+            const seasonName = ['SEASON 1','SEASON 2','SEASON 3','SEASON 4','SEASON 5'][seasonIdx];
+
+            seasonBadge.textContent = seasonName;
+
+            // Season end — may be overridden by admin in Firebase
+            let _seasonEndMs = EPOCH + (seasonIdx + 1) * 14 * 86400000;
+
+            // Try to read Firebase override (once Firebase is ready)
+            function _tryLoadSeasonEnd() {
+                if (!window._realm?.getDb()) { setTimeout(_tryLoadSeasonEnd, 800); return; }
+                const _db = window._realm.getDb();
+                const _ref = window._realm.getRef();
+                const _get = window._realm.getGet();
+                _get(_ref(_db, 'system/season')).then(snap => {
+                    const d = snap.val();
+                    if (d?.seasonEndTime) _seasonEndMs = d.seasonEndTime;
+                }).catch(() => {});
+            }
+            _tryLoadSeasonEnd();
+
+            function updateCountdown() {
+                const diff = _seasonEndMs - Date.now();
+                if (diff <= 0) { seasonCountdown.textContent = 'Season ending soon...'; return; }
+                const days = Math.floor(diff / 86400000);
+                const hours = Math.floor((diff % 86400000) / 3600000);
+                const minutes = Math.floor((diff % 3600000) / 60000);
+                seasonCountdown.textContent = `${days}d ${hours}h ${minutes}m remaining`;
+            }
+
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+
+            // Particle animation
+            let particles = [];
+            const particleCount = 50;
+
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            class Particle {
+                constructor() {
+                    this.reset();
+                }
+
+                reset() {
+                    this.x = Math.random() * canvas.width;
+                    this.y = canvas.height + Math.random() * 100;
+                    this.size = Math.random() * 3 + 1;
+                    this.speed = Math.random() * 2 + 1;
+                    this.opacity = Math.random() * 0.5 + 0.2;
+                }
+
+                update() {
+                    this.y -= this.speed;
+                    if (this.y < -10) {
+                        this.reset();
+                    }
+                }
+
+                draw() {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(220, 38, 38, ${this.opacity})`;
+                    ctx.fill();
+                }
+            }
+
+            for (let i = 0; i < particleCount; i++) {
+                particles.push(new Particle());
+            }
+
+            function animateParticles() {
+                if (loadingDismissed) return;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                particles.forEach(p => {
+                    p.update();
+                    p.draw();
+                });
+                requestAnimationFrame(animateParticles);
+            }
+            animateParticles();
+
+            // Loading progress animation
+            const statusMessages = [
+                'Connecting to servers...',
+                'Loading card registry...',
+                'Syncing battle pass...',
+                'Loading player data...',
+                'Almost ready...'
+            ];
+
+            let messageIndex = 0;
+            const targetProgress = 85;
+            const progressIncrement = targetProgress / statusMessages.length;
+
+            function animateLoading() {
+                if (loadingDismissed) return;
+
+                if (currentProgress < targetProgress) {
+                    currentProgress += 0.5;
+                    loadingProgress.style.width = currentProgress + '%';
+
+                    // Update status message at certain progress points
+                    const newMessageIndex = Math.min(
+                        Math.floor(currentProgress / progressIncrement),
+                        statusMessages.length - 1
+                    );
+                    
+                    if (newMessageIndex !== messageIndex) {
+                        messageIndex = newMessageIndex;
+                        loadingStatus.textContent = statusMessages[messageIndex];
+                    }
+
+                    setTimeout(animateLoading, 30);
+                }
+            }
+
+            // Start loading animation
+            setTimeout(animateLoading, 500);
+
+            // 12 second safety fallback
+            setTimeout(() => {
+                if (!loadingDismissed) {
+                    console.warn('Loading screen safety fallback triggered');
+                    dismissLoadingScreen();
+                }
+            }, 12000);
+
+            // Function to dismiss loading screen
+            window.appReadyToShow = function() {
+                if (loadingDismissed) return;
+                dismissLoadingScreen();
+            };
+
+            function dismissLoadingScreen() {
+                if (loadingDismissed) return;
+                loadingDismissed = true;
+                loadingProgress.style.width = '100%';
+                loadingStatus.textContent = 'Ready!';
+                setTimeout(() => {
+                    loadingScreen.classList.add('fade-out');
+                    setTimeout(() => {
+                        loadingScreen.classList.add('hidden');
+                    }, 500);
+                }, 300);
+            }
+        })();
+    </script>
+
+    <script>
+        // Battle Pass Logic - Completely Rewritten for Reliability
+        
+        // Battle pass constants
+        const XPB_PER_TIER = 2000;
+        const TOTAL_TIERS = 100;
+        const EPOCH = new Date('2026-06-04T00:00:00Z').getTime();
+        const daysSince = Math.floor((Date.now() - EPOCH) / 86400000);
+        const pos = ((daysSince % 70) + 70) % 70;
+        const seasonIdx = Math.floor(pos / 14);
+        const seasonName = ['SEASON 1','SEASON 2','SEASON 3','SEASON 4','SEASON 5'][seasonIdx];
+
+        // BP season end — reads from Firebase so admin override works
+        let _bpSeasonEndMs = null;
+
+        function _startBPCountdown() {
+            const el = document.getElementById('bp-season-countdown');
+            if (!el) return;
+
+            function tick() {
+                if (!_bpSeasonEndMs) { el.textContent = '-- : -- : --'; return; }
+                const diff = _bpSeasonEndMs - Date.now();
+                if (diff <= 0) { el.textContent = 'ENDING SOON'; return; }
+                const d = Math.floor(diff / 86400000);
+                const h = Math.floor((diff % 86400000) / 3600000);
+                const m = Math.floor((diff % 3600000) / 60000);
+                const s = Math.floor((diff % 60000) / 1000);
+                el.textContent = `${d}d ${String(h).padStart(2,'0')}h ${String(m).padStart(2,'0')}m ${String(s).padStart(2,'0')}s`;
+            }
+            tick();
+            setInterval(tick, 1000);
+        }
+
+        // Initialize battle pass system
+        function initBattlePassSystem() {
+            console.log('Initializing battle pass system...');
+            _startBPCountdown();
+            
+            // Wait for Firebase to be ready
+            const checkFirebase = setInterval(() => {
+                if (window._realm && window._realm.getDb()) {
+                    clearInterval(checkFirebase);
+                    console.log('Firebase ready, initializing battle pass...');
+                    // Load season end from Firebase
+                    const _db = window._realm.getDb();
+                    const _ref = window._realm.getRef();
+                    const _get = window._realm.getGet();
+                    _get(_ref(_db, 'system/season')).then(snap => {
+                        const d = snap.val();
+                        const EPOCH = new Date('2026-06-04T00:00:00Z').getTime();
+                        const daysSince = Math.floor((Date.now() - EPOCH) / 86400000);
+                        const pos = ((daysSince % 70) + 70) % 70;
+                        const sIdx = Math.floor(pos / 14);
+                        _bpSeasonEndMs = (d?.seasonEndTime) || (EPOCH + (sIdx + 1) * 14 * 86400000);
+                    }).catch(() => {
+                        const EPOCH = new Date('2026-06-04T00:00:00Z').getTime();
+                        const daysSince = Math.floor((Date.now() - EPOCH) / 86400000);
+                        const pos = ((daysSince % 70) + 70) % 70;
+                        const sIdx = Math.floor(pos / 14);
+                        _bpSeasonEndMs = EPOCH + (sIdx + 1) * 14 * 86400000;
+                    });
+                    refreshBattlePassUI();
+                    // tier track will be rendered by renderBattlePassUI
+                }
+            }, 500);
+
+            // Timeout after 10 seconds
+            setTimeout(() => clearInterval(checkFirebase), 10000);
+        }
+
+        // Refresh battle pass UI with fresh data
+        function refreshBattlePassUI() {
+            console.log('Refreshing battle pass UI...');
+            
+            const db = window._realm?.getDb();
+            const ref = window._realm?.getRef();
+            const get = window._realm?.getGet();
+            const activeUser = window._realm?.getActiveUser();
+
+            if (!db || !ref || !get) {
+                console.error('Firebase not ready');
+                return;
+            }
+
+            if (!activeUser) {
+                console.error('User not logged in');
+                return;
+            }
+
+            const userRef = ref(db, `users/${activeUser.uid}`);
+            get(userRef).then(snapshot => {
+                const userData = snapshot.val() || {};
+                console.log('Battle pass user data:', userData);
+                
+                // Update global user data
+                if (window._realm.setUserData) {
+                    window._realm.setUserData(userData);
+                }
+                
+                renderBattlePassUI(userData);
+            }).catch(err => {
+                console.error('Error fetching battle pass data:', err);
+            });
+        }
+
+        // Render battle pass UI
+        function renderBattlePassUI(userData) {
+            const bp = userData.battlePass || { owned: false, xpb: 0, tier: 1 };
+            const credits = userData.credits || 0;
+
+            console.log('Rendering battle pass UI:', bp);
+
+            // Update season info
+            const seasonInfo = document.getElementById('bp-season-info');
+            if (seasonInfo) seasonInfo.textContent = seasonName;
+            
+            // Update credits display
+            const creditsDisplay = document.getElementById('bp-credits');
+            if (creditsDisplay) creditsDisplay.textContent = `${credits} ⬡`;
+
+            // Update buy button
+            const buyBtn = document.getElementById('bp-buy-btn');
+            if (buyBtn) {
+                if (bp.owned) {
+                    buyBtn.textContent = 'PASS OWNED';
+                    buyBtn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+                    buyBtn.disabled = true;
+                } else {
+                    buyBtn.textContent = `BUY PASS (500 ⬡)`;
+                    buyBtn.style.background = 'linear-gradient(135deg, #dc2626, #ff4444)';
+                    buyBtn.disabled = credits < 500;
+                }
+            }
+
+            // Update XPB progress
+            const currentTier = bp.tier || 1;
+            const currentXPB = bp.xpb || 0;
+            const progressPercent = Math.min(100, (currentXPB / XPB_PER_TIER) * 100);
+
+            const currentTierEl = document.getElementById('bp-current-tier');
+            if (currentTierEl) currentTierEl.textContent = currentTier;
+            
+            const xpbCurrentEl = document.getElementById('bp-xpb-current');
+            if (xpbCurrentEl) xpbCurrentEl.textContent = currentXPB;
+            
+            const xpbNeededEl = document.getElementById('bp-xpb-needed');
+            if (xpbNeededEl) xpbNeededEl.textContent = XPB_PER_TIER;
+            
+            const xpbProgressEl = document.getElementById('bp-xpb-progress');
+            if (xpbProgressEl) xpbProgressEl.style.width = `${progressPercent}%`;
+
+            // Update claim button visibility
+            const claimBtn = document.getElementById('bp-claim-tier-btn');
+            if (claimBtn) {
+                if (bp.owned && currentXPB >= XPB_PER_TIER && currentTier < TOTAL_TIERS) {
+                    claimBtn.style.display = 'block';
+                } else {
+                    claimBtn.style.display = 'none';
+                }
+            }
+
+            // Render tier track with current progress
+            renderTierTrack(currentTier);
+
+            // Scroll to current tier
+            setTimeout(() => {
+                const tierTrack = document.getElementById('bp-tier-track');
+                const currentTierNode = document.querySelector(`[data-tier="${currentTier}"]`);
+                if (currentTierNode && tierTrack) {
+                    const offset = currentTierNode.offsetLeft - (tierTrack.offsetWidth / 2) + (currentTierNode.offsetWidth / 2);
+                    tierTrack.scrollLeft = offset;
+                }
+            }, 100);
+        }
+
+        // Refresh battle pass section only (XPB, tier, button, tier track)
+        window.refreshBattlePassSection = async function() {
+            const refreshBtn = document.getElementById('bp-refresh-btn');
+            if (refreshBtn) {
+                refreshBtn.style.animation = 'bpSpin 0.6s linear';
+                refreshBtn.disabled = true;
+                setTimeout(() => {
+                    refreshBtn.style.animation = '';
+                    refreshBtn.disabled = false;
+                }, 700);
+            }
+            await refreshBattlePassUI();
+        };
+
+        // Render tier track — premium redesign
+        function renderTierTrack(currentTier) {
+            const tierTrack = document.getElementById('bp-tier-track');
+            if (!tierTrack) return;
+            currentTier = currentTier || 1;
+            tierTrack.innerHTML = '';
+
+            for (let i = 1; i <= TOTAL_TIERS; i++) {
+                const isMilestone = i % 10 === 0;
+                const isPast = i < currentTier;
+                const isCurrent = i === currentTier;
+                const tierEl = document.createElement('div');
+                tierEl.dataset.tier = i;
+
+                if (isMilestone) {
+                    // Big milestone node
+                    tierEl.style.cssText = `
+                        width: 46px; height: 46px;
+                        border-radius: 12px;
+                        background: ${isPast ? 'linear-gradient(135deg,#7f1d1d,#dc2626)' : isCurrent ? 'linear-gradient(135deg,#dc2626,#ff4444)' : 'rgba(30,35,50,0.9)'};
+                        border: 2px solid ${isPast || isCurrent ? '#ef4444' : 'rgba(255,255,255,0.1)'};
+                        display: flex; align-items: center; justify-content: center;
+                        flex-direction: column; gap: 1px;
+                        font-weight: 900; font-size: 0.72rem;
+                        font-family: 'Orbitron', sans-serif;
+                        color: ${isPast || isCurrent ? '#fff' : 'rgba(239,68,68,0.5)'};
+                        flex-shrink: 0; cursor: pointer; position: relative; z-index: 2;
+                        box-shadow: ${isCurrent ? '0 0 0 3px rgba(239,68,68,0.25), 0 0 18px rgba(220,38,38,0.5)' : isPast ? '0 0 10px rgba(220,38,38,0.2)' : 'none'};
+                        transform: ${isCurrent ? 'scale(1.15)' : 'scale(1)'};
+                        transition: transform 0.15s, box-shadow 0.15s;
+                    `;
+                    tierEl.innerHTML = `<span style="font-size:0.55rem;opacity:0.7;letter-spacing:0.05em;">TIER</span><span>${i}</span>`;
+                    if (isCurrent) {
+                        const ring = document.createElement('div');
+                        ring.style.cssText = `position:absolute;inset:-6px;border-radius:16px;border:2px solid rgba(239,68,68,0.4);animation:bpPulseRing 1.6s ease-in-out infinite;pointer-events:none;`;
+                        tierEl.appendChild(ring);
+                    }
+                } else {
+                    // Small dot node
+                    const sz = isCurrent ? '18px' : '12px';
+                    tierEl.style.cssText = `
+                        width:${sz}; height:${sz};
+                        border-radius: 50%;
+                        background: ${isPast ? '#dc2626' : isCurrent ? '#ff4444' : 'rgba(255,255,255,0.08)'};
+                        border: 1.5px solid ${isPast || isCurrent ? '#ef4444' : 'rgba(255,255,255,0.12)'};
+                        flex-shrink:0; cursor:pointer; position:relative; z-index:2;
+                        box-shadow: ${isCurrent ? '0 0 12px rgba(239,68,68,0.7)' : isPast ? '0 0 4px rgba(220,38,38,0.3)' : 'none'};
+                        transform: ${isCurrent ? 'scale(1.2)' : 'scale(1)'};
+                        transition: transform 0.15s;
+                    `;
+                }
+
+                // Connector
+                if (i < TOTAL_TIERS) {
+                    const line = document.createElement('div');
+                    line.style.cssText = `
+                        width: ${isMilestone ? '10px' : '7px'};
+                        height: ${isPast ? '3px' : '2px'};
+                        background: ${isPast ? 'linear-gradient(90deg,#dc2626,#ef4444)' : 'rgba(255,255,255,0.08)'};
+                        flex-shrink:0; border-radius:2px; align-self:center;
+                        box-shadow: ${isPast ? '0 0 4px rgba(220,38,38,0.3)' : 'none'};
+                        transition: background 0.3s;
+                    `;
+                    tierTrack.appendChild(tierEl);
+                    tierTrack.appendChild(line);
+                } else {
+                    tierTrack.appendChild(tierEl);
+                }
+
+                tierEl.onclick = () => showTierRewards(i);
+            }
+        }
+
+        // Get tier rewards
+        // Small tiers: exactly ONE reward, cycling: xp → money → pack → xp → money → pack…
+        // Big tiers (every 10th): ALL THREE rewards
+        function getTierRewards(tier) {
+            const isMilestone = tier % 10 === 0;
+            
+            if (isMilestone) {
+                const milestoneIndex = tier / 10;
+                const packs = ['Bronze','Silver','Gold','Platinum','Diamond','Mythic','Exotic','Divine','Divine','Divine'];
+                const coinsBase = 600;
+                const coinsIncrement = (5000 - 600) / 9;
+                const xpBase = 120;
+                const xpIncrement = (400 - 120) / 9;
+                
+                return {
+                    type: 'milestone',
+                    coins: Math.round(coinsBase + (milestoneIndex - 1) * coinsIncrement),
+                    xp: Math.round(xpBase + (milestoneIndex - 1) * xpIncrement),
+                    pack: packs[milestoneIndex - 1],
+                    credits: tier === 100 ? 100 : (tier % 20 === 0 ? 50 : 0)
+                };
+            } else {
+                // Determine reward bracket
+                let coins, xp, pack;
+                if (tier <= 30) {
+                    coins = 500; xp = 100; pack = 'Bronze';
+                } else if (tier <= 60) {
+                    coins = 2000; xp = 200; pack = 'Silver';
+                } else if (tier <= 90) {
+                    coins = 3500; xp = 300; pack = 'Diamond';
+                } else {
+                    coins = 4500; xp = 380; pack = 'Exotic';
+                }
+
+                // Cycle pattern for small tiers (skip multiples of 10):
+                // Within each group of 9 small tiers between milestones,
+                // position within group = (tier-1) % 10  (0..8, skipping position 9 which is milestone)
+                // reward type cycles: 0,3,6 → xp | 1,4,7 → money | 2,5,8 → pack
+                const posInGroup = (tier - 1) % 10; // 0–8 for small tiers
+                const cycle = posInGroup % 3; // 0=xp, 1=money, 2=pack
+
+                if (cycle === 0) {
+                    return { type: 'normal', rewardKind: 'xp', xp };
+                } else if (cycle === 1) {
+                    return { type: 'normal', rewardKind: 'money', coins };
+                } else {
+                    return { type: 'normal', rewardKind: 'pack', pack };
+                }
+            }
+        }
+
+        // Show tier rewards
+        function showTierRewards(tier) {
+            const userData = window._realm?.getUserData() || {};
+            const bp = userData.battlePass || { owned: false };
+            const rewards = getTierRewards(tier);
+
+            const sheet = document.getElementById('bp-rewards-sheet');
+            const contentEl = document.getElementById('bp-sheet-content');
+            const sheetTier = document.getElementById('bp-sheet-tier');
+
+            if (sheetTier) sheetTier.textContent = tier;
+            if (!sheet || !contentEl) return;
+
+            const isMilestone = tier % 10 === 0;
+
+            if (!bp.owned && tier > 1) {
+                contentEl.innerHTML = `
+                    <div class="bp-lock-content">
+                        <div class="bp-lock-icon">🔒</div>
+                        <div class="bp-lock-title">PASS NOT OWNED</div>
+                        <p class="bp-lock-desc">Purchase the Battle Pass to unlock Tier ${tier} and all future rewards.</p>
+                        <button onclick="buyBattlePass(); closeBattlePassSheet();" class="bp-lock-buy-btn">BUY PASS — 500 ⬡</button>
+                    </div>
+                `;
+            } else {
+                const rewardRow = (iconClass, emoji, name, desc) =>
+                    `<div class="bp-reward-row${isMilestone ? ' milestone' : ''}">
+                        <div class="bp-reward-icon ${iconClass}">${emoji}</div>
+                        <div>
+                            <div class="bp-reward-name">${name}</div>
+                            <div class="bp-reward-desc">${desc}</div>
+                        </div>
+                    </div>`;
+
+                let rows = '';
+                if (rewards.type === 'milestone') {
+                    rows += rewardRow('money', '💰', `${rewards.coins}€`, 'Instant coin payout');
+                    rows += rewardRow('xp',    '⚡', `${rewards.xp} XP`, 'Level progression boost');
+                    rows += rewardRow('pack',  '📦', `${rewards.pack} Pack`, 'Premium card pack');
+                    if (rewards.credits > 0)
+                        rows += rewardRow('credits', '⬡', `${rewards.credits} Credits`, 'Spend on future passes');
+                } else {
+                    if (rewards.rewardKind === 'xp')
+                        rows = rewardRow('xp', '⚡', `${rewards.xp} XP`, 'Level progression boost');
+                    else if (rewards.rewardKind === 'money')
+                        rows = rewardRow('money', '💰', `${rewards.coins}€`, 'Instant coin payout');
+                    else
+                        rows = rewardRow('pack', '📦', `${rewards.pack} Pack`, 'Card pack reward');
+                }
+                contentEl.innerHTML = rows;
+            }
+
+            sheet.style.bottom = '0';
+            const backdrop = document.getElementById('bp-sheet-backdrop');
+            if (backdrop) backdrop.classList.add('active');
+        }
+
+        // Global functions for HTML access
+        // ── BP ADMIN PANEL ─────────────────────────────────────────────
+        const BP_ADMIN_CODE = 'fool';
+
+        window.openBPAdmin = function() {
+            // Reset to lock screen each time
+            document.getElementById('bp-admin-lock').style.display = 'block';
+            document.getElementById('bp-admin-panel').style.display = 'none';
+            document.getElementById('bp-admin-code-input').value = '';
+            document.getElementById('bp-admin-code-error').style.display = 'none';
+            document.getElementById('bp-admin-modal').style.display = 'block';
+            document.getElementById('bp-admin-backdrop').style.display = 'block';
+            setTimeout(() => document.getElementById('bp-admin-code-input').focus(), 100);
+        };
+
+        window.closeBPAdmin = function() {
+            document.getElementById('bp-admin-modal').style.display = 'none';
+            document.getElementById('bp-admin-backdrop').style.display = 'none';
+        };
+
+        window.checkBPAdminCode = function() {
+            const input = document.getElementById('bp-admin-code-input').value;
+            if (input === BP_ADMIN_CODE) {
+                document.getElementById('bp-admin-lock').style.display = 'none';
+                document.getElementById('bp-admin-panel').style.display = 'block';
+                // Show current season end
+                const db = window._realm?.getDb();
+                const ref = window._realm?.getRef();
+                const get = window._realm?.getGet();
+                if (db && ref && get) {
+                    get(ref(db, 'system/season')).then(snap => {
+                        const d = snap.val();
+                        const endEl = document.getElementById('admin-current-end');
+                        if (d?.seasonEndTime) {
+                            endEl.textContent = new Date(d.seasonEndTime).toLocaleString();
+                            // Pre-fill the datetime input
+                            const dt = new Date(d.seasonEndTime);
+                            const local = new Date(dt.getTime() - dt.getTimezoneOffset() * 60000).toISOString().slice(0,16);
+                            document.getElementById('admin-season-end-input').value = local;
+                        } else {
+                            endEl.textContent = 'Not set';
+                        }
+                    }).catch(() => {});
+                }
+            } else {
+                document.getElementById('bp-admin-code-error').style.display = 'block';
+                document.getElementById('bp-admin-code-input').value = '';
+                document.getElementById('bp-admin-code-input').focus();
+            }
+        };
+
+        window.adminSendXPBToUser = async function() {
+            const db = window._realm?.getDb();
+            const ref = window._realm?.getRef();
+            const get = window._realm?.getGet();
+            const update = window._realm?.getUpdate();
+            const statusEl = document.getElementById('admin-user-status');
+
+            const targetInput = document.getElementById('admin-target-uid').value.trim();
+            const amount = parseInt(document.getElementById('admin-xpb-amount').value) || 0;
+
+            if (!targetInput) { statusEl.textContent = '⚠ Enter a UID or username.'; statusEl.style.color = '#f59e0b'; return; }
+            if (amount <= 0) { statusEl.textContent = '⚠ Enter a valid XPB amount.'; statusEl.style.color = '#f59e0b'; return; }
+
+            statusEl.textContent = 'Searching...'; statusEl.style.color = '#9ca3af';
+
+            try {
+                // Try direct UID first
+                let targetUid = targetInput;
+                let snap = await get(ref(db, `users/${targetInput}`));
+
+                // If not found by UID, search by username
+                if (!snap.exists()) {
+                    const allSnap = await get(ref(db, 'users'));
+                    const allUsers = allSnap.val() || {};
+                    const match = Object.entries(allUsers).find(([uid, u]) =>
+                        u.username?.toLowerCase() === targetInput.toLowerCase()
+                    );
+                    if (!match) { statusEl.textContent = '✗ Player not found.'; statusEl.style.color = '#ef4444'; return; }
+                    targetUid = match[0];
+                    snap = await get(ref(db, `users/${targetUid}`));
+                }
+
+                const userData = snap.val();
+                const currentXPB = userData?.battlePass?.xpb || 0;
+                const newXPB = currentXPB + amount;
+
+                await update(ref(db, `users/${targetUid}/battlePass`), { xpb: newXPB });
+                statusEl.textContent = `✓ Sent ${amount} XPB to ${userData?.username || targetUid} (${currentXPB} → ${newXPB})`;
+                statusEl.style.color = '#10b981';
+                document.getElementById('admin-xpb-amount').value = '';
+            } catch(err) {
+                statusEl.textContent = `✗ Error: ${err.message}`;
+                statusEl.style.color = '#ef4444';
+            }
+        };
+
+        window.adminSendXPBToAll = async function() {
+            const db = window._realm?.getDb();
+            const ref = window._realm?.getRef();
+            const get = window._realm?.getGet();
+            const update = window._realm?.getUpdate();
+            const statusEl = document.getElementById('admin-all-status');
+
+            const amount = parseInt(document.getElementById('admin-xpb-all-amount').value) || 0;
+            if (amount <= 0) { statusEl.textContent = '⚠ Enter a valid XPB amount.'; statusEl.style.color = '#f59e0b'; return; }
+
+            statusEl.textContent = 'Fetching all players...'; statusEl.style.color = '#9ca3af';
+
+            try {
+                const snap = await get(ref(db, 'users'));
+                const allUsers = snap.val() || {};
+                const uids = Object.keys(allUsers);
+
+                statusEl.textContent = `Updating ${uids.length} players...`;
+
+                const batch = {};
+                for (const uid of uids) {
+                    const currentXPB = allUsers[uid]?.battlePass?.xpb || 0;
+                    batch[`users/${uid}/battlePass/xpb`] = currentXPB + amount;
+                }
+                await update(ref(db, '/'), batch);
+
+                statusEl.textContent = `✓ Sent ${amount} XPB to ${uids.length} players!`;
+                statusEl.style.color = '#10b981';
+                document.getElementById('admin-xpb-all-amount').value = '';
+            } catch(err) {
+                statusEl.textContent = `✗ Error: ${err.message}`;
+                statusEl.style.color = '#ef4444';
+            }
+        };
+
+        window.adminSetSeasonEnd = async function() {
+            const db = window._realm?.getDb();
+            const ref = window._realm?.getRef();
+            const update = window._realm?.getUpdate();
+            const statusEl = document.getElementById('admin-season-status');
+
+            const inputVal = document.getElementById('admin-season-end-input').value;
+            if (!inputVal) { statusEl.textContent = '⚠ Pick a date and time.'; statusEl.style.color = '#f59e0b'; return; }
+
+            const newEndTime = new Date(inputVal).getTime();
+            if (isNaN(newEndTime)) { statusEl.textContent = '⚠ Invalid date.'; statusEl.style.color = '#f59e0b'; return; }
+
+            statusEl.textContent = 'Saving...'; statusEl.style.color = '#9ca3af';
+
+            try {
+                await update(ref(db, 'system/season'), {
+                    seasonEndTime: newEndTime,
+                    overriddenAt: Date.now()
+                });
+                // Update live countdown immediately
+                if (typeof _bpSeasonEndMs !== 'undefined') _bpSeasonEndMs = newEndTime;
+                document.getElementById('admin-current-end').textContent = new Date(newEndTime).toLocaleString();
+                statusEl.textContent = '✓ Season end date updated!';
+                statusEl.style.color = '#10b981';
+            } catch(err) {
+                statusEl.textContent = `✗ Error: ${err.message}`;
+                statusEl.style.color = '#ef4444';
+            }
+        };
+        // ───────────────────────────────────────────────────────────────
+
+        window.showXPBInfoModal = function() {
+            document.getElementById('xpb-info-modal').style.display = 'block';
+            document.getElementById('xpb-info-backdrop').style.display = 'block';
+        };
+        window.closeXPBInfoModal = function() {
+            document.getElementById('xpb-info-modal').style.display = 'none';
+            document.getElementById('xpb-info-backdrop').style.display = 'none';
+        };
+
+        window.closeBattlePassSheet = function() {
+            const sheet = document.getElementById('bp-rewards-sheet');
+            if (sheet) sheet.style.bottom = '-100%';
+            const backdrop = document.getElementById('bp-sheet-backdrop');
+            if (backdrop) backdrop.classList.remove('active');
+        };
+
+        window.buyBattlePass = async function() {
+            console.log('Buy battle pass clicked');
+            
+            const db = window._realm?.getDb();
+            const ref = window._realm?.getRef();
+            const update = window._realm?.getUpdate();
+            const activeUser = window._realm?.getActiveUser();
+
+            if (!db || !ref || !update || !activeUser) {
+                console.error('Firebase not ready or user not logged in');
+                showToast('System not ready', 'error');
+                return;
+            }
+
+            try {
+                const userData = window._realm?.getUserData() || {};
+                const credits = userData.credits || 0;
+
+                if (userData.battlePass?.owned) {
+                    showToast('Battle Pass already owned!', 'success');
+                    return;
+                }
+
+                if (credits < 500) {
+                    showToast('Insufficient credits! Need 500 ⬡', 'error');
+                    return;
+                }
+
+                console.log('Purchasing battle pass...');
+
+                // Compute current season index (must match the season reset logic)
+                const _epoch = new Date('2026-06-04T00:00:00Z').getTime();
+                const _daysSince = Math.floor((Date.now() - _epoch) / 86400000);
+                const _pos = ((_daysSince % 70) + 70) % 70;
+                const _seasonIdx = Math.floor(_pos / 14);
+
+                await update(ref(db, `users/${activeUser.uid}`), {
+                    credits: credits - 500,
+                    'battlePass/owned': true,
+                    'battlePass/xpb': userData.battlePass?.xpb ?? 0,
+                    'battlePass/tier': userData.battlePass?.tier ?? 1,
+                    'battlePass/currentSeason': _seasonIdx,
+                    'battlePass/lastLoginDay': userData.battlePass?.lastLoginDay ?? null,
+                });
+
+                console.log('Battle pass purchased successfully');
+                showToast('Battle Pass purchased! 🎉', 'success');
+                
+                // Update local record immediately so UI is snappy
+                const liveData = window._realm?.getUserData();
+                if (liveData) {
+                    liveData.credits = credits - 500;
+                    liveData.battlePass = { owned: true, xpb: 0, tier: 1 };
+                }
+                
+                // Wait a moment for Firebase to update
+                setTimeout(() => refreshBattlePassUI(), 500);
+            } catch (error) {
+                console.error('Error purchasing battle pass:', error);
+                showToast('Failed to purchase battle pass', 'error');
+            }
+        };
+
+        window.claimBattlePassTier = async function() {
+            console.log('Claim tier button clicked');
+            
+            const db = window._realm?.getDb();
+            const ref = window._realm?.getRef();
+            const update = window._realm?.getUpdate();
+            const activeUser = window._realm?.getActiveUser();
+
+            if (!db || !ref || !update || !activeUser) {
+                console.error('Firebase not ready or user not logged in');
+                showToast('System not ready', 'error');
+                return;
+            }
+
+            try {
+                const userData = window._realm?.getUserData() || {};
+                const bp = userData.battlePass || { owned: false, xpb: 0, tier: 1 };
+                
+                if (!bp.owned) {
+                    showToast('Battle Pass not owned!', 'error');
+                    return;
+                }
+
+                const currentTier = bp.tier || 1;
+                const currentXPB = bp.xpb || 0;
+
+                if (currentXPB < XPB_PER_TIER) {
+                    showToast('Not enough XPB to claim tier!', 'error');
+                    return;
+                }
+
+                if (currentTier >= TOTAL_TIERS) {
+                    showToast('Maximum tier reached!', 'success');
+                    return;
+                }
+
+                console.log(`Claiming tier ${currentTier + 1}...`);
+
+                const nextTier = currentTier + 1;
+                const isMilestone = nextTier % 10 === 0;
+                let rewardText = '';
+                let updates = {};
+
+                const currentMoney = userData.money || 0;
+                const currentXP = userData.xp || 0;
+                const currentCredits = userData.credits || 0;
+                const currentPacks = userData.packs || {};
+
+                if (isMilestone) {
+                    const rewards = getTierRewards(nextTier);
+                    updates = {
+                        money: currentMoney + rewards.coins,
+                        xp: currentXP + rewards.xp,
+                        credits: currentCredits + (rewards.credits || 0),
+                        'battlePass/xpb': currentXPB - XPB_PER_TIER,
+                        'battlePass/tier': nextTier
+                    };
+
+                    rewardText = `${rewards.coins}€, ${rewards.xp} XP, ${rewards.pack} pack`;
+                    if (rewards.credits > 0) {
+                        rewardText += `, ${rewards.credits} credits`;
+                    }
+                    // Open pack for free after applying updates
+                    const milestonePackKey = rewards.pack.toLowerCase();
+                    const milestonePackPrice = (window.PACK_METADATA && window.PACK_METADATA[milestonePackKey]?.price) || 999999;
+                    await update(ref(db, `users/${activeUser.uid}`), updates);
+                    const origMoney = userData.money || 0;
+                    userData.money = origMoney + milestonePackPrice + 1;
+                    await purchasePackAsset(milestonePackKey);
+                    userData.money = origMoney;
+                    showToast(`Tier ${nextTier} claimed! 🎁 ${rewardText}`, 'success');
+                    setTimeout(() => refreshBattlePassUI(), 500);
+                    return;
+                } else {
+                    const rewards = getTierRewards(nextTier);
+                    
+                    if (rewards.rewardKind === 'money') {
+                        updates = {
+                            money: currentMoney + rewards.coins,
+                            'battlePass/xpb': currentXPB - XPB_PER_TIER,
+                            'battlePass/tier': nextTier
+                        };
+                        rewardText = `${rewards.coins}€`;
+                    } else if (rewards.rewardKind === 'xp') {
+                        updates = {
+                            xp: currentXP + rewards.xp,
+                            'battlePass/xpb': currentXPB - XPB_PER_TIER,
+                            'battlePass/tier': nextTier
+                        };
+                        rewardText = `${rewards.xp} XP`;
+                    } else {
+                        // Pack reward: open the pack for free
+                        const packKey = rewards.pack.toLowerCase();
+                        const packPrice = (window.PACK_METADATA && window.PACK_METADATA[packKey]?.price) || 999999;
+                        const originalMoney = userData.money || 0;
+                        userData.money = originalMoney + packPrice + 1;
+                        updates = {
+                            'battlePass/xpb': currentXPB - XPB_PER_TIER,
+                            'battlePass/tier': nextTier
+                        };
+                        await update(ref(db, `users/${activeUser.uid}`), updates);
+                        await purchasePackAsset(packKey);
+                        userData.money = originalMoney;
+                        showToast(`Tier ${nextTier} claimed! 🎁 ${rewards.pack} Pack opened!`, 'success');
+                        setTimeout(() => refreshBattlePassUI(), 500);
+                        return;
+                    }
+                }
+
+                console.log('Applying updates:', updates);
+                await update(ref(db, `users/${activeUser.uid}`), updates);
+                console.log('Tier claimed successfully');
+                
+                showToast(`Tier ${nextTier} claimed! 🎁 ${rewardText}`, 'success');
+                
+                // Wait a moment for Firebase to update
+                setTimeout(() => refreshBattlePassUI(), 500);
+            } catch (error) {
+                console.error('Error claiming tier:', error);
+                showToast('Failed to claim tier', 'error');
+            }
+        };
+
+        window.awardXPB = async function(amount, source) {
+            console.log(`Awarding ${amount} XPB from ${source}`);
+            
+            const db = window._realm?.getDb();
+            const ref = window._realm?.getRef();
+            const update = window._realm?.getUpdate();
+            const activeUser = window._realm?.getActiveUser();
+
+            if (!db || !ref || !update || !activeUser) {
+                console.error('Firebase not ready or user not logged in');
+                return;
+            }
+
+            try {
+                const userData = window._realm?.getUserData() || {};
+                const bp = userData.battlePass || { owned: false, xpb: 0 };
+
+                if (!bp.owned) {
+                    console.log('Battle pass not owned, skipping XPB award');
+                    return;
+                }
+
+                const newXPB = (bp.xpb || 0) + amount;
+                console.log(`Updating XPB from ${bp.xpb} to ${newXPB}`);
+
+                await update(ref(db, `users/${activeUser.uid}/battlePass`), { xpb: newXPB });
+                showToast(`+${amount} XPB from ${source}`, 'success');
+                
+                // Wait a moment for Firebase to update
+                setTimeout(() => refreshBattlePassUI(), 500);
+            } catch (error) {
+                console.error('Error awarding XPB:', error);
+            }
+        };
+
+        window.checkDailyLoginXPB = async function() {
+            const db = window._realm?.getDb();
+            const ref = window._realm?.getRef();
+            const update = window._realm?.getUpdate();
+            const activeUser = window._realm?.getActiveUser();
+
+            if (!db || !ref || !update || !activeUser) return;
+
+            try {
+                const userData = window._realm?.getUserData() || {};
+                const bp = userData.battlePass || { owned: false, lastLoginDay: null };
+
+                if (!bp.owned) return;
+
+                const today = new Date().toDateString();
+                
+                if (bp.lastLoginDay !== today) {
+                    await awardXPB(300, 'Daily Login');
+                    await update(ref(db, `users/${activeUser.uid}/battlePass`), { lastLoginDay: today });
+                }
+            } catch (error) {
+                console.error('Error checking daily login XPB:', error);
+            }
+        };
+
+        // Initialize battle pass system when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initBattlePassSystem);
+        } else {
+            initBattlePassSystem();
+        }
+    </script>
 
     <!-- COMING SOON SCREEN (hidden automatically on/after May 27 2026) -->
     <div id="coming-soon-screen">
@@ -4028,22 +5666,41 @@
     <button type="button" id="btn-admin-lock" title="Admin access">🔒 ADMIN</button>
 
     <!-- BAN SCREEN -->
-    <div id="ban-screen" style="display:none; position:fixed; inset:0; z-index:999999; background:#060000; align-items:center; justify-content:center; padding:24px; flex-direction:column; text-align:center;">
+    <div id="ban-screen"
+        style="display:none; position:fixed; inset:0; z-index:999999; background:#060000; align-items:center; justify-content:center; padding:24px; flex-direction:column; text-align:center;">
         <div style="max-width:440px; width:100%;">
             <div style="font-size:5rem; margin-bottom:16px; animation:banPulse 1.4s ease-in-out infinite;">🚫</div>
-            <div style="font-family:'Orbitron',sans-serif; font-size:2.4rem; font-weight:900; color:#ff1a1a; letter-spacing:5px; margin-bottom:10px; text-shadow:0 0 40px rgba(255,26,26,0.9), 0 0 80px rgba(255,26,26,0.4);">BANNED</div>
-            <div style="width:100%; height:3px; background:linear-gradient(90deg, transparent, #ff1a1a, transparent); margin-bottom:28px;"></div>
-            <div style="background:rgba(255,0,0,0.08); border:2px solid rgba(255,26,26,0.6); border-radius:16px; padding:28px 24px; margin-bottom:24px; box-shadow:0 0 40px rgba(255,0,0,0.2), inset 0 0 30px rgba(255,0,0,0.05);">
-                <div style="font-size:1.2rem; font-weight:900; color:#ff4444; margin-bottom:14px; letter-spacing:1px;">YOUR ACCOUNT HAS BEEN SUSPENDED</div>
-                <div style="font-size:0.9rem; color:#cc3333; line-height:1.7; font-weight:600;">An administrator has banned you from Realm.<br>You cannot access the game or your assets<br>until your ban is lifted.</div>
+            <div
+                style="font-family:'Orbitron',sans-serif; font-size:2.4rem; font-weight:900; color:#ff1a1a; letter-spacing:5px; margin-bottom:10px; text-shadow:0 0 40px rgba(255,26,26,0.9), 0 0 80px rgba(255,26,26,0.4);">
+                BANNED</div>
+            <div
+                style="width:100%; height:3px; background:linear-gradient(90deg, transparent, #ff1a1a, transparent); margin-bottom:28px;">
             </div>
-            <div style="font-size:0.72rem; color:#551111; font-weight:700; letter-spacing:0.5px;">CONTACT SUPPORT IF YOU BELIEVE THIS IS A MISTAKE</div>
+            <div
+                style="background:rgba(255,0,0,0.08); border:2px solid rgba(255,26,26,0.6); border-radius:16px; padding:28px 24px; margin-bottom:24px; box-shadow:0 0 40px rgba(255,0,0,0.2), inset 0 0 30px rgba(255,0,0,0.05);">
+                <div style="font-size:1.2rem; font-weight:900; color:#ff4444; margin-bottom:14px; letter-spacing:1px;">
+                    YOUR ACCOUNT HAS BEEN SUSPENDED</div>
+                <div style="font-size:0.9rem; color:#cc3333; line-height:1.7; font-weight:600;">An administrator has
+                    banned you from Realm.<br>You cannot access the game or your assets<br>until your ban is lifted.
+                </div>
+            </div>
+            <div style="font-size:0.72rem; color:#551111; font-weight:700; letter-spacing:0.5px;">CONTACT SUPPORT IF YOU
+                BELIEVE THIS IS A MISTAKE</div>
         </div>
     </div>
     <style>
         @keyframes banPulse {
-            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 12px rgba(255,26,26,0.5)); }
-            50% { transform: scale(1.1); filter: drop-shadow(0 0 35px rgba(255,26,26,1)); }
+
+            0%,
+            100% {
+                transform: scale(1);
+                filter: drop-shadow(0 0 12px rgba(255, 26, 26, 0.5));
+            }
+
+            50% {
+                transform: scale(1.1);
+                filter: drop-shadow(0 0 35px rgba(255, 26, 26, 1));
+            }
         }
     </style>
 
@@ -4100,8 +5757,11 @@
 
             <div class="rank-row" id="hud-rank-row">
                 <span id="hud-clash-rank-badge"></span>
-                <span id="hud-rank-reward-timer" style="font-size:0.68rem;font-weight:700;color:#6b7280;margin-left:4px;"></span>
-                <button id="hud-rank-claim-btn" onclick="claimClashRankReward()" style="display:none;margin-left:4px;padding:3px 10px;border-radius:999px;border:none;background:linear-gradient(135deg,#10b981,#059669);color:#fff;font-size:0.72rem;font-weight:900;letter-spacing:0.04em;cursor:pointer;box-shadow:0 0 12px rgba(16,185,129,0.55);animation:claimGlow 1.5s ease-in-out infinite;">🎁 CLAIM REWARD</button>
+                <span id="hud-rank-reward-timer"
+                    style="font-size:0.68rem;font-weight:700;color:#6b7280;margin-left:4px;"></span>
+                <button id="hud-rank-claim-btn" onclick="claimClashRankReward()"
+                    style="display:none;margin-left:4px;padding:3px 10px;border-radius:999px;border:none;background:linear-gradient(135deg,#10b981,#059669);color:#fff;font-size:0.72rem;font-weight:900;letter-spacing:0.04em;cursor:pointer;box-shadow:0 0 12px rgba(16,185,129,0.55);animation:claimGlow 1.5s ease-in-out infinite;">🎁
+                    CLAIM REWARD</button>
             </div>
             <div class="xp-row">
                 <div class="level-tag" id="hud-level">LV 1</div>
@@ -4148,17 +5808,19 @@
                     </div>
                 </div>
                 <div class="grid-container" id="container-inventory"></div>
-                
+
                 <div class="flex-between mb-4 mt-6">
                     <div>
                         <h2 class="section-title">⭐ My Collection</h2>
                         <p class="section-desc">Cards saved to collection cannot be sold</p>
                     </div>
                 </div>
-                <div class="collection-sticker" style="background:linear-gradient(135deg,#fbbf24,#f59e0b); padding:12px 16px; border-radius:8px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; border:2px solid #fff;">
+                <div class="collection-sticker"
+                    style="background:linear-gradient(135deg,#fbbf24,#f59e0b); padding:12px 16px; border-radius:8px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; border:2px solid #fff;">
                     <div style="display:flex; gap:16px; align-items:center;">
                         <span style="font-weight:900; color:#111827; font-size:0.9rem;">🏷️ COLLECTION INFO</span>
-                        <span style="font-weight:700; color:#111827; font-size:0.85rem;">Base Price & Pack Chance displayed on cards</span>
+                        <span style="font-weight:700; color:#111827; font-size:0.85rem;">Base Price & Pack Chance
+                            displayed on cards</span>
                     </div>
                 </div>
                 <div class="grid-container" id="container-collection"></div>
@@ -4173,6 +5835,192 @@
                 </div>
                 <div class="panel-glass">
                     <div id="container-online-players"></div>
+                </div>
+            </section>
+
+            <section id="view-battlepass" class="view-panel" style="padding: 0; margin: -16px; margin-bottom: 0;">
+
+                <!-- HERO BANNER -->
+                <div class="bp-hero">
+                    <div class="bp-hero-bg"></div>
+                    <div class="bp-hero-scanlines"></div>
+                    <div class="bp-hero-content">
+                        <div class="bp-hero-top">
+                            <div class="bp-hero-left">
+                                <div class="bp-season-label" id="bp-season-info">SEASON 1</div>
+                                <h1 class="bp-hero-title">BATTLE<br>PASS</h1>
+                                <div class="bp-hero-subtitle">100 TIERS OF REWARDS</div>
+                                <div id="bp-season-countdown" style="font-size:0.72rem;color:#ff6666;font-family:'Orbitron',sans-serif;margin-top:6px;letter-spacing:1px;">-- : -- : --</div>
+                            </div>
+                            <div class="bp-hero-right">
+                                <div class="bp-credits-pill">
+                                    <span class="bp-credits-icon">&#11042;</span>
+                                    <div>
+                                        <div class="bp-credits-label">CREDITS</div>
+                                        <div class="bp-credits-value" id="bp-credits">0 &#11042;</div>
+                                    </div>
+                                </div>
+                                <button id="bp-buy-btn" onclick="buyBattlePass()" class="bp-buy-btn">
+                                    <span class="bp-buy-shine"></span>
+                                    <span class="bp-buy-text">BUY PASS</span>
+                                    <span class="bp-buy-price">500 &#11042;</span>
+                                </button>
+                                <button id="bp-refresh-btn" onclick="refreshBattlePassSection()" class="bp-refresh-btn" title="Refresh">&#8635;</button>
+                                <button onclick="openBPAdmin()" style="background:rgba(220,38,38,0.15);border:1px solid rgba(220,38,38,0.35);color:#ff4444;border-radius:8px;width:32px;height:32px;font-size:0.85rem;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;" title="Admin">&#9881;</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bp-hero-orb bp-orb-1"></div>
+                    <div class="bp-hero-orb bp-orb-2"></div>
+                    <div class="bp-hero-orb bp-orb-3"></div>
+                </div>
+
+                <!-- PROGRESS CARD -->
+                <div style="padding: 16px 16px 0;">
+                    <div class="bp-progress-card">
+                        <div class="bp-progress-header">
+                            <div class="bp-tier-badge">
+                                <span class="bp-tier-badge-label">TIER</span>
+                                <span class="bp-tier-badge-num" id="bp-current-tier">1</span>
+                            </div>
+                            <div class="bp-xpb-info">
+                                <div style="display:flex;align-items:center;gap:6px;">
+                                    <span class="bp-xpb-label">XPB PROGRESS</span>
+                                    <button onclick="showXPBInfoModal()" style="background:rgba(220,38,38,0.18);border:1px solid rgba(220,38,38,0.4);color:#ff6666;border-radius:50%;width:18px;height:18px;font-size:0.65rem;font-weight:900;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;line-height:1;flex-shrink:0;" title="How to earn XPB">?</button>
+                                </div>
+                                <span class="bp-xpb-nums"><span id="bp-xpb-current">0</span><span style="color:#4b5563;"> / <span id="bp-xpb-needed">2000</span></span></span>
+                            </div>
+                        </div>
+                        <div class="bp-progress-track">
+                            <div id="bp-xpb-progress" class="bp-progress-fill"></div>
+                        </div>
+                        <button id="bp-claim-tier-btn" onclick="claimBattlePassTier()" class="bp-claim-btn" style="display:none;">
+                            <span>&#127873;</span>
+                            <span>CLAIM TIER REWARD</span>
+                            <span class="bp-claim-arrow">&#8594;</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- TIER TRACK -->
+                <div class="bp-track-wrapper">
+                    <div class="bp-track-header">
+                        <span class="bp-track-label">TIER TRACK</span>
+                        <span class="bp-track-hint">Tap a tier to see rewards</span>
+                    </div>
+                    <div id="bp-tier-track" class="bp-tier-track">
+                        <!-- Tiers generated by JS -->
+                    </div>
+                    <div class="bp-track-fade-l"></div>
+                    <div class="bp-track-fade-r"></div>
+                </div>
+
+                <!-- REWARDS SHEET -->
+                <!-- XPB INFO MODAL -->
+                <!-- BP ADMIN PANEL -->
+                <div id="bp-admin-backdrop" onclick="closeBPAdmin()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:3000;backdrop-filter:blur(6px);"></div>
+                <div id="bp-admin-modal" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:3001;width:min(380px,94vw);background:#0a0d14;border:1px solid rgba(220,38,38,0.5);border-radius:18px;padding:24px 20px;box-shadow:0 0 60px rgba(220,38,38,0.25);max-height:90vh;overflow-y:auto;">
+                    <div id="bp-admin-lock" style="">
+                        <div style="font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:700;color:#ff4444;text-align:center;margin-bottom:6px;letter-spacing:2px;">&#128274; ADMIN ACCESS</div>
+                        <div style="color:#6b7280;font-size:0.78rem;text-align:center;margin-bottom:18px;">Enter admin code to continue</div>
+                        <input id="bp-admin-code-input" type="password" placeholder="Enter code..." style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(220,38,38,0.3);border-radius:10px;padding:12px 14px;color:white;font-size:1rem;outline:none;text-align:center;letter-spacing:4px;" onkeydown="if(event.key==='Enter')checkBPAdminCode()">
+                        <div id="bp-admin-code-error" style="color:#ef4444;font-size:0.75rem;text-align:center;margin-top:8px;display:none;">Wrong code. Try again.</div>
+                        <button onclick="checkBPAdminCode()" style="width:100%;margin-top:14px;background:linear-gradient(135deg,#dc2626,#991b1b);border:none;color:white;border-radius:10px;padding:12px;font-weight:700;font-size:0.9rem;cursor:pointer;font-family:'Orbitron',sans-serif;letter-spacing:1px;">UNLOCK</button>
+                        <button onclick="closeBPAdmin()" style="width:100%;margin-top:8px;background:transparent;border:1px solid rgba(255,255,255,0.1);color:#6b7280;border-radius:10px;padding:10px;font-weight:600;font-size:0.85rem;cursor:pointer;">CANCEL</button>
+                    </div>
+                    <div id="bp-admin-panel" style="display:none;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                            <div style="font-family:'Orbitron',sans-serif;font-size:0.95rem;font-weight:700;color:#ff4444;letter-spacing:1px;">&#9881; BP ADMIN</div>
+                            <button onclick="closeBPAdmin()" style="background:rgba(255,255,255,0.08);border:none;color:#9ca3af;border-radius:50%;width:28px;height:28px;font-size:1.1rem;cursor:pointer;">&#10005;</button>
+                        </div>
+
+                        <!-- SEND XPB TO SPECIFIC USER -->
+                        <div style="background:rgba(220,38,38,0.07);border:1px solid rgba(220,38,38,0.2);border-radius:12px;padding:16px;margin-bottom:14px;">
+                            <div style="font-weight:700;font-size:0.85rem;color:#f3f4f6;margin-bottom:12px;">&#127987; Send XPB to Player</div>
+                            <input id="admin-target-uid" type="text" placeholder="Player UID or username..." style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:10px 12px;color:white;font-size:0.85rem;outline:none;margin-bottom:8px;">
+                            <input id="admin-xpb-amount" type="number" placeholder="XPB amount..." min="1" style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:10px 12px;color:white;font-size:0.85rem;outline:none;margin-bottom:10px;">
+                            <button onclick="adminSendXPBToUser()" style="width:100%;background:linear-gradient(135deg,#dc2626,#991b1b);border:none;color:white;border-radius:8px;padding:10px;font-weight:700;font-size:0.85rem;cursor:pointer;">SEND XPB</button>
+                            <div id="admin-user-status" style="font-size:0.75rem;text-align:center;margin-top:8px;color:#6b7280;"></div>
+                        </div>
+
+                        <!-- SEND XPB TO EVERYONE -->
+                        <div style="background:rgba(220,38,38,0.07);border:1px solid rgba(220,38,38,0.2);border-radius:12px;padding:16px;margin-bottom:14px;">
+                            <div style="font-weight:700;font-size:0.85rem;color:#f3f4f6;margin-bottom:12px;">&#127760; Send XPB to Everyone</div>
+                            <input id="admin-xpb-all-amount" type="number" placeholder="XPB amount for all players..." min="1" style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:10px 12px;color:white;font-size:0.85rem;outline:none;margin-bottom:10px;">
+                            <button onclick="adminSendXPBToAll()" style="width:100%;background:linear-gradient(135deg,#7c3aed,#5b21b6);border:none;color:white;border-radius:8px;padding:10px;font-weight:700;font-size:0.85rem;cursor:pointer;">SEND TO ALL</button>
+                            <div id="admin-all-status" style="font-size:0.75rem;text-align:center;margin-top:8px;color:#6b7280;"></div>
+                        </div>
+
+                        <!-- CHANGE SEASON END DATE -->
+                        <div style="background:rgba(220,38,38,0.07);border:1px solid rgba(220,38,38,0.2);border-radius:12px;padding:16px;">
+                            <div style="font-weight:700;font-size:0.85rem;color:#f3f4f6;margin-bottom:4px;">&#128197; Override Season End Date</div>
+                            <div style="font-size:0.72rem;color:#6b7280;margin-bottom:12px;">Current end: <span id="admin-current-end">—</span></div>
+                            <input id="admin-season-end-input" type="datetime-local" style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:10px 12px;color:white;font-size:0.85rem;outline:none;margin-bottom:10px;color-scheme:dark;">
+                            <button onclick="adminSetSeasonEnd()" style="width:100%;background:linear-gradient(135deg,#d97706,#92400e);border:none;color:white;border-radius:8px;padding:10px;font-weight:700;font-size:0.85rem;cursor:pointer;">SET END DATE</button>
+                            <div id="admin-season-status" style="font-size:0.75rem;text-align:center;margin-top:8px;color:#6b7280;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="xpb-info-backdrop" onclick="closeXPBInfoModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:2000;backdrop-filter:blur(4px);"></div>
+                <div id="xpb-info-modal" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2001;width:min(340px,90vw);background:#0e1220;border:1px solid rgba(220,38,38,0.4);border-radius:16px;padding:24px 20px;box-shadow:0 0 40px rgba(220,38,38,0.2);">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+                        <div style="font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:700;color:#ff4444;letter-spacing:1px;">HOW TO EARN XPB</div>
+                        <button onclick="closeXPBInfoModal()" style="background:rgba(255,255,255,0.08);border:none;color:#9ca3af;border-radius:50%;width:28px;height:28px;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;">&times;</button>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:10px;">
+                        <div style="background:rgba(220,38,38,0.08);border:1px solid rgba(220,38,38,0.2);border-radius:10px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;">
+                            <div>
+                                <div style="font-weight:700;font-size:0.9rem;color:#f3f4f6;">Daily Login</div>
+                                <div style="font-size:0.72rem;color:#6b7280;margin-top:2px;">Once per calendar day</div>
+                            </div>
+                            <div style="font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:700;color:#ff4444;">+300</div>
+                        </div>
+                        <div style="background:rgba(220,38,38,0.08);border:1px solid rgba(220,38,38,0.2);border-radius:10px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;">
+                            <div>
+                                <div style="font-weight:700;font-size:0.9rem;color:#f3f4f6;">Open a Pack</div>
+                                <div style="font-size:0.72rem;color:#6b7280;margin-top:2px;">Any pack purchase</div>
+                            </div>
+                            <div style="font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:700;color:#ff4444;">+150</div>
+                        </div>
+                        <div style="background:rgba(220,38,38,0.08);border:1px solid rgba(220,38,38,0.2);border-radius:10px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;">
+                            <div>
+                                <div style="font-weight:700;font-size:0.9rem;color:#f3f4f6;">Win a Battle</div>
+                                <div style="font-size:0.72rem;color:#6b7280;margin-top:2px;">Per clash victory</div>
+                            </div>
+                            <div style="font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:700;color:#ff4444;">+75</div>
+                        </div>
+                        <div style="background:rgba(220,38,38,0.08);border:1px solid rgba(220,38,38,0.2);border-radius:10px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;">
+                            <div>
+                                <div style="font-weight:700;font-size:0.9rem;color:#f3f4f6;">Complete a Trade</div>
+                                <div style="font-size:0.72rem;color:#6b7280;margin-top:2px;">Per successful trade</div>
+                            </div>
+                            <div style="font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:700;color:#ff4444;">+50</div>
+                        </div>
+                        <div style="background:rgba(220,38,38,0.08);border:1px solid rgba(220,38,38,0.2);border-radius:10px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;">
+                            <div>
+                                <div style="font-weight:700;font-size:0.9rem;color:#f3f4f6;">Complete a Card Set</div>
+                                <div style="font-size:0.72rem;color:#6b7280;margin-top:2px;">Full set in Archive</div>
+                            </div>
+                            <div style="font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:700;color:#ff4444;">+800</div>
+                        </div>
+                    </div>
+                    <div style="margin-top:16px;padding:10px 12px;background:rgba(255,255,255,0.04);border-radius:8px;font-size:0.72rem;color:#6b7280;text-align:center;">
+                        2,000 XPB per tier &nbsp;·&nbsp; 100 tiers total
+                    </div>
+                </div>
+
+                <div id="bp-sheet-backdrop" onclick="closeBattlePassSheet()" class="bp-sheet-backdrop"></div>
+                <div id="bp-rewards-sheet" class="bp-rewards-sheet">
+                    <div class="bp-sheet-handle"></div>
+                    <div class="bp-sheet-header">
+                        <div>
+                            <div class="bp-sheet-eyebrow">TIER REWARDS</div>
+                            <h3 class="bp-sheet-title">Tier <span id="bp-sheet-tier">1</span></h3>
+                        </div>
+                        <button onclick="closeBattlePassSheet()" class="bp-sheet-close">&#10005;</button>
+                    </div>
+                    <div id="bp-sheet-content" class="bp-sheet-content"></div>
                 </div>
             </section>
 
@@ -4199,12 +6047,13 @@
             <section id="view-trade" class="view-panel">
                 <h2 class="section-title">Trading Hub</h2>
                 <p class="section-desc">Trade cards, money, and XP with other players</p>
-                
+
                 <!-- New Trading System -->
                 <div id="new-trade-system">
                     <!-- Online Players List -->
                     <div id="online-players-container">
-                        <h3 style="font-size:0.9rem; font-weight:800; margin-bottom:12px; color:var(--primary);">ONLINE PLAYERS</h3>
+                        <h3 style="font-size:0.9rem; font-weight:800; margin-bottom:12px; color:var(--primary);">ONLINE
+                            PLAYERS</h3>
                         <div id="online-players-list" class="online-players-list">
                             <div class="loading-text">Loading online players...</div>
                         </div>
@@ -4213,10 +6062,12 @@
                     <!-- Trade Interface (hidden by default) -->
                     <div id="trade-interface" class="trade-interface" style="display:none;">
                         <div id="trade-partner-info" class="trade-partner-info"></div>
-                        
+
                         <div class="trade-offers-container">
                             <div class="trade-offer-side">
-                                <h4 style="font-size:0.85rem; font-weight:800; margin-bottom:12px; color:var(--primary);">YOUR OFFER</h4>
+                                <h4
+                                    style="font-size:0.85rem; font-weight:800; margin-bottom:12px; color:var(--primary);">
+                                    YOUR OFFER</h4>
                                 <div class="trade-item-selector">
                                     <button class="trade-type-btn active" data-type="money">MONEY</button>
                                     <button class="trade-type-btn" data-type="xp">XP</button>
@@ -4224,18 +6075,21 @@
                                 </div>
                                 <div id="my-offer-content" class="trade-offer-content"></div>
                             </div>
-                            
+
                             <div class="trade-offer-side">
-                                <h4 style="font-size:0.85rem; font-weight:800; margin-bottom:12px; color:var(--accent-green);">THEIR OFFER</h4>
+                                <h4
+                                    style="font-size:0.85rem; font-weight:800; margin-bottom:12px; color:var(--accent-green);">
+                                    THEIR OFFER</h4>
                                 <div id="their-offer-content" class="trade-offer-content">
                                     <div class="loading-text">Waiting for offer...</div>
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="trade-actions">
                             <button class="btn-cancel" onclick="cancelNewTrade()">CANCEL</button>
-                            <button class="btn-accept" id="btn-lock-trade" onclick="lockTradeOffer()">LOCK TRADE</button>
+                            <button class="btn-accept" id="btn-lock-trade" onclick="lockTradeOffer()">LOCK
+                                TRADE</button>
                         </div>
                     </div>
                 </div>
@@ -4317,12 +6171,16 @@
                 </div>
 
                 <div style="margin-top:20px; padding-top:16px; border-top:1px solid var(--border-glow);">
-                    <div style="font-size:0.7rem; font-weight:800; letter-spacing:0.08em; color:#a855f7; margin-bottom:10px;">⚗️ MUTATION TOOLS</div>
+                    <div
+                        style="font-size:0.7rem; font-weight:800; letter-spacing:0.08em; color:#a855f7; margin-bottom:10px;">
+                        ⚗️ MUTATION TOOLS</div>
                     <div class="player-row">
                         <div>
                             <div style="font-weight:bold;">🧲 Mutation Magnet</div>
-                            <div style="font-size:0.75rem; color:#9ca3af; margin-top:2px;">Forces all mutations onto one card. Removable anytime.</div>
-                            <div style="font-size:0.75rem; color:#9ca3af; margin-top:2px;">Inventory: <span id="shop-magnets-count" style="color:white; font-weight:bold;">0</span></div>
+                            <div style="font-size:0.75rem; color:#9ca3af; margin-top:2px;">Forces all mutations onto one
+                                card. Removable anytime.</div>
+                            <div style="font-size:0.75rem; color:#9ca3af; margin-top:2px;">Inventory: <span
+                                    id="shop-magnets-count" style="color:white; font-weight:bold;">0</span></div>
                         </div>
                         <button class="btn-lvlup" style="background:linear-gradient(135deg,#7c3aed,#a855f7);"
                             onclick="buyMutationMagnet()">€150.00</button>
@@ -4332,7 +6190,8 @@
 
             <section id="view-quests" class="view-panel">
                 <h2 class="section-title">Quest Board</h2>
-                <p class="section-desc">Extreme rotating objectives for Daily, Weekly, and Monthly economy progression.</p>
+                <p class="section-desc">Extreme rotating objectives for Daily, Weekly, and Monthly economy progression.
+                </p>
 
                 <div id="container-quests" class="quest-board">
                     <div class="quest-tabs" role="tablist" aria-label="Quest tiers">
@@ -4359,7 +6218,8 @@
                         <div class="quest-tier-head">
                             <div>
                                 <div class="quest-tier-title">Weekly Quests</div>
-                                <div class="quest-tier-meta">7 slots. Very, very, very, very, very hard. Resets Sunday at midnight.</div>
+                                <div class="quest-tier-meta">7 slots. Very, very, very, very, very hard. Resets Sunday
+                                    at midnight.</div>
                             </div>
                             <div class="quest-reset-timer" id="quest-countdown-weekly">Reset: --</div>
                         </div>
@@ -4414,7 +6274,8 @@
                                 id="prof-stat-discovery">0 / 375</div>
                         </div>
                     </div>
-                    <button class="btn-action btn-blue" id="btn-sell-all-profile" style="margin-bottom:12px; min-height:44px;">SELL ALL</button>
+                    <button class="btn-action btn-blue" id="btn-sell-all-profile"
+                        style="margin-bottom:12px; min-height:44px;">SELL ALL</button>
                     <div id="prestige-profile-panel"></div>
                     <button class="btn-action btn-outline"
                         style="border-color:var(--accent-red); color:var(--accent-red);" id="action-signout">SIGN OUT
@@ -4430,6 +6291,7 @@
             <div class="nav-tab" data-target="cards"><span class="nav-icon">🃏</span><span>Deck</span></div>
             <div class="nav-tab" data-target="steal"><span class="nav-icon">🥷</span><span>Steal</span></div>
             <div class="nav-tab" data-target="trade"><span class="nav-icon">🔄</span><span>Trade</span></div>
+            <div class="nav-tab" data-target="battlepass"><span class="nav-icon">🎟</span><span>Pass</span></div>
             <div class="nav-tab" data-target="book"><span class="nav-icon">📖</span><span>Archive</span></div>
             <div class="nav-tab" data-target="ranks"><span class="nav-icon">🏆</span><span>Ranks</span></div>
             <div class="nav-tab" data-target="shop"><span class="nav-icon">🛒</span><span>Shop</span></div>
@@ -4471,9 +6333,11 @@
             <button class="btn-action btn-blue" id="cd-customize-btn"
                 style="display:none; margin-bottom:16px;">CUSTOMIZE</button>
             <button class="btn-action btn-outline" id="cd-add-to-collection-btn"
-                style="display:none; margin-bottom:16px; border-color:var(--gold); color:var(--gold);">⭐ ADD TO COLLECTION (€2500)</button>
+                style="display:none; margin-bottom:16px; border-color:var(--gold); color:var(--gold);">⭐ ADD TO
+                COLLECTION (€2500)</button>
             <button class="btn-action btn-outline" id="cd-remove-from-collection-btn"
-                style="display:none; margin-bottom:16px; border-color:var(--accent-red); color:var(--accent-red);">🔓 REMOVE FROM COLLECTION (€5000)</button>
+                style="display:none; margin-bottom:16px; border-color:var(--accent-red); color:var(--accent-red);">🔓
+                REMOVE FROM COLLECTION (€5000)</button>
 
             <div
                 style="border-top:1px solid var(--border-glow); padding-top:16px; display:flex; justify-content:space-between; align-items:center;">
@@ -4561,7 +6425,8 @@
                     <label for="custom-card-photo-file">UPLOAD CARD PHOTO</label>
                     <input type="file" id="custom-card-photo-file" accept="image/*">
                     <div class="card-photo-preview" id="custom-card-photo-preview">No card photo selected</div>
-                    <button type="button" class="btn-action btn-outline" id="remove-card-photo" style="padding:10px;">REMOVE CARD PHOTO</button>
+                    <button type="button" class="btn-action btn-outline" id="remove-card-photo"
+                        style="padding:10px;">REMOVE CARD PHOTO</button>
                 </div>
             </div>
             <button class="btn-action btn-blue" id="save-card-customization">SAVE CUSTOMIZATION</button>
@@ -4607,7 +6472,8 @@
                 id="math-equation-prompt">-- + --</div>
             <input type="number" id="math-player-input"
                 style="background:var(--bg-dark); border:2px solid var(--border-glow); font-size:1.8rem; text-align:center; padding:12px; width:80%; border-radius:12px; color:white; outline:none; margin-bottom:24px;"
-                placeholder="Result" inputmode="numeric" pattern="[0-9]*" autocomplete="off" autocorrect="off" autocapitalize="off">
+                placeholder="Result" inputmode="numeric" pattern="[0-9]*" autocomplete="off" autocorrect="off"
+                autocapitalize="off">
             <button class="btn-action btn-blue" id="math-submit-response">TRANSMIT DECRYPTION</button>
         </div>
     </div>
@@ -4660,7 +6526,8 @@
                     <label style="font-size:0.75rem;font-weight:800;color:#9ca3af;white-space:nowrap;">CUSTOM ×</label>
                     <input type="number" id="admin-luck-custom" min="1" max="10000" step="1" placeholder="e.g. 50"
                         style="flex:1;background:var(--bg-surface);border:2px solid var(--border-glow);color:white;padding:9px 12px;border-radius:8px;font-size:1rem;font-weight:800;outline:none;width:100%;">
-                    <button type="button" id="admin-luck-custom-set" style="background:rgba(139,92,246,0.25);border:2px solid #a78bfa;color:#c4b5fd;font-weight:800;font-size:0.8rem;padding:9px 14px;border-radius:8px;cursor:pointer;white-space:nowrap;">SET</button>
+                    <button type="button" id="admin-luck-custom-set"
+                        style="background:rgba(139,92,246,0.25);border:2px solid #a78bfa;color:#c4b5fd;font-weight:800;font-size:0.8rem;padding:9px 14px;border-radius:8px;cursor:pointer;white-space:nowrap;">SET</button>
                 </div>
                 <div class="admin-row">
                     <select id="admin-luck-duration">
@@ -4697,7 +6564,8 @@
 
             <div class="admin-panel-section">
                 <h4>PACK RESTOCK</h4>
-                <p style="font-size:0.78rem;color:#94a3b8;margin-bottom:10px;">Click a pack to force restock it with a custom amount, or restock all at once.</p>
+                <p style="font-size:0.78rem;color:#94a3b8;margin-bottom:10px;">Click a pack to force restock it with a
+                    custom amount, or restock all at once.</p>
                 <div style="display:flex;gap:8px;margin-bottom:10px;">
                     <button class="admin-restock-btn" style="background:var(--accent-green);color:white;flex:1;"
                         onclick="triggerManualRestock()">RESTOCK ALL</button>
@@ -4727,7 +6595,8 @@
                         style="background:var(--bg-surface);border:1px solid var(--border-glow);color:white;padding:10px;border-radius:8px;">
                     <input type="number" id="cp-stock" placeholder="Total stock" min="1"
                         style="background:var(--bg-surface);border:1px solid var(--border-glow);color:white;padding:10px;border-radius:8px;">
-                    <input type="number" id="cp-restock-percent" placeholder="Restock % of max" min="0" max="100" step="1"
+                    <input type="number" id="cp-restock-percent" placeholder="Restock % of max" min="0" max="100"
+                        step="1"
                         style="background:var(--bg-surface);border:1px solid var(--border-glow);color:white;padding:10px;border-radius:8px;">
                     <input type="datetime-local" id="cp-expiry"
                         style="background:var(--bg-surface);border:1px solid var(--border-glow);color:white;padding:10px;border-radius:8px;grid-column:1/-1;">
@@ -4759,7 +6628,8 @@
 
             <div class="admin-panel-section">
                 <h4>STEALING CONTROL</h4>
-                <p style="font-size:0.78rem;color:#94a3b8;margin-bottom:10px;">Enable or disable stealing for all players globally.</p>
+                <p style="font-size:0.78rem;color:#94a3b8;margin-bottom:10px;">Enable or disable stealing for all
+                    players globally.</p>
                 <div style="display:flex;gap:8px;">
                     <button class="admin-restock-btn" style="background:var(--accent-green);color:white;flex:1;"
                         id="admin-enable-stealing">ENABLE STEALING</button>
@@ -4881,17 +6751,17 @@
         // Core Game Constants Setup
         const PACK_TYPES = ['paper', 'wood', 'stone', 'bronze', 'silver', 'gold', 'platinum', 'diamond', 'mythic', 'exotic', 'divine', 'celestial', 'galactic', 'universal', 'secret'];
         const MAX_MUTATION_BONUS_PERCENT = 55;
-const MUTATIONS_LIST = [
-    { name: "Shattered Core", bonusPercent: -30, type: "bad", color: "#ef4444" },
-    { name: "Rust Corroded", bonusPercent: -20, type: "bad", color: "#ef4444" },
-    { name: "Glitch Fragmented", bonusPercent: -10, type: "bad", color: "#f87171" },
-    { name: "Polished Matrix", bonusPercent: 8, type: "good", color: "#10b981" },
-    { name: "Quantum Neon", bonusPercent: 15, type: "good", color: "#34d399" },
-    { name: "Prismatic Shift", bonusPercent: 25, type: "good", color: "#3b82f6" },
-    { name: "Hyper Drive Chromatic", bonusPercent: 35, type: "good", color: "#8b5cf6" },
-    { name: "Astral Supernova", bonusPercent: 45, type: "good", color: "#ec4899" },
-    { name: "Overlord Alpha Omega", bonusPercent: 55, type: "good", color: "#f59e0b" }
-];
+        const MUTATIONS_LIST = [
+            { name: "Shattered Core", bonusPercent: -30, type: "bad", color: "#ef4444" },
+            { name: "Rust Corroded", bonusPercent: -20, type: "bad", color: "#ef4444" },
+            { name: "Glitch Fragmented", bonusPercent: -10, type: "bad", color: "#f87171" },
+            { name: "Polished Matrix", bonusPercent: 8, type: "good", color: "#10b981" },
+            { name: "Quantum Neon", bonusPercent: 15, type: "good", color: "#34d399" },
+            { name: "Prismatic Shift", bonusPercent: 25, type: "good", color: "#3b82f6" },
+            { name: "Hyper Drive Chromatic", bonusPercent: 35, type: "good", color: "#8b5cf6" },
+            { name: "Astral Supernova", bonusPercent: 45, type: "good", color: "#ec4899" },
+            { name: "Overlord Alpha Omega", bonusPercent: 55, type: "good", color: "#f59e0b" }
+        ];
 
         // Balanced economy — achievable in 1.5-2 months with regular play
         const PACK_METADATA = {
@@ -5010,7 +6880,7 @@ const MUTATIONS_LIST = [
             { id: 'hidden_1', name: 'zezo AURA', flavour: 'Built the nothing between stars.', baseValue: 200, unlocksAtLevel: 10 },
             { id: 'hidden_2', name: 'PS5', flavour: 'Exists only in the space between commands.', baseValue: 300, unlocksAtLevel: 20 },
             { id: 'hidden_3', name: 'pyramids', flavour: 'Rules the cracks in broken systems.', baseValue: 400, unlocksAtLevel: 30 },
-            { id: 'hidden_4', name: 'twinkies', flavour: 'Spins chaos into currency.', baseValue: 500, unlocksAtLevel: 40 },
+            { id: 'hidden_4', name: 'ASSER EL MALT', flavour: 'Spins chaos into currency.', baseValue: 500, unlocksAtLevel: 40 },
             { id: 'hidden_5', name: 'HOHOS', flavour: 'The waterfall no one hears.', baseValue: 600, unlocksAtLevel: 50 },
             { id: 'hidden_6', name: 'FOOOOOOOOOL', flavour: 'Records every deal that never happened.', baseValue: 700, unlocksAtLevel: 60 },
             { id: 'hidden_7', name: 'ASSERSOSA5', flavour: 'A broadcast from the end of the network.', baseValue: 800, unlocksAtLevel: 70 },
@@ -5711,8 +7581,8 @@ const MUTATIONS_LIST = [
         function isUserStillInTutorial() { return false; }
         function isCurrentUserStillInTutorial() { return false; }
         function getTutorialStep() { return 0; }
-        function autoAdvanceTutorialFromCurrentState() {}
-        function renderTutorialOverlay() {}
+        function autoAdvanceTutorialFromCurrentState() { }
+        function renderTutorialOverlay() { }
         async function advanceTutorialTo() { return; }
         async function completeTutorial() { return; }
 
@@ -6177,7 +8047,7 @@ const MUTATIONS_LIST = [
                 PACK_TYPES.forEach(pKey => {
                     const cfg = RESTOCK_CONFIG[pKey];
                     const color = PACK_COLOR_HEX[pKey];
-                    const isDark = ['divine','platinum','silver','paper','celestial'].includes(pKey);
+                    const isDark = ['divine', 'platinum', 'silver', 'paper', 'celestial'].includes(pKey);
                     const textColor = isDark ? '#111' : '#fff';
 
                     const row = document.createElement('div');
@@ -6265,7 +8135,7 @@ const MUTATIONS_LIST = [
 
             const cfg = RESTOCK_CONFIG[packKey];
             const color = PACK_COLOR_HEX[packKey];
-            const isDark = ['divine','platinum','silver','paper','celestial'].includes(packKey);
+            const isDark = ['divine', 'platinum', 'silver', 'paper', 'celestial'].includes(packKey);
 
             const overlay = document.createElement('div');
             overlay.id = 'admin-restock-prompt-modal';
@@ -6530,7 +8400,7 @@ const MUTATIONS_LIST = [
             document.getElementById('auth-screen').style.display = 'none';
             document.getElementById('app-workspace').style.display = 'none';
             if (_banCheckInterval) { clearInterval(_banCheckInterval); _banCheckInterval = null; }
-            signOut(auth).catch(() => {});
+            signOut(auth).catch(() => { });
         }
 
         function startBanPolling(user) {
@@ -6562,6 +8432,10 @@ const MUTATIONS_LIST = [
                 document.getElementById('auth-screen').style.display = 'none';
                 document.getElementById('app-workspace').style.display = 'flex';
                 requestAnimationFrame(updateNavIndicator);
+                
+                // Set loading: true in presence for steal protection
+                set(ref(db, `presence/${userEntity.uid}/loading`), true).catch(() => {});
+                
                 initializeUserEnvironmentCore();
                 startBanPolling(userEntity);
             } else {
@@ -6575,6 +8449,8 @@ const MUTATIONS_LIST = [
                 }
                 document.getElementById('app-workspace').style.display = 'none';
                 deconstructUserEnvironmentCore();
+                // Call appReadyToShow when no user (show auth screen immediately)
+                if (window.appReadyToShow) window.appReadyToShow();
             }
         });
 
@@ -6660,6 +8536,51 @@ const MUTATIONS_LIST = [
                 if (!userDataRecord.discovered) userDataRecord.discovered = {};
                 if (!userDataRecord.locks) userDataRecord.locks = {};
                 if (typeof userDataRecord.prestige === 'undefined') userDataRecord.prestige = 0;
+                
+                // Initialize credits (⬡) - every user starts with 500
+                if (typeof userDataRecord.credits === 'undefined' || userDataRecord.credits === null) {
+                    userDataRecord.credits = 500;
+                    update(ref(db, `users/${activeUserSession.uid}`), { credits: 500 }).catch(() => {});
+                }
+                
+                // Initialize battle pass data structure
+                const EPOCH = new Date('2026-06-04T00:00:00Z').getTime();
+                const daysSince = Math.floor((Date.now() - EPOCH) / 86400000);
+                const pos = ((daysSince % 70) + 70) % 70;
+                const seasonIdx = Math.floor(pos / 14);
+                const seasonEndTime = EPOCH + (seasonIdx + 1) * 14 * 86400000;
+                
+                // Save current season end time to Firebase
+                update(ref(db, 'system/season'), {
+                    currentSeason: seasonIdx,
+                    seasonName: ['SEASON 1','SEASON 2','SEASON 3','SEASON 4','SEASON 5'][seasonIdx],
+                    seasonEndTime: seasonEndTime,
+                    updatedAt: Date.now()
+                }).catch(() => {});
+                
+                if (!userDataRecord.battlePass) {
+                    userDataRecord.battlePass = {
+                        owned: false,
+                        xpb: 0,
+                        tier: 1,
+                        lastLoginDay: null,
+                        currentSeason: seasonIdx
+                    };
+                    update(ref(db, `users/${activeUserSession.uid}/battlePass`), userDataRecord.battlePass).catch(() => {});
+                } else {
+                    // Check for season reset — preserve owned, only reset progress
+                    if (userDataRecord.battlePass.currentSeason !== seasonIdx) {
+                        userDataRecord.battlePass = {
+                            owned: userDataRecord.battlePass.owned || false,
+                            xpb: 0,
+                            tier: 1,
+                            lastLoginDay: null,
+                            currentSeason: seasonIdx
+                        };
+                        update(ref(db, `users/${activeUserSession.uid}/battlePass`), userDataRecord.battlePass).catch(() => {});
+                    }
+                }
+                
                 if (!userDataRecord.tutorial || typeof userDataRecord.tutorial !== 'object') {
                     // Ensure tutorial exists for strict, account-based progression and protection.
                     userDataRecord.tutorial = { completed: false, step: 0, createdAt: Date.now() };
@@ -6675,8 +8596,22 @@ const MUTATIONS_LIST = [
                 autoAdvanceTutorialFromCurrentState();
                 renderTutorialOverlay();
                 tryPublishPresenceWhenReady();
+                
+                // Clear loading flag after user data loads
+                update(ref(db, `presence/${activeUserSession.uid}/loading`), false).catch(() => {});
+                
                 // Initialize global rank reward cycle listener + timer
                 setTimeout(() => initGlobalRankCycleListener(), 2000);
+                
+                // Call appReadyToShow on first data load
+                if (window.appReadyToShow) {
+                    setTimeout(() => window.appReadyToShow(), 500);
+                    
+                    // Check daily login XPB reward
+                    setTimeout(() => {
+                        if (window.checkDailyLoginXPB) window.checkDailyLoginXPB();
+                    }, 1000);
+                }
             });
 
             if (userInventoryUnsub) userInventoryUnsub();
@@ -6782,11 +8717,11 @@ const MUTATIONS_LIST = [
             n = parseFloat(n) || 0;
             const abs = Math.abs(n);
             const sign = n < 0 ? '-' : '';
-            if (abs >= 1e15)  return sign + (abs / 1e15).toFixed(abs % 1e15 === 0 ? 0 : 2).replace(/\.?0+$/, '') + 'Q';
-            if (abs >= 1e12)  return sign + (abs / 1e12).toFixed(abs % 1e12 === 0 ? 0 : 2).replace(/\.?0+$/, '') + 'T';
-            if (abs >= 1e9)   return sign + (abs / 1e9 ).toFixed(abs % 1e9  === 0 ? 0 : 2).replace(/\.?0+$/, '') + 'B';
-            if (abs >= 1e6)   return sign + (abs / 1e6 ).toFixed(abs % 1e6  === 0 ? 0 : 2).replace(/\.?0+$/, '') + 'M';
-            if (abs >= 1e3)   return sign + (abs / 1e3 ).toFixed(abs % 1e3  === 0 ? 0 : 2).replace(/\.?0+$/, '') + 'K';
+            if (abs >= 1e15) return sign + (abs / 1e15).toFixed(abs % 1e15 === 0 ? 0 : 2).replace(/\.?0+$/, '') + 'Q';
+            if (abs >= 1e12) return sign + (abs / 1e12).toFixed(abs % 1e12 === 0 ? 0 : 2).replace(/\.?0+$/, '') + 'T';
+            if (abs >= 1e9) return sign + (abs / 1e9).toFixed(abs % 1e9 === 0 ? 0 : 2).replace(/\.?0+$/, '') + 'B';
+            if (abs >= 1e6) return sign + (abs / 1e6).toFixed(abs % 1e6 === 0 ? 0 : 2).replace(/\.?0+$/, '') + 'M';
+            if (abs >= 1e3) return sign + (abs / 1e3).toFixed(abs % 1e3 === 0 ? 0 : 2).replace(/\.?0+$/, '') + 'K';
             return sign + abs.toFixed(2);
         }
 
@@ -7543,6 +9478,9 @@ const MUTATIONS_LIST = [
                 streakMsg = `🔥 ${newStreak}-day streak! +€${formatNum(earnedStreakBonus)} bonus`;
             }
             startPackOpeningExperience(packKey, capturedSelectedCardObject, streakMsg);
+
+            // Award XPB for opening a pack
+            if (window.awardXPB) window.awardXPB(150, 'Pack Opened');
         };
 
         let globalCopiesTrackerRef = {};
@@ -7782,7 +9720,7 @@ const MUTATIONS_LIST = [
             targetGridDisplayNode.innerHTML = '';
 
             const collectionCards = Object.entries(userDeckRecord || {}).filter(([, card]) => card?.isCollection);
-            
+
             if (collectionCards.length === 0) {
                 targetGridDisplayNode.innerHTML = `<div class="empty-state">No collection cards yet — add cards from your deck to build your collection.</div>`;
                 return;
@@ -7977,10 +9915,10 @@ const MUTATIONS_LIST = [
             }
             document.getElementById('cd-customize-btn').style.display = isPrestigeUser() ? 'block' : 'none';
             document.getElementById('cd-customize-btn').onclick = () => openCardCustomizationModal(instanceId, cardName, cardColor);
-            
+
             const addToCollectionBtn = document.getElementById('cd-add-to-collection-btn');
             const removeFromCollectionBtn = document.getElementById('cd-remove-from-collection-btn');
-            
+
             if (instanceData.collectionToggled) {
                 addToCollectionBtn.style.display = 'none';
                 removeFromCollectionBtn.style.display = 'none';
@@ -8254,7 +10192,7 @@ const MUTATIONS_LIST = [
             showToast("🧲 Mutation Magnet removed. Returned to inventory.", "info");
         };
 
-                // --- CLOSING MODALS (ARCHIVE) ---
+        // --- CLOSING MODALS (ARCHIVE) ---
         document.getElementById('close-archive-modal')?.addEventListener('click', () => {
             closeModal('modal-archive-details');
         });
@@ -8396,6 +10334,9 @@ const MUTATIONS_LIST = [
                 const targetPresenceMetadata = globalContinuousPresenceListSnapshot[pUidKey];
                 if (!isPresenceEntryActive(targetPresenceMetadata)) return;
 
+                // Skip players who are currently loading (steal protection)
+                if (targetPresenceMetadata.loading === true) return;
+
                 const displayName = (targetPresenceMetadata.username || '').trim() || 'Unknown Operative';
                 const nameInitial = displayName.charAt(0).toUpperCase();
                 const isStealShielded = targetPresenceMetadata.stealingActive === true;
@@ -8411,9 +10352,9 @@ const MUTATIONS_LIST = [
                             </div>
                         </div>
                         ${isStealShielded
-                            ? `<button class="btn-lvlup" style="background:#374151; color:#6b7280; cursor:not-allowed;" disabled title="Shielded while stealing">SHIELDED</button>`
-                            : `<button class="btn-lvlup" style="background:var(--accent-red);" onclick="executeTargetInventoryInspectionScan('${pUidKey}')">SCAN INVENTORY</button>`
-                        }
+                        ? `<button class="btn-lvlup" style="background:#374151; color:#6b7280; cursor:not-allowed;" disabled title="Shielded while stealing">SHIELDED</button>`
+                        : `<button class="btn-lvlup" style="background:var(--accent-red);" onclick="executeTargetInventoryInspectionScan('${pUidKey}')">SCAN INVENTORY</button>`
+                    }
                     </div>
                 `;
                 targetContainerNode.innerHTML += htmlRowItem;
@@ -8608,16 +10549,16 @@ const MUTATIONS_LIST = [
             };
 
             const attackerOnlyPayload = {};
-            
+
             // Check for duplicate card IDs and delete newest if exists
             const attackerInventorySnap = await get(ref(db, `inventory/${attackerUid}`));
             const attackerInventory = attackerInventorySnap.val() || {};
             const duplicateInstanceId = Object.keys(attackerInventory).find(id => attackerInventory[id]?.cardId === transferredCard.cardId);
-            
+
             if (duplicateInstanceId) {
                 attackerOnlyPayload[`inventory/${attackerUid}/${duplicateInstanceId}`] = null;
             }
-            
+
             attackerOnlyPayload[`inventory/${attackerUid}/${lootInstanceId}`] = transferredCard;
             if (!userDataRecord.discovered?.[transferredCard.cardId]) {
                 attackerOnlyPayload[`users/${attackerUid}/discovered/${transferredCard.cardId}`] = Date.now();
@@ -8887,7 +10828,7 @@ const MUTATIONS_LIST = [
             if (isAttacker && activeUserSession?.uid) {
                 update(ref(db, `presence/${activeUserSession.uid}`), {
                     stealingActive: true
-                }).catch(() => {});
+                }).catch(() => { });
             }
 
             if (activeStealSessionUnsub) {
@@ -8962,7 +10903,7 @@ const MUTATIONS_LIST = [
                     sess.claimedBy = winner;
                     sess.winnerSolveTimeMs = atkMs !== null ? atkMs : defMs;
                     return sess;
-                }).catch(() => {});
+                }).catch(() => { });
             }, 30000);
 
             // Clear the auto-judge timer if we unsub before it fires
@@ -9106,6 +11047,8 @@ const MUTATIONS_LIST = [
                             showToast(winMsg, 'success');
                             trackQuestProgress('win_clashes', 1);
                             awardClashRankPoint();
+                            // Award XPB for battle win
+                            if (window.awardXPB) window.awardXPB(75, 'Battle Win');
                         }
                         // concludeLiveChallenge is triggered by the onValue listener watching sessionState
                     }).catch(err => {
@@ -9151,7 +11094,7 @@ const MUTATIONS_LIST = [
             if (activeUserSession?.uid) {
                 update(ref(db, `presence/${activeUserSession.uid}`), {
                     stealingActive: false
-                }).catch(() => {});
+                }).catch(() => { });
             }
 
             const myUid = activeUserSession?.uid;
@@ -9327,14 +11270,14 @@ const MUTATIONS_LIST = [
         // Ranks in order: 8 tiers × 3 divisions each = 24 steps total (0–23)
         // After div 3 of each rank → promote to div 1 of next rank
         const CLASH_RANKS = [
-            { id: 'bronze',    name: 'Bronze',       color: '#cd7f32', css: 'rank-bronze',    img: 'BRONZE.png',    reward: { xp: 0,   money: 0    } },
-            { id: 'silver',    name: 'Silver',       color: '#c0c0c0', css: 'rank-silver',    img: 'SILVER.png',    reward: { xp: 100, money: 0    } },
-            { id: 'gold',      name: 'Gold',         color: '#ffd700', css: 'rank-gold',      img: 'GOLD.png',      reward: { xp: 200, money: 500  } },
-            { id: 'platinum',  name: 'Platinum',     color: '#e5e4e2', css: 'rank-platinum',  img: 'PLATINUM.png',  reward: { xp: 300, money: 750  } },
-            { id: 'diamond',   name: 'Diamond',      color: '#7df9ff', css: 'rank-diamond',   img: 'DIAMOND.png',   reward: { xp: 400, money: 1000 } },
-            { id: 'champion',  name: 'Champion',     color: '#f59e0b', css: 'rank-champion',  img: 'CHAMPION.png',  reward: { xp: 450, money: 1250 } },
-            { id: 'grandchamp',name: 'Grand Champion',color: '#a855f7',css: 'rank-grandchamp',img: 'GRAND_CHAMPION.png',        reward: { xp: 550, money: 2000 } },
-            { id: 'ssl',       name: 'SSL',          color: '#ff1493', css: 'rank-ssl',       img: 'SSL.png',       reward: { xp: 700, money: 4000 } }
+            { id: 'bronze', name: 'Bronze', color: '#cd7f32', css: 'rank-bronze', img: 'BRONZE.png', reward: { xp: 0, money: 0 } },
+            { id: 'silver', name: 'Silver', color: '#c0c0c0', css: 'rank-silver', img: 'SILVER.png', reward: { xp: 100, money: 0 } },
+            { id: 'gold', name: 'Gold', color: '#ffd700', css: 'rank-gold', img: 'GOLD.png', reward: { xp: 200, money: 500 } },
+            { id: 'platinum', name: 'Platinum', color: '#e5e4e2', css: 'rank-platinum', img: 'PLATINUM.png', reward: { xp: 300, money: 750 } },
+            { id: 'diamond', name: 'Diamond', color: '#7df9ff', css: 'rank-diamond', img: 'DIAMOND.png', reward: { xp: 400, money: 1000 } },
+            { id: 'champion', name: 'Champion', color: '#f59e0b', css: 'rank-champion', img: 'CHAMPION.png', reward: { xp: 450, money: 1250 } },
+            { id: 'grandchamp', name: 'Grand Champion', color: '#a855f7', css: 'rank-grandchamp', img: 'GRAND_CHAMPION.png', reward: { xp: 550, money: 2000 } },
+            { id: 'ssl', name: 'SSL', color: '#ff1493', css: 'rank-ssl', img: 'SSL.png', reward: { xp: 700, money: 4000 } }
         ];
 
         // Each rank has 3 divisions (D1, D2, D3). Win in D3 → next rank D1.
@@ -9490,8 +11433,8 @@ const MUTATIONS_LIST = [
                 }
                 globalRankCycleState = {
                     nextRewardAt: data.nextRewardAt,
-                    cycleId:      data.cycleId || 1,
-                    rewardReady:  data.rewardReady || false
+                    cycleId: data.cycleId || 1,
+                    rewardReady: data.rewardReady || false
                 };
                 rankCycleAdvanceInFlight = false;
                 startRankRewardCountdown();
@@ -9536,15 +11479,15 @@ const MUTATIONS_LIST = [
 
                 // Normal countdown
                 const totalSecs = Math.ceil(msLeft / 1000);
-                const days  = Math.floor(totalSecs / 86400);
+                const days = Math.floor(totalSecs / 86400);
                 const hours = Math.floor((totalSecs % 86400) / 3600);
-                const mins  = Math.floor((totalSecs % 3600) / 60);
-                const secs  = totalSecs % 60;
+                const mins = Math.floor((totalSecs % 3600) / 60);
+                const secs = totalSecs % 60;
                 let label = '🏆 Rewards in ';
-                if (days > 0)       label += `${days}d ${hours}h`;
+                if (days > 0) label += `${days}d ${hours}h`;
                 else if (hours > 0) label += `${hours}h ${mins}m`;
-                else if (mins > 0)  label += `${mins}m ${secs}s`;
-                else                label += `${secs}s`;
+                else if (mins > 0) label += `${mins}m ${secs}s`;
+                else label += `${secs}s`;
                 _showTimerText(label, msLeft < 3600000 ? '#f59e0b' : '#6b7280');
             }
 
@@ -9560,7 +11503,7 @@ const MUTATIONS_LIST = [
 
             // Check both the user's stamped pending reward AND the global rewardReady flag
             const globalReady = globalRankCycleState.rewardReady &&
-                                 globalRankCycleState.cycleId > claimed;
+                globalRankCycleState.cycleId > claimed;
 
             if (pending > claimed || globalReady) {
                 // Ensure local record reflects the pending reward so button stays visible
@@ -9572,7 +11515,7 @@ const MUTATIONS_LIST = [
         }
 
         // ── claim handler ─────────────────────────────────────────────
-        window.claimClashRankReward = async function() {
+        window.claimClashRankReward = async function () {
             if (!activeUserSession?.uid) return;
             const uid = activeUserSession.uid;
 
@@ -9617,11 +11560,11 @@ const MUTATIONS_LIST = [
             const reward = rank.reward;
 
             const payload = {};
-            if (reward.xp    > 0) payload[`users/${uid}/xp`]    = (userDataRecord.xp    || 0) + reward.xp;
-            if (reward.money > 0) payload[`users/${uid}/money`]  = parseFloat(((userDataRecord.money || 0) + reward.money).toFixed(2));
+            if (reward.xp > 0) payload[`users/${uid}/xp`] = (userDataRecord.xp || 0) + reward.xp;
+            if (reward.money > 0) payload[`users/${uid}/money`] = parseFloat(((userDataRecord.money || 0) + reward.money).toFixed(2));
             payload[`users/${uid}/clashRankLastCycleClaimed`] = pendingCycle;
-            payload[`users/${uid}/clashRankPoints`]           = 0;  // reset to Bronze D1
-            payload[`users/${uid}/clashRankPendingReward`]    = null;
+            payload[`users/${uid}/clashRankPoints`] = 0;  // reset to Bronze D1
+            payload[`users/${uid}/clashRankPendingReward`] = null;
 
             try {
                 await update(ref(db, '/'), payload);
@@ -9633,16 +11576,16 @@ const MUTATIONS_LIST = [
 
             // Mirror to local record so UI updates instantly without waiting for Firebase echo
             userDataRecord.clashRankLastCycleClaimed = pendingCycle;
-            userDataRecord.clashRankPendingReward    = null;
-            userDataRecord.clashRankPoints           = 0;
-            if (reward.xp    > 0) userDataRecord.xp    = (userDataRecord.xp    || 0) + reward.xp;
-            if (reward.money > 0) userDataRecord.money  = parseFloat(((userDataRecord.money || 0) + reward.money).toFixed(2));
+            userDataRecord.clashRankPendingReward = null;
+            userDataRecord.clashRankPoints = 0;
+            if (reward.xp > 0) userDataRecord.xp = (userDataRecord.xp || 0) + reward.xp;
+            if (reward.money > 0) userDataRecord.money = parseFloat(((userDataRecord.money || 0) + reward.money).toFixed(2));
 
             // Hide the button — the countdown ticker will now show the next cycle timer
             _hideRewardUI();
 
             const rewardParts = [];
-            if (reward.xp    > 0) rewardParts.push(`+${reward.xp} XP`);
+            if (reward.xp > 0) rewardParts.push(`+${reward.xp} XP`);
             if (reward.money > 0) rewardParts.push(`€${reward.money}`);
             const rewardStr = rewardParts.length ? rewardParts.join(' & ') : 'participation reward';
             showToast(`🎁 ${rank.name} reward claimed: ${rewardStr}! Rank reset to Bronze.`, 'success');
@@ -9677,7 +11620,7 @@ const MUTATIONS_LIST = [
                 // Stamp clashRankPendingReward onto every user who hasn't claimed this cycle
                 try {
                     const usersSnap = await get(ref(db, 'users'));
-                    const allUsers  = usersSnap.val() || {};
+                    const allUsers = usersSnap.val() || {};
                     const stampPayload = {};
                     for (const uid in allUsers) {
                         const u = allUsers[uid];
@@ -9691,7 +11634,7 @@ const MUTATIONS_LIST = [
                 } catch (e) {
                     console.warn('[RankCycle] Could not stamp pending rewards:', e);
                 }
-            }).catch(() => {});
+            }).catch(() => { });
         }
 
         // Called after a user claims — advances the cycle for the next 5-day window
@@ -9701,12 +11644,12 @@ const MUTATIONS_LIST = [
                 if (!current) return;
                 if (current.cycleId !== cycleId) return; // already advanced by another claimer
                 return {
-                    cycleId:      cycleId + 1,
+                    cycleId: cycleId + 1,
                     nextRewardAt: nextRewardAt + RANK_REWARD_INTERVAL_MS,
-                    rewardReady:  false,
+                    rewardReady: false,
                     lastAdvancedAt: Date.now()
                 };
-            }).catch(() => {});
+            }).catch(() => { });
         }
 
         // Render clash rank leaderboard
@@ -9722,7 +11665,7 @@ const MUTATIONS_LIST = [
                 const u = users[uid];
                 const pts = u.clashRankPoints || 0;
                 if (!u.username) continue;
-                rows.push({ username: u.username, pts, avatarBgColor: u.avatarBgColor || 'var(--primary)', avatarLetters: u.avatarLetters || u.username.slice(0,2).toUpperCase(), prestige: getPrestigeCount(u) });
+                rows.push({ username: u.username, pts, avatarBgColor: u.avatarBgColor || 'var(--primary)', avatarLetters: u.avatarLetters || u.username.slice(0, 2).toUpperCase(), prestige: getPrestigeCount(u) });
             }
             rows.sort((a, b) => b.pts - a.pts);
 
@@ -9938,7 +11881,7 @@ const MUTATIONS_LIST = [
             });
         }
 
-        window.setQuestTab = function(tab) {
+        window.setQuestTab = function (tab) {
             activeQuestTab = tab;
             document.querySelectorAll('.quest-tab-btn').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.questTab === tab);
@@ -10162,7 +12105,7 @@ const MUTATIONS_LIST = [
         window.claimQuestReward = async function (questId) {
             let quest = null;
             let period = null;
-            
+
             Object.keys(QUEST_POOLS).forEach(p => {
                 const found = QUEST_POOLS[p].find(q => q.id === questId);
                 if (found) {
@@ -10186,22 +12129,22 @@ const MUTATIONS_LIST = [
             } else if (quest.rewardType === 'gold_pack') {
                 // Open gold packs for free by temporarily crediting enough money then calling purchasePackAsset
                 const goldPackPrice = PACK_METADATA['gold']?.price || 400;
-                const originalMoney = userDataRecord.money || 0;
+                const originalMoney = userData.money || 0;
                 for (let i = 0; i < quest.rewardAmount; i++) {
                     userDataRecord.money = originalMoney + goldPackPrice * (quest.rewardAmount - i);
                     await purchasePackAsset('gold');
                 }
-                userDataRecord.money = originalMoney;
+                userData.money = originalMoney;
                 showToast(`🎁 Claimed ${quest.rewardAmount}x Gold Pack!`, 'success');
             } else if (quest.rewardType === 'platinum_pack') {
                 // Open platinum packs for free by temporarily crediting enough money
                 const platPackPrice = PACK_METADATA['platinum']?.price || 1000;
-                const originalMoney = userDataRecord.money || 0;
+                const originalMoney = userData.money || 0;
                 for (let i = 0; i < quest.rewardAmount; i++) {
                     userDataRecord.money = originalMoney + platPackPrice * (quest.rewardAmount - i);
                     await purchasePackAsset('platinum');
                 }
-                userDataRecord.money = originalMoney;
+                userData.money = originalMoney;
                 showToast(`💎 Claimed ${quest.rewardAmount}x Platinum Pack!`, 'success');
             }
 
@@ -10568,15 +12511,15 @@ const MUTATIONS_LIST = [
             try {
                 const usersSnap = await get(ref(db, 'users'));
                 const users = usersSnap.val() || {};
-                
+
                 playersList.innerHTML = '';
-                
+
                 for (const uid in users) {
                     if (uid === activeUserSession.uid) continue;
-                    
+
                     const user = users[uid];
                     if (!user.username) continue;
-                    
+
                     const playerItem = document.createElement('div');
                     playerItem.className = 'online-player-item';
                     playerItem.innerHTML = `
@@ -10591,7 +12534,7 @@ const MUTATIONS_LIST = [
                     `;
                     playersList.appendChild(playerItem);
                 }
-                
+
                 if (playersList.children.length === 0) {
                     playersList.innerHTML = '<div class="loading-text">No other players found.</div>';
                 }
@@ -10602,15 +12545,15 @@ const MUTATIONS_LIST = [
         }
 
         // Send trade request to a player
-        window.sendTradeRequest = async function(partnerUid, partnerUsername, avatarBgColor, avatarLetters) {
+        window.sendTradeRequest = async function (partnerUid, partnerUsername, avatarBgColor, avatarLetters) {
             if (!activeUserSession?.uid) {
                 return showToast('You must be signed in to trade.', 'error');
             }
 
             const tradeId = `${activeUserSession.uid}_${partnerUid}_${Date.now()}`;
-            
+
             console.log('Sending trade request to', partnerUsername, 'with ID:', tradeId);
-            
+
             try {
                 // Create trade request in Firebase (recipient's path)
                 await set(ref(db, `trade_requests/${partnerUid}/${tradeId}`), {
@@ -10641,9 +12584,9 @@ const MUTATIONS_LIST = [
                 onValue(recipientRequestRef, snapshot => {
                     const recipientRequest = snapshot.val();
                     if (!recipientRequest) return;
-                    
+
                     console.log('Recipient request status changed:', recipientRequest.status);
-                    
+
                     if (recipientRequest.status === 'accepted' && !newTradeState.active) {
                         console.log('Recipient accepted the trade request');
                         initializeNewTrade(partnerUid, partnerUsername, avatarBgColor, avatarLetters, tradeId);
@@ -10672,7 +12615,7 @@ const MUTATIONS_LIST = [
             if (!activeUserSession?.uid) return;
 
             console.log('Listening for trade requests for user:', activeUserSession.uid);
-            
+
             const requestsRef = ref(db, `trade_requests/${activeUserSession.uid}`);
             onValue(requestsRef, snapshot => {
                 const requests = snapshot.val();
@@ -10689,9 +12632,9 @@ const MUTATIONS_LIST = [
 
                 for (const requestId of requestIds) {
                     const request = requests[requestId];
-                    
+
                     console.log('Processing request:', requestId, 'status:', request.status, 'from:', request.fromUsername, 'to:', request.toUsername);
-                    
+
                     // If I received a pending request, show modal (only if modal is not already showing this request)
                     if (request.status === 'pending' && request.toUid === activeUserSession.uid) {
                         if (!window.pendingTradeRequest || window.pendingTradeRequest.requestId !== requestId) {
@@ -10700,7 +12643,7 @@ const MUTATIONS_LIST = [
                         }
                         break; // Only show one at a time
                     }
-                    
+
                     // If my sent request was accepted, initialize trade
                     if (request.status === 'accepted' && request.fromUid === activeUserSession.uid) {
                         console.log('Trade request accepted by:', request.toUsername);
@@ -10712,7 +12655,7 @@ const MUTATIONS_LIST = [
                         remove(ref(db, `trade_requests/${activeUserSession.uid}/${requestId}`));
                         break;
                     }
-                    
+
                     // If my sent request was declined, notify me
                     if (request.status === 'declined' && request.fromUid === activeUserSession.uid) {
                         console.log('Trade request declined by:', request.toUsername);
@@ -10729,16 +12672,16 @@ const MUTATIONS_LIST = [
         function showTradeRequestModal(requestId, request) {
             console.log('Showing trade request modal for:', request.fromUsername);
             console.log('Request data:', request);
-            
+
             document.getElementById('trade-request-message').innerHTML = `
                 <strong>${request.fromUsername}</strong> wants to trade with you!<br>
                 <small style="color:#9ca3af;">ID: ${request.fromUid.slice(0, 8)}...</small>
             `;
             document.getElementById('trade-request-modal').style.display = 'flex';
-            
+
             // Store request data for later use
             window.pendingTradeRequest = { requestId, request };
-            
+
             // Re-enable buttons
             const acceptBtn = document.querySelector('#trade-request-modal .btn-accept');
             const declineBtn = document.querySelector('#trade-request-modal .btn-cancel');
@@ -10746,78 +12689,78 @@ const MUTATIONS_LIST = [
             if (declineBtn) declineBtn.disabled = false;
         }
 
-        window.closeTradeRequestModal = function() {
+        window.closeTradeRequestModal = function () {
             document.getElementById('trade-request-modal').style.display = 'none';
             window.pendingTradeRequest = null;
         };
 
-        window.declineTradeRequest = async function() {
+        window.declineTradeRequest = async function () {
             if (!window.pendingTradeRequest) return;
-            
+
             const { requestId, request } = window.pendingTradeRequest;
-            
+
             console.log('Declining trade request from:', request.fromUsername);
-            
+
             try {
                 // Update request status to declined (only in recipient's path)
                 await update(ref(db, `trade_requests/${activeUserSession.uid}/${requestId}`), {
                     status: 'declined'
                 });
-                
+
                 console.log('Request status updated to declined');
                 showToast('Trade request declined.', 'success');
             } catch (error) {
                 console.error('Error declining request:', error);
                 showToast('Failed to decline request: ' + error.message, 'error');
             }
-            
+
             closeTradeRequestModal();
         };
 
-        window.acceptTradeRequest = async function() {
+        window.acceptTradeRequest = async function () {
             console.log('acceptTradeRequest called');
-            
+
             if (!window.pendingTradeRequest) {
                 console.error('No pending trade request');
                 showToast('No pending trade request', 'error');
                 return;
             }
-            
+
             const { requestId, request } = window.pendingTradeRequest;
-            
+
             console.log('Accepting trade request from:', request.fromUsername);
             console.log('Request ID:', requestId);
             console.log('Active user UID:', activeUserSession?.uid);
-            
+
             // Disable buttons to prevent double-click
             const acceptBtn = document.querySelector('#trade-request-modal .btn-accept');
             const declineBtn = document.querySelector('#trade-request-modal .btn-cancel');
             if (acceptBtn) acceptBtn.disabled = true;
             if (declineBtn) declineBtn.disabled = true;
-            
+
             try {
                 // Update request status to accepted (only in recipient's path)
                 console.log('Updating request status to accepted...');
                 await update(ref(db, `trade_requests/${activeUserSession.uid}/${requestId}`), {
                     status: 'accepted'
                 });
-                
+
                 console.log('Request status updated to accepted');
 
                 // Initialize trade
                 console.log('Initializing trade...');
                 await initializeNewTrade(request.fromUid, request.fromUsername, request.fromAvatarBgColor, request.fromAvatarLetters, requestId);
-                
+
                 console.log('Trade initialized successfully');
                 showToast('Trade request accepted!', 'success');
-                
+
                 // Close modal after successful initialization
                 closeTradeRequestModal();
             } catch (error) {
                 console.error('Error accepting request:', error);
                 console.error('Error details:', error.code, error.message);
                 showToast('Failed to accept request: ' + error.message, 'error');
-                
+
                 // Re-enable buttons on error
                 if (acceptBtn) acceptBtn.disabled = false;
                 if (declineBtn) declineBtn.disabled = false;
@@ -10828,7 +12771,7 @@ const MUTATIONS_LIST = [
         async function initializeNewTrade(partnerUid, partnerUsername, partnerAvatarBgColor, partnerAvatarLetters, requestId) {
             console.log('Initializing new trade with:', partnerUsername);
             console.log('Avatar data:', { partnerAvatarBgColor, partnerAvatarLetters });
-            
+
             // Cancel any existing trade
             cancelNewTrade();
 
@@ -10853,11 +12796,11 @@ const MUTATIONS_LIST = [
                 console.error('Trade partner info element not found');
                 throw new Error('Trade UI element not found');
             }
-            
+
             // Use default values if avatar data is missing
             const safeAvatarBgColor = partnerAvatarBgColor || 'var(--primary)';
             const safeAvatarLetters = partnerAvatarLetters || partnerUsername.slice(0, 2).toUpperCase();
-            
+
             partnerInfo.innerHTML = `
                 <div class="profile-badge" style="background:${safeAvatarBgColor}; width:50px; height:50px;">
                     ${safeAvatarLetters}
@@ -10870,12 +12813,12 @@ const MUTATIONS_LIST = [
 
             const onlinePlayersContainer = document.getElementById('online-players-container');
             const tradeInterface = document.getElementById('trade-interface');
-            
+
             if (!onlinePlayersContainer || !tradeInterface) {
                 console.error('Trade UI elements not found');
                 throw new Error('Trade UI elements not found');
             }
-            
+
             onlinePlayersContainer.style.display = 'none';
             tradeInterface.style.display = 'block';
 
@@ -10888,9 +12831,9 @@ const MUTATIONS_LIST = [
             // Check if trade already exists, if not create it
             const tradeRef = ref(db, `active_trades/${tradeId}`);
             const tradeSnap = await get(tradeRef);
-            
+
             console.log('Trade exists:', tradeSnap.exists());
-            
+
             if (!tradeSnap.exists()) {
                 // Create new trade session
                 await set(tradeRef, {
@@ -11028,17 +12971,17 @@ const MUTATIONS_LIST = [
         }
 
         // Update trade type buttons (wrapped in DOMContentLoaded to ensure elements exist)
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             document.querySelectorAll('.trade-type-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
+                btn.addEventListener('click', function () {
                     document.querySelectorAll('.trade-type-btn').forEach(b => b.classList.remove('active'));
                     this.classList.add('active');
-                    
+
                     newTradeState.myOffer.type = this.dataset.type;
                     newTradeState.myOffer.value = 0;
                     newTradeState.myOffer.cards = [];
                     newTradeState.selectedCards = new Set();
-                    
+
                     renderMyOfferContent();
                     updateTradeOfferInFirebase();
                 });
@@ -11046,13 +12989,13 @@ const MUTATIONS_LIST = [
         });
 
         // Update my money offer
-        window.updateMyMoneyOffer = async function(value) {
+        window.updateMyMoneyOffer = async function (value) {
             newTradeState.myOffer.value = parseFloat(value) || 0;
             await updateTradeOfferInFirebase();
         };
 
         // Update my XP offer
-        window.updateMyXpOffer = async function(value) {
+        window.updateMyXpOffer = async function (value) {
             newTradeState.myOffer.value = parseFloat(value) || 0;
             await updateTradeOfferInFirebase();
         };
@@ -11069,10 +13012,10 @@ const MUTATIONS_LIST = [
         }
 
         // Open card inventory modal
-        window.openCardInventoryModal = async function() {
+        window.openCardInventoryModal = async function () {
             const modal = document.getElementById('card-inventory-modal');
             const list = document.getElementById('card-inventory-list');
-            
+
             list.innerHTML = '<div class="loading-text">Loading cards...</div>';
             modal.style.display = 'flex';
 
@@ -11097,7 +13040,7 @@ const MUTATIONS_LIST = [
                     }
 
                     const isSelected = newTradeState.selectedCards.has(instanceId);
-                    
+
                     const cardItem = document.createElement('div');
                     cardItem.className = `inventory-card-item ${isSelected ? 'selected' : ''}`;
                     cardItem.innerHTML = `
@@ -11112,44 +13055,44 @@ const MUTATIONS_LIST = [
             }
         };
 
-        window.closeCardInventoryModal = function() {
+        window.closeCardInventoryModal = function () {
             document.getElementById('card-inventory-modal').style.display = 'none';
         };
 
         // Toggle card selection
-        window.toggleCardSelection = function(instanceId, cardName, packSource, cardId) {
+        window.toggleCardSelection = function (instanceId, cardName, packSource, cardId) {
             if (newTradeState.selectedCards.has(instanceId)) {
                 newTradeState.selectedCards.delete(instanceId);
             } else {
                 newTradeState.selectedCards.add(instanceId);
             }
-            
+
             // Re-render modal to show selection
             openCardInventoryModal();
         };
 
         // Confirm card selection
-        window.confirmCardSelection = async function() {
+        window.confirmCardSelection = async function () {
             newTradeState.myOffer.cards = [];
-            
+
             for (const instanceId of newTradeState.selectedCards) {
                 try {
                     const cardSnap = await get(ref(db, `inventory/${activeUserSession.uid}/${instanceId}`));
                     const card = cardSnap.val();
-                    
+
                     let cardName = 'Unknown Card';
                     const registry = GAME_REGISTRY[card.packSource];
                     if (registry) {
                         const meta = registry.find(c => c.id === card.cardId);
                         if (meta) cardName = meta.name;
                     }
-                    
+
                     newTradeState.myOffer.cards.push({ instanceId, cardId: card.cardId, name: cardName, packSource: card.packSource });
                 } catch (error) {
                     console.error('Error loading card:', error);
                 }
             }
-            
+
             renderSelectedCards();
             closeCardInventoryModal();
             await updateTradeOfferInFirebase();
@@ -11174,7 +13117,7 @@ const MUTATIONS_LIST = [
         }
 
         // Remove card from offer
-        window.removeCardFromOffer = async function(instanceId) {
+        window.removeCardFromOffer = async function (instanceId) {
             newTradeState.selectedCards.delete(instanceId);
             newTradeState.myOffer.cards = newTradeState.myOffer.cards.filter(c => c.instanceId !== instanceId);
             renderSelectedCards();
@@ -11184,7 +13127,7 @@ const MUTATIONS_LIST = [
         // Update trade lock UI
         function updateTradeLockUI() {
             const lockBtn = document.getElementById('btn-lock-trade');
-            
+
             if (newTradeState.myLocked) {
                 lockBtn.textContent = 'LOCKED';
                 lockBtn.disabled = true;
@@ -11202,13 +13145,13 @@ const MUTATIONS_LIST = [
         }
 
         // Lock trade offer
-        window.lockTradeOffer = async function() {
+        window.lockTradeOffer = async function () {
             console.log('lockTradeOffer called');
             console.log('Trade active:', newTradeState.active);
             console.log('My locked:', newTradeState.myLocked);
             console.log('Trade ID:', newTradeState.tradeId);
             console.log('Active user UID:', activeUserSession?.uid);
-            
+
             if (!newTradeState.active || newTradeState.myLocked) return;
 
             // Validate offer
@@ -11253,20 +13196,20 @@ const MUTATIONS_LIST = [
             try {
                 console.log('Updating lock status in Firebase...');
                 console.log('Firebase path:', `active_trades/${newTradeState.tradeId}/locked/${activeUserSession.uid}`);
-                
+
                 // First check if trade exists
                 const tradeRef = ref(db, `active_trades/${newTradeState.tradeId}`);
                 const tradeSnap = await get(tradeRef);
                 console.log('Trade exists:', tradeSnap.exists());
-                
+
                 if (!tradeSnap.exists()) {
                     console.error('Trade does not exist in Firebase');
                     return showToast('Trade not found. Please try again.', 'error');
                 }
-                
+
                 const tradeData = tradeSnap.val();
                 console.log('Trade data:', tradeData);
-                
+
                 // Use a single update operation to set lock status
                 // This ensures the locked field exists and sets the current user's lock
                 const partnerLocked = tradeData.locked ? (tradeData.locked[newTradeState.partnerUid] || false) : false;
@@ -11276,7 +13219,7 @@ const MUTATIONS_LIST = [
                         [newTradeState.partnerUid]: partnerLocked
                     }
                 });
-                
+
                 newTradeState.myLocked = true;
                 updateTradeLockUI();
                 showToast('Trade locked! Waiting for partner...', 'success');
@@ -11294,13 +13237,13 @@ const MUTATIONS_LIST = [
             newTradeState.executing = true;
 
             const tradeRef = ref(db, `active_trades/${newTradeState.tradeId}`);
-            
+
             try {
                 // Use transaction to prevent double execution
                 await runTransaction(tradeRef, (tradeData) => {
                     if (!tradeData || tradeData.status !== 'active') return;
                     if (!tradeData.locked[activeUserSession.uid] || !tradeData.locked[newTradeState.partnerUid]) return;
-                    
+
                     tradeData.status = 'processing';
                     return tradeData;
                 });
@@ -11308,7 +13251,7 @@ const MUTATIONS_LIST = [
                 // Get fresh data
                 const freshSnap = await get(tradeRef);
                 const freshTrade = freshSnap.val();
-                
+
                 if (!freshTrade || freshTrade.status !== 'processing') {
                     return; // Already processed
                 }
@@ -11480,6 +13423,8 @@ const MUTATIONS_LIST = [
 
                 await update(ref(db, '/'), operations);
                 showToast('Trade completed successfully!', 'success');
+                // Award XPB for trade completion
+                if (window.awardXPB) window.awardXPB(50, 'Trade Completed');
                 cancelNewTrade();
             } catch (error) {
                 newTradeState.executing = false;
@@ -11489,7 +13434,7 @@ const MUTATIONS_LIST = [
         }
 
         // Cancel new trade
-        window.cancelNewTrade = async function() {
+        window.cancelNewTrade = async function () {
             if (!newTradeState.active) return;
 
             if (newTradeState.listener) {
@@ -11529,7 +13474,7 @@ const MUTATIONS_LIST = [
         // =========================================================
         // FEATURE 3: ARCHIVE BOOK (MILESTONE XP REWARDS)
         // =========================================================
-        
+
         // Initialize collections tracking in user profile
         function initializeCollectionsTracking() {
             if (!userDataRecord.collections) {
@@ -11552,7 +13497,7 @@ const MUTATIONS_LIST = [
 
                 // Check if all required cards are owned
                 const allOwned = setData.requiredCards.every(cardId => discovered[cardId]);
-                
+
                 if (allOwned && !collections[setName]?.completed) {
                     // Set completed!
                     awardSetCompletionReward(setName, setData);
@@ -11562,30 +13507,30 @@ const MUTATIONS_LIST = [
 
         async function awardSetCompletionReward(setName, setData) {
             const xpReward = setData.rewardXp;
-            
+
             try {
                 // Use transaction to atomically award XP and mark as claimed
                 const userRef = ref(db, `users/${activeUserSession.uid}`);
                 await runTransaction(userRef, (userData) => {
                     if (!userData) return;
-                    
+
                     if (!userData.collections) userData.collections = {};
                     if (!userData.collections[setName]) userData.collections[setName] = {};
-                    
+
                     // Double-check not already claimed
                     if (userData.collections[setName].rewardClaimed) return userData;
-                    
+
                     userData.collections[setName].completed = true;
                     userData.collections[setName].rewardClaimed = true;
                     userData.collections[setName].completedAt = serverTimestamp();
                     userData.xp = (userData.xp || 0) + xpReward;
-                    
+
                     return userData;
                 });
 
                 // Show notification
                 showArchiveNotification(setData.name, xpReward);
-                
+
                 // Update local data
                 if (!userDataRecord.collections) userDataRecord.collections = {};
                 userDataRecord.collections[setName] = {
@@ -11594,9 +13539,12 @@ const MUTATIONS_LIST = [
                     completedAt: Date.now()
                 };
                 userDataRecord.xp = (userDataRecord.xp || 0) + xpReward;
-                
+
                 renderHUDDisplayElements();
                 
+                // Award XPB for set completion
+                if (window.awardXPB) window.awardXPB(800, 'Set Completed');
+
             } catch (error) {
                 console.error('Error awarding set completion:', error);
             }
@@ -11607,7 +13555,7 @@ const MUTATIONS_LIST = [
             const text = document.getElementById('archive-notification-text');
             text.textContent = `You completed the ${setName} and received ${xpReward} XP!`;
             notification.classList.add('show');
-            
+
             setTimeout(() => {
                 notification.classList.remove('show');
             }, 5000);
@@ -11616,7 +13564,7 @@ const MUTATIONS_LIST = [
         // Hook into existing card acquisition functions
         // Override the pack purchase function to check for set completion
         const originalPurchasePackAsset = window.purchasePackAsset;
-        window.purchasePackAsset = async function(packKey) {
+        window.purchasePackAsset = async function (packKey) {
             await originalPurchasePackAsset.call(this, packKey);
             // Check for set completion after pack opening
             setTimeout(() => {
@@ -11624,12 +13572,14 @@ const MUTATIONS_LIST = [
                 for (const cardId in discovered) {
                     checkSetCompletion(cardId);
                 }
+                // Award XPB for pack opening
+                if (window.awardXPB) window.awardXPB(150, 'Pack Opened');
             }, 1000);
         };
 
         // Initialize collections and trading system on user load
         const originalInitializeUserEnvironmentCore = initializeUserEnvironmentCore;
-        initializeUserEnvironmentCore = function() {
+        initializeUserEnvironmentCore = function () {
             originalInitializeUserEnvironmentCore.call(this);
             setTimeout(() => {
                 initializeCollectionsTracking();
@@ -11650,12 +13600,12 @@ const MUTATIONS_LIST = [
         const _stolenTimers = {}; // instanceId -> { startedAt: timestamp }
 
         // Register a newly stolen card
-        window.registerStolenCardActiveTimer = function(instanceId) {
+        window.registerStolenCardActiveTimer = function (instanceId) {
             _stolenTimers[instanceId] = { startedAt: Date.now() };
         };
 
         // Returns ms elapsed since steal (only while page was open; resets on leave)
-        window.getStolenActiveMs = function(instanceId) {
+        window.getStolenActiveMs = function (instanceId) {
             const entry = _stolenTimers[instanceId];
             if (!entry) return Infinity; // No record = old card, no restriction
             return Date.now() - entry.startedAt;
@@ -11736,10 +13686,22 @@ const MUTATIONS_LIST = [
             for (const id in _stolenTimers) delete _stolenTimers[id];
         });
 
+        // Expose Firebase functions for non-module scripts
+        window._realm = {
+            getDb: () => db,
+            getRef: () => ref,
+            getUpdate: () => update,
+            getSet: () => set,
+            getGet: () => get,
+            getServerTimestamp: () => serverTimestamp,
+            getUserData: () => userDataRecord,
+            getActiveUser: () => activeUserSession,
+        };
     </script>
-    <div style="position: fixed; top: 12px; left: 12px; z-index: 9999999999999; color: rgba(255, 255, 255, 0.4); font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
-    V:9.9.9
-</div>
+    <div
+        style="position: fixed; top: 12px; left: 12px; z-index: 9999999999999; color: rgba(255, 255, 255, 0.4); font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
+        V:9.9.8
+    </div>
 </body>
 
 </html>
