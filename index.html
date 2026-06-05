@@ -10016,8 +10016,10 @@
 
             payload[`users/${activeUserSession.uid}/money`] = parseFloat((parseFloat(userDataRecord.money || 0) + totalPayout).toFixed(2));
 
-            await update(ref(db, '/'), payload);
+            // Play before any await — iOS only allows audio within a direct user gesture
             playMoneySound();
+
+            await update(ref(db, '/'), payload);
             showToast(`Sold ${sellableEntries.length} unlocked card${sellableEntries.length === 1 ? '' : 's'} for €${formatNum(totalPayout)}.`, 'success');
         };
 
@@ -10406,13 +10408,15 @@
             const finalPayout = salePayoutVal;
             if (!confirm(`Verify financial liquidation execution for selected asset? Payout calculated at: €${formatNum(finalPayout)}`)) return;
 
+            // Play before any await — iOS only allows audio within a direct user gesture
+            playMoneySound();
+
             const databasePatchPayload = {};
             databasePatchPayload[`inventory/${activeUserSession.uid}/${instanceId}`] = null;
             databasePatchPayload[`users/${activeUserSession.uid}/money`] = userDataRecord.money + finalPayout;
             databasePatchPayload[`users/${activeUserSession.uid}/xp`] = userDataRecord.xp + 10;
 
             await update(ref(db, '/'), databasePatchPayload);
-            playMoneySound();
             // Tutorial step 4/12: selling a card.
             if (isCurrentUserStillInTutorial() && getTutorialStep() === 3) {
                 advanceTutorialTo(4, { soldCard: true, soldCardAt: Date.now() });
@@ -13988,7 +13992,7 @@
     </script>
     <div
         style="position: fixed; top: 12px; left: 12px; z-index: 9999999999999; color: rgba(255, 255, 255, 0.4); font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
-        V:9.7
+        V:9.5
     </div>
 </body>
 
