@@ -4714,8 +4714,11 @@
             const seasonIdx = Math.floor(pos / 14);
             const daysLeft = 14 - (pos % 14);
             const seasonName = ['SEASON 1','SEASON 2','SEASON 3','SEASON 4','SEASON 5'][seasonIdx];
+            const seasonColors = ['#ef4444','#3b82f6','#22c55e','#a855f7','#ef4444'];
+            const seasonColor = seasonColors[seasonIdx] || '#ef4444';
 
             seasonBadge.textContent = seasonName;
+            seasonBadge.style.color = seasonColor;
 
             // Season end — may be overridden by admin in Firebase
             let _seasonEndMs = EPOCH + (seasonIdx + 1) * 14 * 86400000;
@@ -4728,13 +4731,19 @@
                 const _get = window._realm.getGet();
                 _get(_ref(_db, 'system/season')).then(snap => {
                     const d = snap.val();
-                    if (d?.seasonEndTime) _seasonEndMs = d.seasonEndTime;
+                    if (d?.seasonEndTime) {
+                        _seasonEndMs = d.seasonEndTime;
+                        window._realmSeasonEndMs = d.seasonEndTime;
+                        updateCountdown(); // Refresh countdown immediately with Firebase data
+                    }
                 }).catch(() => {});
             }
             _tryLoadSeasonEnd();
 
             function updateCountdown() {
-                const diff = _seasonEndMs - Date.now();
+                // Always use window._realmSeasonEndMs if set (admin override syncs here)
+                const endMs = window._realmSeasonEndMs || _seasonEndMs;
+                const diff = endMs - Date.now();
                 if (diff <= 0) { seasonCountdown.textContent = 'Season ending soon...'; return; }
                 const days = Math.floor(diff / 86400000);
                 const hours = Math.floor((diff % 86400000) / 3600000);
@@ -4877,6 +4886,8 @@
         const pos = ((daysSince % 70) + 70) % 70;
         const seasonIdx = Math.floor(pos / 14);
         const seasonName = ['SEASON 1','SEASON 2','SEASON 3','SEASON 4','SEASON 5'][seasonIdx];
+        const SEASON_COLORS = ['#ef4444','#3b82f6','#22c55e','#a855f7','#ef4444'];
+        const currentSeasonColor = SEASON_COLORS[seasonIdx] || '#ef4444';
 
         // BP season end — reads from Firebase so admin override works
         let _bpSeasonEndMs = null;
@@ -4884,6 +4895,7 @@
         function _startBPCountdown() {
             const el = document.getElementById('bp-season-countdown');
             if (!el) return;
+            el.style.color = currentSeasonColor;
 
             function tick() {
                 if (!_bpSeasonEndMs) { el.textContent = '-- : -- : --'; return; }
@@ -4909,25 +4921,26 @@
                 if (window._realm && window._realm.getDb()) {
                     clearInterval(checkFirebase);
                     console.log('Firebase ready, initializing battle pass...');
-                    // Load season end from Firebase
                     const _db = window._realm.getDb();
                     const _ref = window._realm.getRef();
                     const _get = window._realm.getGet();
                     _get(_ref(_db, 'system/season')).then(snap => {
                         const d = snap.val();
-                        const EPOCH = new Date('2026-06-04T00:00:00Z').getTime();
-                        const daysSince = Math.floor((Date.now() - EPOCH) / 86400000);
-                        const pos = ((daysSince % 70) + 70) % 70;
-                        const sIdx = Math.floor(pos / 14);
-                        _bpSeasonEndMs = (d?.seasonEndTime) || (EPOCH + (sIdx + 1) * 14 * 86400000);
+                        const _bpEPOCH = new Date('2026-06-04T00:00:00Z').getTime();
+                        const _bpDays = Math.floor((Date.now() - _bpEPOCH) / 86400000);
+                        const _bpPos = ((_bpDays % 70) + 70) % 70;
+                        const _bpSIdx = Math.floor(_bpPos / 14);
+                        // Use Firebase seasonEndTime if set by admin, otherwise calculate
+                        _bpSeasonEndMs = (d?.seasonEndTime) || (_bpEPOCH + (_bpSIdx + 1) * 14 * 86400000);
+                        refreshBattlePassUI();
                     }).catch(() => {
-                        const EPOCH = new Date('2026-06-04T00:00:00Z').getTime();
-                        const daysSince = Math.floor((Date.now() - EPOCH) / 86400000);
-                        const pos = ((daysSince % 70) + 70) % 70;
-                        const sIdx = Math.floor(pos / 14);
-                        _bpSeasonEndMs = EPOCH + (sIdx + 1) * 14 * 86400000;
+                        const _bpEPOCH = new Date('2026-06-04T00:00:00Z').getTime();
+                        const _bpDays = Math.floor((Date.now() - _bpEPOCH) / 86400000);
+                        const _bpPos = ((_bpDays % 70) + 70) % 70;
+                        const _bpSIdx = Math.floor(_bpPos / 14);
+                        _bpSeasonEndMs = _bpEPOCH + (_bpSIdx + 1) * 14 * 86400000;
+                        refreshBattlePassUI();
                     });
-                    refreshBattlePassUI();
                     // tier track will be rendered by renderBattlePassUI
                 }
             }, 500);
@@ -4980,7 +4993,12 @@
 
             // Update season info
             const seasonInfo = document.getElementById('bp-season-info');
-            if (seasonInfo) seasonInfo.textContent = seasonName;
+            if (seasonInfo) {
+                seasonInfo.textContent = seasonName;
+                seasonInfo.style.color = currentSeasonColor;
+                seasonInfo.style.borderColor = currentSeasonColor;
+                seasonInfo.style.background = currentSeasonColor + '22';
+            }
             
             // Update credits display
             const creditsDisplay = document.getElementById('bp-credits');
@@ -5388,9 +5406,39 @@
                     overriddenAt: Date.now()
                 });
                 // Update live countdown immediately
-                if (typeof _bpSeasonEndMs !== 'undefined') _bpSeasonEndMs = newEndTime;
+                _bpSeasonEndMs = newEndTime;
+                window._realmSeasonEndMs = newEndTime;
                 document.getElementById('admin-current-end').textContent = new Date(newEndTime).toLocaleString();
                 statusEl.textContent = '✓ Season end date updated!';
+                statusEl.style.color = '#10b981';
+            } catch(err) {
+                statusEl.textContent = `✗ Error: ${err.message}`;
+                statusEl.style.color = '#ef4444';
+            }
+        };
+
+        window.adminResetSeasonTo14Days = async function() {
+            const db = window._realm?.getDb();
+            const ref = window._realm?.getRef();
+            const update = window._realm?.getUpdate();
+            const statusEl = document.getElementById('admin-season-status');
+
+            statusEl.textContent = 'Resetting...'; statusEl.style.color = '#9ca3af';
+
+            try {
+                const newEndTime = Date.now() + (14 * 24 * 60 * 60 * 1000);
+                await update(ref(db, 'system/season'), {
+                    seasonEndTime: newEndTime,
+                    overriddenAt: Date.now()
+                });
+                _bpSeasonEndMs = newEndTime;
+                window._realmSeasonEndMs = newEndTime;
+                document.getElementById('admin-current-end').textContent = new Date(newEndTime).toLocaleString();
+                // Pre-fill the input with the new value
+                const dt = new Date(newEndTime);
+                const local = new Date(dt.getTime() - dt.getTimezoneOffset() * 60000).toISOString().slice(0,16);
+                document.getElementById('admin-season-end-input').value = local;
+                statusEl.textContent = '✓ Season reset to 14 days from now!';
                 statusEl.style.color = '#10b981';
             } catch(err) {
                 statusEl.textContent = `✗ Error: ${err.message}`;
@@ -6027,10 +6075,11 @@
 
                         <!-- CHANGE SEASON END DATE -->
                         <div style="background:rgba(220,38,38,0.07);border:1px solid rgba(220,38,38,0.2);border-radius:12px;padding:16px;">
-                            <div style="font-weight:700;font-size:0.85rem;color:#f3f4f6;margin-bottom:4px;">&#128197; Override Season End Date</div>
+                            <div style="font-weight:700;font-size:0.85rem;color:#f3f4f6;margin-bottom:4px;">&#128197; Season End Date</div>
                             <div style="font-size:0.72rem;color:#6b7280;margin-bottom:12px;">Current end: <span id="admin-current-end">—</span></div>
+                            <button onclick="adminResetSeasonTo14Days()" style="width:100%;background:linear-gradient(135deg,#0891b2,#0e7490);border:none;color:white;border-radius:8px;padding:10px;font-weight:700;font-size:0.85rem;cursor:pointer;margin-bottom:8px;">&#8635; RESET TO 14 DAYS FROM NOW</button>
                             <input id="admin-season-end-input" type="datetime-local" style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:10px 12px;color:white;font-size:0.85rem;outline:none;margin-bottom:10px;color-scheme:dark;">
-                            <button onclick="adminSetSeasonEnd()" style="width:100%;background:linear-gradient(135deg,#d97706,#92400e);border:none;color:white;border-radius:8px;padding:10px;font-weight:700;font-size:0.85rem;cursor:pointer;">SET END DATE</button>
+                            <button onclick="adminSetSeasonEnd()" style="width:100%;background:linear-gradient(135deg,#d97706,#92400e);border:none;color:white;border-radius:8px;padding:10px;font-weight:700;font-size:0.85rem;cursor:pointer;">SET CUSTOM END DATE</button>
                             <div id="admin-season-status" style="font-size:0.75rem;text-align:center;margin-top:8px;color:#6b7280;"></div>
                         </div>
                     </div>
@@ -8681,15 +8730,9 @@
                 const daysSince = Math.floor((Date.now() - EPOCH) / 86400000);
                 const pos = ((daysSince % 70) + 70) % 70;
                 const seasonIdx = Math.floor(pos / 14);
-                const seasonEndTime = EPOCH + (seasonIdx + 1) * 14 * 86400000;
                 
-                // Save current season end time to Firebase
-                update(ref(db, 'system/season'), {
-                    currentSeason: seasonIdx,
-                    seasonName: ['SEASON 1','SEASON 2','SEASON 3','SEASON 4','SEASON 5'][seasonIdx],
-                    seasonEndTime: seasonEndTime,
-                    updatedAt: Date.now()
-                }).catch(() => {});
+                // Season metadata in system/season is managed exclusively by the admin panel.
+                // User logins never write to system/season.
                 
                 if (!userDataRecord.battlePass) {
                     userDataRecord.battlePass = {
@@ -13935,7 +13978,7 @@
     </script>
     <div
         style="position: fixed; top: 12px; left: 12px; z-index: 9999999999999; color: rgba(255, 255, 255, 0.4); font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
-        V:9.5
+        V:9.6
     </div>
 </body>
 
