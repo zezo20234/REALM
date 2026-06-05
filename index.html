@@ -8690,9 +8690,11 @@
             }, PRESENCE_HEARTBEAT_MS);
         }
 
+        let _presenceInitialDelayTimer = null;
         function setupPresenceSystem() {
             const uid = activeUserSession.uid;
             const presenceNodeRef = ref(db, `presence/${uid}`);
+            let _firstConnect = true;
 
             if (presenceOffsetUnsub) presenceOffsetUnsub();
             presenceOffsetUnsub = onValue(ref(db, '.info/serverTimeOffset'), snapshot => {
@@ -8704,8 +8706,18 @@
             presenceConnectedUnsub = onValue(ref(db, '.info/connected'), snapshot => {
                 if (snapshot.val() !== true) return;
                 onDisconnect(presenceNodeRef).remove();
-                tryPublishPresenceWhenReady();
-                startPresenceHeartbeat();
+                if (_firstConnect) {
+                    _firstConnect = false;
+                    if (_presenceInitialDelayTimer) clearTimeout(_presenceInitialDelayTimer);
+                    _presenceInitialDelayTimer = setTimeout(() => {
+                        _presenceInitialDelayTimer = null;
+                        tryPublishPresenceWhenReady();
+                        startPresenceHeartbeat();
+                    }, 12000);
+                } else {
+                    tryPublishPresenceWhenReady();
+                    startPresenceHeartbeat();
+                }
             });
         }
 
@@ -8889,14 +8901,13 @@
 
         function formatNum(n) {
             n = parseFloat(n) || 0;
-            const abs = Math.abs(n);
             const sign = n < 0 ? '-' : '';
-            if (abs >= 1e15) return sign + (abs / 1e15).toFixed(abs % 1e15 === 0 ? 0 : 2).replace(/\.?0+$/, '') + 'Q';
-            if (abs >= 1e12) return sign + (abs / 1e12).toFixed(abs % 1e12 === 0 ? 0 : 2).replace(/\.?0+$/, '') + 'T';
-            if (abs >= 1e9) return sign + (abs / 1e9).toFixed(abs % 1e9 === 0 ? 0 : 2).replace(/\.?0+$/, '') + 'B';
-            if (abs >= 1e6) return sign + (abs / 1e6).toFixed(abs % 1e6 === 0 ? 0 : 2).replace(/\.?0+$/, '') + 'M';
-            if (abs >= 1e3) return sign + (abs / 1e3).toFixed(abs % 1e3 === 0 ? 0 : 2).replace(/\.?0+$/, '') + 'K';
-            return sign + abs.toFixed(2);
+            const abs = Math.abs(n);
+            // Always show with commas, no K/M/T abbreviations
+            if (Number.isInteger(abs)) {
+                return sign + abs.toLocaleString('en-US');
+            }
+            return sign + abs.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         }
 
         function renderHUDDisplayElements() {
@@ -9865,8 +9876,6 @@
             const card = userDeckRecord?.[instanceId];
             if (!card) return;
             if (!card.isCollection) return;
-            if (card.collectionToggled) return showToast('This card has already been toggled in/out of collection.', 'error');
-
             const cost = 5000;
             if ((userDataRecord.money || 0) < cost) {
                 return showToast(`You need €${cost} to remove this card from collection.`, 'error');
@@ -9877,10 +9886,11 @@
                     ...card,
                     isCollection: false,
                     unsellable: false,
-                    collectionToggled: true
+                    collectionToggled: false
                 },
                 [`users/${activeUserSession.uid}/money`]: (userDataRecord.money || 0) - cost
             });
+            userDeckRecord[instanceId] = { ...card, isCollection: false, unsellable: false, collectionToggled: false };
             userDataRecord.money = (userDataRecord.money || 0) - cost;
             showToast('Card removed from collection for €5000!', 'success');
             closeModal('modal-card-details');
@@ -9981,7 +9991,7 @@
                     </div>
                     <div class="card-action-overlay">
                         <div style="display:flex; gap:6px;">
-                            <button class="card-btn" style="flex:1; background:var(--bg-surface); border:1px solid var(--border-glow); color:#9ca3af;" disabled>COLLECTION</button>
+                            <button class="card-btn" style="flex:1; background:#7f1d1d; border:1px solid #ef4444; color:#fca5a5; font-weight:800;" onclick="removeFromCollection('${instanceIdKey}')">REMOVE €5,000</button>
                         </div>
                     </div>
                 `;
@@ -13992,7 +14002,7 @@
     </script>
     <div
         style="position: fixed; top: 12px; left: 12px; z-index: 9999999999999; color: rgba(255, 255, 255, 0.4); font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
-        V:9.5
+        V:9.6
     </div>
 </body>
 
