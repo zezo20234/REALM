@@ -3222,30 +3222,98 @@
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 8px;
-            background: rgba(15, 23, 42, 0.72);
-            border: 1px solid rgba(148, 163, 184, 0.16);
-            border-radius: 12px;
+            background: rgba(9, 13, 22, 0.85);
+            border: 1px solid rgba(148, 163, 184, 0.14);
+            border-radius: 14px;
             padding: 6px;
         }
 
         .quest-tab-btn {
-            min-height: 46px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            min-height: 64px;
+            padding: 10px 6px;
             border: 1px solid transparent;
-            border-radius: 8px;
+            border-radius: 10px;
             background: transparent;
-            color: #9ca3af;
+            color: #6b7280;
             cursor: pointer;
-            font-size: 0.74rem;
+            transition: all 0.18s ease;
+            position: relative;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .quest-tab-btn:active {
+            transform: scale(0.95);
+        }
+
+        .qtab-icon {
+            font-size: 1.4rem;
+            line-height: 1;
+            filter: grayscale(0.6) opacity(0.6);
+            transition: filter 0.18s ease;
+        }
+
+        .qtab-label {
+            font-size: 0.72rem;
             font-weight: 900;
-            letter-spacing: 0.04em;
+            letter-spacing: 0.05em;
             text-transform: uppercase;
-            transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+            transition: color 0.18s ease;
+        }
+
+        .qtab-count {
+            font-size: 0.62rem;
+            font-weight: 800;
+            color: #4b5563;
+            background: rgba(255,255,255,0.06);
+            border-radius: 999px;
+            padding: 1px 7px;
+            letter-spacing: 0.04em;
+            transition: all 0.18s ease;
         }
 
         .quest-tab-btn.active {
+            background: linear-gradient(145deg, rgba(37, 99, 235, 0.22), rgba(20, 184, 166, 0.12));
+            border-color: rgba(96, 165, 250, 0.5);
+            box-shadow: 0 0 14px rgba(37, 99, 235, 0.2), inset 0 1px 0 rgba(255,255,255,0.06);
             color: #f8fafc;
-            background: linear-gradient(135deg, rgba(37, 99, 235, 0.35), rgba(20, 184, 166, 0.16));
-            border-color: rgba(96, 165, 250, 0.45);
+        }
+
+        .quest-tab-btn.active .qtab-icon {
+            filter: grayscale(0) opacity(1);
+        }
+
+        .quest-tab-btn.active .qtab-label {
+            color: #e0f2fe;
+        }
+
+        .quest-tab-btn.active .qtab-count {
+            color: #93c5fd;
+            background: rgba(96, 165, 250, 0.18);
+        }
+
+        /* daily tab golden tint when active */
+        [data-quest-tab="daily"].quest-tab-btn.active {
+            background: linear-gradient(145deg, rgba(245, 158, 11, 0.16), rgba(251, 191, 36, 0.08));
+            border-color: rgba(251, 191, 36, 0.45);
+        }
+        [data-quest-tab="daily"].quest-tab-btn.active .qtab-count {
+            color: #fde68a;
+            background: rgba(245, 158, 11, 0.18);
+        }
+
+        /* monthly tab purple tint when active */
+        [data-quest-tab="monthly"].quest-tab-btn.active {
+            background: linear-gradient(145deg, rgba(168, 85, 247, 0.2), rgba(139, 92, 246, 0.1));
+            border-color: rgba(167, 139, 250, 0.5);
+        }
+        [data-quest-tab="monthly"].quest-tab-btn.active .qtab-count {
+            color: #d8b4fe;
+            background: rgba(168, 85, 247, 0.18);
         }
 
         .quest-tier-panel {
@@ -5477,9 +5545,12 @@
                     const milestonePackPrice = (window.PACK_METADATA && window.PACK_METADATA[milestonePackKey]?.price) || 999999;
                     await update(ref(db, `users/${activeUser.uid}`), updates);
                     const origMoney = userData.money || 0;
-                    userData.money = origMoney + milestonePackPrice + 1;
-                    await purchasePackAsset(milestonePackKey);
-                    userData.money = origMoney;
+                    try {
+                        userData.money = origMoney + milestonePackPrice + 1;
+                        await purchasePackAsset(milestonePackKey);
+                    } finally {
+                        userData.money = origMoney;
+                    }
                     showToast(`Tier ${nextTier} claimed! 🎁 ${rewardText}`, 'success');
                     setTimeout(() => refreshBattlePassUI(), 500);
                     return;
@@ -5505,14 +5576,17 @@
                         const packKey = rewards.pack.toLowerCase();
                         const packPrice = (window.PACK_METADATA && window.PACK_METADATA[packKey]?.price) || 999999;
                         const originalMoney = userData.money || 0;
-                        userData.money = originalMoney + packPrice + 1;
                         updates = {
                             'battlePass/xpb': currentXPB - XPB_PER_TIER,
                             'battlePass/tier': nextTier
                         };
                         await update(ref(db, `users/${activeUser.uid}`), updates);
-                        await purchasePackAsset(packKey);
-                        userData.money = originalMoney;
+                        try {
+                            userData.money = originalMoney + packPrice + 1;
+                            await purchasePackAsset(packKey);
+                        } finally {
+                            userData.money = originalMoney;
+                        }
                         showToast(`Tier ${nextTier} claimed! 🎁 ${rewards.pack} Pack opened!`, 'success');
                         setTimeout(() => refreshBattlePassUI(), 500);
                         return;
@@ -5585,7 +5659,7 @@
                 const today = new Date().toDateString();
                 
                 if (bp.lastLoginDay !== today) {
-                    await awardXPB(300, 'Daily Login');
+                    await window.awardXPB(300, 'Daily Login');
                     await update(ref(db, `users/${activeUser.uid}/battlePass`), { lastLoginDay: today });
                 }
             } catch (error) {
@@ -6190,24 +6264,35 @@
 
             <section id="view-quests" class="view-panel">
                 <h2 class="section-title">Quest Board</h2>
-                <p class="section-desc">Extreme rotating objectives for Daily, Weekly, and Monthly economy progression.
-                </p>
+                <p class="section-desc">Hard rotating challenges. Best rewards: €5,000 · 500 XP · Exotic Pack.</p>
 
                 <div id="container-quests" class="quest-board">
                     <div class="quest-tabs" role="tablist" aria-label="Quest tiers">
                         <button class="quest-tab-btn active" type="button" data-quest-tab="daily"
-                            onclick="setQuestTab('daily')">Daily</button>
+                            onclick="setQuestTab('daily')">
+                            <span class="qtab-icon">☀️</span>
+                            <span class="qtab-label">Daily</span>
+                            <span class="qtab-count">3</span>
+                        </button>
                         <button class="quest-tab-btn" type="button" data-quest-tab="weekly"
-                            onclick="setQuestTab('weekly')">Weekly</button>
+                            onclick="setQuestTab('weekly')">
+                            <span class="qtab-icon">⚡</span>
+                            <span class="qtab-label">Weekly</span>
+                            <span class="qtab-count">14</span>
+                        </button>
                         <button class="quest-tab-btn" type="button" data-quest-tab="monthly"
-                            onclick="setQuestTab('monthly')">Monthly</button>
+                            onclick="setQuestTab('monthly')">
+                            <span class="qtab-icon">🏆</span>
+                            <span class="qtab-label">Monthly</span>
+                            <span class="qtab-count">28</span>
+                        </button>
                     </div>
 
                     <section class="quest-tier-panel active" data-quest-panel="daily">
                         <div class="quest-tier-head">
                             <div>
-                                <div class="quest-tier-title">Daily Quests</div>
-                                <div class="quest-tier-meta">3 slots. Very, very hard. Resets at local midnight.</div>
+                                <div class="quest-tier-title">☀️ Daily Challenges</div>
+                                <div class="quest-tier-meta">3 challenges · Rotates every midnight</div>
                             </div>
                             <div class="quest-reset-timer" id="quest-countdown-daily">Reset: --</div>
                         </div>
@@ -6217,9 +6302,8 @@
                     <section class="quest-tier-panel" data-quest-panel="weekly">
                         <div class="quest-tier-head">
                             <div>
-                                <div class="quest-tier-title">Weekly Quests</div>
-                                <div class="quest-tier-meta">7 slots. Very, very, very, very, very hard. Resets Sunday
-                                    at midnight.</div>
+                                <div class="quest-tier-title">⚡ Weekly Challenges</div>
+                                <div class="quest-tier-meta">14 challenges · Rotates every Sunday at midnight</div>
                             </div>
                             <div class="quest-reset-timer" id="quest-countdown-weekly">Reset: --</div>
                         </div>
@@ -6229,8 +6313,8 @@
                     <section class="quest-tier-panel" data-quest-panel="monthly">
                         <div class="quest-tier-head">
                             <div>
-                                <div class="quest-tier-title">Monthly Quests</div>
-                                <div class="quest-tier-meta">12 slots. Extreeeeeeeeemly hard. Resets on the 1st.</div>
+                                <div class="quest-tier-title">🏆 Monthly Challenges</div>
+                                <div class="quest-tier-meta">28 challenges · Rotates on the 1st of every month</div>
                             </div>
                             <div class="quest-reset-timer" id="quest-countdown-monthly">Reset: --</div>
                         </div>
@@ -6816,63 +6900,110 @@
         ];
 
         const QUEST_POOLS = {
+            // 12 daily challenges — medium difficulty, resets at midnight
             daily: [
-                { id: 'daily_open_500', title: 'Pack Apocalypse', description: 'Open 500 packs in a single day. Only the dedicated survive.', type: 'open_packs', target: 500, unit: 'packs opened', rewardType: 'platinum_pack', rewardAmount: 2, difficultyScore: 100 },
-                { id: 'daily_clash_100', title: 'Clash Master', description: 'Win 100 card clashes before the daily reset. Prove your dominance.', type: 'win_clashes', target: 100, unit: 'clashes won', rewardType: 'xp', rewardAmount: 900, difficultyScore: 100 },
-                { id: 'daily_sell_200', title: 'Market Purge', description: 'Sell 200 cards from your deck in one day. Liquidate everything.', type: 'sell_cards', target: 200, unit: 'cards sold', rewardType: 'money', rewardAmount: 1000, difficultyScore: 100 },
-                { id: 'daily_discover_50', title: 'Archive Explorer', description: 'Discover 50 new unique cards today. Expand your knowledge.', type: 'discover_cards', target: 50, unit: 'cards discovered', rewardType: 'xp', rewardAmount: 900, difficultyScore: 100 },
-                { id: 'daily_earn_500', title: 'Quick Cash', description: 'Earn 500 euros today through any means. Fast money.', type: 'earn_money', target: 500, unit: 'euros earned', progressMode: 'sum_money', rewardType: 'money', rewardAmount: 1000, difficultyScore: 100 },
-                { id: 'daily_trade_30', title: 'Trade Hustler', description: 'Execute 30 player trades today. Move the market.', type: 'player_trades', target: 30, unit: 'trades executed', rewardType: 'platinum_pack', rewardAmount: 2, difficultyScore: 100 },
-                { id: 'daily_own_300', title: 'Vault Builder', description: 'Own 300 cards simultaneously. Build your collection.', type: 'own_cards', target: 300, unit: 'cards owned', progressMode: 'max', rewardType: 'xp', rewardAmount: 800, difficultyScore: 100 },
-                { id: 'daily_mg_50', title: 'Minigame Ace', description: 'Win 50 math or reaction minigames today. Sharpen your skills.', type: 'minigame_wins', target: 50, unit: 'minigames won', rewardType: 'xp', rewardAmount: 850, difficultyScore: 100 },
-                { id: 'daily_bank_5000', title: 'Bank Secure', description: 'Hold 5,000 euros in your bank simultaneously. Secure your wealth.', type: 'bank_balance', target: 5000, unit: 'euros banked', progressMode: 'max_money', rewardType: 'money', rewardAmount: 950, difficultyScore: 100 },
-                { id: 'daily_snipe_20', title: 'Auction Sniper', description: 'Snipe 20 cards from the global auction today. Strike fast.', type: 'auction_snipes', target: 20, unit: 'cards sniped', rewardType: 'xp', rewardAmount: 800, difficultyScore: 100 },
-                { id: 'daily_duplicate_200', title: 'Duplicate Cleaner', description: 'Fuse or burn 200 duplicate cards today. Clean your vault.', type: 'fuse_or_burn_duplicates', target: 200, unit: 'duplicates fused/burned', rewardType: 'money', rewardAmount: 900, difficultyScore: 100 },
-                { id: 'daily_open_300', title: 'Pack Rush', description: 'Open 300 packs today. Speed opening.', type: 'open_packs', target: 300, unit: 'packs opened', rewardType: 'platinum_pack', rewardAmount: 1, difficultyScore: 100 },
-                { id: 'daily_clash_75', title: 'Clash Warrior', description: 'Win 75 card clashes today. Battle tested.', type: 'win_clashes', target: 75, unit: 'clashes won', rewardType: 'xp', rewardAmount: 750, difficultyScore: 100 },
-                { id: 'daily_sell_150', title: 'Market Flow', description: 'Sell 150 cards today. Keep the market moving.', type: 'sell_cards', target: 150, unit: 'cards sold', rewardType: 'money', rewardAmount: 800, difficultyScore: 100 },
-                { id: 'daily_discover_40', title: 'Card Hunter', description: 'Discover 40 new unique cards today. Hunt them down.', type: 'discover_cards', target: 40, unit: 'cards discovered', rewardType: 'xp', rewardAmount: 700, difficultyScore: 100 },
-                { id: 'daily_earn_400', title: 'Income Stream', description: 'Earn 400 euros today. Steady income.', type: 'earn_money', target: 400, unit: 'euros earned', progressMode: 'sum_money', rewardType: 'money', rewardAmount: 850, difficultyScore: 100 },
-                { id: 'daily_trade_25', title: 'Trade Broker', description: 'Execute 25 player trades today. Broker deals.', type: 'player_trades', target: 25, unit: 'trades executed', rewardType: 'platinum_pack', rewardAmount: 1, difficultyScore: 100 },
-                { id: 'daily_own_250', title: 'Collection Keeper', description: 'Own 250 cards simultaneously. Maintain your collection.', type: 'own_cards', target: 250, unit: 'cards owned', progressMode: 'max', rewardType: 'xp', rewardAmount: 700, difficultyScore: 100 },
-                { id: 'daily_mg_40', title: 'Minigame Pro', description: 'Win 40 minigames today. Pro level.', type: 'minigame_wins', target: 40, unit: 'minigames won', rewardType: 'xp', rewardAmount: 750, difficultyScore: 100 },
-                { id: 'daily_bank_4000', title: 'Bank Guardian', description: 'Hold 4,000 euros in your bank. Guard your wealth.', type: 'bank_balance', target: 4000, unit: 'euros banked', progressMode: 'max_money', rewardType: 'money', rewardAmount: 800, difficultyScore: 100 },
-                { id: 'daily_snipe_15', title: 'Quick Snipe', description: 'Snipe 15 cards from auction today. Quick strikes.', type: 'auction_snipes', target: 15, unit: 'cards sniped', rewardType: 'xp', rewardAmount: 700, difficultyScore: 100 },
-                { id: 'daily_duplicate_150', title: 'Duplicate Manager', description: 'Fuse or burn 150 duplicates today. Manage excess.', type: 'fuse_or_burn_duplicates', target: 150, unit: 'duplicates fused/burned', rewardType: 'money', rewardAmount: 750, difficultyScore: 100 },
-                { id: 'daily_open_400', title: 'Pack Marathon', description: 'Open 400 packs today. Endurance opening.', type: 'open_packs', target: 400, unit: 'packs opened', rewardType: 'platinum_pack', rewardAmount: 2, difficultyScore: 100 },
-                { id: 'daily_clash_80', title: 'Clash Veteran', description: 'Win 80 card clashes today. Veteran status.', type: 'win_clashes', target: 80, unit: 'clashes won', rewardType: 'xp', rewardAmount: 800, difficultyScore: 100 },
-                { id: 'daily_sell_180', title: 'Market Maker', description: 'Sell 180 cards today. Make the market.', type: 'sell_cards', target: 180, unit: 'cards sold', rewardType: 'money', rewardAmount: 900, difficultyScore: 100 },
-                { id: 'daily_discover_45', title: 'Archive Seeker', description: 'Discover 45 new unique cards today. Seek knowledge.', type: 'discover_cards', target: 45, unit: 'cards discovered', rewardType: 'xp', rewardAmount: 800, difficultyScore: 100 },
-                { id: 'daily_earn_450', title: 'Profit Seeker', description: 'Earn 450 euros today. Seek profit.', type: 'earn_money', target: 450, unit: 'euros earned', progressMode: 'sum_money', rewardType: 'money', rewardAmount: 950, difficultyScore: 100 },
-                { id: 'daily_trade_28', title: 'Trade Master', description: 'Execute 28 player trades today. Master trading.', type: 'player_trades', target: 28, unit: 'trades executed', rewardType: 'platinum_pack', rewardAmount: 2, difficultyScore: 100 },
-                { id: 'daily_own_280', title: 'Vault Guardian', description: 'Own 280 cards simultaneously. Guard your vault.', type: 'own_cards', target: 280, unit: 'cards owned', progressMode: 'max', rewardType: 'xp', rewardAmount: 750, difficultyScore: 100 },
-                { id: 'daily_mg_45', title: 'Minigame Expert', description: 'Win 45 minigames today. Expert level.', type: 'minigame_wins', target: 45, unit: 'minigames won', rewardType: 'xp', rewardAmount: 850, difficultyScore: 100 },
-                { id: 'daily_bank_4500', title: 'Bank Protector', description: 'Hold 4,500 euros in your bank. Protect your wealth.', type: 'bank_balance', target: 4500, unit: 'euros banked', progressMode: 'max_money', rewardType: 'money', rewardAmount: 900, difficultyScore: 100 },
-                { id: 'daily_snipe_18', title: 'Auction Hunter', description: 'Snipe 18 cards from auction today. Hunt for deals.', type: 'auction_snipes', target: 18, unit: 'cards sniped', rewardType: 'xp', rewardAmount: 750, difficultyScore: 100 },
-                { id: 'daily_duplicate_180', title: 'Duplicate Destroyer', description: 'Fuse or burn 180 duplicates today. Destroy excess.', type: 'fuse_or_burn_duplicates', target: 180, unit: 'duplicates fused/burned', rewardType: 'money', rewardAmount: 850, difficultyScore: 100 }
+                { id: 'daily_A1', title: 'Pack Opener', description: 'Open 8 packs of any type today. Crack them open!', type: 'open_packs', target: 8, unit: 'packs opened', rewardType: 'money', rewardAmount: 800 },
+                { id: 'daily_A2', title: 'Clash Fighter', description: 'Win 5 card clashes today. Show your strength!', type: 'win_clashes', target: 5, unit: 'clashes won', rewardType: 'xp', rewardAmount: 300 },
+                { id: 'daily_A3', title: 'Merchant', description: 'Sell 6 cards from your deck today.', type: 'sell_cards', target: 6, unit: 'cards sold', rewardType: 'money', rewardAmount: 700 },
+                { id: 'daily_A4', title: 'Explorer', description: 'Discover 4 new unique cards today.', type: 'discover_cards', target: 4, unit: 'cards discovered', rewardType: 'xp', rewardAmount: 250 },
+                { id: 'daily_A5', title: 'Money Maker', description: 'Earn €350 from any source today.', type: 'earn_money', target: 350, unit: 'euros earned', progressMode: 'sum_money', rewardType: 'money', rewardAmount: 900 },
+                { id: 'daily_A6', title: 'Deck Builder', description: 'Own at least 15 cards in your deck at once.', type: 'own_cards', target: 15, unit: 'cards owned', progressMode: 'max', rewardType: 'xp', rewardAmount: 200 },
+                { id: 'daily_A7', title: 'Bronze Digger', description: 'Open 5 Bronze packs today.', type: 'open_packs', target: 5, packType: 'bronze', unit: 'bronze packs opened', rewardType: 'money', rewardAmount: 1200 },
+                { id: 'daily_A8', title: 'Battle Ready', description: 'Win 8 clashes today. Keep fighting!', type: 'win_clashes', target: 8, unit: 'clashes won', rewardType: 'xp', rewardAmount: 400 },
+                { id: 'daily_A9', title: 'Card Flipper', description: 'Sell 10 cards from your deck today.', type: 'sell_cards', target: 10, unit: 'cards sold', rewardType: 'money', rewardAmount: 1500 },
+                { id: 'daily_A10', title: 'Wealth Seeker', description: 'Earn €600 from any source today.', type: 'earn_money', target: 600, unit: 'euros earned', progressMode: 'sum_money', rewardType: 'xp', rewardAmount: 350 },
+                { id: 'daily_A11', title: 'Stone Collector', description: 'Open 4 Stone packs today.', type: 'open_packs', target: 4, packType: 'stone', unit: 'stone packs opened', rewardType: 'money', rewardAmount: 2000 },
+                { id: 'daily_A12', title: 'New Discoveries', description: 'Discover 6 new unique cards today.', type: 'discover_cards', target: 6, unit: 'cards discovered', rewardType: 'exotic_pack', rewardAmount: 1 }
             ],
+            // 28 weekly challenges — medium difficulty, resets every Sunday at midnight
             weekly: [
-                { id: 'weekly_open_5000', title: 'Pack Tsunami', description: 'Open 5,000 packs this week. Unleash the flood.', type: 'open_packs', target: 5000, unit: 'packs opened', rewardType: 'platinum_pack', rewardAmount: 2, difficultyScore: 100 },
-                { id: 'weekly_clash_1000', title: 'Clash Legend', description: 'Win 1,000 card clashes this week. Become unstoppable.', type: 'win_clashes', target: 1000, unit: 'clashes won', rewardType: 'xp', rewardAmount: 900, difficultyScore: 100 },
-                { id: 'weekly_sell_2000', title: 'Mass Liquidation', description: 'Sell 2,000 cards this week. Empty your vault.', type: 'sell_cards', target: 2000, unit: 'cards sold', rewardType: 'money', rewardAmount: 1000, difficultyScore: 100 },
-                { id: 'weekly_discover_1000', title: 'Archive Invasion', description: 'Discover 1,000 new unique cards this week. Expand your collection.', type: 'discover_cards', target: 1000, unit: 'cards discovered', rewardType: 'xp', rewardAmount: 900, difficultyScore: 100 },
-                { id: 'weekly_earn_10000', title: 'Fortune Builder', description: 'Earn 10,000 euros this week through any means. Build your empire.', type: 'earn_money', target: 10000, unit: 'euros earned', progressMode: 'sum_money', rewardType: 'money', rewardAmount: 1000, difficultyScore: 100 },
-                { id: 'weekly_trade_200', title: 'Trade Tycoon', description: 'Execute 200 player trades this week. Master the market.', type: 'player_trades', target: 200, unit: 'trades executed', rewardType: 'platinum_pack', rewardAmount: 2, difficultyScore: 100 },
-                { id: 'weekly_own_1500', title: 'Vault Expansion', description: 'Own 1,500 cards simultaneously. Fill your treasury.', type: 'own_cards', target: 1500, unit: 'cards owned', progressMode: 'max', rewardType: 'xp', rewardAmount: 900, difficultyScore: 100 }
+                { id: 'weekly_B1', title: 'Weekly Pack Rush', description: 'Open 40 packs this week. Keep opening!', type: 'open_packs', target: 40, unit: 'packs opened', rewardType: 'money', rewardAmount: 1800 },
+                { id: 'weekly_B2', title: 'Clash Veteran', description: 'Win 30 clashes this week. Prove yourself!', type: 'win_clashes', target: 30, unit: 'clashes won', rewardType: 'xp', rewardAmount: 400 },
+                { id: 'weekly_B3', title: 'Weekly Seller', description: 'Sell 35 cards this week. Keep trading!', type: 'sell_cards', target: 35, unit: 'cards sold', rewardType: 'money', rewardAmount: 2200 },
+                { id: 'weekly_B4', title: 'Archive Seeker', description: 'Discover 15 unique cards this week.', type: 'discover_cards', target: 15, unit: 'cards discovered', rewardType: 'xp', rewardAmount: 350 },
+                { id: 'weekly_B5', title: 'Weekly Income', description: 'Earn €1,500 this week from any source.', type: 'earn_money', target: 1500, unit: 'euros earned', progressMode: 'sum_money', rewardType: 'money', rewardAmount: 2500 },
+                { id: 'weekly_B6', title: 'Vault Starter', description: 'Own at least 30 cards at once this week.', type: 'own_cards', target: 30, unit: 'cards owned', progressMode: 'max', rewardType: 'xp', rewardAmount: 300 },
+                { id: 'weekly_B7', title: 'Bronze Week', description: 'Open 20 Bronze packs this week.', type: 'open_packs', target: 20, packType: 'bronze', unit: 'bronze packs opened', rewardType: 'money', rewardAmount: 1600 },
+                { id: 'weekly_B8', title: 'Silver Week', description: 'Open 10 Silver packs this week.', type: 'open_packs', target: 10, packType: 'silver', unit: 'silver packs opened', rewardType: 'xp', rewardAmount: 450 },
+                { id: 'weekly_B9', title: 'Clash Streak', description: 'Win 50 clashes this week. Dominate!', type: 'win_clashes', target: 50, unit: 'clashes won', rewardType: 'money', rewardAmount: 2000 },
+                { id: 'weekly_B10', title: 'Big Seller', description: 'Sell 60 cards this week. Clean house!', type: 'sell_cards', target: 60, unit: 'cards sold', rewardType: 'xp', rewardAmount: 500 },
+                { id: 'weekly_B11', title: 'Card Hoarder', description: 'Own at least 50 cards at once this week.', type: 'own_cards', target: 50, unit: 'cards owned', progressMode: 'max', rewardType: 'money', rewardAmount: 1900 },
+                { id: 'weekly_B12', title: 'Fortune Week', description: 'Earn €2,500 this week from any source.', type: 'earn_money', target: 2500, unit: 'euros earned', progressMode: 'sum_money', rewardType: 'xp', rewardAmount: 480 },
+                { id: 'weekly_B13', title: 'Wood Chopper', description: 'Open 25 Wood packs this week.', type: 'open_packs', target: 25, packType: 'wood', unit: 'wood packs opened', rewardType: 'money', rewardAmount: 1400 },
+                { id: 'weekly_B14', title: 'Stone Breaker', description: 'Open 18 Stone packs this week.', type: 'open_packs', target: 18, packType: 'stone', unit: 'stone packs opened', rewardType: 'xp', rewardAmount: 420 },
+                { id: 'weekly_B15', title: 'Card Scholar', description: 'Discover 25 unique cards this week.', type: 'discover_cards', target: 25, unit: 'cards discovered', rewardType: 'money', rewardAmount: 2100 },
+                { id: 'weekly_B16', title: 'Weekend Warrior', description: 'Win 70 clashes this week. Relentless!', type: 'win_clashes', target: 70, unit: 'clashes won', rewardType: 'xp', rewardAmount: 500 },
+                { id: 'weekly_B17', title: 'Market Mover', description: 'Sell 80 cards this week. Own the market.', type: 'sell_cards', target: 80, unit: 'cards sold', rewardType: 'money', rewardAmount: 2300 },
+                { id: 'weekly_B18', title: 'Gold Digger', description: 'Open 5 Gold packs this week.', type: 'open_packs', target: 5, packType: 'gold', unit: 'gold packs opened', rewardType: 'xp', rewardAmount: 500 },
+                { id: 'weekly_B19', title: 'Millionaire\'s Path', description: 'Earn €3,500 this week from any source.', type: 'earn_money', target: 3500, unit: 'euros earned', progressMode: 'sum_money', rewardType: 'money', rewardAmount: 2400 },
+                { id: 'weekly_B20', title: 'Collection Growth', description: 'Own at least 75 cards at once this week.', type: 'own_cards', target: 75, unit: 'cards owned', progressMode: 'max', rewardType: 'xp', rewardAmount: 480 },
+                { id: 'weekly_B21', title: 'Pack Enthusiast', description: 'Open 70 packs of any type this week.', type: 'open_packs', target: 70, unit: 'packs opened', rewardType: 'money', rewardAmount: 2200 },
+                { id: 'weekly_B22', title: 'Clash Champion', description: 'Win 100 clashes this week. Champion!', type: 'win_clashes', target: 100, unit: 'clashes won', rewardType: 'exotic_pack', rewardAmount: 1 },
+                { id: 'weekly_B23', title: 'Card Curator', description: 'Discover 35 unique cards this week.', type: 'discover_cards', target: 35, unit: 'cards discovered', rewardType: 'money', rewardAmount: 2500 },
+                { id: 'weekly_B24', title: 'Platinum Seeker', description: 'Open 3 Platinum packs this week.', type: 'open_packs', target: 3, packType: 'platinum', unit: 'platinum packs opened', rewardType: 'xp', rewardAmount: 500 },
+                { id: 'weekly_B25', title: 'Mega Seller', description: 'Sell 100 cards this week. Impressive!', type: 'sell_cards', target: 100, unit: 'cards sold', rewardType: 'money', rewardAmount: 2500 },
+                { id: 'weekly_B26', title: 'Rich Week', description: 'Earn €4,500 this week from any source.', type: 'earn_money', target: 4500, unit: 'euros earned', progressMode: 'sum_money', rewardType: 'xp', rewardAmount: 500 },
+                { id: 'weekly_B27', title: 'Vault Captain', description: 'Own at least 100 cards at once this week.', type: 'own_cards', target: 100, unit: 'cards owned', progressMode: 'max', rewardType: 'money', rewardAmount: 2500 },
+                { id: 'weekly_B28', title: 'Week Finale', description: 'Open 100 packs this week. End it strong!', type: 'open_packs', target: 100, unit: 'packs opened', rewardType: 'exotic_pack', rewardAmount: 1 }
             ],
+            // 56 monthly challenges — medium difficulty, resets every 4 Sundays
             monthly: [
-                { id: 'monthly_open_50000', title: 'Pack Singularity', description: 'Open 50,000 packs this month. Reach the event horizon.', type: 'open_packs', target: 50000, unit: 'packs opened', rewardType: 'platinum_pack', rewardAmount: 2, difficultyScore: 100 },
-                { id: 'monthly_clash_10000', title: 'Clash God', description: 'Win 10,000 card clashes this month. Ascend to divinity.', type: 'win_clashes', target: 10000, unit: 'clashes won', rewardType: 'xp', rewardAmount: 900, difficultyScore: 100 },
-                { id: 'monthly_sell_20000', title: 'Total Liquidation', description: 'Sell 20,000 cards this month. Leave nothing behind.', type: 'sell_cards', target: 20000, unit: 'cards sold', rewardType: 'money', rewardAmount: 1000, difficultyScore: 100 },
-                { id: 'monthly_discover_10000', title: 'Complete Archive', description: 'Discover 10,000 new unique cards this month. Complete the collection.', type: 'discover_cards', target: 10000, unit: 'cards discovered', rewardType: 'xp', rewardAmount: 900, difficultyScore: 100 },
-                { id: 'monthly_earn_100000', title: 'Economic Titan', description: 'Earn 100,000 euros this month. Rule the economy.', type: 'earn_money', target: 100000, unit: 'euros earned', progressMode: 'sum_money', rewardType: 'money', rewardAmount: 1000, difficultyScore: 100 },
-                { id: 'monthly_trade_1000', title: 'Trade Emperor', description: 'Execute 1,000 player trades this month. Control the market.', type: 'player_trades', target: 1000, unit: 'trades executed', rewardType: 'platinum_pack', rewardAmount: 2, difficultyScore: 100 },
-                { id: 'monthly_own_5000', title: 'Vault Master', description: 'Own 5,000 cards simultaneously. Build the ultimate treasury.', type: 'own_cards', target: 5000, unit: 'cards owned', progressMode: 'max', rewardType: 'xp', rewardAmount: 900, difficultyScore: 100 },
-                { id: 'monthly_daily_100', title: 'Daily Quest Champion', description: 'Complete and claim 100 Daily Quests this month. Never miss a day.', type: 'daily_quests_completed', target: 100, unit: 'daily quests claimed', rewardType: 'platinum_pack', rewardAmount: 2, difficultyScore: 100 },
-                { id: 'monthly_mg_5000', title: 'Minigame Grandmaster', description: 'Win 5,000 math or reaction minigames this month. Perfect your skills.', type: 'minigame_wins', target: 5000, unit: 'minigames won', rewardType: 'xp', rewardAmount: 900, difficultyScore: 100 },
-                { id: 'monthly_bank_100000', title: 'Bank Fortress', description: 'Hold 100,000 euros in your bank simultaneously. Fortify your wealth.', type: 'bank_balance', target: 100000, unit: 'euros banked', progressMode: 'max_money', rewardType: 'money', rewardAmount: 1000, difficultyScore: 100 },
-                { id: 'monthly_snipe_500', title: 'Auction Predator', description: 'Snipe 500 cards from the global auction this month. Strike with precision.', type: 'auction_snipes', target: 500, unit: 'cards sniped', rewardType: 'xp', rewardAmount: 900, difficultyScore: 100 },
-                { id: 'monthly_duplicate_10000', title: 'Duplicate Obliterator', description: 'Fuse or burn 10,000 duplicate cards this month. Purge the excess.', type: 'fuse_or_burn_duplicates', target: 10000, unit: 'duplicates fused/burned', rewardType: 'money', rewardAmount: 1000, difficultyScore: 100 }
+                { id: 'monthly_C1', title: 'Monthly Pack Opener', description: 'Open 150 packs this month.', type: 'open_packs', target: 150, unit: 'packs opened', rewardType: 'money', rewardAmount: 1500 },
+                { id: 'monthly_C2', title: 'Monthly Clash Fighter', description: 'Win 120 clashes this month.', type: 'win_clashes', target: 120, unit: 'clashes won', rewardType: 'xp', rewardAmount: 350 },
+                { id: 'monthly_C3', title: 'Monthly Seller', description: 'Sell 130 cards this month.', type: 'sell_cards', target: 130, unit: 'cards sold', rewardType: 'money', rewardAmount: 1800 },
+                { id: 'monthly_C4', title: 'Monthly Explorer', description: 'Discover 50 unique cards this month.', type: 'discover_cards', target: 50, unit: 'cards discovered', rewardType: 'xp', rewardAmount: 300 },
+                { id: 'monthly_C5', title: 'Monthly Income', description: 'Earn €5,000 this month from any source.', type: 'earn_money', target: 5000, unit: 'euros earned', progressMode: 'sum_money', rewardType: 'money', rewardAmount: 2000 },
+                { id: 'monthly_C6', title: 'Vault Grower', description: 'Own at least 60 cards at once this month.', type: 'own_cards', target: 60, unit: 'cards owned', progressMode: 'max', rewardType: 'xp', rewardAmount: 280 },
+                { id: 'monthly_C7', title: 'Bronze Month', description: 'Open 50 Bronze packs this month.', type: 'open_packs', target: 50, packType: 'bronze', unit: 'bronze packs opened', rewardType: 'money', rewardAmount: 1600 },
+                { id: 'monthly_C8', title: 'Silver Month', description: 'Open 30 Silver packs this month.', type: 'open_packs', target: 30, packType: 'silver', unit: 'silver packs opened', rewardType: 'xp', rewardAmount: 320 },
+                { id: 'monthly_C9', title: 'Battle Month', description: 'Win 200 clashes this month.', type: 'win_clashes', target: 200, unit: 'clashes won', rewardType: 'money', rewardAmount: 2100 },
+                { id: 'monthly_C10', title: 'Card Cleaner', description: 'Sell 200 cards this month.', type: 'sell_cards', target: 200, unit: 'cards sold', rewardType: 'xp', rewardAmount: 400 },
+                { id: 'monthly_C11', title: 'Collector\'s Path', description: 'Own at least 80 cards at once this month.', type: 'own_cards', target: 80, unit: 'cards owned', progressMode: 'max', rewardType: 'money', rewardAmount: 1900 },
+                { id: 'monthly_C12', title: 'Growing Fortune', description: 'Earn €7,500 this month from any source.', type: 'earn_money', target: 7500, unit: 'euros earned', progressMode: 'sum_money', rewardType: 'xp', rewardAmount: 420 },
+                { id: 'monthly_C13', title: 'Wood Month', description: 'Open 60 Wood packs this month.', type: 'open_packs', target: 60, packType: 'wood', unit: 'wood packs opened', rewardType: 'money', rewardAmount: 1400 },
+                { id: 'monthly_C14', title: 'Stone Month', description: 'Open 45 Stone packs this month.', type: 'open_packs', target: 45, packType: 'stone', unit: 'stone packs opened', rewardType: 'xp', rewardAmount: 360 },
+                { id: 'monthly_C15', title: 'Archive Builder', description: 'Discover 80 unique cards this month.', type: 'discover_cards', target: 80, unit: 'cards discovered', rewardType: 'money', rewardAmount: 2200 },
+                { id: 'monthly_C16', title: 'Clash Streak', description: 'Win 300 clashes this month. Relentless!', type: 'win_clashes', target: 300, unit: 'clashes won', rewardType: 'xp', rewardAmount: 450 },
+                { id: 'monthly_C17', title: 'Mass Seller', description: 'Sell 280 cards this month.', type: 'sell_cards', target: 280, unit: 'cards sold', rewardType: 'money', rewardAmount: 2300 },
+                { id: 'monthly_C18', title: 'Gold Month', description: 'Open 12 Gold packs this month.', type: 'open_packs', target: 12, packType: 'gold', unit: 'gold packs opened', rewardType: 'xp', rewardAmount: 480 },
+                { id: 'monthly_C19', title: 'Big Earnings', description: 'Earn €10,000 this month from any source.', type: 'earn_money', target: 10000, unit: 'euros earned', progressMode: 'sum_money', rewardType: 'money', rewardAmount: 2400 },
+                { id: 'monthly_C20', title: 'Vault Expansion', description: 'Own at least 120 cards at once this month.', type: 'own_cards', target: 120, unit: 'cards owned', progressMode: 'max', rewardType: 'xp', rewardAmount: 470 },
+                { id: 'monthly_C21', title: 'Pack Dedication', description: 'Open 250 packs this month.', type: 'open_packs', target: 250, unit: 'packs opened', rewardType: 'money', rewardAmount: 2000 },
+                { id: 'monthly_C22', title: 'Clash Legend', description: 'Win 400 clashes this month.', type: 'win_clashes', target: 400, unit: 'clashes won', rewardType: 'xp', rewardAmount: 490 },
+                { id: 'monthly_C23', title: 'Card Scholar', description: 'Discover 110 unique cards this month.', type: 'discover_cards', target: 110, unit: 'cards discovered', rewardType: 'money', rewardAmount: 2300 },
+                { id: 'monthly_C24', title: 'Platinum Month', description: 'Open 8 Platinum packs this month.', type: 'open_packs', target: 8, packType: 'platinum', unit: 'platinum packs opened', rewardType: 'xp', rewardAmount: 500 },
+                { id: 'monthly_C25', title: 'Epic Seller', description: 'Sell 350 cards this month.', type: 'sell_cards', target: 350, unit: 'cards sold', rewardType: 'money', rewardAmount: 2400 },
+                { id: 'monthly_C26', title: 'Monthly Millionaire', description: 'Earn €14,000 this month from any source.', type: 'earn_money', target: 14000, unit: 'euros earned', progressMode: 'sum_money', rewardType: 'xp', rewardAmount: 500 },
+                { id: 'monthly_C27', title: 'Grand Vault', description: 'Own at least 150 cards at once this month.', type: 'own_cards', target: 150, unit: 'cards owned', progressMode: 'max', rewardType: 'money', rewardAmount: 2500 },
+                { id: 'monthly_C28', title: 'Pack Master', description: 'Open 350 packs this month.', type: 'open_packs', target: 350, unit: 'packs opened', rewardType: 'exotic_pack', rewardAmount: 1 },
+                { id: 'monthly_C29', title: 'Clash Commander', description: 'Win 500 clashes this month.', type: 'win_clashes', target: 500, unit: 'clashes won', rewardType: 'money', rewardAmount: 2500 },
+                { id: 'monthly_C30', title: 'Discovery Master', description: 'Discover 140 unique cards this month.', type: 'discover_cards', target: 140, unit: 'cards discovered', rewardType: 'xp', rewardAmount: 500 },
+                { id: 'monthly_C31', title: 'Sell-Off', description: 'Sell 420 cards this month.', type: 'sell_cards', target: 420, unit: 'cards sold', rewardType: 'money', rewardAmount: 2500 },
+                { id: 'monthly_C32', title: 'Wealth Builder', description: 'Earn €18,000 this month from any source.', type: 'earn_money', target: 18000, unit: 'euros earned', progressMode: 'sum_money', rewardType: 'exotic_pack', rewardAmount: 1 },
+                { id: 'monthly_C33', title: 'Deck Lord', description: 'Own at least 180 cards at once this month.', type: 'own_cards', target: 180, unit: 'cards owned', progressMode: 'max', rewardType: 'xp', rewardAmount: 500 },
+                { id: 'monthly_C34', title: 'Pack Devotion', description: 'Open 450 packs this month.', type: 'open_packs', target: 450, unit: 'packs opened', rewardType: 'money', rewardAmount: 2500 },
+                { id: 'monthly_C35', title: 'Monthly Warrior', description: 'Win 620 clashes this month.', type: 'win_clashes', target: 620, unit: 'clashes won', rewardType: 'xp', rewardAmount: 500 },
+                { id: 'monthly_C36', title: 'Archive Completionist', description: 'Discover 170 unique cards this month.', type: 'discover_cards', target: 170, unit: 'cards discovered', rewardType: 'money', rewardAmount: 2500 },
+                { id: 'monthly_C37', title: 'Card Empire', description: 'Sell 500 cards this month.', type: 'sell_cards', target: 500, unit: 'cards sold', rewardType: 'xp', rewardAmount: 500 },
+                { id: 'monthly_C38', title: 'Economic Titan', description: 'Earn €22,000 this month from any source.', type: 'earn_money', target: 22000, unit: 'euros earned', progressMode: 'sum_money', rewardType: 'money', rewardAmount: 2500 },
+                { id: 'monthly_C39', title: 'Vault King', description: 'Own at least 220 cards at once this month.', type: 'own_cards', target: 220, unit: 'cards owned', progressMode: 'max', rewardType: 'exotic_pack', rewardAmount: 1 },
+                { id: 'monthly_C40', title: 'Endless Opener', description: 'Open 550 packs this month.', type: 'open_packs', target: 550, unit: 'packs opened', rewardType: 'xp', rewardAmount: 500 },
+                { id: 'monthly_C41', title: 'Diamond Hunter', description: 'Open 5 Diamond packs this month.', type: 'open_packs', target: 5, packType: 'diamond', unit: 'diamond packs opened', rewardType: 'money', rewardAmount: 2500 },
+                { id: 'monthly_C42', title: 'Battle Hardened', description: 'Win 750 clashes this month.', type: 'win_clashes', target: 750, unit: 'clashes won', rewardType: 'xp', rewardAmount: 500 },
+                { id: 'monthly_C43', title: 'Knowledge Base', description: 'Discover 200 unique cards this month.', type: 'discover_cards', target: 200, unit: 'cards discovered', rewardType: 'money', rewardAmount: 2500 },
+                { id: 'monthly_C44', title: 'Sell Everything', description: 'Sell 580 cards this month.', type: 'sell_cards', target: 580, unit: 'cards sold', rewardType: 'xp', rewardAmount: 500 },
+                { id: 'monthly_C45', title: 'Tycoon', description: 'Earn €26,000 this month from any source.', type: 'earn_money', target: 26000, unit: 'euros earned', progressMode: 'sum_money', rewardType: 'exotic_pack', rewardAmount: 1 },
+                { id: 'monthly_C46', title: 'Legendary Vault', description: 'Own at least 260 cards at once this month.', type: 'own_cards', target: 260, unit: 'cards owned', progressMode: 'max', rewardType: 'money', rewardAmount: 2500 },
+                { id: 'monthly_C47', title: 'Pack Overlord', description: 'Open 650 packs this month.', type: 'open_packs', target: 650, unit: 'packs opened', rewardType: 'xp', rewardAmount: 500 },
+                { id: 'monthly_C48', title: 'Clash Supreme', description: 'Win 880 clashes this month.', type: 'win_clashes', target: 880, unit: 'clashes won', rewardType: 'money', rewardAmount: 2500 },
+                { id: 'monthly_C49', title: 'Full Archive', description: 'Discover 230 unique cards this month.', type: 'discover_cards', target: 230, unit: 'cards discovered', rewardType: 'xp', rewardAmount: 500 },
+                { id: 'monthly_C50', title: 'Merchant Prince', description: 'Sell 660 cards this month.', type: 'sell_cards', target: 660, unit: 'cards sold', rewardType: 'exotic_pack', rewardAmount: 1 },
+                { id: 'monthly_C51', title: 'Monthly Fortune', description: 'Earn €30,000 this month from any source.', type: 'earn_money', target: 30000, unit: 'euros earned', progressMode: 'sum_money', rewardType: 'money', rewardAmount: 2500 },
+                { id: 'monthly_C52', title: 'Titan\'s Vault', description: 'Own at least 300 cards at once this month.', type: 'own_cards', target: 300, unit: 'cards owned', progressMode: 'max', rewardType: 'xp', rewardAmount: 500 },
+                { id: 'monthly_C53', title: 'Mythic Opener', description: 'Open 3 Mythic packs this month.', type: 'open_packs', target: 3, packType: 'mythic', unit: 'mythic packs opened', rewardType: 'money', rewardAmount: 2500 },
+                { id: 'monthly_C54', title: 'Ultimate Clash', description: 'Win 1,000 clashes this month. Legend!', type: 'win_clashes', target: 1000, unit: 'clashes won', rewardType: 'xp', rewardAmount: 500 },
+                { id: 'monthly_C55', title: 'Complete Collection', description: 'Discover 260 unique cards this month.', type: 'discover_cards', target: 260, unit: 'cards discovered', rewardType: 'money', rewardAmount: 2500 },
+                { id: 'monthly_C56', title: 'Monthly Champion', description: 'Sell 750 cards this month. You are the champion!', type: 'sell_cards', target: 750, unit: 'cards sold', rewardType: 'exotic_pack', rewardAmount: 1 }
             ]
         };
 
@@ -8435,6 +8566,8 @@
                 
                 // Set loading: true in presence for steal protection
                 set(ref(db, `presence/${userEntity.uid}/loading`), true).catch(() => {});
+                // Set 15-second join protection so new entrants can't be stolen from immediately
+                update(ref(db, `presence/${userEntity.uid}`), { joinProtectionExpiry: Date.now() + 15000 }).catch(() => {});
                 
                 initializeUserEnvironmentCore();
                 startBanPolling(userEntity);
@@ -8586,9 +8719,7 @@
                     userDataRecord.tutorial = { completed: false, step: 0, createdAt: Date.now() };
                     update(ref(db, `users/${activeUserSession.uid}/tutorial`), userDataRecord.tutorial).catch(() => { });
                 }
-                if (!userDataRecord.quests) {
-                    update(ref(db, `users/${activeUserSession.uid}/quests/1`), { unlockedAt: Date.now(), progress: 0, completed: false, claimed: false });
-                }
+                // Quest data is auto-created by trackQuestProgress when actions are performed
                 userProfileHydrated = true;
                 renderHUDDisplayElements();
                 renderProfileDisplayData();
@@ -9428,7 +9559,7 @@
             }
 
             operationsPayloadBatch[`users/${activeUserSession.uid}/money`] = updatedMoney;
-            operationsPayloadBatch[`users/${activeUserSession.uid}/xp`] = userDataRecord.xp + 10;
+            operationsPayloadBatch[`users/${activeUserSession.uid}/xp`] = (userDataRecord.xp || 0) + 10;
 
             if (!userDataRecord.discovered || !userDataRecord.discovered[capturedSelectedCardObject.id]) {
                 operationsPayloadBatch[`users/${activeUserSession.uid}/discovered/${capturedSelectedCardObject.id}`] = Date.now();
@@ -9595,12 +9726,13 @@
                 applyCardCustomizationToNode(cardUiNodeElement, customization);
 
                 let lockOverlayElementMarkup = '';
-                if (evaluatingSecurityLockIsActive) {
-                    const dynamicSecondsLeft = Math.ceil((currentInstanceItem.cryptographicLockExpiry - currentSystemEpoch) / 1000);
+                const cardLockCount = currentInstanceItem.lockCount || 0;
+                const isPermLocked = currentInstanceItem.permLocked === true;
+                if (isPermLocked) {
                     lockOverlayElementMarkup = `
                         <div class="card-overlay-lock" role="button" tabindex="0" title="Tap to unlock" onclick="unlockInventoryCard('${instanceIdKey}')">
-                            <span>🔒 SECURED</span>
-                            <span style="font-size:0.7rem; margin-top:4px;">${Math.floor(dynamicSecondsLeft / 60)}m ${dynamicSecondsLeft % 60}s</span>
+                            <span>🔒 LOCKED</span>
+                            <span style="font-size:0.7rem; margin-top:4px;">${cardLockCount}/2 uses</span>
                         </div>
                     `;
                 }
@@ -10336,25 +10468,37 @@
 
                 // Skip players who are currently loading (steal protection)
                 if (targetPresenceMetadata.loading === true) return;
+                // Check 15-second join protection window
+                const isJoinProtected = targetPresenceMetadata.joinProtectionExpiry && targetPresenceMetadata.joinProtectionExpiry > Date.now();
 
                 const displayName = (targetPresenceMetadata.username || '').trim() || 'Unknown Operative';
                 const nameInitial = displayName.charAt(0).toUpperCase();
                 const isStealShielded = targetPresenceMetadata.stealingActive === true;
+                const joinMsLeft = isJoinProtected ? Math.ceil((targetPresenceMetadata.joinProtectionExpiry - Date.now()) / 1000) : 0;
 
                 activeRenderedCount++;
+                // Compute button HTML separately to avoid nested template literal issues
+                let actionBtnHtml;
+                if (isStealShielded || isJoinProtected) {
+                    const btnTitle = isJoinProtected ? 'Join protection active' : 'Shielded while stealing';
+                    const btnLabel = isJoinProtected ? ('\u{1F6E1}\uFE0F ' + joinMsLeft + 's') : 'SHIELDED';
+                    actionBtnHtml = '<button class="btn-lvlup" style="background:#374151; color:#6b7280; cursor:not-allowed;" disabled title="' + btnTitle + '">' + btnLabel + '</button>';
+                } else {
+                    actionBtnHtml = '<button class="btn-lvlup" style="background:var(--accent-red);" onclick="executeTargetInventoryInspectionScan(\'' + pUidKey + '\')">SCAN INVENTORY</button>';
+                }
+                const statusColor = isStealShielded ? '#f59e0b' : isJoinProtected ? '#60a5fa' : '#10b981';
+                const statusText = isStealShielded ? '\u2694 EXECUTING STEAL \u2014 SHIELDED' : isJoinProtected ? ('\u{1F6E1} JOIN PROTECTION \u2014 ' + joinMsLeft + 's') : '\u25CF ONLINE DATA NODE';
+                const shieldBadges = (isStealShielded ? ' <span title="This operative is currently attacking \u2014 shielded from infiltration" style="font-size:1rem;">\u2694\uFE0F\u{1F6E1}\uFE0F</span>' : '') + (isJoinProtected ? ' <span title="New entrant \u2014 join protection active" style="font-size:1rem;">\u{1F6E1}\uFE0F</span>' : '');
                 const htmlRowItem = `
                     <div class="player-row">
                         <div style="display:flex; align-items:center; gap:12px;">
                             <div class="profile-badge" style="background:#4b5563;">${nameInitial}</div>
                             <div>
-                                <div style="font-weight:bold;">${displayName}${isStealShielded ? ' <span title="This operative is currently attacking — shielded from infiltration" style="font-size:1rem;">⚔️🛡️</span>' : ''}</div>
-                                <div style="font-size:0.7rem; color:${isStealShielded ? '#f59e0b' : '#10b981'};">${isStealShielded ? '⚔ EXECUTING STEAL — SHIELDED' : '● ONLINE DATA NODE'}</div>
+                                <div style="font-weight:bold;">${displayName}${shieldBadges}</div>
+                                <div style="font-size:0.7rem; color:${statusColor};">${statusText}</div>
                             </div>
                         </div>
-                        ${isStealShielded
-                        ? `<button class="btn-lvlup" style="background:#374151; color:#6b7280; cursor:not-allowed;" disabled title="Shielded while stealing">SHIELDED</button>`
-                        : `<button class="btn-lvlup" style="background:var(--accent-red);" onclick="executeTargetInventoryInspectionScan('${pUidKey}')">SCAN INVENTORY</button>`
-                    }
+                        ${actionBtnHtml}
                     </div>
                 `;
                 targetContainerNode.innerHTML += htmlRowItem;
@@ -10375,6 +10519,11 @@
             const targetPresenceData = targetPresenceSnap.val() || {};
             if (targetPresenceData.stealingActive === true) {
                 return showToast("⚔️ This operative is currently executing an attack — they are shielded from being targeted.", "info");
+            }
+            // Block stealing from players still in their 15-second join protection window
+            if (targetPresenceData.joinProtectionExpiry && targetPresenceData.joinProtectionExpiry > Date.now()) {
+                const msLeft = Math.ceil((targetPresenceData.joinProtectionExpiry - Date.now()) / 1000);
+                return showToast(`🛡️ This player just joined — protected for ${msLeft}s more.`, "info");
             }
 
             const targetProfileSnapshot = await get(ref(db, `users/${targetPlayerUid}`));
@@ -11011,8 +11160,8 @@
                     runTransaction(sessionRef, (sess) => {
                         if (!sess) return;
                         if (sess.sessionState !== 'initialized') return; // already resolved
-                        if (sess.attackerSolveMs === undefined && sess.attackerSolveMs === null &&
-                            sess.defenderSolveMs === undefined && sess.defenderSolveMs === null) return; // no one answered yet
+                        if ((sess.attackerSolveMs === undefined || sess.attackerSolveMs === null) &&
+                            (sess.defenderSolveMs === undefined || sess.defenderSolveMs === null)) return; // no one answered yet
 
                         const atkMs = (sess.attackerSolveMs !== undefined && sess.attackerSolveMs !== null)
                             ? sess.attackerSolveMs : Infinity;
@@ -11903,17 +12052,47 @@
                 return;
             }
 
-            // For daily quests, select 3 quests based on day of month
-            let selectedQuests = questPool;
-            if (activeQuestTab === 'daily') {
-                const dayOfMonth = new Date().getDate();
-                const startIndex = ((dayOfMonth - 1) * 3) % questPool.length;
-                selectedQuests = [];
-                for (let i = 0; i < 3; i++) {
-                    const index = (startIndex + i) % questPool.length;
-                    selectedQuests.push(questPool[index]);
+            // Seeded shuffle — deterministic Fisher-Yates using a simple LCG
+            function seededShuffle(arr, seed) {
+                const a = arr.slice();
+                let s = seed >>> 0;
+                for (let i = a.length - 1; i > 0; i--) {
+                    s = (Math.imul(1664525, s) + 1013904223) >>> 0;
+                    const j = s % (i + 1);
+                    [a[i], a[j]] = [a[j], a[i]];
                 }
+                return a;
             }
+
+            // Compute the current period index (cycles through 60 for daily, 30 for weekly/monthly)
+            const now = new Date();
+            const EPOCH = new Date('2025-01-05'); // fixed anchor Sunday
+            let periodIndex = 0;
+            let periodRotations = 30;
+            if (activeQuestTab === 'daily') {
+                const daysSinceEpoch = Math.floor((now - EPOCH) / 86400000);
+                periodRotations = 60;
+                periodIndex = daysSinceEpoch % periodRotations;
+            } else if (activeQuestTab === 'weekly') {
+                const weeksSinceEpoch = Math.floor((now - EPOCH) / (7 * 86400000));
+                periodRotations = 30;
+                periodIndex = weeksSinceEpoch % periodRotations;
+            } else if (activeQuestTab === 'monthly') {
+                const cycleMs = 4 * 7 * 86400000;
+                const cyclesSinceEpoch = Math.floor((now - EPOCH) / cycleMs);
+                periodRotations = 30;
+                periodIndex = cyclesSinceEpoch % periodRotations;
+            }
+
+            // Shuffle the pool deterministically for this period, then pick the required count
+            const questLimits = { daily: 3, weekly: 14, monthly: 28 };
+            const questLimit = questLimits[activeQuestTab] || questPool.length;
+            const shuffled = seededShuffle(questPool, periodIndex * 7919 + activeQuestTab.length);
+            // Stamp quests with period so Firebase progress keys are period-specific (auto-reset)
+            const selectedQuests = shuffled.slice(0, questLimit).map(q => ({
+                ...q,
+                id: `${q.id}_p${periodIndex}`
+            }));
 
             selectedQuests.forEach((quest, index) => {
                 const qData = questsData[quest.id] || {};
@@ -11976,6 +12155,8 @@
                         action = `<button class="quest-claim-btn" onclick="claimQuestReward('${quest.id}')">CLAIM ${quest.rewardAmount}x GOLD PACK</button>`;
                     } else if (quest.rewardType === 'platinum_pack') {
                         action = `<button class="quest-claim-btn" onclick="claimQuestReward('${quest.id}')">CLAIM ${quest.rewardAmount}x PLATINUM PACK</button>`;
+                    } else if (quest.rewardType === 'exotic_pack') {
+                        action = `<button class="quest-claim-btn" style="background:linear-gradient(135deg,#ff6b35,#f59e0b);box-shadow:0 0 18px rgba(255,107,53,0.5);" onclick="claimQuestReward('${quest.id}')">🔥 CLAIM ${quest.rewardAmount}x EXOTIC PACK</button>`;
                     }
                 } else if (status === 'claimed') {
                     action = `<div class="quest-done-label">✓ REWARD CLAIMED</div>`;
@@ -11990,6 +12171,8 @@
                     rewardText = `Reward: ${quest.rewardAmount}x Gold Pack`;
                 } else if (quest.rewardType === 'platinum_pack') {
                     rewardText = `Reward: ${quest.rewardAmount}x Platinum Pack`;
+                } else if (quest.rewardType === 'exotic_pack') {
+                    rewardText = `🔥 Reward: ${quest.rewardAmount}x EXOTIC PACK`;
                 }
 
                 card.innerHTML = `
@@ -12023,15 +12206,23 @@
                 resetTime = 'Daily reset at midnight';
             } else if (activeQuestTab === 'weekly') {
                 const sunday = new Date(now);
-                sunday.setDate(sunday.getDate() + (7 - sunday.getDay()));
+                const daysUntilSunday = sunday.getDay() === 0 ? 7 : (7 - sunday.getDay());
+                sunday.setDate(sunday.getDate() + daysUntilSunday);
                 sunday.setHours(0, 0, 0, 0);
                 resetMs = sunday.getTime() - now.getTime();
                 resetTime = 'Weekly reset Sunday midnight';
             } else if (activeQuestTab === 'monthly') {
-                const firstNextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-                firstNextMonth.setHours(0, 0, 0, 0);
-                resetMs = firstNextMonth.getTime() - now.getTime();
-                resetTime = 'Monthly reset 1st of month';
+                // Find the next 4th Sunday from current date's most recent cycle start
+                const now4 = new Date(now);
+                // Get the most recent "cycle start" Sunday (every 4 weeks)
+                // Epoch reference: use a known past Sunday as anchor
+                const anchor = new Date('2025-01-05'); // a known Sunday
+                const msSinceAnchor = now.getTime() - anchor.getTime();
+                const cycleMs = 4 * 7 * 24 * 3600000;
+                const nextCycleStart = new Date(anchor.getTime() + Math.ceil(msSinceAnchor / cycleMs) * cycleMs);
+                nextCycleStart.setHours(0, 0, 0, 0);
+                resetMs = nextCycleStart.getTime() - now.getTime();
+                resetTime = 'Monthly reset every 4 Sundays';
             }
 
             const hours = Math.floor(resetMs / 3600000);
@@ -12053,12 +12244,44 @@
             return `${minutes}m left`;
         }
 
+        // Returns the current period index for a given tab (used for quest ID stamping)
+        function getQuestPeriodIndex(tab) {
+            const now = new Date();
+            const EPOCH = new Date('2025-01-05');
+            if (tab === 'daily') {
+                return Math.floor((now - EPOCH) / 86400000) % 60;
+            } else if (tab === 'weekly') {
+                return Math.floor((now - EPOCH) / (7 * 86400000)) % 30;
+            } else {
+                return Math.floor((now - EPOCH) / (4 * 7 * 86400000)) % 30;
+            }
+        }
+
+        // Seeded shuffle helper (must match renderQuestsUI version)
+        function seededShuffleForTracking(arr, seed) {
+            const a = arr.slice();
+            let s = seed >>> 0;
+            for (let i = a.length - 1; i > 0; i--) {
+                s = (Math.imul(1664525, s) + 1013904223) >>> 0;
+                const j = s % (i + 1);
+                [a[i], a[j]] = [a[j], a[i]];
+            }
+            return a;
+        }
+
         function trackQuestProgress(type, amount, extra) {
             if (!activeUserSession?.uid) return;
+            const questLimits = { daily: 3, weekly: 14, monthly: 28 };
 
-            Object.keys(QUEST_POOLS).forEach(period => {
-                QUEST_POOLS[period].forEach(quest => {
-                    const qData = questsData[quest.id] || {};
+            Object.keys(QUEST_POOLS).forEach(tab => {
+                const periodIndex = getQuestPeriodIndex(tab);
+                const limit = questLimits[tab] || QUEST_POOLS[tab].length;
+                const shuffled = seededShuffleForTracking(QUEST_POOLS[tab], periodIndex * 7919 + tab.length);
+                const activeQuests = shuffled.slice(0, limit);
+
+                activeQuests.forEach(quest => {
+                    const stampedId = `${quest.id}_p${periodIndex}`;
+                    const qData = questsData[stampedId] || {};
                     const claimed = qData.claimed || false;
                     const completed = qData.completed || false;
 
@@ -12074,26 +12297,24 @@
                         const progressMode = quest.progressMode;
 
                         if (progressMode === 'max' || progressMode === 'max_money') {
-                            // For max-mode quests, set progress to the current value if it's higher
                             const currentValue = progressMode === 'max_money'
                                 ? (userDataRecord.money || 0)
-                                : amount; // amount = current deck count for own_cards
-                            runTransaction(ref(db, `users/${activeUserSession.uid}/quests/${quest.id}/progress`), current => {
+                                : amount;
+                            runTransaction(ref(db, `users/${activeUserSession.uid}/quests/${stampedId}/progress`), current => {
                                 return Math.max(current || 0, currentValue);
                             }).then(result => {
                                 const newProgress = result.snapshot.val() || 0;
                                 if (newProgress >= quest.target) {
-                                    update(ref(db, `users/${activeUserSession.uid}/quests/${quest.id}`), { completed: true });
+                                    update(ref(db, `users/${activeUserSession.uid}/quests/${stampedId}`), { completed: true });
                                 }
                             });
                         } else {
-                            // Default: increment by amount
-                            runTransaction(ref(db, `users/${activeUserSession.uid}/quests/${quest.id}/progress`), current => {
+                            runTransaction(ref(db, `users/${activeUserSession.uid}/quests/${stampedId}/progress`), current => {
                                 return (current || 0) + amount;
                             }).then(result => {
                                 const newProgress = result.snapshot.val() || 0;
                                 if (newProgress >= quest.target) {
-                                    update(ref(db, `users/${activeUserSession.uid}/quests/${quest.id}`), { completed: true });
+                                    update(ref(db, `users/${activeUserSession.uid}/quests/${stampedId}`), { completed: true });
                                 }
                             });
                         }
@@ -12106,8 +12327,10 @@
             let quest = null;
             let period = null;
 
+            // questId is stamped e.g. 'daily_A3_p42'; strip the period suffix to find pool entry
+            const baseQuestId = questId.replace(/_p\d+$/, '');
             Object.keys(QUEST_POOLS).forEach(p => {
-                const found = QUEST_POOLS[p].find(q => q.id === questId);
+                const found = QUEST_POOLS[p].find(q => q.id === baseQuestId);
                 if (found) {
                     quest = found;
                     period = p;
@@ -12129,23 +12352,32 @@
             } else if (quest.rewardType === 'gold_pack') {
                 // Open gold packs for free by temporarily crediting enough money then calling purchasePackAsset
                 const goldPackPrice = PACK_METADATA['gold']?.price || 400;
-                const originalMoney = userData.money || 0;
+                const originalMoney = userDataRecord.money || 0;
                 for (let i = 0; i < quest.rewardAmount; i++) {
                     userDataRecord.money = originalMoney + goldPackPrice * (quest.rewardAmount - i);
                     await purchasePackAsset('gold');
                 }
-                userData.money = originalMoney;
+                userDataRecord.money = originalMoney;
                 showToast(`🎁 Claimed ${quest.rewardAmount}x Gold Pack!`, 'success');
             } else if (quest.rewardType === 'platinum_pack') {
                 // Open platinum packs for free by temporarily crediting enough money
                 const platPackPrice = PACK_METADATA['platinum']?.price || 1000;
-                const originalMoney = userData.money || 0;
+                const originalMoney = userDataRecord.money || 0;
                 for (let i = 0; i < quest.rewardAmount; i++) {
                     userDataRecord.money = originalMoney + platPackPrice * (quest.rewardAmount - i);
                     await purchasePackAsset('platinum');
                 }
-                userData.money = originalMoney;
+                userDataRecord.money = originalMoney;
                 showToast(`💎 Claimed ${quest.rewardAmount}x Platinum Pack!`, 'success');
+            } else if (quest.rewardType === 'exotic_pack') {
+                const exoticPackPrice = PACK_METADATA['exotic']?.price || 5000;
+                const originalMoneyEx = userDataRecord.money || 0;
+                for (let i = 0; i < quest.rewardAmount; i++) {
+                    userDataRecord.money = originalMoneyEx + exoticPackPrice * (quest.rewardAmount - i);
+                    await purchasePackAsset('exotic');
+                }
+                userDataRecord.money = originalMoneyEx;
+                showToast(`🔥 Claimed ${quest.rewardAmount}x Exotic Pack!`, 'success');
             }
 
             payload[`users/${activeUserSession.uid}/quests/${questId}/claimed`] = true;
@@ -13572,20 +13804,23 @@
                 for (const cardId in discovered) {
                     checkSetCompletion(cardId);
                 }
-                // Award XPB for pack opening
-                if (window.awardXPB) window.awardXPB(50, 'Pack Opened');
+                // XPB for pack opening is already awarded in purchasePackAsset (40 XPB)
             }, 1000);
         };
 
-        // Initialize collections and trading system on user load
+        // Initialize collections and trading system on user load (guard prevents double-init on re-login)
+        let _collectionsAndTradingInitialized = false;
         const originalInitializeUserEnvironmentCore = initializeUserEnvironmentCore;
         initializeUserEnvironmentCore = function () {
             originalInitializeUserEnvironmentCore.call(this);
-            setTimeout(() => {
-                initializeCollectionsTracking();
-                loadOnlinePlayers();
-                listenForTradeRequests();
-            }, 2000);
+            if (!_collectionsAndTradingInitialized) {
+                _collectionsAndTradingInitialized = true;
+                setTimeout(() => {
+                    initializeCollectionsTracking();
+                    loadOnlinePlayers();
+                    listenForTradeRequests();
+                }, 2000);
+            }
         };
 
         // =========================================================
@@ -13700,7 +13935,7 @@
     </script>
     <div
         style="position: fixed; top: 12px; left: 12px; z-index: 9999999999999; color: rgba(255, 255, 255, 0.4); font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
-        V:9.9.9
+        V:9.5
     </div>
 </body>
 
