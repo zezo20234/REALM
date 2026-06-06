@@ -5879,11 +5879,9 @@
 
             <div class="rank-row" id="hud-rank-row">
                 <span id="hud-clash-rank-badge"></span>
-                <span id="hud-rank-reward-timer"
-                    style="font-size:0.68rem;font-weight:700;color:#6b7280;margin-left:4px;"></span>
+                <span id="hud-rank-reward-timer" style="font-size:0.7rem;font-weight:800;color:#9ca3af;margin-left:6px;"></span>
                 <button id="hud-rank-claim-btn" onclick="claimClashRankReward()"
-                    style="display:none;margin-left:4px;padding:3px 10px;border-radius:999px;border:none;background:linear-gradient(135deg,#10b981,#059669);color:#fff;font-size:0.72rem;font-weight:900;letter-spacing:0.04em;cursor:pointer;box-shadow:0 0 12px rgba(16,185,129,0.55);animation:claimGlow 1.5s ease-in-out infinite;">🎁
-                    CLAIM REWARD</button>
+                    style="display:none;margin-left:6px;padding:3px 10px;border-radius:999px;border:none;background:linear-gradient(135deg,#10b981,#059669);color:#fff;font-size:0.72rem;font-weight:900;letter-spacing:0.04em;cursor:pointer;box-shadow:0 0 12px rgba(16,185,129,0.55);animation:claimGlow 1.5s ease-in-out infinite;">🎁 CLAIM REWARD</button>
             </div>
             <div class="xp-row">
                 <div class="level-tag" id="hud-level">LV 1</div>
@@ -8784,10 +8782,13 @@
                 tryPublishPresenceWhenReady();
                 
                 // Clear loading flag after user data loads
-                update(ref(db, `presence/${activeUserSession.uid}/loading`), false).catch(() => {});
+                set(ref(db, `presence/${activeUserSession.uid}/loading`), false).catch(() => {});
                 
-                // Initialize global rank reward cycle listener + timer
-                setTimeout(() => initGlobalRankCycleListener(), 2000);
+                // Initialize global rank reward cycle listener + timer (only once)
+                if (!window._rankCycleListenerStarted) {
+                    window._rankCycleListenerStarted = true;
+                    setTimeout(() => initGlobalRankCycleListener(), 2000);
+                }
                 
                 // Call appReadyToShow on first data load
                 if (window.appReadyToShow) {
@@ -11486,36 +11487,39 @@
         // Ranks in order: 8 tiers × 3 divisions each = 24 steps total (0–23)
         // After div 3 of each rank → promote to div 1 of next rank
         const CLASH_RANKS = [
-            { id: 'bronze', name: 'Bronze', color: '#cd7f32', css: 'rank-bronze', img: 'BRONZE.png', reward: { xp: 0, money: 0 } },
-            { id: 'silver', name: 'Silver', color: '#c0c0c0', css: 'rank-silver', img: 'SILVER.png', reward: { xp: 100, money: 0 } },
-            { id: 'gold', name: 'Gold', color: '#ffd700', css: 'rank-gold', img: 'GOLD.png', reward: { xp: 200, money: 500 } },
-            { id: 'platinum', name: 'Platinum', color: '#e5e4e2', css: 'rank-platinum', img: 'PLATINUM.png', reward: { xp: 300, money: 750 } },
-            { id: 'diamond', name: 'Diamond', color: '#7df9ff', css: 'rank-diamond', img: 'DIAMOND.png', reward: { xp: 400, money: 1000 } },
-            { id: 'champion', name: 'Champion', color: '#f59e0b', css: 'rank-champion', img: 'CHAMPION.png', reward: { xp: 450, money: 1250 } },
-            { id: 'grandchamp', name: 'Grand Champion', color: '#a855f7', css: 'rank-grandchamp', img: 'GRAND_CHAMPION.png', reward: { xp: 550, money: 2000 } },
-            { id: 'ssl', name: 'SSL', color: '#ff1493', css: 'rank-ssl', img: 'SSL.png', reward: { xp: 700, money: 4000 } }
+            { id: 'bronze',     name: 'Bronze',        color: '#cd7f32', css: 'rank-bronze',     img: 'BRONZE.png',        reward: { xp: 50,  money: 200  } },
+            { id: 'silver',     name: 'Silver',        color: '#c0c0c0', css: 'rank-silver',     img: 'SILVER.png',        reward: { xp: 100, money: 400  } },
+            { id: 'gold',       name: 'Gold',          color: '#ffd700', css: 'rank-gold',       img: 'GOLD.png',          reward: { xp: 200, money: 700  } },
+            { id: 'platinum',   name: 'Platinum',      color: '#e5e4e2', css: 'rank-platinum',   img: 'PLATINUM.png',      reward: { xp: 300, money: 1000 } },
+            { id: 'diamond',    name: 'Diamond',       color: '#7df9ff', css: 'rank-diamond',    img: 'DIAMOND.png',       reward: { xp: 400, money: 1500 } },
+            { id: 'champion',   name: 'Champion',      color: '#f59e0b', css: 'rank-champion',   img: 'CHAMPION.png',      reward: { xp: 500, money: 2000 } },
+            { id: 'grandchamp', name: 'Grand Champion',color: '#a855f7', css: 'rank-grandchamp', img: 'GRAND_CHAMPION.png',reward: { xp: 650, money: 3000 } },
+            { id: 'ssl',        name: 'SSL',           color: '#ff1493', css: 'rank-ssl',        img: 'SSL.png',           reward: { xp: 800, money: 5000 } }
         ];
 
-        // Each rank has 3 divisions (D1, D2, D3). Win in D3 → next rank D1.
+        // Each rank has 4 divisions (I, II, III, IV). Win in div IV → next rank div I.
         // clashRankPoints: total wins across all time, used to compute rank/division.
-        // rankIndex = floor(points / 3), capped at max
-        // division = (points % 3) + 1  → 1, 2, or 3
+        // rankIndex = floor(points / 4), capped at max
+        // divisionIndex = points % 4  → 0,1,2,3 → labels I, II, III, IV
+
+        const DIVISION_LABELS = ['I', 'II', 'III', 'IV'];
 
         function getClashRankFromPoints(points) {
             const p = Math.max(0, parseInt(points) || 0);
             const maxIndex = CLASH_RANKS.length - 1;
-            const rankIndex = Math.min(Math.floor(p / 3), maxIndex);
+            const rankIndex = Math.min(Math.floor(p / 4), maxIndex);
             const rank = CLASH_RANKS[rankIndex];
-            // At SSL (max) stay at div 3 once all wins earned
-            const division = rankIndex === maxIndex ? Math.min((p % 3) + 1, 3) : (p % 3) + 1;
-            return { rank, division, points: p, rankIndex };
+            const divIdx = rankIndex === maxIndex ? Math.min(p % 4, 3) : p % 4;
+            const division = divIdx + 1;
+            const divisionLabel = DIVISION_LABELS[divIdx];
+            return { rank, division, divisionLabel, points: p, rankIndex };
         }
 
         function buildClashRankBadgeHTML(points) {
-            const { rank, division } = getClashRankFromPoints(points);
-            return `<span class="clash-rank-badge ${rank.css}" title="${rank.name} Division ${division}">
+            const { rank, divisionLabel } = getClashRankFromPoints(points);
+            return `<span class="clash-rank-badge ${rank.css}" title="${rank.name} Division ${divisionLabel}">
                 <img src="${rank.img}" alt="${rank.name}" onerror="this.style.display='none'">
-                ${rank.name.toUpperCase()} <span class="rank-div-dot"></span> D${division}
+                ${rank.name.toUpperCase()} <span class="rank-div-dot"></span> ${divisionLabel}
             </span>`;
         }
 
@@ -11524,10 +11528,8 @@
             const row = document.getElementById('hud-rank-row');
             if (!el) return;
             const pts = userDataRecord.clashRankPoints || 0;
-            // Always show the row (timer is always useful); badge only if ranked
             if (row) row.style.display = 'flex';
             el.innerHTML = pts ? buildClashRankBadgeHTML(pts) : '';
-            checkClashRankReward();
         }
 
         function renderProfileClashRankBadge() {
@@ -11553,9 +11555,9 @@
 
             // Notify on rank-up
             if (newData.rankIndex > prevData.rankIndex) {
-                showToast(`🏆 Rank Up! You are now ${newData.rank.name} Division ${newData.division}!`, 'success');
+                showToast(`🏆 Rank Up! You are now ${newData.rank.name} Division ${newData.divisionLabel}!`, 'success');
             } else if (newData.division > prevData.division) {
-                showToast(`⬆️ Division Up! ${newData.rank.name} Division ${newData.division}`, 'success');
+                showToast(`⬆️ Division Up! ${newData.rank.name} Division ${newData.divisionLabel}`, 'success');
             }
 
             renderHudClashRankBadge();
@@ -11577,9 +11579,9 @@
             userDataRecord.clashRankPoints = newPts;
 
             if (newData.rankIndex < prevData.rankIndex) {
-                showToast(`📉 Rank Down! You are now ${newData.rank.name} Division ${newData.division}`, 'error');
+                showToast(`📉 Rank Down! You are now ${newData.rank.name} Division ${newData.divisionLabel}`, 'error');
             } else {
-                showToast(`📉 Division Down! ${newData.rank.name} Division ${newData.division}`, 'error');
+                showToast(`📉 Division Down! ${newData.rank.name} Division ${newData.divisionLabel}`, 'error');
             }
 
             renderHudClashRankBadge();
@@ -11587,286 +11589,208 @@
         }
 
         // ═══════════════════════════════════════════════════════════════
-        // CLASH RANK REWARD CYCLE
+        // CLASH RANK REWARD CYCLE  — clean rewrite
         //
-        // Firebase layout:
-        //   system/clashRankRewardCycle            = { nextRewardAt, cycleId }
-        //   users/{uid}/clashRankLastCycleClaimed  = <cycleId already claimed>
-        //   users/{uid}/clashRankPendingReward     = <cycleId owed, not yet claimed>
+        // Firebase:
+        //   system/clashRankRewardCycle = { cycleId, nextRewardAt, rewardReady }
+        //     cycleId      – increments every 3 days
+        //     nextRewardAt – epoch ms when the NEXT cycle will be ready
+        //     rewardReady  – true while players can claim; false while counting down
         //
-        // How it works:
-        //   - A global countdown ticks on every client.
-        //   - When it hits 0, the first client to see it runs tryAdvanceGlobalRankCycle(),
-        //     which atomically bumps the cycle and writes clashRankPendingReward onto
-        //     EVERY user node — so players who were offline get it the moment they log in.
-        //   - checkClashRankReward() runs on every userDataRecord update (login, Firebase
-        //     push, etc.) and shows/hides the button based purely on pending > lastClaimed.
-        //   - Clicking CLAIM gives the reward, resets rank to Bronze, marks claimed.
+        //   users/{uid}/rankLastClaimedCycle  – cycleId of last claim (prevents double-claim)
+        //
+        // Flow:
+        //   1. Firebase listener keeps every client's globalCycle in sync.
+        //   2. If rewardReady=false  →  show countdown timer next to rank badge.
+        //   3. If rewardReady=true   →  show 🎁 CLAIM REWARD button (same for everyone).
+        //   4. When timer hits 0, the first client runs advanceCycle() atomically:
+        //        sets rewardReady=true, bumps cycleId, sets nextRewardAt = now + 3 days.
+        //      The Firebase listener fires on all clients → they all see rewardReady=true.
+        //   5. Player clicks CLAIM → reward paid, rank reset to Bronze I, rankLastClaimedCycle saved.
+        //      claimClashRankReward() is idempotent — second claim in same cycle does nothing.
         // ═══════════════════════════════════════════════════════════════
 
         const RANK_REWARD_INTERVAL_MS = 3 * 24 * 60 * 60 * 1000; // 3 days
-        let globalRankCycleState = { nextRewardAt: 0, cycleId: 0 };
-        let rankRewardTimerInterval = null;
-        let rankCycleAdvanceInFlight = false; // prevent stampeding tryAdvance calls
+        const CYCLE_REF_PATH = 'system/clashRankRewardCycle';
 
-        // ── helpers ──────────────────────────────────────────────────
-        function _showTimerText(text, color) {
-            const el = document.getElementById('hud-rank-reward-timer');
-            const btn = document.getElementById('hud-rank-claim-btn');
-            if (!el) return;
-            el.textContent = text;
-            el.style.display = 'inline';
-            el.style.color = color || '#6b7280';
-            if (btn) btn.style.display = 'none';
+        let globalCycle = { cycleId: 0, nextRewardAt: 0, rewardReady: false };
+        let rankTimerInterval = null;
+        let cycleAdvanceInFlight = false;
+
+        // ── HUD helpers ───────────────────────────────────────────────
+        function rankHudShowTimer(msLeft) {
+            const timerEl = document.getElementById('hud-rank-reward-timer');
+            const btnEl   = document.getElementById('hud-rank-claim-btn');
+            if (!timerEl) return;
+            const totalSecs = Math.max(0, Math.ceil(msLeft / 1000));
+            const d = Math.floor(totalSecs / 86400);
+            const h = Math.floor((totalSecs % 86400) / 3600);
+            const m = Math.floor((totalSecs % 3600) / 60);
+            const s = totalSecs % 60;
+            let label;
+            if (d > 0)      label = `⏳ ${d}d ${h}h ${m}m`;
+            else if (h > 0) label = `⏳ ${h}h ${m}m ${s}s`;
+            else            label = `⏳ ${m}m ${s}s`;
+            timerEl.textContent = label;
+            timerEl.style.display = 'inline';
+            timerEl.style.color = msLeft < 3_600_000 ? '#f59e0b' : '#9ca3af';
+            if (btnEl) btnEl.style.display = 'none';
         }
 
-        function _showClaimButton() {
-            const el = document.getElementById('hud-rank-reward-timer');
-            const btn = document.getElementById('hud-rank-claim-btn');
-            if (el) { el.textContent = ''; el.style.display = 'none'; }
-            if (btn) {
-                btn.style.display = 'inline-block';
-                btn.disabled = false;
-                btn.textContent = '🎁 CLAIM REWARD';
-            }
+        function rankHudShowClaim() {
+            const timerEl = document.getElementById('hud-rank-reward-timer');
+            const btnEl   = document.getElementById('hud-rank-claim-btn');
+            if (timerEl) { timerEl.textContent = ''; timerEl.style.display = 'none'; }
+            if (btnEl) { btnEl.style.display = 'inline-block'; btnEl.disabled = false; btnEl.textContent = '🎁 CLAIM REWARD'; }
         }
 
-        function _hideRewardUI() {
-            const el = document.getElementById('hud-rank-reward-timer');
-            const btn = document.getElementById('hud-rank-claim-btn');
-            if (el) { el.textContent = ''; el.style.display = 'none'; }
-            if (btn) btn.style.display = 'none';
+        function rankHudHideAll() {
+            const timerEl = document.getElementById('hud-rank-reward-timer');
+            const btnEl   = document.getElementById('hud-rank-claim-btn');
+            if (timerEl) { timerEl.textContent = ''; timerEl.style.display = 'none'; }
+            if (btnEl) btnEl.style.display = 'none';
         }
 
-        // ── init ──────────────────────────────────────────────────────
-        function initGlobalRankCycleListener() {
-            onValue(ref(db, 'system/clashRankRewardCycle'), async snap => {
-                const data = snap.val();
-                if (!data || !data.nextRewardAt) {
-                    const initNext = Date.now() + RANK_REWARD_INTERVAL_MS;
-                    await set(ref(db, 'system/clashRankRewardCycle'), { nextRewardAt: initNext, cycleId: 1, rewardReady: false });
-                    return;
+        // ── Countdown ticker ─────────────────────────────────────────
+        function startRankCountdown() {
+            if (rankTimerInterval) clearInterval(rankTimerInterval);
+            rankTimerInterval = setInterval(rankTimerTick, 1000);
+            rankTimerTick();
+        }
+
+        function rankTimerTick() {
+            if (globalCycle.rewardReady) {
+                // Check if this user has already claimed this cycle
+                const lastClaimed = userDataRecord.rankLastClaimedCycle || 0;
+                if (lastClaimed >= globalCycle.cycleId) {
+                    // Already claimed — show countdown to next cycle
+                    const msLeft = globalCycle.nextRewardAt - Date.now();
+                    rankHudShowTimer(Math.max(0, msLeft));
+                } else {
+                    rankHudShowClaim();
                 }
-                globalRankCycleState = {
-                    nextRewardAt: data.nextRewardAt,
-                    cycleId: data.cycleId || 1,
-                    rewardReady: data.rewardReady || false
+                return;
+            }
+
+            const msLeft = globalCycle.nextRewardAt - Date.now();
+            if (msLeft <= 0) {
+                // Timer expired — one client advances the cycle
+                if (!cycleAdvanceInFlight) {
+                    cycleAdvanceInFlight = true;
+                    advanceCycle();
+                }
+                rankHudShowTimer(0);
+                return;
+            }
+            rankHudShowTimer(msLeft);
+        }
+
+        // ── Firebase cycle listener ───────────────────────────────────
+        async function initGlobalRankCycleListener() {
+            try {
+                // Step 1: Check if the cycle node exists, create it if not
+                const snap = await get(ref(db, CYCLE_REF_PATH));
+                if (!snap.exists()) {
+                    console.log('[RankCycle] No cycle found — creating initial cycle in Firebase');
+                    await set(ref(db, CYCLE_REF_PATH), {
+                        cycleId: 1,
+                        nextRewardAt: Date.now() + RANK_REWARD_INTERVAL_MS,
+                        rewardReady: false
+                    });
+                    console.log('[RankCycle] Initial cycle created');
+                }
+            } catch (e) {
+                console.error('[RankCycle] Failed to init cycle node:', e);
+            }
+
+            // Step 2: Listen for changes (covers this client + all other clients advancing the cycle)
+            onValue(ref(db, CYCLE_REF_PATH), snap => {
+                const data = snap.val();
+                if (!data) return;
+                globalCycle = {
+                    cycleId:      data.cycleId      || 1,
+                    nextRewardAt: data.nextRewardAt  || (Date.now() + RANK_REWARD_INTERVAL_MS),
+                    rewardReady:  data.rewardReady   || false
                 };
-                rankCycleAdvanceInFlight = false;
-                startRankRewardCountdown();
-                checkClashRankReward();
+                cycleAdvanceInFlight = false;
+                console.log('[RankCycle] Cycle updated:', globalCycle);
+                startRankCountdown();
             });
         }
 
-        // ── countdown ticker ─────────────────────────────────────────
-        function startRankRewardCountdown() {
-            if (rankRewardTimerInterval) clearInterval(rankRewardTimerInterval);
-
-            function tick() {
-                // Priority 1: confirmed pending reward stamped on this user's node
-                const pending = userDataRecord.clashRankPendingReward || 0;
-                const claimed = userDataRecord.clashRankLastCycleClaimed || 0;
-                if (pending > claimed) {
-                    _showClaimButton();
-                    return;
-                }
-
-                // Priority 2: cycle is marked rewardReady globally but stamp hasn't arrived yet
-                if (globalRankCycleState.rewardReady) {
-                    // Stamp ourselves locally so the button shows immediately
-                    if (!userDataRecord.clashRankPendingReward ||
-                        userDataRecord.clashRankPendingReward < globalRankCycleState.cycleId) {
-                        userDataRecord.clashRankPendingReward = globalRankCycleState.cycleId;
-                    }
-                    _showClaimButton();
-                    return;
-                }
-
-                const msLeft = globalRankCycleState.nextRewardAt - Date.now();
-
-                if (msLeft <= 0) {
-                    _showTimerText('⏳ Preparing reward…', '#10b981');
-                    if (!rankCycleAdvanceInFlight) {
-                        rankCycleAdvanceInFlight = true;
-                        tryAdvanceGlobalRankCycle(globalRankCycleState.cycleId, globalRankCycleState.nextRewardAt);
-                    }
-                    return;
-                }
-
-                // Normal countdown
-                const totalSecs = Math.ceil(msLeft / 1000);
-                const days = Math.floor(totalSecs / 86400);
-                const hours = Math.floor((totalSecs % 86400) / 3600);
-                const mins = Math.floor((totalSecs % 3600) / 60);
-                const secs = totalSecs % 60;
-                let label = '🏆 Rewards in ';
-                if (days > 0) label += `${days}d ${hours}h`;
-                else if (hours > 0) label += `${hours}h ${mins}m`;
-                else if (mins > 0) label += `${mins}m ${secs}s`;
-                else label += `${secs}s`;
-                _showTimerText(label, msLeft < 3600000 ? '#f59e0b' : '#6b7280');
-            }
-
-            tick();
-            rankRewardTimerInterval = setInterval(tick, 1000);
+        // ── Advance cycle (atomic, only one client wins) ──────────────
+        function advanceCycle() {
+            runTransaction(ref(db, CYCLE_REF_PATH), current => {
+                if (!current) return;
+                if (current.rewardReady) return; // already advanced by another client
+                return {
+                    cycleId:      (current.cycleId || 1),
+                    nextRewardAt: Date.now() + RANK_REWARD_INTERVAL_MS,
+                    rewardReady:  true
+                };
+            }).catch(e => console.warn('[RankCycle] advanceCycle error', e));
         }
 
-        // ── check on every userDataRecord update ──────────────────────
-        function checkClashRankReward() {
-            if (!activeUserSession?.uid) return;
-            const pending = userDataRecord.clashRankPendingReward || 0;
-            const claimed = userDataRecord.clashRankLastCycleClaimed || 0;
-
-            // Check both the user's stamped pending reward AND the global rewardReady flag
-            const globalReady = globalRankCycleState.rewardReady &&
-                globalRankCycleState.cycleId > claimed;
-
-            if (pending > claimed || globalReady) {
-                // Ensure local record reflects the pending reward so button stays visible
-                if (globalReady && pending < globalRankCycleState.cycleId) {
-                    userDataRecord.clashRankPendingReward = globalRankCycleState.cycleId;
-                }
-                _showClaimButton();
-            }
-        }
-
-        // ── claim handler ─────────────────────────────────────────────
+        // ── Claim handler ─────────────────────────────────────────────
         window.claimClashRankReward = async function () {
             if (!activeUserSession?.uid) return;
             const uid = activeUserSession.uid;
 
-            const lastClaimed = userDataRecord.clashRankLastCycleClaimed || 0;
-
-            // pendingCycle: prefer user node stamp, fall back to global cycleId
-            // (the stamp may not have arrived from Firebase yet, but the button
-            //  is only shown when globalRankCycleState confirms reward is ready)
-            let pendingCycle = userDataRecord.clashRankPendingReward || 0;
-
-            // Fallback 1: global rewardReady flag says a reward exists for this cycle
-            if (pendingCycle <= lastClaimed && globalRankCycleState.rewardReady && globalRankCycleState.cycleId > lastClaimed) {
-                pendingCycle = globalRankCycleState.cycleId;
-            }
-
-            // Fallback 2: button is visible (meaning the tick confirmed reward ready),
-            // but globalRankCycleState.rewardReady was already cleared by advanceCycleAfterClaim.
-            // In this case use cycleId directly — it's still the correct pending cycle.
-            const claimBtn = document.getElementById('hud-rank-claim-btn');
-            if (pendingCycle <= lastClaimed && claimBtn && claimBtn.style.display !== 'none' && globalRankCycleState.cycleId > lastClaimed) {
-                pendingCycle = globalRankCycleState.cycleId;
-            }
-
-            // Last resort: if cycleId itself hasn't advanced yet (first cycle edge case),
-            // treat cycleId 1 as pending for users who have never claimed
-            if (pendingCycle <= lastClaimed && lastClaimed === 0 && globalRankCycleState.cycleId >= 1 &&
-                claimBtn && claimBtn.style.display !== 'none') {
-                pendingCycle = globalRankCycleState.cycleId;
-            }
-
-            if (pendingCycle <= lastClaimed) {
-                showToast('No reward ready to claim.', 'info');
+            if (!globalCycle.rewardReady) {
+                showToast('No reward ready yet.', 'info');
                 return;
             }
 
-            // Disable button immediately so double-clicks do nothing
-            const btn = claimBtn;
-            if (btn) { btn.disabled = true; btn.textContent = 'Claiming…'; }
+            const lastClaimed = userDataRecord.rankLastClaimedCycle || 0;
+            if (lastClaimed >= globalCycle.cycleId) {
+                showToast('Already claimed this cycle!', 'info');
+                return;
+            }
 
+            // Disable button to prevent double-clicks
+            const btnEl = document.getElementById('hud-rank-claim-btn');
+            if (btnEl) { btnEl.disabled = true; btnEl.textContent = 'Claiming…'; }
+
+            // Determine reward based on current rank
             const pts = userDataRecord.clashRankPoints || 0;
             const { rank } = getClashRankFromPoints(pts);
             const reward = rank.reward;
 
-            const payload = {};
-            if (reward.xp > 0) payload[`users/${uid}/xp`] = (userDataRecord.xp || 0) + reward.xp;
-            if (reward.money > 0) payload[`users/${uid}/money`] = parseFloat(((userDataRecord.money || 0) + reward.money).toFixed(2));
-            payload[`users/${uid}/clashRankLastCycleClaimed`] = pendingCycle;
-            payload[`users/${uid}/clashRankPoints`] = 0;  // reset to Bronze D1
-            payload[`users/${uid}/clashRankPendingReward`] = null;
+            // Write everything atomically
+            const payload = {
+                [`users/${uid}/rankLastClaimedCycle`]:  globalCycle.cycleId,
+                [`users/${uid}/clashRankPoints`]:        0   // reset to Bronze I
+            };
+            if (reward.xp    > 0) payload[`users/${uid}/xp`]    = (userDataRecord.xp    || 0) + reward.xp;
+            if (reward.money > 0) payload[`users/${uid}/money`]  = parseFloat(((userDataRecord.money || 0) + reward.money).toFixed(2));
 
             try {
                 await update(ref(db, '/'), payload);
             } catch (err) {
-                showToast('Could not claim reward — check connection.', 'error');
-                if (btn) { btn.disabled = false; btn.textContent = '🎁 CLAIM REWARD'; }
+                showToast('Could not claim — check your connection.', 'error');
+                if (btnEl) { btnEl.disabled = false; btnEl.textContent = '🎁 CLAIM REWARD'; }
                 return;
             }
 
-            // Mirror to local record so UI updates instantly without waiting for Firebase echo
-            userDataRecord.clashRankLastCycleClaimed = pendingCycle;
-            userDataRecord.clashRankPendingReward = null;
-            userDataRecord.clashRankPoints = 0;
-            if (reward.xp > 0) userDataRecord.xp = (userDataRecord.xp || 0) + reward.xp;
-            if (reward.money > 0) userDataRecord.money = parseFloat(((userDataRecord.money || 0) + reward.money).toFixed(2));
+            // Mirror locally for instant UI update
+            userDataRecord.rankLastClaimedCycle = globalCycle.cycleId;
+            userDataRecord.clashRankPoints      = 0;
+            if (reward.xp    > 0) userDataRecord.xp    = (userDataRecord.xp    || 0) + reward.xp;
+            if (reward.money > 0) userDataRecord.money  = parseFloat(((userDataRecord.money || 0) + reward.money).toFixed(2));
 
-            // Hide the button — the countdown ticker will now show the next cycle timer
-            _hideRewardUI();
+            // Show countdown to next cycle immediately
+            rankTimerTick();
 
-            const rewardParts = [];
-            if (reward.xp > 0) rewardParts.push(`+${reward.xp} XP`);
-            if (reward.money > 0) rewardParts.push(`€${reward.money}`);
-            const rewardStr = rewardParts.length ? rewardParts.join(' & ') : 'participation reward';
-            showToast(`🎁 ${rank.name} reward claimed: ${rewardStr}! Rank reset to Bronze.`, 'success');
-
-            // Now advance the cycle so the next 5-day countdown starts
-            advanceCycleAfterClaim(globalRankCycleState.cycleId, globalRankCycleState.nextRewardAt);
+            const parts = [];
+            if (reward.xp    > 0) parts.push(`+${reward.xp} XP`);
+            if (reward.money > 0) parts.push(`+€${reward.money}`);
+            const rewardStr = parts.length ? parts.join(' & ') : 'a reward';
+            showToast(`🎁 Claimed ${rewardStr} as ${rank.name}! Rank reset to Bronze I.`, 'success');
 
             renderHUDDisplayElements();
             renderHudClashRankBadge();
             renderProfileClashRankBadge();
         };
-
-        // ── advance cycle + stamp all users ───────────────────────────
-        // Strategy: when timer hits 0, mark the cycle as "reward ready" (rewardReady: true)
-        // WITHOUT advancing nextRewardAt yet. nextRewardAt only advances after the user claims.
-        // This way the onValue listener doesn't reset the countdown before the button appears.
-        function tryAdvanceGlobalRankCycle(cycleId, nextRewardAt) {
-            const cycleRef = ref(db, 'system/clashRankRewardCycle');
-            runTransaction(cycleRef, current => {
-                if (!current) return;
-                if (current.cycleId !== cycleId) return; // another client already handled it
-                if (current.rewardReady) return; // already marked ready
-                return {
-                    cycleId,
-                    nextRewardAt,   // keep the same — don't advance yet
-                    rewardReady: true,
-                    lastAdvancedAt: Date.now()
-                };
-            }).then(async result => {
-                if (!result.committed) return;
-
-                // Stamp clashRankPendingReward onto every user who hasn't claimed this cycle
-                try {
-                    const usersSnap = await get(ref(db, 'users'));
-                    const allUsers = usersSnap.val() || {};
-                    const stampPayload = {};
-                    for (const uid in allUsers) {
-                        const u = allUsers[uid];
-                        if ((u.clashRankLastCycleClaimed || 0) < cycleId) {
-                            stampPayload[`users/${uid}/clashRankPendingReward`] = cycleId;
-                        }
-                    }
-                    if (Object.keys(stampPayload).length) {
-                        await update(ref(db, '/'), stampPayload);
-                    }
-                } catch (e) {
-                    console.warn('[RankCycle] Could not stamp pending rewards:', e);
-                }
-            }).catch(() => { });
-        }
-
-        // Called after a user claims — advances the cycle for the next 5-day window
-        function advanceCycleAfterClaim(cycleId, nextRewardAt) {
-            const cycleRef = ref(db, 'system/clashRankRewardCycle');
-            runTransaction(cycleRef, current => {
-                if (!current) return;
-                if (current.cycleId !== cycleId) return; // already advanced by another claimer
-                return {
-                    cycleId: cycleId + 1,
-                    nextRewardAt: nextRewardAt + RANK_REWARD_INTERVAL_MS,
-                    rewardReady: false,
-                    lastAdvancedAt: Date.now()
-                };
-            }).catch(() => { });
-        }
 
         // Render clash rank leaderboard
         async function renderClashRankLeaderboard() {
@@ -14037,10 +13961,816 @@
             getUserData: () => userDataRecord,
             getActiveUser: () => activeUserSession,
         };
+
+        // =========================================================
+        // SHADOWBOT — Autonomous AI Player
+        // =========================================================
+        // - Runs every 30 seconds regardless of logged-in users
+        // - Starts with €1,000,000. Has its own Firebase user record.
+        // - Decisions: buy pack | sell card | steal | do nothing
+        // - Sell only if card value > base price OR max mutation reached
+        // - Steal: balanced aggressor. Targets users who stole from it most.
+        // - Own clash rank. SSL rank → solves math in 5s; Bronze → 15s.
+        // - Visible in leaderboards with 🤖 icon.
+        // =========================================================
+
+        const SHADOWBOT_UID = 'shadowbot_uid_v1';
+        const SHADOWBOT_USERNAME = 'ShadowBot';
+        const SHADOWBOT_STARTING_MONEY = 1000000;
+        const SHADOWBOT_INTERVAL_MS = 30000;
+        const SHADOWBOT_STEAL_COOLDOWN_MS = 4 * 60 * 1000; // 4 min like normal user
+        // Rank → math solve speed map (ms). Higher rank = faster.
+        // SSL = 4s (very fast), Bronze = 7.5s (slow)
+        const SHADOWBOT_RANK_SOLVE_MS = {
+            bronze: 7500,
+            silver: 6800,
+            gold: 6000,
+            platinum: 5500,
+            diamond: 5000,
+            champion: 4700,
+            grandchamp: 4300,
+            ssl: 4000,
+        };
+
+        let shadowbotState = {
+            initialized: false,
+            data: null,         // mirrors users/shadowbot_uid_v1
+            inventory: {},      // mirrors inventory/shadowbot_uid_v1
+            intervalTimer: null,
+            attackersLog: {},   // uid -> count of times they stole from bot
+        };
+
+        // ── Bootstrap: ensure bot user record exists in Firebase ──
+        async function shadowbotBootstrap() {
+            try {
+                const botSnap = await get(ref(db, `users/${SHADOWBOT_UID}`));
+                if (!botSnap.exists()) {
+                    // Create bot account
+                    await set(ref(db, `users/${SHADOWBOT_UID}`), {
+                        username: SHADOWBOT_USERNAME,
+                        isBot: true,
+                        money: SHADOWBOT_STARTING_MONEY,
+                        level: 1,
+                        xp: 0,
+                        streak: 0,
+                        clashRankPoints: 21, // Start at SSL (21 points = rankIndex 7 = SSL)
+                        avatarBgColor: '#1a0a2e',
+                        avatarLetters: '🤖',
+                        createdAt: Date.now(),
+                        stealCooldownExpiry: 0,
+                    });
+                    console.log('[ShadowBot] Account created.');
+                }
+
+                // Keep bot presence alive (so it shows as "online")
+                await set(ref(db, `presence/${SHADOWBOT_UID}`), {
+                    online: true,
+                    username: SHADOWBOT_USERNAME,
+                    isBot: true,
+                    lastSeen: Date.now(),
+                });
+
+                // Load bot data
+                const freshSnap = await get(ref(db, `users/${SHADOWBOT_UID}`));
+                shadowbotState.data = freshSnap.val() || {};
+                const invSnap = await get(ref(db, `inventory/${SHADOWBOT_UID}`));
+                shadowbotState.inventory = invSnap.val() || {};
+
+                // Listen to real-time bot data updates
+                onValue(ref(db, `users/${SHADOWBOT_UID}`), snap => {
+                    shadowbotState.data = snap.val() || {};
+                });
+                onValue(ref(db, `inventory/${SHADOWBOT_UID}`), snap => {
+                    shadowbotState.inventory = snap.val() || {};
+                });
+
+                // Track who stole from the bot (listen to clash sessions where bot is defender)
+                onValue(ref(db, 'clash_sessions'), snap => {
+                    const sessions = snap.val() || {};
+                    for (const sid in sessions) {
+                        const sess = sessions[sid];
+                        if (sess.defenderUid === SHADOWBOT_UID && sess.winnerSignaledUid && sess.winnerSignaledUid !== SHADOWBOT_UID) {
+                            // Someone successfully stole from bot
+                            const thief = sess.winnerSignaledUid;
+                            shadowbotState.attackersLog[thief] = (shadowbotState.attackersLog[thief] || 0) + 1;
+                        }
+                        // Also handle incoming attacks against bot automatically
+                        if (sess.defenderUid === SHADOWBOT_UID && sess.sessionState === 'initialized'
+                            && !sess.defenderSolveMs && !sess._botHandled) {
+                            shadowbotHandleIncomingAttack(sid, sess);
+                        }
+                    }
+                });
+
+                shadowbotState.initialized = true;
+                console.log('[ShadowBot] Initialized. Starting tick loop.');
+                shadowbotStartTradeListener();
+                shadowbotStartLoop();
+            } catch (err) {
+                console.warn('[ShadowBot] Bootstrap error:', err);
+            }
+        }
+
+        // ── Get bot's current solve time based on rank ──
+        function shadowbotGetSolveMs() {
+            const pts = shadowbotState.data?.clashRankPoints || 0;
+            const { rank } = getClashRankFromPoints(pts);
+            return SHADOWBOT_RANK_SOLVE_MS[rank?.id] || 15000;
+        }
+
+        // ── Bot automatically defends when attacked ──
+        async function shadowbotHandleIncomingAttack(sessionId, session) {
+            try {
+                // Mark as handled to prevent double-processing
+                await update(ref(db, `clash_sessions/${sessionId}`), { _botHandled: true });
+
+                const solveMs = shadowbotGetSolveMs();
+                // Add small variance: ±10% of solve time
+                const actualSolveMs = solveMs + (Math.random() * solveMs * 0.2 - solveMs * 0.1);
+
+                setTimeout(async () => {
+                    try {
+                        const sessSnap = await get(ref(db, `clash_sessions/${sessionId}`));
+                        const sess = sessSnap.val();
+                        if (!sess || sess.sessionState !== 'initialized') return;
+
+                        await runTransaction(ref(db, `clash_sessions/${sessionId}`), (s) => {
+                            if (!s || s.sessionState !== 'initialized') return;
+                            if (s.defenderSolveMs !== undefined && s.defenderSolveMs !== null) return;
+                            s.defenderSolveMs = Math.round(actualSolveMs);
+                            return s;
+                        });
+
+                        // After window, try to judge
+                        setTimeout(async () => {
+                            try {
+                                await runTransaction(ref(db, `clash_sessions/${sessionId}`), (s) => {
+                                    if (!s || s.sessionState !== 'initialized') return;
+                                    const atkMs = s.attackerSolveMs !== undefined && s.attackerSolveMs !== null ? s.attackerSolveMs : Infinity;
+                                    const defMs = s.defenderSolveMs !== undefined && s.defenderSolveMs !== null ? s.defenderSolveMs : Infinity;
+                                    if (atkMs === Infinity && defMs === Infinity) return;
+                                    const winner = atkMs <= defMs ? s.attackerUid : s.defenderUid;
+                                    s.sessionState = 'terminated_resolved';
+                                    s.winnerSignaledUid = winner;
+                                    s.claimed = true;
+                                    s.claimedBy = winner;
+                                    s.winnerSolveTimeMs = Math.min(atkMs === Infinity ? defMs : atkMs, defMs === Infinity ? atkMs : defMs);
+                                    return s;
+                                });
+
+                                // Update bot rank points
+                                const finalSess = (await get(ref(db, `clash_sessions/${sessionId}`))).val();
+                                if (finalSess) {
+                                    if (finalSess.winnerSignaledUid === SHADOWBOT_UID) {
+                                        // Bot won defense
+                                        const curPts = shadowbotState.data?.clashRankPoints || 0;
+                                        await update(ref(db, `users/${SHADOWBOT_UID}`), { clashRankPoints: curPts + 1 });
+                                    } else {
+                                        // Bot lost — attacker stole card
+                                        const thief = finalSess.attackerUid;
+                                        shadowbotState.attackersLog[thief] = (shadowbotState.attackersLog[thief] || 0) + 1;
+                                        // Apply card loss (defender side)
+                                        const targetKey = finalSess.targetCardInstanceKey;
+                                        if (targetKey) {
+                                            await remove(ref(db, `inventory/${SHADOWBOT_UID}/${targetKey}`));
+                                        }
+                                    }
+                                }
+                            } catch (e) { console.warn('[ShadowBot] judge error', e); }
+                        }, 600);
+                    } catch (e) { console.warn('[ShadowBot] defense submit error', e); }
+                }, Math.round(actualSolveMs));
+            } catch (err) {
+                console.warn('[ShadowBot] handleIncomingAttack error:', err);
+            }
+        }
+
+        // ── 30-second decision loop ──
+        function shadowbotStartLoop() {
+            if (shadowbotState.intervalTimer) clearInterval(shadowbotState.intervalTimer);
+            shadowbotState.intervalTimer = setInterval(shadowbotTick, SHADOWBOT_INTERVAL_MS);
+            // Also run once after a short delay on init
+            setTimeout(shadowbotTick, 5000);
+        }
+
+        async function shadowbotTick() {
+            if (!shadowbotState.initialized) return;
+            try {
+                const botData = shadowbotState.data || {};
+                const botInventory = shadowbotState.inventory || {};
+                const botMoney = parseFloat(botData.money || 0);
+                const now = Date.now();
+                const stealCooldown = botData.stealCooldownExpiry || 0;
+                const canSteal = now > stealCooldown;
+
+                // Collect sellable cards:
+                // - liveValue exceeds baseValue (mutations pushed it up → good time to sell)
+                // - OR card has reached the mutation sell threshold (3+ mutations: diminishing returns / risk of bad mutations)
+                // Bot never sells cards it just got (< 10 seconds old) to avoid immediate regret
+                const SHADOWBOT_MAX_MUTATIONS_SELL_THRESHOLD = 3;
+                const now2 = Date.now();
+                const sellable = [];
+                for (const [instanceId, card] of Object.entries(botInventory)) {
+                    if (!card) continue;
+                    // Don't immediately flip a card just acquired
+                    if (card.acquiredTimestamp && (now2 - card.acquiredTimestamp) < 10000) continue;
+                    const baseValue = shadowbotGetCardBaseValue(card);
+                    const liveValue = shadowbotCalculateValue(card);
+                    const mutations = (card.activeMutationIndexes || []).length;
+                    const atMaxMutation = mutations >= SHADOWBOT_MAX_MUTATIONS_SELL_THRESHOLD;
+                    const isProfitable = liveValue > baseValue * 1.05; // sell if at least 5% above base
+                    if (isProfitable || atMaxMutation) {
+                        sellable.push({ instanceId, card, liveValue, baseValue, mutations });
+                    }
+                }
+
+                // Fetch live stock from Firebase so we only pick 'buy' when packs are actually in stock
+                const stockSnap = await get(ref(db, 'system/packs/stockAllocations'));
+                const liveStock = stockSnap.val() || {};
+
+                // Find best affordable pack that has stock
+                const affordablePacks = PACK_TYPES.filter(p =>
+                    PACK_METADATA[p].price <= botMoney && (liveStock[p] || 0) > 0
+                );
+                // Pick mid-tier biased pack
+                let chosenPack = null;
+                if (affordablePacks.length > 0) {
+                    const midIdx = Math.floor(affordablePacks.length * 0.4 + Math.random() * affordablePacks.length * 0.4);
+                    chosenPack = affordablePacks[Math.min(midIdx, affordablePacks.length - 1)];
+                }
+                const canBuyPack = chosenPack !== null;
+                const hasSellable = sellable.length > 0;
+
+                // Build weighted decision array
+                const choices = [];
+                if (canSteal) choices.push({ action: 'steal', weight: 20 });
+                if (canBuyPack) choices.push({ action: 'buy', weight: 45 });
+                if (hasSellable) choices.push({ action: 'sell', weight: 25 });
+                choices.push({ action: 'nothing', weight: 10 });
+
+                const totalWeight = choices.reduce((s, c) => s + c.weight, 0);
+                let roll = Math.random() * totalWeight;
+                let chosen = 'nothing';
+                for (const c of choices) {
+                    roll -= c.weight;
+                    if (roll <= 0) { chosen = c.action; break; }
+                }
+
+                console.log(`[ShadowBot] Decision: ${chosen} | Money: €${botMoney.toFixed(0)} | Cards: ${Object.keys(botInventory).length} | Pack: ${chosenPack || 'none'}`);
+
+                if (chosen === 'buy' && chosenPack) {
+                    await shadowbotBuyPack(botMoney, chosenPack, liveStock[chosenPack]);
+                } else if (chosen === 'sell' && hasSellable) {
+                    await shadowbotSellCard(sellable);
+                } else if (chosen === 'steal') {
+                    await shadowbotAttemptSteal(botData);
+                }
+                // 'nothing' → skip
+
+                // Refresh presence heartbeat
+                update(ref(db, `presence/${SHADOWBOT_UID}`), { lastSeen: Date.now() }).catch(() => {});
+            } catch (err) {
+                console.warn('[ShadowBot] Tick error:', err);
+            }
+        }
+
+        function shadowbotGetCardBaseValue(card) {
+            if (card.packSource === 'hidden') {
+                const hc = HIDDEN_CARDS.find(h => h.id === card.cardId);
+                return hc ? hc.baseValue : 0;
+            }
+            if (card.packSource === '__custom__') return parseFloat(card.customCardMeta?.baseValue || 0);
+            const reg = GAME_REGISTRY[card.packSource]?.find(x => x.id === card.cardId);
+            return reg ? reg.baseValue : 0;
+        }
+
+        function shadowbotCalculateValue(card) {
+            let val = shadowbotGetCardBaseValue(card);
+            (card.activeMutationIndexes || []).forEach(i => {
+                const m = MUTATIONS_LIST[i];
+                if (!m) return;
+                const bp = Math.max(-MAX_MUTATION_BONUS_PERCENT, Math.min(MAX_MUTATION_BONUS_PERCENT, m.bonusPercent || 0));
+                val = val * (1 + bp / 100);
+            });
+            return parseFloat(val.toFixed(2));
+        }
+
+
+
+        // packKey and currentStock are pre-verified by shadowbotTick; use a transaction to safely decrement stock
+        async function shadowbotBuyPack(botMoney, packKey, currentStock) {
+            if (!packKey || !currentStock || currentStock <= 0) return;
+
+            const metaSpec = PACK_METADATA[packKey];
+            if (!metaSpec || botMoney < metaSpec.price) return;
+
+            const pool = GAME_REGISTRY[packKey];
+            if (!pool || !pool.length) return;
+
+            // Use a transaction on stock to prevent race conditions with real players buying simultaneously
+            const stockRef = ref(db, `system/packs/stockAllocations/${packKey}`);
+            const txResult = await runTransaction(stockRef, (currentVal) => {
+                const s = currentVal || 0;
+                if (s <= 0) return; // abort — sold out
+                return s - 1;
+            });
+
+            if (!txResult.committed) {
+                console.log(`[ShadowBot] Pack ${packKey} sold out (transaction aborted)`);
+                return;
+            }
+
+            // Pick a card
+            const roll = Math.random() * 100;
+            let cum = 0;
+            let picked = pool[pool.length - 1];
+            for (const c of pool) {
+                cum += c.chance;
+                if (roll <= cum) { picked = c; break; }
+            }
+
+            const instanceId = `bot_${Date.now()}_${Math.floor(Math.random() * 9999)}`;
+            const newMoney = parseFloat((botMoney - metaSpec.price).toFixed(2));
+
+            await update(ref(db, '/'), {
+                [`users/${SHADOWBOT_UID}/money`]: newMoney,
+                [`users/${SHADOWBOT_UID}/xp`]: (shadowbotState.data?.xp || 0) + 10,
+                [`inventory/${SHADOWBOT_UID}/${instanceId}`]: {
+                    instanceId,
+                    cardId: picked.id,
+                    packSource: packKey,
+                    registryIndexRef: picked.index,
+                    acquiredTimestamp: Date.now(),
+                    activeMutationIndexes: [],
+                    cryptographicLockExpiry: 0,
+                },
+            });
+            console.log(`[ShadowBot] Bought ${packKey} pack → got "${picked.name}" (base: €${shadowbotGetCardBaseValue({ cardId: picked.id, packSource: packKey })})`);
+        }
+
+        async function shadowbotSellCard(sellable) {
+            if (!sellable.length) return;
+            // Sort by highest value and sell the most valuable
+            sellable.sort((a, b) => b.liveValue - a.liveValue);
+            const { instanceId, liveValue } = sellable[0];
+
+            const newMoney = parseFloat(((shadowbotState.data?.money || 0) + liveValue).toFixed(2));
+            await update(ref(db, '/'), {
+                [`users/${SHADOWBOT_UID}/money`]: newMoney,
+                [`inventory/${SHADOWBOT_UID}/${instanceId}`]: null,
+            });
+            console.log(`[ShadowBot] Sold card for €${liveValue}`);
+        }
+
+        // ── ShadowBot Trade Intelligence ──────────────────────────────
+        // Called once during bootstrap to watch for incoming trade requests.
+        // Bot evaluates every trade offer before accepting/declining.
+
+        function shadowbotStartTradeListener() {
+            onValue(ref(db, `trade_requests/${SHADOWBOT_UID}`), async (snap) => {
+                const requests = snap.val();
+                if (!requests) return;
+                for (const [requestId, req] of Object.entries(requests)) {
+                    if (!req || req.status !== 'pending' || req.toUid !== SHADOWBOT_UID) continue;
+                    // Mark as being processed so we don't process it twice
+                    await update(ref(db, `trade_requests/${SHADOWBOT_UID}/${requestId}`), { status: 'processing' });
+                    // Small think delay (realistic)
+                    setTimeout(() => shadowbotRespondToTradeRequest(requestId, req), 3000 + Math.random() * 2000);
+                }
+            });
+
+            // Also watch active_trades where the bot is a participant — evaluate and lock when ready
+            onValue(ref(db, 'active_trades'), async (snap) => {
+                const trades = snap.val();
+                if (!trades) return;
+                for (const [tradeId, trade] of Object.entries(trades)) {
+                    if (!trade || trade.status !== 'active') continue;
+                    const isBotParticipant = trade.participant1 === SHADOWBOT_UID || trade.participant2 === SHADOWBOT_UID;
+                    if (!isBotParticipant) continue;
+                    const botLocked = trade.locked?.[SHADOWBOT_UID];
+                    if (botLocked) continue; // already locked
+                    // Bot needs to evaluate the trade and decide whether to lock in
+                    setTimeout(() => shadowbotEvaluateAndLockTrade(tradeId, trade), 4000 + Math.random() * 3000);
+                }
+            });
+        }
+
+        async function shadowbotRespondToTradeRequest(requestId, req) {
+            try {
+                // Accept all trade requests (the real evaluation happens when locking the trade)
+                await update(ref(db, `trade_requests/${SHADOWBOT_UID}/${requestId}`), { status: 'accepted' });
+
+                // Initialize bot's side of the trade in active_trades
+                const tradeId = requestId;
+                const tradeRef = ref(db, `active_trades/${tradeId}`);
+                const tradeSnap = await get(tradeRef);
+
+                if (!tradeSnap.exists()) {
+                    await set(tradeRef, {
+                        participant1: req.fromUid,
+                        participant1Username: req.fromUsername,
+                        participant2: SHADOWBOT_UID,
+                        participant2Username: SHADOWBOT_USERNAME,
+                        offers: {
+                            [req.fromUid]: { type: 'money', value: 0, cards: [] },
+                            [SHADOWBOT_UID]: { type: 'money', value: 0, cards: [] }
+                        },
+                        locked: {
+                            [req.fromUid]: false,
+                            [SHADOWBOT_UID]: false
+                        },
+                        status: 'active',
+                        createdAt: Date.now()
+                    });
+                } else {
+                    await update(tradeRef, {
+                        [`offers/${SHADOWBOT_UID}`]: { type: 'money', value: 0, cards: [] },
+                        [`locked/${SHADOWBOT_UID}`]: false
+                    });
+                }
+                console.log(`[ShadowBot] Accepted trade request from ${req.fromUsername}, waiting to evaluate offer...`);
+            } catch (err) {
+                console.warn('[ShadowBot] Trade request response error:', err);
+            }
+        }
+
+        // ── Core trade valuation: determine if a trade is fair for the bot ──
+        function shadowbotEvaluateTradeOffer(myOffer, theirOffer, botInventorySnapshot) {
+            // ── Helper: compute card value from an offer card entry ──
+            function getOfferCardValue(offerCard) {
+                // offerCard has { instanceId, cardId, packSource, name }
+                const dummyCard = {
+                    cardId: offerCard.cardId,
+                    packSource: offerCard.packSource,
+                    activeMutationIndexes: offerCard.activeMutationIndexes || []
+                };
+                return shadowbotCalculateValue(dummyCard);
+            }
+
+            function getTotalOfferValue(offer) {
+                if (!offer) return 0;
+                if (offer.type === 'money') return parseFloat(offer.value) || 0;
+                if (offer.type === 'xp') {
+                    // XP is worth a fraction of money (rough equivalence: 1 XP ≈ 0.5 coins)
+                    return (parseFloat(offer.value) || 0) * 0.5;
+                }
+                if (offer.type === 'cards') {
+                    return (offer.cards || []).reduce((sum, c) => sum + getOfferCardValue(c), 0);
+                }
+                return 0;
+            }
+
+            const botGetsValue = getTotalOfferValue(theirOffer);  // what the bot RECEIVES
+            const botGivesValue = getTotalOfferValue(myOffer);    // what the bot GIVES UP
+
+            // ── Reject if offer is completely empty ──
+            if (botGetsValue === 0) {
+                return { accept: false, reason: 'empty_offer' };
+            }
+
+            // ── Reject if bot is giving up cards that are unsellable/special ──
+            if (myOffer?.type === 'cards') {
+                for (const c of (myOffer.cards || [])) {
+                    const fullCard = botInventorySnapshot[c.instanceId];
+                    if (fullCard?.unsellable) {
+                        return { accept: false, reason: 'unsellable_card' };
+                    }
+                }
+            }
+
+            // ── Value ratio check: bot should get at least 85% of what it gives ──
+            // This prevents people from offering trash for valuable cards
+            const MIN_VALUE_RATIO = 0.85;
+            if (botGivesValue > 0) {
+                const ratio = botGetsValue / botGivesValue;
+                if (ratio < MIN_VALUE_RATIO) {
+                    return { accept: false, reason: 'unfair_ratio', ratio };
+                }
+            }
+
+            // ── Anti-dump check: if they offer only XP and we give real cards, be skeptical ──
+            if (theirOffer?.type === 'xp' && myOffer?.type === 'cards') {
+                // Only accept if XP equivalent value >= 90% of card value
+                if (botGetsValue < botGivesValue * 0.9) {
+                    return { accept: false, reason: 'xp_for_cards_bad_deal' };
+                }
+            }
+
+            // ── Sanity cap: don't accept a deal where bot loses more than 5× what it gains ──
+            if (botGivesValue > botGetsValue * 5) {
+                return { accept: false, reason: 'extreme_loss' };
+            }
+
+            // ── Greed check: if the deal is too good to be true (we get 10× more), it's suspicious ──
+            // Accept it — but log it. (Could indicate a generous player or a mistake.)
+            if (botGetsValue > botGivesValue * 10 && botGivesValue > 0) {
+                console.log('[ShadowBot] Trade seems very favorable — accepting anyway.');
+            }
+
+            // ── If we give nothing and get something (pure gift), accept it happily ──
+            if (botGivesValue === 0 && botGetsValue > 0) {
+                return { accept: true, reason: 'pure_gift' };
+            }
+
+            return { accept: true, reason: 'fair_trade', botGetsValue, botGivesValue };
+        }
+
+        async function shadowbotEvaluateAndLockTrade(tradeId, tradeSnapshot) {
+            try {
+                // Re-fetch fresh data to avoid stale snapshot decisions
+                const freshSnap = await get(ref(db, `active_trades/${tradeId}`));
+                const trade = freshSnap.val();
+                if (!trade || trade.status !== 'active') return;
+                if (trade.locked?.[SHADOWBOT_UID]) return; // already locked
+
+                const isBotP1 = trade.participant1 === SHADOWBOT_UID;
+                const partnerUid = isBotP1 ? trade.participant2 : trade.participant1;
+
+                const myOffer = trade.offers?.[SHADOWBOT_UID] || { type: 'money', value: 0, cards: [] };
+                const theirOffer = trade.offers?.[partnerUid] || { type: 'money', value: 0, cards: [] };
+
+                // If the partner hasn't put anything in yet, wait — don't lock on nothing
+                const theirOfferEmpty =
+                    (theirOffer.type === 'money' && (!theirOffer.value || theirOffer.value === 0)) ||
+                    (theirOffer.type === 'xp' && (!theirOffer.value || theirOffer.value === 0)) ||
+                    (theirOffer.type === 'cards' && (!theirOffer.cards || theirOffer.cards.length === 0));
+
+                if (theirOfferEmpty) {
+                    console.log('[ShadowBot] Trade: partner hasn\'t offered anything yet, waiting...');
+                    // Check again in 10s if partner still hasn't offered, cancel
+                    setTimeout(async () => {
+                        const recheck = (await get(ref(db, `active_trades/${tradeId}`))).val();
+                        if (!recheck || recheck.status !== 'active') return;
+                        const recheckOffer = recheck.offers?.[partnerUid];
+                        const recheckEmpty =
+                            (recheckOffer?.type === 'money' && (!recheckOffer.value || recheckOffer.value === 0)) ||
+                            (recheckOffer?.type === 'xp' && (!recheckOffer.value || recheckOffer.value === 0)) ||
+                            (recheckOffer?.type === 'cards' && (!recheckOffer.cards || recheckOffer.cards.length === 0));
+                        if (recheckEmpty) {
+                            console.log('[ShadowBot] Trade: partner still offered nothing — cancelling trade.');
+                            await update(ref(db, `active_trades/${tradeId}`), { status: 'cancelled', reason: 'bot_no_offer_from_partner' });
+                        }
+                    }, 10000);
+                    return;
+                }
+
+                const botInv = shadowbotState.inventory || {};
+                const decision = shadowbotEvaluateTradeOffer(myOffer, theirOffer, botInv);
+
+                if (decision.accept) {
+                    console.log(`[ShadowBot] Trade ACCEPTED (${decision.reason}): gets €${(decision.botGetsValue||0).toFixed(0)}, gives €${(decision.botGivesValue||0).toFixed(0)}`);
+                    // Build bot's counter-offer if bot has nothing offered yet (offer a small amount of money as goodwill)
+                    const botOfferIsEmpty =
+                        (myOffer.type === 'money' && (!myOffer.value || myOffer.value === 0)) ||
+                        (myOffer.type === 'cards' && (!myOffer.cards || myOffer.cards.length === 0));
+
+                    if (botOfferIsEmpty && decision.reason !== 'pure_gift') {
+                        // Offer a token amount back: 10% of what we're getting, minimum 1 coin
+                        const counterMoney = Math.max(1, Math.round(decision.botGetsValue * 0.10));
+                        const botMoney = parseFloat(shadowbotState.data?.money || 0);
+                        if (counterMoney <= botMoney) {
+                            await update(ref(db, `active_trades/${tradeId}/offers/${SHADOWBOT_UID}`), {
+                                type: 'money', value: counterMoney, cards: []
+                            });
+                        }
+                    }
+
+                    // Lock in
+                    await update(ref(db, `active_trades/${tradeId}`), {
+                        [`locked/${SHADOWBOT_UID}`]: true
+                    });
+                } else {
+                    console.log(`[ShadowBot] Trade DECLINED (${decision.reason})`);
+                    await update(ref(db, `active_trades/${tradeId}`), {
+                        status: 'cancelled',
+                        reason: `bot_declined_${decision.reason}`
+                    });
+                }
+            } catch (err) {
+                console.warn('[ShadowBot] EvaluateAndLockTrade error:', err);
+            }
+        }
+        // ──────────────────────────────────────────────────────────────
+
+        async function shadowbotAttemptSteal(botData) {
+            try {
+                // Get all online presence entries to find targets
+                const presenceSnap = await get(ref(db, 'presence'));
+                const presence = presenceSnap.val() || {};
+
+                // Get all non-bot users
+                const usersSnap = await get(ref(db, 'users'));
+                const allUsers = usersSnap.val() || {};
+
+                // Build target list: prefer users who stole from bot most
+                let targets = Object.entries(presence)
+                    .filter(([uid, p]) => uid !== SHADOWBOT_UID && p && p.online)
+                    .map(([uid]) => uid)
+                    .filter(uid => allUsers[uid] && !isUserStillInTutorial(allUsers[uid]));
+
+                if (!targets.length) {
+                    // Fall back to any non-tutorial, non-bot user
+                    targets = Object.keys(allUsers).filter(uid =>
+                        uid !== SHADOWBOT_UID &&
+                        allUsers[uid]?.username &&
+                        !isUserStillInTutorial(allUsers[uid])
+                    );
+                }
+
+                if (!targets.length) return;
+
+                // Sort: users who stole from bot first (most attacks → highest priority)
+                targets.sort((a, b) => (shadowbotState.attackersLog[b] || 0) - (shadowbotState.attackersLog[a] || 0));
+
+                // Try up to 3 targets to find one with a stealable card
+                for (let i = 0; i < Math.min(3, targets.length); i++) {
+                    const defenderUid = targets[i];
+
+                    // Don't target if they're currently attacking someone
+                    const defPres = presence[defenderUid] || {};
+                    if (defPres.stealingActive) continue;
+
+                    // Check tutorial
+                    const defProfile = allUsers[defenderUid] || {};
+                    if (isUserStillInTutorial(defProfile)) continue;
+
+                    // Get their inventory
+                    const defInvSnap = await get(ref(db, `inventory/${defenderUid}`));
+                    const defInv = defInvSnap.val() || {};
+
+                    // Find a stealable card (not locked, not Ramez)
+                    const now = Date.now();
+                    const stealableKeys = Object.keys(defInv).filter(key => {
+                        const card = defInv[key];
+                        if (!card) return false;
+                        if (isRamezCard(card)) return false;
+                        if (card.cryptographicLockExpiry && card.cryptographicLockExpiry > now) return false;
+                        if (card.unsellable) return false;
+                        return true;
+                    });
+
+                    if (!stealableKeys.length) continue;
+
+                    // Check if already being stolen
+                    const sessSnap = await get(ref(db, 'clash_sessions'));
+                    const sessions = sessSnap.val() || {};
+                    const alreadyTargeted = new Set(Object.values(sessions).map(s => s.lockedTargetInstanceId));
+
+                    const available = stealableKeys.filter(k => !alreadyTargeted.has(k));
+                    if (!available.length) continue;
+
+                    // Pick random card
+                    const targetKey = available[Math.floor(Math.random() * available.length)];
+                    const targetCard = defInv[targetKey];
+
+                    // Create clash session
+                    const sessionId = push(ref(db, 'clash_sessions')).key;
+                    const argA = Math.floor(Math.random() * 30) + 1;
+                    const argB = Math.floor(Math.random() * 30) + 1;
+                    const op = Math.random() > 0.5 ? '+' : '-';
+                    const leftOp = op === '-' && argA < argB ? argB : argA;
+                    const rightOp = op === '-' && argA < argB ? argA : argB;
+                    const answer = op === '-' ? leftOp - rightOp : leftOp + rightOp;
+
+                    const newCooldown = now + SHADOWBOT_STEAL_COOLDOWN_MS;
+                    const session = {
+                        sessionId,
+                        attackerUid: SHADOWBOT_UID,
+                        attackerName: SHADOWBOT_USERNAME,
+                        defenderUid,
+                        targetCardInstanceKey: targetKey,
+                        lockedTargetInstanceId: targetKey,
+                        targetCardSnapshot: targetCard,
+                        puzzleType: 'clash_math',
+                        mathArgA: leftOp,
+                        mathArgB: rightOp,
+                        mathOperator: op,
+                        mathExpectedResult: answer,
+                        sessionState: 'initialized',
+                        winnerSignaledUid: '',
+                        transferCompleted: false,
+                        timestampMarker: serverTimestamp(),
+                    };
+
+                    const payload = {};
+                    payload[`clash_sessions/${sessionId}`] = session;
+                    payload[`steal_payloads/${sessionId}`] = {
+                        defenderUid,
+                        targetCardInstanceKey: targetKey,
+                        card: targetCard,
+                    };
+                    payload[`users/${SHADOWBOT_UID}/stealCooldownExpiry`] = newCooldown;
+
+                    await update(ref(db, '/'), payload);
+                    console.log(`[ShadowBot] Initiated steal on ${defProfile.username} (retaliating: ${shadowbotState.attackersLog[defenderUid] || 0} prior attacks)`);
+
+                    // Bot auto-solves its own attack after rank-based delay
+                    const solveMs = shadowbotGetSolveMs();
+                    const actual = solveMs + (Math.random() * solveMs * 0.2 - solveMs * 0.1);
+                    setTimeout(async () => {
+                        try {
+                            await runTransaction(ref(db, `clash_sessions/${sessionId}`), (s) => {
+                                if (!s || s.sessionState !== 'initialized') return;
+                                if (s.attackerSolveMs !== undefined && s.attackerSolveMs !== null) return;
+                                s.attackerSolveMs = Math.round(actual);
+                                return s;
+                            });
+
+                            // Judge after window
+                            setTimeout(async () => {
+                                try {
+                                    const judgeResult = await runTransaction(ref(db, `clash_sessions/${sessionId}`), (s) => {
+                                        if (!s || s.sessionState !== 'initialized') return;
+                                        const atkMs = s.attackerSolveMs !== undefined ? s.attackerSolveMs : Infinity;
+                                        const defMs = s.defenderSolveMs !== undefined ? s.defenderSolveMs : Infinity;
+                                        if (atkMs === Infinity && defMs === Infinity) return;
+                                        const winner = atkMs <= defMs ? s.attackerUid : s.defenderUid;
+                                        s.sessionState = 'terminated_resolved';
+                                        s.winnerSignaledUid = winner;
+                                        s.claimed = true;
+                                        s.claimedBy = winner;
+                                        s.winnerSolveTimeMs = Math.min(atkMs === Infinity ? defMs : atkMs, defMs === Infinity ? atkMs : defMs);
+                                        return s;
+                                    });
+
+                                    if (!judgeResult.committed) return;
+                                    const resolved = judgeResult.snapshot.val();
+                                    if (!resolved) return;
+
+                                    if (resolved.winnerSignaledUid === SHADOWBOT_UID) {
+                                        // Bot won — transfer card
+                                        const stolenCard = {
+                                            ...targetCard,
+                                            stolenAt: Date.now(),
+                                            stolenFrom: defenderUid,
+                                        };
+                                        await update(ref(db, '/'), {
+                                            [`inventory/${SHADOWBOT_UID}/${targetKey}`]: stolenCard,
+                                            [`inventory/${defenderUid}/${targetKey}`]: null,
+                                            [`clash_sessions/${sessionId}/attackerLootApplied`]: true,
+                                            [`clash_sessions/${sessionId}/defenderCardPurged`]: true,
+                                        });
+                                        console.log(`[ShadowBot] Steal SUCCESS — got "${targetCard.cardId}"`);
+                                        // Award rank point to bot
+                                        const curPts = shadowbotState.data?.clashRankPoints || 0;
+                                        await update(ref(db, `users/${SHADOWBOT_UID}`), { clashRankPoints: curPts + 1 });
+                                    } else {
+                                        console.log(`[ShadowBot] Steal FAILED — defender was faster`);
+                                    }
+
+                                    // Cleanup
+                                    setTimeout(async () => {
+                                        await remove(ref(db, `clash_sessions/${sessionId}`));
+                                        await remove(ref(db, `steal_payloads/${sessionId}`));
+                                    }, 3000);
+                                } catch (e) { console.warn('[ShadowBot] attack judge error', e); }
+                            }, 600);
+                        } catch (e) { console.warn('[ShadowBot] attack solve error', e); }
+                    }, Math.round(actual));
+
+                    break; // Only one steal per tick
+                }
+            } catch (err) {
+                console.warn('[ShadowBot] attemptSteal error:', err);
+            }
+        }
+
+        // ── Patch leaderboards to show bot with 🤖 ──
+        const _originalHandleLeaderboardQuery = window.handleLeaderboardQuery;
+        window.handleLeaderboardQuery = async function(metricSortingKey) {
+            await _originalHandleLeaderboardQuery.call(this, metricSortingKey);
+            // After rendering, find the bot entry and add 🤖 icon
+            const container = document.getElementById('container-leaderboards');
+            if (!container) return;
+            container.querySelectorAll('.rank-entry, .clash-rank-leaderboard-row').forEach(row => {
+                const nameEl = row.querySelector('.cr-name') || row.querySelector('[style*="font-weight:700"]');
+                if (nameEl && nameEl.textContent.trim() === SHADOWBOT_USERNAME) {
+                    if (!nameEl.textContent.includes('🤖')) {
+                        nameEl.textContent = '🤖 ' + nameEl.textContent.trim();
+                    }
+                }
+            });
+        };
+
+        // ── Initialize ShadowBot after user environment is set up ──
+        // Hook into initializeUserEnvironmentCore to start bot once Firebase is ready
+        const _prevInitUserEnvForBot = initializeUserEnvironmentCore;
+        initializeUserEnvironmentCore = function() {
+            _prevInitUserEnvForBot.call(this);
+            // Start bot after 4 seconds (after Firebase connections settle)
+            setTimeout(() => {
+                if (!shadowbotState.initialized) {
+                    shadowbotBootstrap().catch(err => console.warn('[ShadowBot] init failed:', err));
+                }
+            }, 4000);
+        };
+        // =========================================================
+        // END SHADOWBOT
+        // =========================================================
     </script>
     <div
         style="position: fixed; top: 12px; left: 12px; z-index: 9999999999999; color: rgba(255, 255, 255, 0.4); font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
-        V:9.5
+        V:9.6
     </div>
 </body>
 
