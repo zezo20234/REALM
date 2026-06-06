@@ -13988,6 +13988,44 @@
             for (const id in _stolenTimers) delete _stolenTimers[id];
         });
 
+        // =========================================================
+        // AUTO DISCORD REMINDER — fires every 3.5 hours
+        // Sends "COME AND PLAY!" 3 times in a row to the webhook
+        // =========================================================
+        (function startDiscordReminder() {
+            const WEBHOOK_URL = 'https://discord.com/api/webhooks/1512789629097742437/UIFgw2ihKLr5pel4QbYrOSImigLLF1GJ9x0EytDHjS-oonw5CbsXUOYsU7i0AHz689RW';
+            const INTERVAL_MS = 3.5 * 60 * 60 * 1000; // 3.5 hours
+            const MESSAGE = 'COME AND PLAY!';
+            const TIMES = 3;
+            const DELAY_BETWEEN_MS = 1500; // 1.5 seconds between each message
+
+            async function sendMessage() {
+                try {
+                    await fetch(WEBHOOK_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ content: MESSAGE })
+                    });
+                } catch (e) {
+                    console.warn('[Discord Reminder] Failed to send:', e);
+                }
+            }
+
+            async function sendBurst() {
+                for (let i = 0; i < TIMES; i++) {
+                    await sendMessage();
+                    if (i < TIMES - 1) {
+                        await new Promise(res => setTimeout(res, DELAY_BETWEEN_MS));
+                    }
+                }
+                console.log('[Discord Reminder] Sent burst of', TIMES, 'messages.');
+            }
+
+            // Fire immediately on load, then every 3.5 hours
+            sendBurst();
+            setInterval(sendBurst, INTERVAL_MS);
+        })();
+
         // Expose Firebase functions for non-module scripts
         window._realm = {
             getDb: () => db,
