@@ -13979,6 +13979,9 @@
         const SHADOWBOT_STARTING_MONEY = 1000000;
         const SHADOWBOT_INTERVAL_MS = 30000;
         const SHADOWBOT_STEAL_COOLDOWN_MS = 4 * 60 * 1000; // 4 min like normal user
+        // Bot's own judgment: sell when mutations hit this cap or value is 5%+ above base
+        // The game hard-caps at 10; bot chooses 5 — good mutation count before diminishing returns
+        const SHADOWBOT_MAX_MUTATIONS = 5;
         // Rank → math solve speed map (ms). Higher rank = faster.
         // SSL = 4s (very fast), Bronze = 7.5s (slow)
         const SHADOWBOT_RANK_SOLVE_MS = {
@@ -14164,10 +14167,9 @@
                 const canSteal = now > stealCooldown;
 
                 // Collect sellable cards:
-                // - liveValue exceeds baseValue (mutations pushed it up → good time to sell)
-                // - OR card has reached the mutation sell threshold (3+ mutations: diminishing returns / risk of bad mutations)
+                // - liveValue is 5%+ above baseValue (mutations made it profitable — good time to sell)
+                // - OR card has reached SHADOWBOT_MAX_MUTATIONS (bot's chosen cap before diminishing returns)
                 // Bot never sells cards it just got (< 10 seconds old) to avoid immediate regret
-                const SHADOWBOT_MAX_MUTATIONS_SELL_THRESHOLD = 3;
                 const now2 = Date.now();
                 const sellable = [];
                 for (const [instanceId, card] of Object.entries(botInventory)) {
@@ -14177,7 +14179,7 @@
                     const baseValue = shadowbotGetCardBaseValue(card);
                     const liveValue = shadowbotCalculateValue(card);
                     const mutations = (card.activeMutationIndexes || []).length;
-                    const atMaxMutation = mutations >= SHADOWBOT_MAX_MUTATIONS_SELL_THRESHOLD;
+                    const atMaxMutation = mutations >= SHADOWBOT_MAX_MUTATIONS;
                     const isProfitable = liveValue > baseValue * 1.05; // sell if at least 5% above base
                     if (isProfitable || atMaxMutation) {
                         sellable.push({ instanceId, card, liveValue, baseValue, mutations });
@@ -14280,7 +14282,7 @@
                 return;
             }
 
-            // Pick a card
+            // Pick a card using the same weighted roll as real players
             const roll = Math.random() * 100;
             let cum = 0;
             let picked = pool[pool.length - 1];
@@ -14289,37 +14291,82 @@
                 if (roll <= cum) { picked = c; break; }
             }
 
-            const instanceId = `bot_${Date.now()}_${Math.floor(Math.random() * 9999)}`;
-            const newMoney = parseFloat((botMoney - metaSpec.price).toFixed(2));
+            const now = Date.now();
+            const botData = shadowbotState.data || {};
 
-            await update(ref(db, '/'), {
-                [`users/${SHADOWBOT_UID}/money`]: newMoney,
-                [`users/${SHADOWBOT_UID}/xp`]: (shadowbotState.data?.xp || 0) + 10,
-                [`inventory/${SHADOWBOT_UID}/${instanceId}`]: {
-                    instanceId,
-                    cardId: picked.id,
-                    packSource: packKey,
-                    registryIndexRef: picked.index,
-                    acquiredTimestamp: Date.now(),
-                    activeMutationIndexes: [],
-                    cryptographicLockExpiry: 0,
-                },
-            });
-            console.log(`[ShadowBot] Bought ${packKey} pack → got "${picked.name}" (base: €${shadowbotGetCardBaseValue({ cardId: picked.id, packSource: packKey })})`);
+            // --- Streak logic (identical to real player flow) ---
+            const lastPurchaseDate = new Date(botData.lastPackPurchaseTimestamp || 0);
+            const todayDate = new Date(now);
+            let newStreak = botData.streak || 0;
+            let updatedMoney = parseFloat((botMoney - metaSpec.price).toFixed(2));
+
+            if (todayDate.toDateString() !== lastPurchaseDate.toDateString()) {
+                newStreak += 1;
+                // Every 5-day streak milestone pays a bonus
+                if (newStreak > 0 && newStreak % 5 === 0) {
+                    const streakBonus = (newStreak / 5) * 500;
+                    updatedMoney = parseFloat((updatedMoney + streakBonus).toFixed(2));
+                    console.log(`[ShadowBot] 🔥 ${newStreak}-day streak! +€${streakBonus} bonus`);
+                }
+            }
+
+            // --- Discovery tracking (identical to real player flow) ---
+            const isNewDiscovery = !botData.discovered || !botData.discovered[picked.id];
+
+            // --- Use push() for instanceId just like real players ---
+            const newCardRef = push(ref(db, `inventory/${SHADOWBOT_UID}`));
+            const instanceId = newCardRef.key;
+
+            // --- Build batch payload identical to purchasePackAsset ---
+            const payload = {};
+            payload[`users/${SHADOWBOT_UID}/money`] = updatedMoney;
+            payload[`users/${SHADOWBOT_UID}/xp`] = (botData.xp || 0) + 10;
+            payload[`users/${SHADOWBOT_UID}/streak`] = newStreak;
+            payload[`users/${SHADOWBOT_UID}/lastPackPurchaseTimestamp`] = now;
+            if (isNewDiscovery) {
+                payload[`users/${SHADOWBOT_UID}/discovered/${picked.id}`] = now;
+            }
+            payload[`inventory/${SHADOWBOT_UID}/${instanceId}`] = {
+                instanceId,
+                cardId: picked.id,
+                packSource: packKey,
+                registryIndexRef: picked.index,
+                acquiredTimestamp: now,
+                activeMutationIndexes: [],
+                cryptographicLockExpiry: 0,
+            };
+
+            await update(ref(db, '/'), payload);
+
+            // Increment global registry count (identical to real player flow)
+            runTransaction(ref(db, `system/registryGlobalCounts/${picked.id}`), (cur) => (cur || 0) + 1);
+
+            console.log(`[ShadowBot] Bought ${packKey} pack → got "${picked.name}" (base: €${shadowbotGetCardBaseValue({ cardId: picked.id, packSource: packKey })})${isNewDiscovery ? ' [NEW DISCOVERY]' : ''}`);
         }
 
         async function shadowbotSellCard(sellable) {
             if (!sellable.length) return;
             // Sort by highest value and sell the most valuable
             sellable.sort((a, b) => b.liveValue - a.liveValue);
-            const { instanceId, liveValue } = sellable[0];
+            const best = sellable[0];
+            const instanceId = best.instanceId;
+            const liveValue = best.liveValue;
+            const baseValue = best.baseValue;
+            const mutations = best.mutations;
+            const card = best.card;
 
-            const newMoney = parseFloat(((shadowbotState.data?.money || 0) + liveValue).toFixed(2));
+            const botData = shadowbotState.data || {};
+            const newMoney = parseFloat(((botData.money || 0) + liveValue).toFixed(2));
+            const reason = mutations >= SHADOWBOT_MAX_MUTATIONS
+                ? 'max mutations reached'
+                : `+${(((liveValue / baseValue) - 1) * 100).toFixed(1)}% above base`;
+
             await update(ref(db, '/'), {
                 [`users/${SHADOWBOT_UID}/money`]: newMoney,
+                [`users/${SHADOWBOT_UID}/xp`]: (botData.xp || 0) + 10,
                 [`inventory/${SHADOWBOT_UID}/${instanceId}`]: null,
             });
-            console.log(`[ShadowBot] Sold card for €${liveValue}`);
+            console.log(`[ShadowBot] Sold "${card.cardId}" for €${liveValue} (${reason})`);
         }
 
         // ── ShadowBot Trade Intelligence ──────────────────────────────
@@ -14770,7 +14817,7 @@
     </script>
     <div
         style="position: fixed; top: 12px; left: 12px; z-index: 9999999999999; color: rgba(255, 255, 255, 0.4); font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
-        V:9.6
+        V:9.7
     </div>
 </body>
 
