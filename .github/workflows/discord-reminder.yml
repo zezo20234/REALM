@@ -2,8 +2,8 @@ name: Discord Reminder
 
 on:
   schedule:
-    - cron: '10 * * * *'  # Every hour on the hour
-  workflow_dispatch:       # Allow manual trigger from GitHub UI
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
 
 jobs:
   send-reminder:
