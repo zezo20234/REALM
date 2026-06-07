@@ -1273,6 +1273,22 @@
         .bp-reward-icon.xp { background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.2); }
         .bp-reward-icon.pack { background: rgba(168,85,247,0.12); border: 1px solid rgba(168,85,247,0.2); }
         .bp-reward-icon.credits { background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.2); }
+        .bp-reward-icon.title { background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.3); }
+
+        /* Title chooser in profile */
+        .title-chooser-section { margin-top: 20px; text-align: left; }
+        .title-chooser-label { font-size: 0.7rem; color: #9ca3af; font-weight: 800; letter-spacing: 0.08em; margin-bottom: 10px; text-align: center; }
+        .title-chooser-grid { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+        .title-option-btn {
+            padding: 6px 14px; border-radius: 999px;
+            border: 1.5px solid rgba(96,165,250,0.35);
+            background: rgba(37,99,235,0.1); color: #bfdbfe;
+            font-size: 0.78rem; font-weight: 800; letter-spacing: 0.02em;
+            cursor: pointer; transition: all 0.15s;
+        }
+        .title-option-btn:hover { border-color: rgba(251,191,36,0.6); background: rgba(251,191,36,0.1); color: #fde68a; }
+        .title-option-btn.active { border-color: #fbbf24; background: rgba(251,191,36,0.18); color: #fde68a; box-shadow: 0 0 10px rgba(251,191,36,0.25); }
+        .title-option-btn.locked { border-color: rgba(75,85,99,0.4); background: rgba(75,85,99,0.08); color: #4b5563; cursor: not-allowed; opacity: 0.5; }
         .bp-reward-name {
             font-weight: 900;
             font-size: 1rem;
@@ -5254,8 +5270,24 @@
         // Get tier rewards
         // Small tiers: exactly ONE reward, cycling: xp → money → pack → xp → money → pack…
         // Big tiers (every 10th): ALL THREE rewards
+        // Season 2 title rewards: awarded at tiers 20, 40, 60, 80, 100 (Season 2 only)
+
+        const SEASON2_BP_TITLES = [
+            { tier: 20,  id: 's2_ghost',     name: 'Ghost Protocol',     emoji: '👁️', desc: 'Season 2 · Tier 20 exclusive' },
+            { tier: 40,  id: 's2_cipher',    name: 'Cipher Agent',       emoji: '🔐', desc: 'Season 2 · Tier 40 exclusive' },
+            { tier: 60,  id: 's2_eclipse',   name: 'Eclipse Broker',     emoji: '🌒', desc: 'Season 2 · Tier 60 exclusive' },
+            { tier: 80,  id: 's2_warlord',   name: 'Warlord of the Vault', emoji: '⚔️', desc: 'Season 2 · Tier 80 exclusive' },
+            { tier: 100, id: 's2_legend',    name: 'Living Legend',      emoji: '🔥', desc: 'Season 2 · Max Tier · Legendary' },
+        ];
+
+        function getSeason2BPTitle(tier) {
+            return SEASON2_BP_TITLES.find(t => t.tier === tier) || null;
+        }
+
         function getTierRewards(tier) {
             const isMilestone = tier % 10 === 0;
+            // Only Season 2 (seasonIdx === 1) gets title rewards at tiers 20/40/60/80/100
+            const s2Title = (seasonIdx === 1 && isMilestone) ? getSeason2BPTitle(tier) : null;
             
             if (isMilestone) {
                 const milestoneIndex = tier / 10;
@@ -5270,7 +5302,8 @@
                     coins: Math.round(coinsBase + (milestoneIndex - 1) * coinsIncrement),
                     xp: Math.round(xpBase + (milestoneIndex - 1) * xpIncrement),
                     pack: packs[milestoneIndex - 1],
-                    credits: ({ 1: 45, 2: 45, 3: 45, 4: 45, 5: 44, 6: 44, 7: 44, 8: 44, 9: 44, 10: 100 })[milestoneIndex] || 0
+                    credits: ({ 1: 45, 2: 45, 3: 45, 4: 45, 5: 44, 6: 44, 7: 44, 8: 44, 9: 44, 10: 100 })[milestoneIndex] || 0,
+                    s1Title: s2Title, // non-null only during Season 2 at tiers 20/40/60/80/100
                 };
             } else {
                 // Determine reward bracket
@@ -5343,6 +5376,8 @@
                     rows += rewardRow('pack',  '📦', `${rewards.pack} Pack`, 'Premium card pack');
                     if (rewards.credits > 0)
                         rows += rewardRow('credits', '⬡', `${rewards.credits} Credits`, 'Spend on future passes');
+                    if (rewards.s1Title)
+                        rows += rewardRow('title', rewards.s1Title.emoji, `"${rewards.s1Title.name}" Title`, rewards.s1Title.desc);
                 } else {
                     if (rewards.rewardKind === 'xp')
                         rows = rewardRow('xp', '⚡', `${rewards.xp} XP`, 'Level progression boost');
@@ -5689,9 +5724,19 @@
                         'battlePass/tier': nextTier
                     };
 
+                    // Unlock Season 2 BP title if this tier has one
+                    if (rewards.s1Title) {
+                        const existingTitles = userData.unlockedTitles || {};
+                        existingTitles[rewards.s1Title.id] = { unlockedAt: Date.now(), source: `Season 2 Battle Pass Tier ${nextTier}` };
+                        updates.unlockedTitles = existingTitles;
+                    }
+
                     rewardText = `${rewards.coins}€, ${rewards.xp} XP, ${rewards.pack} pack`;
                     if (rewards.credits > 0) {
                         rewardText += `, ${rewards.credits} credits`;
+                    }
+                    if (rewards.s1Title) {
+                        rewardText += ` + "${rewards.s1Title.name}" title`;
                     }
                     // Open pack for free after applying updates
                     const milestonePackKey = rewards.pack.toLowerCase();
@@ -5704,7 +5749,12 @@
                     } finally {
                         userData.money = origMoney;
                     }
-                    showToast(`Tier ${nextTier} claimed! 🎁 ${rewardText}`, 'success');
+                    if (rewards.s1Title) {
+                        showToast(`🏅 "${rewards.s1Title.name}" title unlocked! Equip it in your Profile.`, 'success', 4500);
+                        setTimeout(() => showToast(`Tier ${nextTier} claimed! 🎁 ${rewardText}`, 'success'), 1000);
+                    } else {
+                        showToast(`Tier ${nextTier} claimed! 🎁 ${rewardText}`, 'success');
+                    }
                     setTimeout(() => refreshBattlePassUI(), 500);
                     return;
                 } else {
@@ -6526,6 +6576,12 @@
                     </div>
                     <div id="prof-title" class="title-chip" style="margin:6px auto 10px auto;">Rookie</div>
                     <p id="prof-email" style="font-size:0.85rem; color:#9ca3af; margin-bottom:24px;">---</p>
+
+                    <!-- Title Chooser -->
+                    <div id="title-chooser-section" class="title-chooser-section" style="display:none; margin-bottom:20px;">
+                        <div class="title-chooser-label">🏅 EQUIPPED TITLE — TAP TO CHANGE</div>
+                        <div id="title-chooser-grid" class="title-chooser-grid"></div>
+                    </div>
 
                     <div
                         style="display:grid; grid-template-columns:1fr 1fr; gap:12px; text-align:left; margin-bottom:24px;">
@@ -9048,7 +9104,7 @@
 
         function renderHUDDisplayElements() {
             const prestigeCount = getPrestigeCount();
-            const displayTitle = getLevelTitle(userDataRecord.level || 1);
+            const displayTitle = getDisplayTitle();
             document.getElementById('hud-username').innerHTML = `${userDataRecord.username || 'Operative'}${prestigeCount > 0 ? '<span class="star-badge">★</span>' : ''}`;
             document.getElementById('hud-title').innerText = `${displayTitle}${prestigeCount > 0 ? ` · Prestige ${prestigeCount}` : ''}`;
             document.getElementById('hud-streak').innerText = `🔥 Daily Streak: ${userDataRecord.streak || 0} days`;
@@ -12056,12 +12112,113 @@
             });
         };
 
+        // ── Title Chooser ──────────────────────────────────────────────
+        // All titles a user can equip: level-based titles + unlocked BP titles
+        function getAllAvailableTitles() {
+            const level = userDataRecord.level || 1;
+            const unlockedBPTitles = userDataRecord.unlockedTitles || {};
+
+            // Level titles: always available based on current level
+            const levelTitles = LEVEL_TITLE_LADDER
+                .filter(entry => level >= entry.level)
+                .map(entry => ({ id: `lvl_${entry.level}`, name: entry.title, emoji: '⚔️', source: `Level ${entry.level}` }));
+
+            // Battle pass titles: only if unlocked
+            const bpTitles = SEASON2_BP_TITLES
+                .filter(t => !!unlockedBPTitles[t.id])
+                .map(t => ({ id: t.id, name: t.name, emoji: t.emoji, source: t.desc }));
+
+            return [...levelTitles, ...bpTitles];
+        }
+
+        function getLockedBPTitles() {
+            const unlockedBPTitles = userDataRecord.unlockedTitles || {};
+            return SEASON2_BP_TITLES.filter(t => !unlockedBPTitles[t.id]);
+        }
+
+        function getEquippedTitle() {
+            // equippedTitle stored as the title id; fall back to level title
+            return userDataRecord.equippedTitle || null;
+        }
+
+        function getDisplayTitle() {
+            // Returns the string to show in HUD/profile
+            const equipped = getEquippedTitle();
+            if (equipped) {
+                // Check if it's a BP title
+                const bpTitle = SEASON2_BP_TITLES.find(t => t.id === equipped);
+                if (bpTitle && (userDataRecord.unlockedTitles || {})[bpTitle.id]) {
+                    return bpTitle.emoji + ' ' + bpTitle.name;
+                }
+                // Check if it's a level title
+                const lvlEntry = LEVEL_TITLE_LADDER.find(e => `lvl_${e.level}` === equipped);
+                if (lvlEntry && (userDataRecord.level || 1) >= lvlEntry.level) {
+                    return lvlEntry.title;
+                }
+            }
+            return getLevelTitle(userDataRecord.level || 1);
+        }
+
+        window.equipTitle = async function equipTitle(titleId) {
+            const db = window._realm?.getDb();
+            const ref = window._realm?.getRef();
+            const update = window._realm?.getUpdate();
+            const activeUser = window._realm?.getActiveUser();
+            if (!db || !ref || !update || !activeUser) return;
+
+            try {
+                await update(ref(db, `users/${activeUser.uid}`), { equippedTitle: titleId });
+                userDataRecord.equippedTitle = titleId;
+                renderProfileDisplayData();
+                renderHUDDisplayElements();
+                showToast('Title equipped! ✨', 'success');
+            } catch (e) {
+                showToast('Could not equip title', 'error');
+            }
+        }
+
+        function renderTitleChooser() {
+            const section = document.getElementById('title-chooser-section');
+            const grid = document.getElementById('title-chooser-grid');
+            if (!section || !grid) return;
+
+            const available = getAllAvailableTitles();
+            const locked = getLockedBPTitles();
+            const equippedId = getEquippedTitle();
+
+            // Determine currently active title id
+            let activeId = equippedId;
+            if (!activeId || !available.find(t => t.id === activeId)) {
+                // Default to highest level title
+                const lvlMatch = LEVEL_TITLE_LADDER.slice().reverse().find(e => (userDataRecord.level || 1) >= e.level);
+                activeId = lvlMatch ? `lvl_${lvlMatch.level}` : 'lvl_1';
+            }
+
+            let html = '';
+            // Unlocked titles
+            for (const t of available) {
+                const isActive = t.id === activeId;
+                html += `<button class="title-option-btn${isActive ? ' active' : ''}" onclick="equipTitle('${t.id}')" title="${t.source}">${t.emoji ? t.emoji + ' ' : ''}${t.name}</button>`;
+            }
+            // Locked BP titles (show greyed out as teaser)
+            for (const t of locked) {
+                const tierNeeded = t.tier;
+                html += `<button class="title-option-btn locked" title="Unlock at BP Tier ${tierNeeded}">🔒 ${t.name}</button>`;
+            }
+
+            grid.innerHTML = html;
+            section.style.display = available.length > 0 ? 'block' : 'none';
+        }
+        // ──────────────────────────────────────────────────────────────
+
         function renderProfileDisplayData() {
             const prestigeCount = getPrestigeCount();
-            const displayTitle = getLevelTitle(userDataRecord.level || 1);
+            const displayTitle = getDisplayTitle();
             document.getElementById('prof-username').innerHTML = `${userDataRecord.username || '---'}${prestigeCount > 0 ? '<span class="star-badge">★</span>' : ''}`;
             document.getElementById('prof-email').innerText = userDataRecord.email || '---';
             document.getElementById('prof-title').innerText = `${displayTitle}${prestigeCount > 0 ? ` · Prestige ${prestigeCount}` : ''}`;
+
+            renderTitleChooser();
 
             const targetAvatarNodeBadge = document.getElementById('prof-avatar');
             setProfileBadgeContent(targetAvatarNodeBadge);
@@ -14659,72 +14816,12 @@
             }
         }
 
-        // ── ShadowBot Level Up (every 5 minutes) ──
-        async function shadowbotAttemptLevelUp() {
-            if (!shadowbotState.initialized) return;
-            try {
-                const botData = shadowbotState.data || {};
-                const currentLvl = botData.level || 1;
-                if (currentLvl >= 100) return; // already max level
-
-                const requiredXp = currentLvl * 25;
-                const requiredMoney = currentLvl * 15;
-                const botXp = parseFloat(botData.xp || 0);
-                const botMoney = parseFloat(botData.money || 0);
-
-                if (botXp < requiredXp || botMoney < requiredMoney) {
-                    console.log(`[ShadowBot] Level up check: Lv${currentLvl} — needs ${requiredXp} XP (have ${botXp}) & €${requiredMoney} (have €${botMoney.toFixed(0)}) — not ready`);
-                    return;
-                }
-
-                const newLevel = currentLvl + 1;
-                const updates = {
-                    level: newLevel,
-                    title: getLevelTitle(newLevel),
-                    xp: parseFloat((botXp - requiredXp).toFixed(2)),
-                    money: parseFloat((botMoney - requiredMoney).toFixed(2)),
-                };
-
-                // Check for hidden card unlock
-                const hiddenCard = HIDDEN_CARDS.find(hc => hc.unlocksAtLevel === newLevel);
-                if (hiddenCard) {
-                    const instanceId = 'hidden_' + Date.now() + '_' + Math.floor(Math.random() * 9999);
-                    const payload = { ...updates };
-                    // Convert flat updates into nested path form for multi-path update
-                    const multiPayload = {};
-                    for (const [k, v] of Object.entries(updates)) {
-                        multiPayload[`users/${SHADOWBOT_UID}/${k}`] = v;
-                    }
-                    multiPayload[`inventory/${SHADOWBOT_UID}/${instanceId}`] = {
-                        cardId: hiddenCard.id,
-                        packSource: 'hidden',
-                        acquiredTimestamp: Date.now(),
-                        activeMutationIndexes: [],
-                        cryptographicLockExpiry: 0,
-                    };
-                    multiPayload[`users/${SHADOWBOT_UID}/discovered/${hiddenCard.id}`] = Date.now();
-                    await update(ref(db, '/'), multiPayload);
-                    console.log(`[ShadowBot] 🎉 LEVEL UP! Lv${currentLvl} → Lv${newLevel} | Unlocked hidden card: ${hiddenCard.name}`);
-                } else {
-                    await update(ref(db, `users/${SHADOWBOT_UID}`), updates);
-                    console.log(`[ShadowBot] 🎉 LEVEL UP! Lv${currentLvl} → Lv${newLevel}`);
-                }
-            } catch (err) {
-                console.warn('[ShadowBot] levelUp error:', err);
-            }
-        }
-
         // ── 30-second decision loop ──
         function shadowbotStartLoop() {
             if (shadowbotState.intervalTimer) clearInterval(shadowbotState.intervalTimer);
             shadowbotState.intervalTimer = setInterval(shadowbotTick, SHADOWBOT_INTERVAL_MS);
             // Also run once after a short delay on init
             setTimeout(shadowbotTick, 5000);
-
-            // Level up attempt every 5 minutes
-            setInterval(shadowbotAttemptLevelUp, 5 * 60 * 1000);
-            // Also try once shortly after boot (in case bot already has enough XP/money)
-            setTimeout(shadowbotAttemptLevelUp, 10000);
         }
 
         async function shadowbotTick() {
@@ -15914,7 +16011,7 @@ or
     </script>
     <div
         style="position: fixed; top: 12px; left: 12px; z-index: 9999999999999; color: rgba(255, 255, 255, 0.4); font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
-        V:10.0
+        V:9.9
     </div>
 </body>
 
