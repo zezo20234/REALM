@@ -9316,10 +9316,10 @@
             n = parseFloat(n) || 0;
             const sign = n < 0 ? '-' : '';
             const abs = Math.abs(n);
-            // Always show with commas, no K/M/T abbreviations
-            if (Number.isInteger(abs)) {
-                return sign + abs.toLocaleString('en-US');
-            }
+            if (abs >= 1000000000) return sign + (abs / 1000000000).toLocaleString('en-US', { maximumFractionDigits: 1 }) + 'B';
+            if (abs >= 1000000) return sign + (abs / 1000000).toLocaleString('en-US', { maximumFractionDigits: 1 }) + 'M';
+            if (abs >= 1000) return sign + (abs / 1000).toLocaleString('en-US', { maximumFractionDigits: 1 }) + 'K';
+            if (Number.isInteger(abs)) return sign + abs.toLocaleString('en-US');
             return sign + abs.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         }
 
