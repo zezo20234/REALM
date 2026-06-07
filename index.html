@@ -16,7 +16,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Realm">
-    <link rel="apple-touch-icon" href="LOGO.png">
+    <link rel="apple-touch-icon" href="logo.png">
     <style>
         :root {
             --bg-dark: #090d16;
@@ -14267,7 +14267,7 @@
         //   → adjusts steal aggressiveness, sell threshold, pack tier preference
         //   → brain persisted to Firebase — survives page reloads
         // - Steal: balanced aggressor. Targets users who stole from it most.
-        // - Own clash rank. SSL rank → solves math in 4s; Bronze → 7.5s.
+        // - Own clash rank. SSL rank → solves math in 1.5s; Bronze → 4s. Adapts daily to match avg player solve times.
         // - Visible in leaderboards with 🤖 icon.
         // =========================================================
 
@@ -14282,17 +14282,94 @@
         // Hard cap: bot will never hold more than 5 cards at once
         const SHADOWBOT_MAX_INVENTORY = 5;
         // Rank → math solve speed map (ms). Higher rank = faster.
-        // SSL = 4s (very fast), Bronze = 7.5s (slow)
+        // SSL = 1.5s (very fast), Bronze = 4s (slow). Adaptive system overrides these
+        // daily based on observed average player solve times per rank.
         const SHADOWBOT_RANK_SOLVE_MS = {
-            bronze: 7500,
-            silver: 6800,
-            gold: 6000,
-            platinum: 5500,
-            diamond: 5000,
-            champion: 4700,
-            grandchamp: 4300,
-            ssl: 4000,
+            bronze:    4000,
+            silver:    3500,
+            gold:      3000,
+            platinum:  2600,
+            diamond:   2300,
+            champion:  2100,
+            grandchamp: 1800,
+            ssl:       1500,
         };
+
+        // ── Adaptive Solve-Time System ────────────────────────────────
+        // Every day ShadowBot samples resolved clash sessions, computes
+        // the average player solve time per rank tier, and stores them at
+        // system/shadowbot/avgSolveMsByRank/{rankId}.
+        // shadowbotGetSolveMs() will blend the static table with the
+        // live observed average so the bot naturally matches real players.
+        // ─────────────────────────────────────────────────────────────
+        let _shadowbotAdaptiveSolveMs = {}; // rankId → learned ms (may be empty on first run)
+        const SHADOWBOT_ADAPTIVE_BLEND = 0.6; // 60% learned, 40% static baseline
+        const SHADOWBOT_ADAPTIVE_INTERVAL_MS = 24 * 60 * 60 * 1000; // once per day
+
+        async function shadowbotUpdateAdaptiveSolveTimes() {
+            try {
+                // Pull last 500 resolved clash sessions from Firebase
+                const sessSnap = await get(ref(db, 'clash_sessions'));
+                const sessions = sessSnap.val() || {};
+
+                // Gather solve times grouped by the defender's rank at session time
+                // We look at winnerSolveTimeMs as a proxy for competitive speed.
+                // For each session we bucket by attacker/defender rank and collect both sides.
+                const buckets = {}; // rankId → [ms, ...]
+                const allUsers = (await get(ref(db, 'users'))).val() || {};
+
+                for (const sess of Object.values(sessions)) {
+                    if (!sess || sess.sessionState !== 'terminated_resolved') continue;
+                    if (!sess.attackerSolveMs && !sess.defenderSolveMs) continue;
+
+                    // Determine rank for each participant and bucket their solve time
+                    const pairs = [
+                        { uid: sess.attackerUid, ms: sess.attackerSolveMs },
+                        { uid: sess.defenderUid, ms: sess.defenderSolveMs },
+                    ];
+                    for (const { uid, ms } of pairs) {
+                        if (!uid || uid === SHADOWBOT_UID || !ms || ms <= 0 || ms > 30000) continue;
+                        const userData = allUsers[uid];
+                        if (!userData) continue;
+                        const pts = userData.clashRankPoints || 0;
+                        const { rank } = getClashRankFromPoints(pts);
+                        if (!rank) continue;
+                        if (!buckets[rank.id]) buckets[rank.id] = [];
+                        buckets[rank.id].push(ms);
+                    }
+                }
+
+                // Compute averages and persist to Firebase + local state
+                const newAverages = {};
+                for (const [rankId, times] of Object.entries(buckets)) {
+                    if (times.length < 3) continue; // need at least 3 data points to be meaningful
+                    const avg = Math.round(times.reduce((a, b) => a + b, 0) / times.length);
+                    newAverages[rankId] = avg;
+                }
+
+                if (Object.keys(newAverages).length > 0) {
+                    _shadowbotAdaptiveSolveMs = newAverages;
+                    await update(ref(db, 'system/shadowbot/avgSolveMsByRank'), newAverages);
+                    const summary = Object.entries(newAverages).map(([r, ms]) => `${r}:${ms}ms`).join(', ');
+                    console.log(`[ShadowBot] Adaptive solve times updated — ${summary}`);
+                } else {
+                    console.log('[ShadowBot] Adaptive update: not enough session data yet, keeping static times.');
+                }
+            } catch (e) {
+                console.warn('[ShadowBot] Adaptive solve-time update failed:', e);
+            }
+        }
+
+        async function shadowbotLoadAdaptiveSolveTimes() {
+            try {
+                const snap = await get(ref(db, 'system/shadowbot/avgSolveMsByRank'));
+                if (snap.exists()) {
+                    _shadowbotAdaptiveSolveMs = snap.val() || {};
+                    const summary = Object.entries(_shadowbotAdaptiveSolveMs).map(([r, ms]) => `${r}:${ms}ms`).join(', ');
+                    console.log(`[ShadowBot] Loaded adaptive solve times — ${summary}`);
+                }
+            } catch (e) { /* non-critical */ }
+        }
 
         // ── ShadowBot Learning Brain ──────────────────────────────────
         // Tracks outcomes over time and adjusts strategy weights.
@@ -14449,6 +14526,13 @@
 
                 shadowbotState.initialized = true;
                 console.log('[ShadowBot] Initialized. Starting tick loop.');
+
+                // Load previously-saved adaptive solve times from Firebase,
+                // then kick off the daily update. First run also triggers immediately.
+                await shadowbotLoadAdaptiveSolveTimes();
+                shadowbotUpdateAdaptiveSolveTimes(); // run once now (non-blocking)
+                setInterval(shadowbotUpdateAdaptiveSolveTimes, SHADOWBOT_ADAPTIVE_INTERVAL_MS); // then daily
+
                 shadowbotStartTradeListener();
                 shadowbotStartLoop();
             } catch (err) {
@@ -14457,10 +14541,55 @@
         }
 
         // ── Get bot's current solve time based on rank ──
+        // Blends the static rank baseline (40%) with the daily-observed
+        // average player solve time for that rank (60%) so ShadowBot
+        // naturally adapts to match real player speeds over time.
+        // If the bot is on a losing streak (>60% loss rate over last 10 steals),
+        // it gets progressively faster — bottoming out at the hard floor of 1500ms.
+        const SHADOWBOT_MIN_SOLVE_MS = 1500; // absolute fastest the bot can ever go
+
         function shadowbotGetSolveMs() {
             const pts = shadowbotState.data?.clashRankPoints || 0;
             const { rank } = getClashRankFromPoints(pts);
-            return SHADOWBOT_RANK_SOLVE_MS[rank?.id] || 15000;
+            const rankId = rank?.id;
+            const staticMs = SHADOWBOT_RANK_SOLVE_MS[rankId] || 4000;
+
+            // Start with the base (blended or static)
+            const adaptiveMs = _shadowbotAdaptiveSolveMs[rankId];
+            let baseMs;
+            if (adaptiveMs && adaptiveMs > 0) {
+                // Blend: 60% adaptive (real player average), 40% static baseline
+                baseMs = Math.round(adaptiveMs * SHADOWBOT_ADAPTIVE_BLEND + staticMs * (1 - SHADOWBOT_ADAPTIVE_BLEND));
+            } else {
+                baseMs = staticMs;
+            }
+
+            // ── Loss-streak speed boost ──────────────────────────────────
+            // Look at the last 10 steal outcomes. If the bot is losing more
+            // than 60% of them, reduce solve time proportionally.
+            // At 60% loss rate → no change. At 100% loss rate → full speed boost.
+            // The boost can bring solve time down to SHADOWBOT_MIN_SOLVE_MS (1500ms) max.
+            const brain = shadowbotState.brain;
+            const totalSteals = brain.steals.won + brain.steals.lost;
+            if (totalSteals >= 5) {
+                // Compute recent loss rate from last 10 tracked steals
+                // We approximate using the overall ratio (brain tracks lifetime totals)
+                const lossRate = brain.steals.lost / totalSteals;
+                if (lossRate > 0.6) {
+                    // How far above 60% are we? Scale 0→1 from 60%→100% loss rate
+                    const severity = (lossRate - 0.6) / 0.4; // 0 at 60%, 1 at 100%
+                    // Max speedup: close the gap between baseMs and the floor by up to severity
+                    const speedup = Math.round((baseMs - SHADOWBOT_MIN_SOLVE_MS) * severity);
+                    const boostedMs = baseMs - speedup;
+                    const finalMs = Math.max(SHADOWBOT_MIN_SOLVE_MS, boostedMs);
+                    if (finalMs < baseMs) {
+                        console.log(`[ShadowBot] Loss-streak boost active (${(lossRate*100).toFixed(0)}% loss rate) — solve time ${baseMs}ms → ${finalMs}ms`);
+                    }
+                    return finalMs;
+                }
+            }
+
+            return Math.max(SHADOWBOT_MIN_SOLVE_MS, baseMs);
         }
 
         // ── Bot automatically defends when attacked ──
