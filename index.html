@@ -5481,11 +5481,15 @@
             
             if (isMilestone) {
                 const milestoneIndex = tier / 10;
-                const packs = ['Bronze','Silver','Gold','Platinum','Diamond','Mythic','Exotic','Divine','Divine','Divine'];
+                // Season 2 has higher max rewards
+                const isSeason2 = seasonIdx === 1;
+                const packs = isSeason2
+                    ? ['Bronze','Silver','Gold','Platinum','Diamond','Mythic','Exotic','Divine','Divine','Celestial']
+                    : ['Bronze','Silver','Gold','Platinum','Diamond','Mythic','Exotic','Divine','Divine','Divine'];
                 const coinsBase = 600;
-                const coinsIncrement = (5000 - 600) / 9;
+                const coinsIncrement = isSeason2 ? (500000 - 600) / 9 : (5000 - 600) / 9;
                 const xpBase = 120;
-                const xpIncrement = (400 - 120) / 9;
+                const xpIncrement = isSeason2 ? (800 - 120) / 9 : (400 - 120) / 9;
                 
                 return {
                     type: 'milestone',
@@ -5497,15 +5501,16 @@
                 };
             } else {
                 // Determine reward bracket
+                const isSeason2 = seasonIdx === 1;
                 let coins, xp, pack;
                 if (tier <= 30) {
                     coins = 500; xp = 100; pack = 'Bronze';
                 } else if (tier <= 60) {
-                    coins = 2000; xp = 200; pack = 'Silver';
+                    coins = isSeason2 ? 5000  : 2000; xp = 200; pack = 'Silver';
                 } else if (tier <= 90) {
-                    coins = 3500; xp = 300; pack = 'Diamond';
+                    coins = isSeason2 ? 50000 : 3500; xp = isSeason2 ? 400 : 300; pack = 'Diamond';
                 } else {
-                    coins = 4500; xp = 380; pack = 'Exotic';
+                    coins = isSeason2 ? 400000 : 4500; xp = isSeason2 ? 750 : 380; pack = isSeason2 ? 'Celestial' : 'Exotic';
                 }
 
                 // Cycle pattern for small tiers (skip multiples of 10):
@@ -5928,18 +5933,10 @@
                     if (rewards.s1Title) {
                         rewardText += ` + "${rewards.s1Title.name}" title`;
                     }
-                    // Open pack for free after applying updates
+                    // Battle pass pack: advance tier then grant free pack via module helper
                     const milestonePackKey = rewards.pack.toLowerCase();
-                    const milestonePackPrice = (window.PACK_METADATA && window.PACK_METADATA[milestonePackKey]?.price) || 999999;
-                    // Add the pack price to money first, buy the pack (which deducts it), net = free
-                    updates.money = (updates.money !== undefined ? updates.money : (userDataRecord.money || 0)) + milestonePackPrice;
                     await update(ref(db, `users/${activeUser.uid}`), updates);
-                    userDataRecord.money = (userDataRecord.money || 0) + milestonePackPrice;
-                    if (sharedGlobalPacks?.stockAllocations && sharedGlobalPacks.stockAllocations[milestonePackKey] <= 0) {
-                        sharedGlobalPacks.stockAllocations[milestonePackKey] = 1;
-                        await update(ref(db, `system/packs/stockAllocations`), { [milestonePackKey]: 1 });
-                    }
-                    await purchasePackAsset(milestonePackKey);
+                    await window.grantBattlePassPack(milestonePackKey);
                     if (rewards.s1Title) {
                         showToast(`🏅 "${rewards.s1Title.name}" title unlocked! Equip it in your Profile.`, 'success', 4500);
                         setTimeout(() => showToast(`Tier ${nextTier} claimed! 🎁 ${rewardText}`, 'success'), 1000);
@@ -5966,24 +5963,14 @@
                         };
                         rewardText = `${rewards.xp} XP`;
                     } else {
-                        // Pack reward: open the pack for free
+                        // Battle pass pack: advance tier then grant free pack via module helper
                         const packKey = rewards.pack.toLowerCase();
-                        const packPrice = (window.PACK_METADATA && window.PACK_METADATA[packKey]?.price) || 999999;
-                        // Add the pack price to money first, buy the pack (which deducts it), net = free
-                        const _bpMoneyWithPack = (userDataRecord.money || 0) + packPrice;
-                        await update(ref(db, `users/${activeUser.uid}`), { money: _bpMoneyWithPack });
-                        userDataRecord.money = _bpMoneyWithPack;
-                        if (sharedGlobalPacks?.stockAllocations && sharedGlobalPacks.stockAllocations[packKey] <= 0) {
-                            sharedGlobalPacks.stockAllocations[packKey] = 1;
-                            await update(ref(db, `system/packs/stockAllocations`), { [packKey]: 1 });
-                        }
                         updates = {
                             'battlePass/xpb': currentXPB - XPB_PER_TIER,
                             'battlePass/tier': nextTier
                         };
                         await update(ref(db, `users/${activeUser.uid}`), updates);
-                        await purchasePackAsset(packKey);
-                        showToast(`Tier ${nextTier} claimed! 🎁 ${rewards.pack} Pack opened!`, 'success');
+                        await window.grantBattlePassPack(packKey);
                         setTimeout(() => refreshBattlePassUI(), 500);
                         return;
                     }
@@ -7499,6 +7486,24 @@
         }
 
         // Manual card registry — 375 cards, 25 per tier; chances sum to 100% per tier.
+        window.PACK_METADATA = PACK_METADATA;
+
+        // Battle pass free pack: credits money, ensures stock, then auto-buys (net zero cost)
+        window.grantBattlePassPack = async function(packKey) {
+            const metaSpec = PACK_METADATA[packKey];
+            if (!metaSpec) return console.error("[BP] Unknown pack:", packKey);
+            // Credit the pack price so the purchase does not cost the user anything
+            userDataRecord.money = (userDataRecord.money || 0) + metaSpec.price;
+            await update(ref(db, "users/" + activeUserSession.uid), { money: userDataRecord.money });
+            // Ensure stock >= 1 in the live object
+            if (!sharedGlobalPacks.stockAllocations) sharedGlobalPacks.stockAllocations = {};
+            if (!(sharedGlobalPacks.stockAllocations[packKey] > 0)) {
+                sharedGlobalPacks.stockAllocations[packKey] = 1;
+            }
+            // Auto-buy: deducts same price back, net zero
+            await purchasePackAsset(packKey);
+        };
+
         const GAME_REGISTRY = {
             paper: [
                 { id: "paper_1", index: 1, name: "Lint Sock Jackpot", pack: "paper", chance: 7, baseValue: 2 },
@@ -10063,7 +10068,6 @@
                 cryptographicLockExpiry: 0
             };
 
-            operationsPayloadBatch[`system/packs/stockAllocations/${packKey}`] = sharedGlobalPacks.stockAllocations[packKey] - 1;
 
             const systemicMasterRegistryCountRef = ref(db, `system/registryGlobalCounts/${capturedSelectedCardObject.id}`);
             runTransaction(systemicMasterRegistryCountRef, (currentCountValue) => {
@@ -16829,7 +16833,7 @@ or
     </script>
     <div
         style="position: fixed; top: 12px; left: 12px; z-index: 9999999999999; color: rgba(255, 255, 255, 0.4); font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
-        V:10.2
+        V:10.3
     </div>
 </body>
 
