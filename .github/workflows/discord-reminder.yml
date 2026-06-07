@@ -9,7 +9,7 @@ jobs:
   send-reminder:
     runs-on: ubuntu-latest
     steps:
-      - name: Send COME AND PLAY! 
+      - name: Send COME AND PLAY! x3
         run: |
           for i in 1; do
             curl -s -X POST "${{ secrets.DISCORD_WEBHOOK_URL }}" \
