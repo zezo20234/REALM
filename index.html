@@ -15010,12 +15010,69 @@
                 // Refresh presence heartbeat
                 update(ref(db, `presence/${SHADOWBOT_UID}`), { lastSeen: Date.now() }).catch(() => {});
 
+                // Level up if possible — every tick
+                await shadowbotCheckLevelUp();
+
                 // Save brain every 5 ticks
                 if (shadowbotState.brain.tickCount % 5 === 0) {
                     shadowbotSaveBrain();
                 }
             } catch (err) {
                 console.warn('[ShadowBot] Tick error:', err);
+            }
+        }
+
+        // ── Level up ShadowBot whenever it has enough XP and money ──
+        async function shadowbotCheckLevelUp() {
+            try {
+                const botData = shadowbotState.data || {};
+                const currentLevel = botData.level || 1;
+                if (currentLevel >= 100) return; // max level
+
+                const requiredXp = currentLevel * 25;
+                const levelCost  = currentLevel * 15;
+                const botXp      = parseFloat(botData.xp    || 0);
+                const botMoney   = parseFloat(botData.money || 0);
+
+                if (botXp < requiredXp || botMoney < levelCost) return; // can't level yet
+
+                const newLevel = currentLevel + 1;
+                const payload = {
+                    level:  newLevel,
+                    title:  getLevelTitle(newLevel),
+                    xp:     botXp   - requiredXp,
+                    money:  parseFloat((botMoney - levelCost).toFixed(2)),
+                };
+
+                // Check if this level unlocks a hidden card (same logic as real players)
+                const hiddenCard = typeof HIDDEN_CARDS !== 'undefined'
+                    ? HIDDEN_CARDS.find(hc => hc.unlocksAtLevel === newLevel)
+                    : null;
+
+                if (hiddenCard) {
+                    const instanceId = 'hidden_' + Date.now() + '_' + Math.floor(Math.random() * 9999);
+                    const cardPayload = {
+                        [`users/${SHADOWBOT_UID}/level`]:                              newLevel,
+                        [`users/${SHADOWBOT_UID}/title`]:                              payload.title,
+                        [`users/${SHADOWBOT_UID}/xp`]:                                payload.xp,
+                        [`users/${SHADOWBOT_UID}/money`]:                             payload.money,
+                        [`users/${SHADOWBOT_UID}/discovered/${hiddenCard.id}`]:       Date.now(),
+                        [`inventory/${SHADOWBOT_UID}/${instanceId}`]: {
+                            cardId: hiddenCard.id,
+                            packSource: 'hidden',
+                            acquiredTimestamp: Date.now(),
+                            activeMutationIndexes: [],
+                            cryptographicLockExpiry: 0,
+                        },
+                    };
+                    await update(ref(db, '/'), cardPayload);
+                    console.log(`[ShadowBot] ⬆️ Leveled up to ${newLevel} — unlocked hidden card: ${hiddenCard.name}`);
+                } else {
+                    await update(ref(db, `users/${SHADOWBOT_UID}`), payload);
+                    console.log(`[ShadowBot] ⬆️ Leveled up to ${newLevel} (XP spent: ${requiredXp}, cost: €${levelCost})`);
+                }
+            } catch (err) {
+                console.warn('[ShadowBot] levelUp error:', err);
             }
         }
 
