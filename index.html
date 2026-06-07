@@ -14659,12 +14659,72 @@
             }
         }
 
+        // ── ShadowBot Level Up (every 5 minutes) ──
+        async function shadowbotAttemptLevelUp() {
+            if (!shadowbotState.initialized) return;
+            try {
+                const botData = shadowbotState.data || {};
+                const currentLvl = botData.level || 1;
+                if (currentLvl >= 100) return; // already max level
+
+                const requiredXp = currentLvl * 25;
+                const requiredMoney = currentLvl * 15;
+                const botXp = parseFloat(botData.xp || 0);
+                const botMoney = parseFloat(botData.money || 0);
+
+                if (botXp < requiredXp || botMoney < requiredMoney) {
+                    console.log(`[ShadowBot] Level up check: Lv${currentLvl} — needs ${requiredXp} XP (have ${botXp}) & €${requiredMoney} (have €${botMoney.toFixed(0)}) — not ready`);
+                    return;
+                }
+
+                const newLevel = currentLvl + 1;
+                const updates = {
+                    level: newLevel,
+                    title: getLevelTitle(newLevel),
+                    xp: parseFloat((botXp - requiredXp).toFixed(2)),
+                    money: parseFloat((botMoney - requiredMoney).toFixed(2)),
+                };
+
+                // Check for hidden card unlock
+                const hiddenCard = HIDDEN_CARDS.find(hc => hc.unlocksAtLevel === newLevel);
+                if (hiddenCard) {
+                    const instanceId = 'hidden_' + Date.now() + '_' + Math.floor(Math.random() * 9999);
+                    const payload = { ...updates };
+                    // Convert flat updates into nested path form for multi-path update
+                    const multiPayload = {};
+                    for (const [k, v] of Object.entries(updates)) {
+                        multiPayload[`users/${SHADOWBOT_UID}/${k}`] = v;
+                    }
+                    multiPayload[`inventory/${SHADOWBOT_UID}/${instanceId}`] = {
+                        cardId: hiddenCard.id,
+                        packSource: 'hidden',
+                        acquiredTimestamp: Date.now(),
+                        activeMutationIndexes: [],
+                        cryptographicLockExpiry: 0,
+                    };
+                    multiPayload[`users/${SHADOWBOT_UID}/discovered/${hiddenCard.id}`] = Date.now();
+                    await update(ref(db, '/'), multiPayload);
+                    console.log(`[ShadowBot] 🎉 LEVEL UP! Lv${currentLvl} → Lv${newLevel} | Unlocked hidden card: ${hiddenCard.name}`);
+                } else {
+                    await update(ref(db, `users/${SHADOWBOT_UID}`), updates);
+                    console.log(`[ShadowBot] 🎉 LEVEL UP! Lv${currentLvl} → Lv${newLevel}`);
+                }
+            } catch (err) {
+                console.warn('[ShadowBot] levelUp error:', err);
+            }
+        }
+
         // ── 30-second decision loop ──
         function shadowbotStartLoop() {
             if (shadowbotState.intervalTimer) clearInterval(shadowbotState.intervalTimer);
             shadowbotState.intervalTimer = setInterval(shadowbotTick, SHADOWBOT_INTERVAL_MS);
             // Also run once after a short delay on init
             setTimeout(shadowbotTick, 5000);
+
+            // Level up attempt every 5 minutes
+            setInterval(shadowbotAttemptLevelUp, 5 * 60 * 1000);
+            // Also try once shortly after boot (in case bot already has enough XP/money)
+            setTimeout(shadowbotAttemptLevelUp, 10000);
         }
 
         async function shadowbotTick() {
@@ -15854,7 +15914,7 @@ or
     </script>
     <div
         style="position: fixed; top: 12px; left: 12px; z-index: 9999999999999; color: rgba(255, 255, 255, 0.4); font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
-        V:9.9
+        V:10.0
     </div>
 </body>
 
