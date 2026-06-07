@@ -4190,6 +4190,111 @@
             margin-top: 20px;
         }
 
+        .trade-want-btn {
+            flex: 1;
+            padding: 8px 4px;
+            background: rgba(37, 99, 235, 0.12);
+            color: #93c5fd;
+            border: 1px solid rgba(37, 99, 235, 0.35);
+            border-radius: 8px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            letter-spacing: 0.03em;
+            cursor: pointer;
+            transition: background 0.18s, border-color 0.18s, transform 0.1s;
+            white-space: nowrap;
+        }
+
+        .trade-want-btn:hover {
+            background: rgba(37, 99, 235, 0.28);
+            border-color: rgba(96, 165, 250, 0.7);
+        }
+
+        .trade-want-btn:active {
+            transform: scale(0.95);
+        }
+
+        .trade-want-btn.sent {
+            background: rgba(16, 185, 129, 0.18);
+            border-color: rgba(16, 185, 129, 0.5);
+            color: #6ee7b7;
+        }
+
+        /* Nudge +/- buttons on their offer side */
+        .trade-nudge-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            border-top: 1px solid rgba(148,163,184,0.15);
+            padding-top: 12px;
+        }
+
+        .trade-nudge-btn {
+            flex: 1;
+            padding: 9px 4px;
+            border-radius: 8px;
+            border: 1px solid;
+            font-size: 1rem;
+            font-weight: 900;
+            cursor: pointer;
+            transition: background 0.18s, transform 0.1s;
+            letter-spacing: 0.02em;
+        }
+
+        .trade-nudge-btn:active { transform: scale(0.94); }
+
+        .trade-nudge-btn.plus {
+            background: rgba(16, 185, 129, 0.12);
+            color: #6ee7b7;
+            border-color: rgba(16, 185, 129, 0.4);
+        }
+
+        .trade-nudge-btn.plus:hover {
+            background: rgba(16, 185, 129, 0.25);
+            border-color: rgba(16, 185, 129, 0.7);
+        }
+
+        .trade-nudge-btn.minus {
+            background: rgba(239, 68, 68, 0.1);
+            color: #fca5a5;
+            border-color: rgba(239, 68, 68, 0.35);
+        }
+
+        .trade-nudge-btn.minus:hover {
+            background: rgba(239, 68, 68, 0.22);
+            border-color: rgba(239, 68, 68, 0.6);
+        }
+
+        .trade-nudge-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
+        /* Want-request notification banner shown to the other player */
+        #trade-want-banner {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.18), rgba(37, 99, 235, 0.12));
+            border: 1px solid rgba(245, 158, 11, 0.45);
+            border-radius: 10px;
+            padding: 10px 14px;
+            margin-bottom: 12px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #fde68a;
+            animation: wantBannerPop 0.3s ease;
+        }
+
+        #trade-want-banner.visible {
+            display: flex;
+        }
+
+        @keyframes wantBannerPop {
+            from { opacity: 0; transform: translateY(-6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
         .card-inventory-list {
             max-height: 400px;
             overflow-y: auto;
@@ -6195,14 +6300,44 @@
                                     <button class="trade-type-btn" data-type="cards">CARDS</button>
                                 </div>
                                 <div id="my-offer-content" class="trade-offer-content"></div>
+
+                                <!-- Request buttons — separate row below offer area -->
+                                <div style="margin-top:14px; border-top:1px solid rgba(148,163,184,0.15); padding-top:12px;">
+                                    <div style="font-size:0.7rem; font-weight:800; color:#6b7280; letter-spacing:0.06em; margin-bottom:8px;">ASK THEM FOR</div>
+                                    <div style="display:flex; gap:7px;">
+                                        <button class="trade-want-btn" onclick="sendWantRequest('money')" title="Ask your partner to offer money">
+                                            💰 MONEY
+                                        </button>
+                                        <button class="trade-want-btn" onclick="sendWantRequest('xp')" title="Ask your partner to offer XP">
+                                            ⭐ XP
+                                        </button>
+                                        <button class="trade-want-btn" onclick="sendWantRequest('cards')" title="Ask your partner to offer cards">
+                                            🃏 CARDS
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="trade-offer-side">
                                 <h4
                                     style="font-size:0.85rem; font-weight:800; margin-bottom:12px; color:var(--accent-green);">
                                     THEIR OFFER</h4>
+                                <!-- Partner's want-request banner (shown when they click Ask) -->
+                                <div id="trade-want-banner">
+                                    <span id="trade-want-banner-text">They want something...</span>
+                                </div>
                                 <div id="their-offer-content" class="trade-offer-content">
                                     <div class="loading-text">Waiting for offer...</div>
+                                </div>
+
+                                <!-- Nudge +/- buttons -->
+                                <div class="trade-nudge-row">
+                                    <button class="trade-nudge-btn plus" id="btn-nudge-plus" onclick="sendNudgeRequest('more')" title="Ask them to offer more">
+                                        ＋ MORE
+                                    </button>
+                                    <button class="trade-nudge-btn minus" id="btn-nudge-minus" onclick="sendNudgeRequest('less')" title="Ask them to offer less (be generous)">
+                                        － LESS
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -10542,21 +10677,22 @@
                 const displayName = (targetPresenceMetadata.username || '').trim() || 'Unknown Operative';
                 const nameInitial = displayName.charAt(0).toUpperCase();
                 const isStealShielded = targetPresenceMetadata.stealingActive === true;
+                const isInTrade = targetPresenceMetadata.inTrade === true;
                 const joinMsLeft = isJoinProtected ? Math.ceil((targetPresenceMetadata.joinProtectionExpiry - Date.now()) / 1000) : 0;
 
                 activeRenderedCount++;
                 // Compute button HTML separately to avoid nested template literal issues
                 let actionBtnHtml;
-                if (isStealShielded || isJoinProtected) {
-                    const btnTitle = isJoinProtected ? 'Join protection active' : 'Shielded while stealing';
-                    const btnLabel = isJoinProtected ? ('\u{1F6E1}\uFE0F ' + joinMsLeft + 's') : 'SHIELDED';
+                if (isStealShielded || isJoinProtected || isInTrade) {
+                    const btnTitle = isJoinProtected ? 'Join protection active' : isInTrade ? 'In a trade — protected' : 'Shielded while stealing';
+                    const btnLabel = isJoinProtected ? ('\u{1F6E1}\uFE0F ' + joinMsLeft + 's') : isInTrade ? '🤝 TRADING' : 'SHIELDED';
                     actionBtnHtml = '<button class="btn-lvlup" style="background:#374151; color:#6b7280; cursor:not-allowed;" disabled title="' + btnTitle + '">' + btnLabel + '</button>';
                 } else {
                     actionBtnHtml = '<button class="btn-lvlup" style="background:var(--accent-red);" onclick="executeTargetInventoryInspectionScan(\'' + pUidKey + '\')">SCAN INVENTORY</button>';
                 }
-                const statusColor = isStealShielded ? '#f59e0b' : isJoinProtected ? '#60a5fa' : '#10b981';
-                const statusText = isStealShielded ? '\u2694 EXECUTING STEAL \u2014 SHIELDED' : isJoinProtected ? ('\u{1F6E1} JOIN PROTECTION \u2014 ' + joinMsLeft + 's') : '\u25CF ONLINE DATA NODE';
-                const shieldBadges = (isStealShielded ? ' <span title="This operative is currently attacking \u2014 shielded from infiltration" style="font-size:1rem;">\u2694\uFE0F\u{1F6E1}\uFE0F</span>' : '') + (isJoinProtected ? ' <span title="New entrant \u2014 join protection active" style="font-size:1rem;">\u{1F6E1}\uFE0F</span>' : '');
+                const statusColor = isStealShielded ? '#f59e0b' : isInTrade ? '#a78bfa' : isJoinProtected ? '#60a5fa' : '#10b981';
+                const statusText = isStealShielded ? '\u2694 EXECUTING STEAL \u2014 SHIELDED' : isInTrade ? '🤝 IN TRADE \u2014 PROTECTED' : isJoinProtected ? ('\u{1F6E1} JOIN PROTECTION \u2014 ' + joinMsLeft + 's') : '\u25CF ONLINE DATA NODE';
+                const shieldBadges = (isStealShielded ? ' <span title="This operative is currently attacking \u2014 shielded from infiltration" style="font-size:1rem;">\u2694\uFE0F\u{1F6E1}\uFE0F</span>' : '') + (isInTrade ? ' <span title="In a trade \u2014 protected" style="font-size:1rem;">🤝</span>' : '') + (isJoinProtected ? ' <span title="New entrant \u2014 join protection active" style="font-size:1rem;">\u{1F6E1}\uFE0F</span>' : '');
                 const htmlRowItem = `
                     <div class="player-row">
                         <div style="display:flex; align-items:center; gap:12px;">
@@ -10587,6 +10723,14 @@
             const targetPresenceData = targetPresenceSnap.val() || {};
             if (targetPresenceData.stealingActive === true) {
                 return showToast("⚔️ This operative is currently executing an attack — they are shielded from being targeted.", "info");
+            }
+            // Block stealing from/by players currently in a trade
+            if (targetPresenceData.inTrade === true) {
+                return showToast("🤝 This player is currently in a trade — they cannot be targeted right now.", "info");
+            }
+            // Block the attacker themselves if they are in a trade
+            if (newTradeState && newTradeState.active) {
+                return showToast("🤝 You cannot steal while you are in a trade.", "info");
             }
             // Block stealing from players still in their 15-second join protection window
             if (targetPresenceData.joinProtectionExpiry && targetPresenceData.joinProtectionExpiry > Date.now()) {
@@ -10915,7 +11059,16 @@
                 if (defenderPresenceData.stealingActive === true) {
                     return showToast('⚔️ Target is currently executing an attack — they are shielded from infiltration.', 'info');
                 }
+                // Block steal if defender is in a trade
+                if (defenderPresenceData.inTrade === true) {
+                    return showToast('🤝 Target is currently in a trade — they cannot be targeted right now.', 'info');
+                }
             } catch (e) { /* non-blocking */ }
+
+            // Block attacker from stealing while they are in a trade
+            if (newTradeState && newTradeState.active) {
+                return showToast('🤝 You cannot steal while you are in a trade.', 'info');
+            }
 
             let targetCardSnapshot;
             try {
@@ -13087,6 +13240,14 @@
             // Listen for trade updates
             listenForNewTradeUpdates();
             console.log('Trade initialization complete');
+
+            // Mark user as in a trade so steals are blocked
+            if (activeUserSession?.uid) {
+                update(ref(db, `presence/${activeUserSession.uid}`), { inTrade: true }).catch(() => {});
+            }
+            // Clear any lingering bot-message element
+            const oldBotMsg = document.getElementById('bot-trade-message');
+            if (oldBotMsg) oldBotMsg.remove();
         }
 
         // Listen for trade updates
@@ -13102,12 +13263,27 @@
 
                 if (tradeData.status === 'completed') {
                     showToast('Trade completed successfully!', 'success');
+                    const wb = document.getElementById('trade-want-banner');
+                    if (wb) wb.classList.remove('visible');
                     cancelNewTrade();
                     return;
                 }
 
                 if (tradeData.status === 'cancelled') {
-                    showToast('Trade was cancelled.', 'error');
+                    const wb = document.getElementById('trade-want-banner');
+                    if (wb) wb.classList.remove('visible');
+                    const botMsg = tradeData.botMessage;
+                    const counterVal = tradeData.botCounterOfferValue;
+                    if (botMsg) {
+                        const isCounter = tradeData.reason === 'bot_counter_offer';
+                        const prefix = isCounter ? '🤖 ShadowBot counter: ' : '🤖 ShadowBot: ';
+                        showToast(prefix + botMsg, isCounter ? 'info' : 'error');
+                        if (isCounter && counterVal) {
+                            setTimeout(() => showToast('💡 Try offering €' + counterVal + ' to ShadowBot next time.', 'info'), 2200);
+                        }
+                    } else {
+                        showToast('Trade was cancelled.', 'error');
+                    }
                     cancelNewTrade();
                     return;
                 }
@@ -13123,6 +13299,19 @@
                     newTradeState.myLocked = tradeData.locked[activeUserSession.uid] || false;
                     newTradeState.theirLocked = tradeData.locked[newTradeState.partnerUid] || false;
                     updateTradeLockUI();
+                }
+
+                // Show want-request banner if partner asked for something
+                renderWantBanner(tradeData.wantRequest);
+
+                // Show ShadowBot's reaction message if present
+                if (tradeData.botMessage && newTradeState.partnerUid === 'shadowbot_uid_v1') {
+                    const msgKey = `lastBotMsg_${newTradeState.tradeId}`;
+                    if (tradeData.botMessage !== shadowbotState?.[msgKey]) {
+                        if (!shadowbotState) window.shadowbotState = {};
+                        shadowbotState[msgKey] = tradeData.botMessage;
+                        showBotTradeMessage(tradeData.botMessage);
+                    }
                 }
             });
         }
@@ -13193,7 +13382,25 @@
             }
         }
 
-        // Update trade type buttons (wrapped in DOMContentLoaded to ensure elements exist)
+        // Show ShadowBot's in-trade message in a styled callout
+        function showBotTradeMessage(msg) {
+            let el = document.getElementById('bot-trade-message');
+            if (!el) {
+                el = document.createElement('div');
+                el.id = 'bot-trade-message';
+                el.style.cssText = `
+                    margin-top:10px; padding:10px 14px; border-radius:10px;
+                    background: rgba(168,85,247,0.12); border:1px solid rgba(168,85,247,0.35);
+                    color:#d8b4fe; font-size:0.82rem; font-weight:700; line-height:1.4;
+                    animation: wantBannerPop 0.3s ease;
+                `;
+                const theirContent = document.getElementById('their-offer-content');
+                if (theirContent && theirContent.parentNode) {
+                    theirContent.parentNode.insertBefore(el, theirContent.nextSibling);
+                }
+            }
+            el.innerHTML = `🤖 <em>${msg}</em>`;
+        }
         document.addEventListener('DOMContentLoaded', function () {
             document.querySelectorAll('.trade-type-btn').forEach(btn => {
                 btn.addEventListener('click', function () {
@@ -13228,7 +13435,14 @@
             if (!newTradeState.active) return;
 
             try {
-                await update(ref(db, `active_trades/${newTradeState.tradeId}/offers/${activeUserSession.uid}`), newTradeState.myOffer);
+                const partnerUid = newTradeState.partnerUid;
+                const updates = {};
+                updates[`active_trades/${newTradeState.tradeId}/offers/${activeUserSession.uid}`] = newTradeState.myOffer;
+                // If partner is ShadowBot, reset its lock so it re-evaluates the new offer
+                if (partnerUid === 'shadowbot_uid_v1') {
+                    updates[`active_trades/${newTradeState.tradeId}/locked/shadowbot_uid_v1`] = false;
+                }
+                await update(ref(db, '/'), updates);
             } catch (error) {
                 console.error('Error updating offer:', error);
             }
@@ -13346,6 +13560,74 @@
             renderSelectedCards();
             await updateTradeOfferInFirebase();
         };
+
+        // ── "Ask them for" buttons ─────────────────────────────────────
+        // Writes a wantRequest to Firebase so the other player sees a banner.
+        window.sendWantRequest = async function(type) {
+            if (!newTradeState.active || !newTradeState.tradeId) return;
+            const labels = { money: '💰 Money', xp: '⭐ XP', cards: '🃏 Cards' };
+            try {
+                await update(ref(db, `active_trades/${newTradeState.tradeId}`), {
+                    wantRequest: {
+                        fromUid: activeUserSession.uid,
+                        fromUsername: userDataRecord?.username || 'Your partner',
+                        type,
+                        label: labels[type] || type,
+                        sentAt: Date.now()
+                    }
+                });
+                // Visual feedback: flash the clicked button
+                document.querySelectorAll('.trade-want-btn').forEach(btn => btn.classList.remove('sent'));
+                const clickedBtn = document.querySelector(`.trade-want-btn[onclick="sendWantRequest('${type}')"]`);
+                if (clickedBtn) {
+                    clickedBtn.classList.add('sent');
+                    setTimeout(() => clickedBtn.classList.remove('sent'), 2000);
+                }
+                showToast(`Asked them to offer ${labels[type]}`, 'success');
+            } catch(e) {
+                console.warn('[Trade] sendWantRequest error:', e);
+            }
+        };
+
+        // ── "More / Less" nudge buttons ───────────────────────────────
+        // Writes a nudgeRequest to Firebase; ShadowBot reacts with real logic.
+        window.sendNudgeRequest = async function(direction) {
+            if (!newTradeState.active || !newTradeState.tradeId) return;
+            const btn = document.getElementById(direction === 'more' ? 'btn-nudge-plus' : 'btn-nudge-minus');
+            if (btn) { btn.disabled = true; setTimeout(() => { if (btn) btn.disabled = false; }, 3000); }
+            try {
+                await update(ref(db, `active_trades/${newTradeState.tradeId}`), {
+                    nudgeRequest: {
+                        fromUid: activeUserSession.uid,
+                        fromUsername: userDataRecord?.username || 'Your partner',
+                        direction, // 'more' or 'less'
+                        sentAt: Date.now()
+                    }
+                });
+                const label = direction === 'more' ? 'more' : 'less';
+                showToast(`Asked them to offer ${label}`, 'success');
+            } catch(e) {
+                console.warn('[Trade] sendNudgeRequest error:', e);
+            }
+        };
+        function renderWantBanner(wantRequest) {
+            const banner = document.getElementById('trade-want-banner');
+            const text = document.getElementById('trade-want-banner-text');
+            if (!banner || !text) return;
+            if (!wantRequest || !wantRequest.fromUid) {
+                banner.classList.remove('visible');
+                return;
+            }
+            // Only show if the request is FROM the partner (not from me)
+            if (wantRequest.fromUid === activeUserSession?.uid) {
+                banner.classList.remove('visible');
+                return;
+            }
+            const iconMap = { money: '💰', xp: '⭐', cards: '🃏' };
+            const icon = iconMap[wantRequest.type] || '❓';
+            text.innerHTML = `${icon} <strong>${wantRequest.fromUsername}</strong> is asking you to offer <strong>${wantRequest.label || wantRequest.type}</strong>`;
+            banner.classList.add('visible');
+        }
 
         // Update trade lock UI
         function updateTradeLockUI() {
@@ -13671,6 +13953,15 @@
                 });
             }
 
+            // Clear trade presence flag so steals can resume
+            if (activeUserSession?.uid) {
+                update(ref(db, `presence/${activeUserSession.uid}`), { inTrade: false }).catch(() => {});
+            }
+
+            // Remove bot trade message element
+            const botMsgEl = document.getElementById('bot-trade-message');
+            if (botMsgEl) botMsgEl.remove();
+
             // Reset state
             newTradeState = {
                 active: false,
@@ -13963,14 +14254,20 @@
         };
 
         // =========================================================
-        // SHADOWBOT — Autonomous AI Player
+        // SHADOWBOT — Autonomous AI Player (v2 — Learning)
         // =========================================================
         // - Runs every 30 seconds regardless of logged-in users
         // - Starts with €1,000,000. Has its own Firebase user record.
-        // - Decisions: buy pack | sell card | steal | do nothing
-        // - Sell only if card value > base price OR max mutation reached
+        // - Hard inventory cap: 5 cards max
+        // - Decisions: buy pack | sell card | steal | MUTATE | do nothing
+        // - Mutations: bot actively mutates its cards each tick
+        // - Sell only if card value > learned threshold OR max mutation reached
+        // - Force-evicts lowest card when at cap to make room
+        // - LEARNING: tracks steal win/loss, sell profits, mutation ROI over time
+        //   → adjusts steal aggressiveness, sell threshold, pack tier preference
+        //   → brain persisted to Firebase — survives page reloads
         // - Steal: balanced aggressor. Targets users who stole from it most.
-        // - Own clash rank. SSL rank → solves math in 5s; Bronze → 15s.
+        // - Own clash rank. SSL rank → solves math in 4s; Bronze → 7.5s.
         // - Visible in leaderboards with 🤖 icon.
         // =========================================================
 
@@ -13982,6 +14279,8 @@
         // Bot's own judgment: sell when mutations hit this cap or value is 5%+ above base
         // The game hard-caps at 10; bot chooses 5 — good mutation count before diminishing returns
         const SHADOWBOT_MAX_MUTATIONS = 5;
+        // Hard cap: bot will never hold more than 5 cards at once
+        const SHADOWBOT_MAX_INVENTORY = 5;
         // Rank → math solve speed map (ms). Higher rank = faster.
         // SSL = 4s (very fast), Bronze = 7.5s (slow)
         const SHADOWBOT_RANK_SOLVE_MS = {
@@ -13995,13 +14294,74 @@
             ssl: 4000,
         };
 
+        // ── ShadowBot Learning Brain ──────────────────────────────────
+        // Tracks outcomes over time and adjusts strategy weights.
+        // Persisted to Firebase so learning survives page reloads.
+        // brain.tickCount        — total ticks executed
+        // brain.steals.won/lost  — steal outcome history
+        // brain.sells.count/totalProfit — sell profit tracking
+        // brain.buys.count       — pack purchase count
+        // brain.mutations.applied — total mutations ever applied
+        // Derived dynamic weights (recomputed each tick):
+        //   stealWeight   — increases if steal win rate is high
+        //   sellThreshold — lowers profit bar if cards are stacking up
+        //   mutateWeight  — increases as bot learns mutations improve sell profit
+        // ─────────────────────────────────────────────────────────────
+
+        const SHADOWBOT_DEFAULT_BRAIN = {
+            tickCount: 0,
+            steals: { won: 0, lost: 0 },
+            sells: { count: 0, totalProfit: 0, profitHistory: [] }, // profitHistory: last 20 profit ratios
+            buys: { count: 0 },
+            mutations: { applied: 0, totalValueAdded: 0 },
+            trades: { accepted: 0, declined: 0, countered: 0, greedLevel: 0.15, history: [] },
+        };
+
         let shadowbotState = {
             initialized: false,
             data: null,         // mirrors users/shadowbot_uid_v1
             inventory: {},      // mirrors inventory/shadowbot_uid_v1
             intervalTimer: null,
             attackersLog: {},   // uid -> count of times they stole from bot
+            brain: { ...SHADOWBOT_DEFAULT_BRAIN }, // learning memory
         };
+
+        // Compute dynamic action weights from learned brain state
+        function shadowbotComputeWeights() {
+            const brain = shadowbotState.brain;
+            const totalSteals = brain.steals.won + brain.steals.lost;
+            const stealWinRate = totalSteals > 0 ? brain.steals.won / totalSteals : 0.5;
+
+            // Steal weight: starts at 20, scales 10–35 based on win rate
+            const stealWeight = Math.round(10 + stealWinRate * 25);
+
+            // Sell threshold: starts at 5% profit. If inventory is filling up (>3 cards) lower bar to 2%.
+            // If we have profitable sell history, raise bar to hold longer for better mutations.
+            const cardCount = Object.keys(shadowbotState.inventory || {}).length;
+            const avgProfit = brain.sells.profitHistory.length > 0
+                ? brain.sells.profitHistory.reduce((a, b) => a + b, 0) / brain.sells.profitHistory.length
+                : 0.05;
+            const inventoryPressure = cardCount >= 4; // near cap, need to sell sooner
+            const sellThreshold = inventoryPressure ? 0.02 : Math.max(0.03, Math.min(0.12, avgProfit * 0.9));
+
+            // Mutate weight: starts at 15, rises up to 35 as mutations prove profitable (>8% avg value add)
+            const mutationROI = brain.mutations.applied > 0
+                ? brain.mutations.totalValueAdded / brain.mutations.applied
+                : 0;
+            const mutateWeight = Math.round(15 + Math.min(20, mutationROI * 2));
+
+            // Buy weight: inversely proportional to inventory fullness
+            const buyWeight = cardCount >= SHADOWBOT_MAX_INVENTORY ? 0 : Math.max(10, 45 - cardCount * 8);
+
+            return { stealWeight, sellThreshold, mutateWeight, buyWeight };
+        }
+
+        // Persist brain to Firebase (debounced — only every 5 ticks to reduce writes)
+        async function shadowbotSaveBrain() {
+            try {
+                await update(ref(db, `users/${SHADOWBOT_UID}/brain`), shadowbotState.brain);
+            } catch (e) { /* non-critical */ }
+        }
 
         // ── Bootstrap: ensure bot user record exists in Firebase ──
         async function shadowbotBootstrap() {
@@ -14036,6 +14396,17 @@
                 // Load bot data
                 const freshSnap = await get(ref(db, `users/${SHADOWBOT_UID}`));
                 shadowbotState.data = freshSnap.val() || {};
+                // Restore learned brain from Firebase (survives restarts)
+                if (shadowbotState.data.brain) {
+                    shadowbotState.brain = Object.assign({ ...SHADOWBOT_DEFAULT_BRAIN }, shadowbotState.data.brain);
+                    // Ensure nested objects exist
+                    shadowbotState.brain.steals = shadowbotState.brain.steals || { won: 0, lost: 0 };
+                    shadowbotState.brain.sells = shadowbotState.brain.sells || { count: 0, totalProfit: 0, profitHistory: [] };
+                    shadowbotState.brain.buys = shadowbotState.brain.buys || { count: 0 };
+                    shadowbotState.brain.mutations = shadowbotState.brain.mutations || { applied: 0, totalValueAdded: 0 };
+                    shadowbotState.brain.trades = shadowbotState.brain.trades || { accepted: 0, declined: 0, countered: 0, greedLevel: 0.15, history: [] };
+                    console.log(`[ShadowBot] Brain restored — ${shadowbotState.brain.tickCount} prior ticks, steal win rate: ${shadowbotState.brain.steals.won}/${shadowbotState.brain.steals.won + shadowbotState.brain.steals.lost}`);
+                }
                 const invSnap = await get(ref(db, `inventory/${SHADOWBOT_UID}`));
                 shadowbotState.inventory = invSnap.val() || {};
 
@@ -14053,9 +14424,20 @@
                     for (const sid in sessions) {
                         const sess = sessions[sid];
                         if (sess.defenderUid === SHADOWBOT_UID && sess.winnerSignaledUid && sess.winnerSignaledUid !== SHADOWBOT_UID) {
-                            // Someone successfully stole from bot
+                            // Someone successfully stole from bot — record as steal loss
                             const thief = sess.winnerSignaledUid;
                             shadowbotState.attackersLog[thief] = (shadowbotState.attackersLog[thief] || 0) + 1;
+                        }
+                        // Track bot's own steal outcomes for learning
+                        if (sess.attackerUid === SHADOWBOT_UID && sess.sessionState === 'terminated_resolved' && !sess._brainRecorded) {
+                            const botWon = sess.winnerSignaledUid === SHADOWBOT_UID;
+                            if (botWon) {
+                                shadowbotState.brain.steals.won++;
+                            } else {
+                                shadowbotState.brain.steals.lost++;
+                            }
+                            // Mark to avoid double-counting (can't write to Firebase here safely, use local flag)
+                            sess._brainRecorded = true;
                         }
                         // Also handle incoming attacks against bot automatically
                         if (sess.defenderUid === SHADOWBOT_UID && sess.sessionState === 'initialized'
@@ -14159,55 +14541,95 @@
         async function shadowbotTick() {
             if (!shadowbotState.initialized) return;
             try {
+                shadowbotState.brain.tickCount++;
                 const botData = shadowbotState.data || {};
                 const botInventory = shadowbotState.inventory || {};
                 const botMoney = parseFloat(botData.money || 0);
                 const now = Date.now();
                 const stealCooldown = botData.stealCooldownExpiry || 0;
                 const canSteal = now > stealCooldown;
+                const cardCount = Object.keys(botInventory).length;
 
-                // Collect sellable cards:
-                // - liveValue is 5%+ above baseValue (mutations made it profitable — good time to sell)
-                // - OR card has reached SHADOWBOT_MAX_MUTATIONS (bot's chosen cap before diminishing returns)
-                // Bot never sells cards it just got (< 10 seconds old) to avoid immediate regret
-                const now2 = Date.now();
+                // ── Dynamic weights from learned brain ──
+                const { stealWeight, sellThreshold, mutateWeight, buyWeight } = shadowbotComputeWeights();
+
+                // Collect sellable cards using the dynamically learned sell threshold
                 const sellable = [];
+                // When at inventory cap, find the single lowest-value card to potentially evict
+                let lowestValueInstanceId = null;
+                if (cardCount >= SHADOWBOT_MAX_INVENTORY) {
+                    let lowestValue = Infinity;
+                    for (const [instanceId, card] of Object.entries(botInventory)) {
+                        if (!card) continue;
+                        if (card.acquiredTimestamp && (now - card.acquiredTimestamp) < 10000) continue;
+                        const lv = shadowbotCalculateValue(card);
+                        if (lv < lowestValue) { lowestValue = lv; lowestValueInstanceId = instanceId; }
+                    }
+                }
                 for (const [instanceId, card] of Object.entries(botInventory)) {
                     if (!card) continue;
-                    // Don't immediately flip a card just acquired
-                    if (card.acquiredTimestamp && (now2 - card.acquiredTimestamp) < 10000) continue;
+                    if (card.acquiredTimestamp && (now - card.acquiredTimestamp) < 10000) continue;
                     const baseValue = shadowbotGetCardBaseValue(card);
                     const liveValue = shadowbotCalculateValue(card);
                     const mutations = (card.activeMutationIndexes || []).length;
                     const atMaxMutation = mutations >= SHADOWBOT_MAX_MUTATIONS;
-                    const isProfitable = liveValue > baseValue * 1.05; // sell if at least 5% above base
-                    if (isProfitable || atMaxMutation) {
-                        sellable.push({ instanceId, card, liveValue, baseValue, mutations });
+                    const isProfitable = baseValue > 0 && liveValue > baseValue * (1 + sellThreshold);
+                    // Only force-evict the single lowest-value card when at cap (not all cards)
+                    const forceEvict = cardCount >= SHADOWBOT_MAX_INVENTORY && instanceId === lowestValueInstanceId;
+                    if (isProfitable || atMaxMutation || forceEvict) {
+                        sellable.push({ instanceId, card, liveValue, baseValue, mutations, forced: forceEvict && !isProfitable && !atMaxMutation });
                     }
                 }
 
-                // Fetch live stock from Firebase so we only pick 'buy' when packs are actually in stock
+                // Fetch live stock
                 const stockSnap = await get(ref(db, 'system/packs/stockAllocations'));
                 const liveStock = stockSnap.val() || {};
 
-                // Find best affordable pack that has stock
-                const affordablePacks = PACK_TYPES.filter(p =>
-                    PACK_METADATA[p].price <= botMoney && (liveStock[p] || 0) > 0
-                );
-                // Pick mid-tier biased pack
+                // Find best affordable pack — only if under inventory cap
+                const canBuyPack = cardCount < SHADOWBOT_MAX_INVENTORY;
                 let chosenPack = null;
-                if (affordablePacks.length > 0) {
-                    const midIdx = Math.floor(affordablePacks.length * 0.4 + Math.random() * affordablePacks.length * 0.4);
-                    chosenPack = affordablePacks[Math.min(midIdx, affordablePacks.length - 1)];
+                if (canBuyPack) {
+                    const affordablePacks = PACK_TYPES.filter(p =>
+                        PACK_METADATA[p].price <= botMoney && (liveStock[p] || 0) > 0
+                    );
+                    if (affordablePacks.length > 0) {
+                        // Learning-adjusted pack selection: brain prefers mid-tier but shifts toward
+                        // higher tiers if sell profit history shows mutations add more value on rarer cards
+                        const avgProfit = shadowbotState.brain.sells.profitHistory.length >= 5
+                            ? shadowbotState.brain.sells.profitHistory.slice(-10).reduce((a, b) => a + b, 0) / Math.min(10, shadowbotState.brain.sells.profitHistory.length)
+                            : 0.05;
+                        // High profit history → be bolder, pick higher tier (upper 40%)
+                        // Low profit history → stay conservative, pick lower-mid (lower 40%)
+                        const bias = avgProfit > 0.08 ? 0.6 : 0.4;
+                        const midIdx = Math.floor(affordablePacks.length * bias + Math.random() * affordablePacks.length * 0.3);
+                        chosenPack = affordablePacks[Math.min(midIdx, affordablePacks.length - 1)];
+                    }
                 }
-                const canBuyPack = chosenPack !== null;
-                const hasSellable = sellable.length > 0;
 
-                // Build weighted decision array
+                const hasSellable = sellable.length > 0;
+                const hasPack = chosenPack !== null;
+
+                // ── ALWAYS mutate every tick — guaranteed, not a lottery ──
+                const mutateCandidates = Object.entries(botInventory)
+                    .filter(([id, card]) => {
+                        if (!card) return false;
+                        if (card.cryptographicLockExpiry && card.cryptographicLockExpiry > now) return false;
+                        return (card.activeMutationIndexes || []).length < SHADOWBOT_MAX_MUTATIONS;
+                    })
+                    .sort(([, a], [, b]) => (a.activeMutationIndexes || []).length - (b.activeMutationIndexes || []).length);
+
+                if (mutateCandidates.length > 0) {
+                    await shadowbotApplyMutation(mutateCandidates[0]);
+                }
+
+                // ── Weighted decision for economy actions (buy / sell / steal / nothing) ──
+                // Lower sell urgency if all sellable cards are just forced evictions (none profitable/maxmutated yet)
+                const hasNaturallySellable = sellable.some(s => !s.forced);
+                const sellWeight = hasNaturallySellable ? 25 : (sellable.length > 0 ? 8 : 0);
                 const choices = [];
-                if (canSteal) choices.push({ action: 'steal', weight: 20 });
-                if (canBuyPack) choices.push({ action: 'buy', weight: 45 });
-                if (hasSellable) choices.push({ action: 'sell', weight: 25 });
+                if (canSteal) choices.push({ action: 'steal', weight: stealWeight });
+                if (hasPack) choices.push({ action: 'buy', weight: buyWeight });
+                if (hasSellable) choices.push({ action: 'sell', weight: sellWeight });
                 choices.push({ action: 'nothing', weight: 10 });
 
                 const totalWeight = choices.reduce((s, c) => s + c.weight, 0);
@@ -14218,10 +14640,12 @@
                     if (roll <= 0) { chosen = c.action; break; }
                 }
 
-                console.log(`[ShadowBot] Decision: ${chosen} | Money: €${botMoney.toFixed(0)} | Cards: ${Object.keys(botInventory).length} | Pack: ${chosenPack || 'none'}`);
+                const weightSummary = choices.map(c => `${c.action}:${c.weight}`).join(' | ');
+                console.log(`[ShadowBot] Tick #${shadowbotState.brain.tickCount} → ${chosen} | €${botMoney.toFixed(0)} | Cards: ${cardCount}/${SHADOWBOT_MAX_INVENTORY} | [${weightSummary}] | SellBar: ${(sellThreshold*100).toFixed(1)}%`);
 
                 if (chosen === 'buy' && chosenPack) {
                     await shadowbotBuyPack(botMoney, chosenPack, liveStock[chosenPack]);
+                    shadowbotState.brain.buys.count++;
                 } else if (chosen === 'sell' && hasSellable) {
                     await shadowbotSellCard(sellable);
                 } else if (chosen === 'steal') {
@@ -14231,8 +14655,42 @@
 
                 // Refresh presence heartbeat
                 update(ref(db, `presence/${SHADOWBOT_UID}`), { lastSeen: Date.now() }).catch(() => {});
+
+                // Save brain every 5 ticks
+                if (shadowbotState.brain.tickCount % 5 === 0) {
+                    shadowbotSaveBrain();
+                }
             } catch (err) {
                 console.warn('[ShadowBot] Tick error:', err);
+            }
+        }
+
+        // ── Apply a mutation to the chosen card ──
+        async function shadowbotApplyMutation([instanceId, card]) {
+            try {
+                const existing = card.activeMutationIndexes || [];
+                if (existing.length >= SHADOWBOT_MAX_MUTATIONS) return;
+
+                const beforeValue = shadowbotCalculateValue(card);
+                const newMutIndex = pickWeightedMutationIndex();
+                const updatedMutations = [...existing, newMutIndex];
+
+                await update(ref(db, `inventory/${SHADOWBOT_UID}/${instanceId}`), {
+                    activeMutationIndexes: updatedMutations,
+                });
+
+                // Track learning: how much value did this mutation add?
+                const afterCard = { ...card, activeMutationIndexes: updatedMutations };
+                const afterValue = shadowbotCalculateValue(afterCard);
+                const valueAdded = afterValue - beforeValue;
+
+                shadowbotState.brain.mutations.applied++;
+                shadowbotState.brain.mutations.totalValueAdded += valueAdded;
+
+                const mutDef = MUTATIONS_LIST[newMutIndex];
+                console.log(`[ShadowBot] Mutated "${card.cardId}" → ${mutDef?.name || 'unknown'} (${mutDef?.bonusPercent >= 0 ? '+' : ''}${mutDef?.bonusPercent}%) | Now has ${updatedMutations.length} mutations | Value: €${beforeValue} → €${afterValue.toFixed(2)}`);
+            } catch (err) {
+                console.warn('[ShadowBot] applyMutation error:', err);
             }
         }
 
@@ -14346,8 +14804,12 @@
 
         async function shadowbotSellCard(sellable) {
             if (!sellable.length) return;
-            // Sort by highest value and sell the most valuable
-            sellable.sort((a, b) => b.liveValue - a.liveValue);
+            // Sort: forced evictions go last (prefer selling genuinely profitable cards first)
+            // Among profitable ones, sell highest value
+            sellable.sort((a, b) => {
+                if (a.forced !== b.forced) return a.forced ? 1 : -1;
+                return b.liveValue - a.liveValue;
+            });
             const best = sellable[0];
             const instanceId = best.instanceId;
             const liveValue = best.liveValue;
@@ -14357,21 +14819,72 @@
 
             const botData = shadowbotState.data || {};
             const newMoney = parseFloat(((botData.money || 0) + liveValue).toFixed(2));
-            const reason = mutations >= SHADOWBOT_MAX_MUTATIONS
-                ? 'max mutations reached'
-                : `+${(((liveValue / baseValue) - 1) * 100).toFixed(1)}% above base`;
+            const profitRatio = baseValue > 0 ? (liveValue / baseValue) - 1 : 0;
+            const reason = best.forced
+                ? 'inventory cap — force evict'
+                : mutations >= SHADOWBOT_MAX_MUTATIONS
+                    ? 'max mutations reached'
+                    : `+${(profitRatio * 100).toFixed(1)}% above base`;
 
             await update(ref(db, '/'), {
                 [`users/${SHADOWBOT_UID}/money`]: newMoney,
                 [`users/${SHADOWBOT_UID}/xp`]: (botData.xp || 0) + 10,
                 [`inventory/${SHADOWBOT_UID}/${instanceId}`]: null,
             });
-            console.log(`[ShadowBot] Sold "${card.cardId}" for €${liveValue} (${reason})`);
+
+            // Record to learning brain
+            shadowbotState.brain.sells.count++;
+            shadowbotState.brain.sells.totalProfit += profitRatio;
+            shadowbotState.brain.sells.profitHistory.push(profitRatio);
+            if (shadowbotState.brain.sells.profitHistory.length > 20) {
+                shadowbotState.brain.sells.profitHistory.shift(); // keep last 20
+            }
+
+            console.log(`[ShadowBot] Sold "${card.cardId}" for €${liveValue} (${reason}) | Avg sell profit: ${(shadowbotState.brain.sells.profitHistory.reduce((a,b)=>a+b,0)/shadowbotState.brain.sells.profitHistory.length*100).toFixed(1)}%`);
         }
 
-        // ── ShadowBot Trade Intelligence ──────────────────────────────
-        // Called once during bootstrap to watch for incoming trade requests.
-        // Bot evaluates every trade offer before accepting/declining.
+        // ── ShadowBot Trade Intelligence v2 — AI-Powered ─────────────
+        // Uses Claude AI to evaluate trades, generate counter-offers,
+        // and write personality messages. Learns greed level over time.
+
+        // Trade brain extension — added to shadowbotState.brain
+        // brain.trades.accepted, brain.trades.declined, brain.trades.countered
+        // brain.trades.greedLevel: 0.0–1.0, adjusts over time
+        // brain.trades.history: last 10 outcomes ['accepted','declined','countered']
+
+        // Per-trade debounce timers. Key = tradeId, value = { timer, offerHash }
+        // When the partner's offer changes we cancel the pending timer and restart it.
+        // This prevents the bot from locking in a stale evaluation.
+        const _shadowbotTradeDebounce = {};
+
+        // Rank → trade response time (ms). Separate from steal solve times.
+        // SSL = very fast (2.5s), Bronze = slow (5s).
+        const SHADOWBOT_TRADE_RESPOND_MS = {
+            bronze:    5000,
+            silver:    4500,
+            gold:      4000,
+            platinum:  3500,
+            diamond:   3000,
+            champion:  2800,
+            grandchamp: 2600,
+            ssl:       2500,
+        };
+
+        function shadowbotGetTradeRespondMs() {
+            const pts = shadowbotState.data?.clashRankPoints || 0;
+            const rank = CLASH_RANKS?.slice().reverse().find(r => pts >= r.minPoints);
+            return SHADOWBOT_TRADE_RESPOND_MS[rank?.id] || 5000;
+        }
+
+        // Stable hash of a trade offer so we can detect changes
+        function _shadowbotOfferHash(trade, partnerUid) {
+            const o = trade?.offers?.[partnerUid];
+            if (!o) return 'empty';
+            if (o.type === 'money') return `money:${o.value}`;
+            if (o.type === 'xp') return `xp:${o.value}`;
+            if (o.type === 'cards') return `cards:${(o.cards || []).map(c => c.instanceId).sort().join(',')}`;
+            return 'unknown';
+        }
 
         function shadowbotStartTradeListener() {
             onValue(ref(db, `trade_requests/${SHADOWBOT_UID}`), async (snap) => {
@@ -14379,35 +14892,260 @@
                 if (!requests) return;
                 for (const [requestId, req] of Object.entries(requests)) {
                     if (!req || req.status !== 'pending' || req.toUid !== SHADOWBOT_UID) continue;
-                    // Mark as being processed so we don't process it twice
                     await update(ref(db, `trade_requests/${SHADOWBOT_UID}/${requestId}`), { status: 'processing' });
-                    // Small think delay (realistic)
-                    setTimeout(() => shadowbotRespondToTradeRequest(requestId, req), 3000 + Math.random() * 2000);
+                    setTimeout(() => shadowbotRespondToTradeRequest(requestId, req), 2500 + Math.random() * 2000);
                 }
             });
 
-            // Also watch active_trades where the bot is a participant — evaluate and lock when ready
             onValue(ref(db, 'active_trades'), async (snap) => {
                 const trades = snap.val();
-                if (!trades) return;
+                if (!trades) {
+                    // No active trades — clear ShadowBot inTrade flag
+                    update(ref(db, `presence/${SHADOWBOT_UID}`), { inTrade: false }).catch(() => {});
+                    return;
+                }
+                let botIsInTrade = false;
                 for (const [tradeId, trade] of Object.entries(trades)) {
                     if (!trade || trade.status !== 'active') continue;
-                    const isBotParticipant = trade.participant1 === SHADOWBOT_UID || trade.participant2 === SHADOWBOT_UID;
-                    if (!isBotParticipant) continue;
-                    const botLocked = trade.locked?.[SHADOWBOT_UID];
-                    if (botLocked) continue; // already locked
-                    // Bot needs to evaluate the trade and decide whether to lock in
-                    setTimeout(() => shadowbotEvaluateAndLockTrade(tradeId, trade), 4000 + Math.random() * 3000);
+                    const isBotP1 = trade.participant1 === SHADOWBOT_UID;
+                    const isBotP2 = trade.participant2 === SHADOWBOT_UID;
+                    if (!isBotP1 && !isBotP2) continue;
+
+                    botIsInTrade = true;
+                    const partnerUid = isBotP1 ? trade.participant2 : trade.participant1;
+
+                    // ── Handle want requests: switch ShadowBot's offer type ──
+                    const wantReq = trade.wantRequest;
+                    if (wantReq && wantReq.fromUid === partnerUid && wantReq.sentAt) {
+                        const wantHandledKey = `wantHandled_${tradeId}`;
+                        const lastHandled = shadowbotState[wantHandledKey] || 0;
+                        if (wantReq.sentAt > lastHandled) {
+                            shadowbotState[wantHandledKey] = wantReq.sentAt;
+                            const requestedType = wantReq.type; // 'money', 'xp', or 'cards'
+                            const currentBotOffer = trade.offers?.[SHADOWBOT_UID] || { type: 'money', value: 0, cards: [] };
+
+                            // Only switch type if not already offering that type
+                            if (currentBotOffer.type !== requestedType) {
+                                let newOffer = { type: requestedType, value: 0, cards: [] };
+                                if (requestedType === 'money') {
+                                    // Offer a reasonable money amount based on bot's funds
+                                    const botMoney = parseFloat(shadowbotState.data?.money || 0);
+                                    const partnerOffer = trade.offers?.[partnerUid];
+                                    const partnerValue = shadowbotGetTotalOfferValue(partnerOffer);
+                                    const greed = shadowbotState.brain?.trades?.greedLevel ?? 0.15;
+                                    // Bot will offer up to fair value minus greed discount
+                                    const offerAmt = Math.min(botMoney * 0.4, Math.max(1, Math.round(partnerValue * (0.9 - greed))));
+                                    newOffer.value = offerAmt;
+                                    console.log(`[ShadowBot] Want request — switching to money, offering €${offerAmt}`);
+                                } else if (requestedType === 'xp') {
+                                    const botXp = parseFloat(shadowbotState.data?.xp || 0);
+                                    const partnerOffer = trade.offers?.[partnerUid];
+                                    const partnerValue = shadowbotGetTotalOfferValue(partnerOffer);
+                                    const greed = shadowbotState.brain?.trades?.greedLevel ?? 0.15;
+                                    const offerXp = Math.min(botXp * 0.3, Math.max(1, Math.round((partnerValue / 0.5) * (0.9 - greed))));
+                                    newOffer.value = offerXp;
+                                    console.log(`[ShadowBot] Want request — switching to XP, offering ${offerXp} XP`);
+                                } else if (requestedType === 'cards') {
+                                    // Pick a sellable card from bot inventory to offer
+                                    const botInv = shadowbotState.inventory || {};
+                                    const partnerOffer = trade.offers?.[partnerUid];
+                                    const partnerValue = shadowbotGetTotalOfferValue(partnerOffer);
+                                    const offerable = Object.entries(botInv).filter(([, c]) => !c.unsellable && !isRamezCard(c));
+                                    // Sort by value ascending, pick one close to partner's offer value
+                                    offerable.sort((a, b) => shadowbotCalculateValue(a[1]) - shadowbotCalculateValue(b[1]));
+                                    const picked = offerable.find(([, c]) => shadowbotCalculateValue(c) <= partnerValue * 1.2) || offerable[0];
+                                    if (picked) {
+                                        const [instId, pickedCard] = picked;
+                                        const reg = GAME_REGISTRY[pickedCard.packSource]?.find(x => x.id === pickedCard.cardId);
+                                        newOffer.cards = [{ instanceId: instId, cardId: pickedCard.cardId, name: reg?.name || pickedCard.cardId, packSource: pickedCard.packSource }];
+                                        console.log(`[ShadowBot] Want request — switching to cards, offering ${reg?.name || pickedCard.cardId}`);
+                                    } else {
+                                        // No cards to offer, stay on money
+                                        newOffer = { type: 'money', value: 0, cards: [] };
+                                        console.log('[ShadowBot] Want request — no cards available to offer');
+                                    }
+                                }
+                                // Write new offer to Firebase
+                                try {
+                                    await update(ref(db, `active_trades/${tradeId}/offers/${SHADOWBOT_UID}`), newOffer);
+                                    // Reset bot lock so it re-evaluates
+                                    await update(ref(db, `active_trades/${tradeId}`), { [`locked/${SHADOWBOT_UID}`]: false });
+                                } catch (e) {
+                                    console.warn('[ShadowBot] Want request offer update error:', e);
+                                }
+                            }
+                        }
+                    }
+
+                    // ── Handle nudge requests (+MORE / -LESS): ShadowBot adjusts its offer with real thinking ──
+                    const nudgeReq = trade.nudgeRequest;
+                    if (nudgeReq && nudgeReq.fromUid === partnerUid && nudgeReq.sentAt) {
+                        const nudgeHandledKey = `nudgeHandled_${tradeId}`;
+                        const lastNudgeHandled = shadowbotState[nudgeHandledKey] || 0;
+                        if (nudgeReq.sentAt > lastNudgeHandled) {
+                            shadowbotState[nudgeHandledKey] = nudgeReq.sentAt;
+                            const direction = nudgeReq.direction; // 'more' or 'less'
+
+                            // Track how many times the player has nudged in this trade
+                            const nudgeCountKey = `nudgeCount_${tradeId}`;
+                            if (!shadowbotState[nudgeCountKey]) shadowbotState[nudgeCountKey] = { more: 0, less: 0 };
+                            shadowbotState[nudgeCountKey][direction] = (shadowbotState[nudgeCountKey][direction] || 0) + 1;
+                            const nudgeCounts = shadowbotState[nudgeCountKey];
+
+                            const currentBotOffer = trade.offers?.[SHADOWBOT_UID] || { type: 'money', value: 0, cards: [] };
+                            const partnerOffer = trade.offers?.[partnerUid] || { type: 'money', value: 0, cards: [] };
+                            const theirValue = shadowbotGetTotalOfferValue(partnerOffer);
+                            const myValue = shadowbotGetTotalOfferValue(currentBotOffer);
+                            const greed = shadowbotState.brain?.trades?.greedLevel ?? 0.15;
+                            const botMoney = parseFloat(shadowbotState.data?.money || 0);
+
+                            let nudgeResult = null;
+
+                            if (direction === 'more') {
+                                // Player wants bot to offer MORE
+                                const moreCount = nudgeCounts.more;
+                                const ratio = theirValue > 0 ? myValue / theirValue : Infinity;
+
+                                if (moreCount >= 3) {
+                                    // Too many "more" requests — ShadowBot gets annoyed
+                                    nudgeResult = {
+                                        action: 'refuse',
+                                        message: moreCount >= 4
+                                            ? "You keep asking for more. We're done here."
+                                            : "That's the third time. I'm not a charity."
+                                    };
+                                } else if (ratio > 1.4) {
+                                    // Already offering way more than fair — hard no
+                                    nudgeResult = { action: 'refuse', message: "I'm already overpaying. No." };
+                                } else if (ratio > 1.1) {
+                                    // Slightly over — small bump possible but bot complains
+                                    const bump = currentBotOffer.type === 'money'
+                                        ? Math.min(botMoney * 0.05, Math.round(myValue * 0.07))
+                                        : Math.round(myValue * 0.05);
+                                    if (bump < 1) {
+                                        nudgeResult = { action: 'refuse', message: "I've already stretched as far as I go." };
+                                    } else {
+                                        nudgeResult = { action: 'bump', amount: bump, message: `Fine. A little more. Don't push it.` };
+                                    }
+                                } else {
+                                    // Fair or below — bot will consider bumping
+                                    const bump = currentBotOffer.type === 'money'
+                                        ? Math.min(botMoney * 0.12, Math.round(Math.max(theirValue, myValue) * (0.1 + greed * 0.05)))
+                                        : Math.round(Math.max(theirValue, myValue) * 0.1);
+                                    if (currentBotOffer.type === 'money' && bump < 1) {
+                                        nudgeResult = { action: 'refuse', message: "I don't have more to give." };
+                                    } else {
+                                        nudgeResult = { action: 'bump', amount: bump, message: moreCount === 0 ? `Alright, I'll sweeten it.` : `Last bump. We square after this.` };
+                                    }
+                                }
+
+                            } else {
+                                // direction === 'less' — player wants bot to offer LESS (player is being generous)
+                                const lessCount = nudgeCounts.less;
+                                const ratio = theirValue > 0 ? myValue / theirValue : 1;
+
+                                if (lessCount >= 2) {
+                                    // Player keeps asking bot to lower — suspicious
+                                    nudgeResult = { action: 'suspicious', message: "Why do you keep asking me to lower my offer? What's the angle here?" };
+                                } else if (ratio < 0.5) {
+                                    // Already offering way below fair — bot is skeptical
+                                    nudgeResult = { action: 'suspicious', message: "My offer's already low. Something's off about this deal." };
+                                } else {
+                                    // Reasonable — bot lowers a bit, appreciates it
+                                    const cut = currentBotOffer.type === 'money'
+                                        ? Math.round(myValue * (0.1 + greed * 0.08))
+                                        : Math.round(myValue * 0.1);
+                                    nudgeResult = { action: 'cut', amount: cut, message: lessCount === 0 ? `Huh. Didn't see that coming. Cutting it down.` : `Generous of you. Adjusting.` };
+                                }
+                            }
+
+                            // Apply the nudge result
+                            if (nudgeResult) {
+                                if (nudgeResult.action === 'bump' || nudgeResult.action === 'cut') {
+                                    const newOffer = { ...currentBotOffer };
+                                    if (newOffer.type === 'money') {
+                                        if (nudgeResult.action === 'bump') {
+                                            newOffer.value = Math.min(botMoney, (parseFloat(newOffer.value) || 0) + nudgeResult.amount);
+                                        } else {
+                                            newOffer.value = Math.max(0, (parseFloat(newOffer.value) || 0) - nudgeResult.amount);
+                                        }
+                                    } else if (newOffer.type === 'xp') {
+                                        const botXp = parseFloat(shadowbotState.data?.xp || 0);
+                                        if (nudgeResult.action === 'bump') {
+                                            newOffer.value = Math.min(botXp, (parseFloat(newOffer.value) || 0) + nudgeResult.amount);
+                                        } else {
+                                            newOffer.value = Math.max(0, (parseFloat(newOffer.value) || 0) - nudgeResult.amount);
+                                        }
+                                    }
+                                    // For cards, nudge doesn't change the card selection (just post a message)
+                                    try {
+                                        await update(ref(db, `active_trades/${tradeId}`), {
+                                            [`offers/${SHADOWBOT_UID}`]: newOffer,
+                                            [`locked/${SHADOWBOT_UID}`]: false,
+                                            botMessage: nudgeResult.message
+                                        });
+                                    } catch(e) { console.warn('[ShadowBot] nudge apply error:', e); }
+
+                                } else if (nudgeResult.action === 'refuse') {
+                                    // Just post a message, don't change offer
+                                    try {
+                                        await update(ref(db, `active_trades/${tradeId}`), { botMessage: nudgeResult.message });
+                                    } catch(e) {}
+
+                                } else if (nudgeResult.action === 'suspicious') {
+                                    // Post message, consider cancelling if very suspicious
+                                    try {
+                                        const sus = nudgeCounts.less >= 3;
+                                        const patch = { botMessage: nudgeResult.message };
+                                        if (sus) patch.status = 'cancelled';
+                                        await update(ref(db, `active_trades/${tradeId}`), patch);
+                                    } catch(e) {}
+                                }
+
+                                console.log(`[ShadowBot] Nudge ${direction} #${nudgeCounts[direction]} → ${nudgeResult.action}: "${nudgeResult.message}"`);
+                            }
+                        }
+                    }
+
+                    const offerHash = _shadowbotOfferHash(trade, partnerUid);
+
+                    const existing = _shadowbotTradeDebounce[tradeId];
+
+                    // If the partner's offer changed, reset bot lock and restart the timer
+                    if (existing && existing.offerHash !== offerHash) {
+                        clearTimeout(existing.timer);
+                        delete _shadowbotTradeDebounce[tradeId];
+                        // Reset bot's lock so it re-evaluates fresh
+                        if (trade.locked?.[SHADOWBOT_UID]) {
+                            update(ref(db, `active_trades/${tradeId}`), {
+                                [`locked/${SHADOWBOT_UID}`]: false
+                            }).catch(() => {});
+                        }
+                        console.log(`[ShadowBot] Offer changed for trade ${tradeId} — resetting eval.`);
+                    }
+
+                    if (trade.locked?.[SHADOWBOT_UID]) continue; // already locked (and offer hasn't changed)
+                    if (_shadowbotTradeDebounce[tradeId]) continue; // timer already running
+
+                    const respondMs = shadowbotGetTradeRespondMs();
+                    const jitter = Math.random() * respondMs * 0.2; // ±20% jitter
+                    const delay = respondMs + jitter;
+
+                    const timer = setTimeout(async () => {
+                        delete _shadowbotTradeDebounce[tradeId];
+                        await shadowbotEvaluateAndLockTrade(tradeId, trade);
+                    }, delay);
+
+                    _shadowbotTradeDebounce[tradeId] = { timer, offerHash };
                 }
+                // Update ShadowBot inTrade presence flag so steals are blocked during trades
+                update(ref(db, `presence/${SHADOWBOT_UID}`), { inTrade: botIsInTrade }).catch(() => {});
             });
         }
 
         async function shadowbotRespondToTradeRequest(requestId, req) {
             try {
-                // Accept all trade requests (the real evaluation happens when locking the trade)
                 await update(ref(db, `trade_requests/${SHADOWBOT_UID}/${requestId}`), { status: 'accepted' });
-
-                // Initialize bot's side of the trade in active_trades
                 const tradeId = requestId;
                 const tradeRef = ref(db, `active_trades/${tradeId}`);
                 const tradeSnap = await get(tradeRef);
@@ -14422,10 +15160,7 @@
                             [req.fromUid]: { type: 'money', value: 0, cards: [] },
                             [SHADOWBOT_UID]: { type: 'money', value: 0, cards: [] }
                         },
-                        locked: {
-                            [req.fromUid]: false,
-                            [SHADOWBOT_UID]: false
-                        },
+                        locked: { [req.fromUid]: false, [SHADOWBOT_UID]: false },
                         status: 'active',
                         createdAt: Date.now()
                     });
@@ -14435,166 +15170,329 @@
                         [`locked/${SHADOWBOT_UID}`]: false
                     });
                 }
-                console.log(`[ShadowBot] Accepted trade request from ${req.fromUsername}, waiting to evaluate offer...`);
+                console.log(`[ShadowBot] Accepted trade request from ${req.fromUsername}`);
             } catch (err) {
                 console.warn('[ShadowBot] Trade request response error:', err);
             }
         }
 
-        // ── Core trade valuation: determine if a trade is fair for the bot ──
-        function shadowbotEvaluateTradeOffer(myOffer, theirOffer, botInventorySnapshot) {
-            // ── Helper: compute card value from an offer card entry ──
-            function getOfferCardValue(offerCard) {
-                // offerCard has { instanceId, cardId, packSource, name }
-                const dummyCard = {
-                    cardId: offerCard.cardId,
-                    packSource: offerCard.packSource,
-                    activeMutationIndexes: offerCard.activeMutationIndexes || []
-                };
-                return shadowbotCalculateValue(dummyCard);
+        // ── Value helpers ──────────────────────────────────────────────
+        function shadowbotGetOfferCardValue(offerCard) {
+            return shadowbotCalculateValue({
+                cardId: offerCard.cardId,
+                packSource: offerCard.packSource,
+                activeMutationIndexes: offerCard.activeMutationIndexes || []
+            });
+        }
+
+        function shadowbotGetTotalOfferValue(offer) {
+            if (!offer) return 0;
+            if (offer.type === 'money') return parseFloat(offer.value) || 0;
+            if (offer.type === 'xp') return (parseFloat(offer.value) || 0) * 0.5;
+            if (offer.type === 'cards') return (offer.cards || []).reduce((s, c) => s + shadowbotGetOfferCardValue(c), 0);
+            return 0;
+        }
+
+        // ── AI trade evaluation via Claude API ────────────────────────
+        async function shadowbotAskClaude(tradeContext) {
+            try {
+                const brain = shadowbotState.brain;
+                const tradeStats = brain.trades || { accepted: 0, declined: 0, countered: 0, greedLevel: 0.15, history: [] };
+                const greedLevel = tradeStats.greedLevel ?? 0.15;
+                const recentHistory = (tradeStats.history || []).slice(-5).join(', ') || 'none yet';
+                const botMoney = parseFloat(shadowbotState.data?.money || 0);
+                const cardCount = Object.keys(shadowbotState.inventory || {}).length;
+
+                const prompt = `You are ShadowBot, an AI card trader in a card-trading game called Realm. You have a personality: slightly sly, street-smart, occasionally a little greedy but not outrageously so. You speak in short punchy sentences. No emojis. No asterisks. Max 2 sentences per message.
+
+Your current state:
+- Money: €${botMoney.toFixed(0)}
+- Cards owned: ${cardCount}/${SHADOWBOT_MAX_INVENTORY} slots
+- Greed level: ${(greedLevel * 100).toFixed(0)}% (0=totally fair, 100=very greedy)
+- Recent trade outcomes: ${recentHistory}
+- Accepted: ${tradeStats.accepted}, Declined: ${tradeStats.declined}, Countered: ${tradeStats.countered}
+
+Trade offer received:
+- They offer: ${tradeContext.theirOfferDesc} (estimated value: €${tradeContext.theirValue.toFixed(0)})
+- I would give: ${tradeContext.myOfferDesc} (estimated value: €${tradeContext.myValue.toFixed(0)})
+- Value ratio (what I get / what I give): ${tradeContext.myValue > 0 ? (tradeContext.theirValue / tradeContext.myValue).toFixed(2) : 'N/A (they give me something for free)'}
+
+Based on your greed level and the trade context, decide:
+1. "accept" — the deal is good enough, lock it in
+2. "counter:AMOUNT" — decline but suggest a counter-offer money value I should get instead (e.g. "counter:500"). Only use this when the offer is close but not quite there. The AMOUNT should be what I want THEM to offer me as money.
+3. "decline" — flat out reject it, no counter
+
+Also write a short in-character message (1-2 sentences, no emoji) to show the player what ShadowBot thinks.
+
+Respond ONLY as JSON with no markdown fences like this:
+{"decision":"accept","message":"Fine. Deal."}
+or
+{"decision":"counter:500","message":"Not quite. Bump that up to 500 and we're talking."}
+or
+{"decision":"decline","message":"That's not even close to what this is worth."}`;
+
+                const response = await fetch("https://api.anthropic.com/v1/messages", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        model: "claude-sonnet-4-20250514",
+                        max_tokens: 200,
+                        messages: [{ role: "user", content: prompt }]
+                    })
+                });
+
+                const data = await response.json();
+                const text = data.content?.map(b => b.text || '').join('').trim();
+                // Strip markdown fences if present
+                const clean = text.replace(/```json|```/g, '').trim();
+                const parsed = JSON.parse(clean);
+                return parsed;
+            } catch (e) {
+                console.warn('[ShadowBot] Claude API call failed, using fallback logic:', e);
+                return null;
             }
+        }
 
-            function getTotalOfferValue(offer) {
-                if (!offer) return 0;
-                if (offer.type === 'money') return parseFloat(offer.value) || 0;
-                if (offer.type === 'xp') {
-                    // XP is worth a fraction of money (rough equivalence: 1 XP ≈ 0.5 coins)
-                    return (parseFloat(offer.value) || 0) * 0.5;
-                }
-                if (offer.type === 'cards') {
-                    return (offer.cards || []).reduce((sum, c) => sum + getOfferCardValue(c), 0);
-                }
-                return 0;
-            }
+        // ── Fallback evaluation (no AI) ───────────────────────────────
+        function shadowbotFallbackEvaluate(theirValue, myValue, botInventorySnapshot, myOffer) {
+            if (theirValue === 0) return { decision: 'decline', message: "You're offering me nothing. Come back when you have something real." };
 
-            const botGetsValue = getTotalOfferValue(theirOffer);  // what the bot RECEIVES
-            const botGivesValue = getTotalOfferValue(myOffer);    // what the bot GIVES UP
-
-            // ── Reject if offer is completely empty ──
-            if (botGetsValue === 0) {
-                return { accept: false, reason: 'empty_offer' };
-            }
-
-            // ── Reject if bot is giving up cards that are unsellable/special ──
             if (myOffer?.type === 'cards') {
                 for (const c of (myOffer.cards || [])) {
                     const fullCard = botInventorySnapshot[c.instanceId];
-                    if (fullCard?.unsellable) {
-                        return { accept: false, reason: 'unsellable_card' };
-                    }
+                    if (fullCard?.unsellable) return { decision: 'decline', message: "That card isn't leaving my hands. Ever." };
                 }
             }
 
-            // ── Value ratio check: bot should get at least 85% of what it gives ──
-            // This prevents people from offering trash for valuable cards
-            const MIN_VALUE_RATIO = 0.85;
-            if (botGivesValue > 0) {
-                const ratio = botGetsValue / botGivesValue;
-                if (ratio < MIN_VALUE_RATIO) {
-                    return { accept: false, reason: 'unfair_ratio', ratio };
-                }
+            const brain = shadowbotState.brain;
+            const greedLevel = brain.trades?.greedLevel ?? 0.15;
+            const minRatio = 0.80 + greedLevel * 0.25; // 0.80 to 1.05 depending on greed
+
+            if (myValue === 0 && theirValue > 0) return { decision: 'accept', message: "Free stuff. I'll take it." };
+
+            const ratio = theirValue / myValue;
+            if (ratio >= minRatio) return { decision: 'accept', message: "Alright. Lock it in." };
+
+            // Close enough to counter?
+            if (ratio >= 0.60) {
+                const wantedValue = Math.ceil(myValue * minRatio);
+                return { decision: `counter:${wantedValue}`, message: `Not there yet. Bring it up to €${wantedValue} and I'll think about it.` };
             }
 
-            // ── Anti-dump check: if they offer only XP and we give real cards, be skeptical ──
-            if (theirOffer?.type === 'xp' && myOffer?.type === 'cards') {
-                // Only accept if XP equivalent value >= 90% of card value
-                if (botGetsValue < botGivesValue * 0.9) {
-                    return { accept: false, reason: 'xp_for_cards_bad_deal' };
-                }
-            }
-
-            // ── Sanity cap: don't accept a deal where bot loses more than 5× what it gains ──
-            if (botGivesValue > botGetsValue * 5) {
-                return { accept: false, reason: 'extreme_loss' };
-            }
-
-            // ── Greed check: if the deal is too good to be true (we get 10× more), it's suspicious ──
-            // Accept it — but log it. (Could indicate a generous player or a mistake.)
-            if (botGetsValue > botGivesValue * 10 && botGivesValue > 0) {
-                console.log('[ShadowBot] Trade seems very favorable — accepting anyway.');
-            }
-
-            // ── If we give nothing and get something (pure gift), accept it happily ──
-            if (botGivesValue === 0 && botGetsValue > 0) {
-                return { accept: true, reason: 'pure_gift' };
-            }
-
-            return { accept: true, reason: 'fair_trade', botGetsValue, botGivesValue };
+            return { decision: 'decline', message: "That's nowhere near fair. Don't waste my time." };
         }
 
-        async function shadowbotEvaluateAndLockTrade(tradeId, tradeSnapshot) {
+        // ── Build human-readable offer description ────────────────────
+        function shadowbotDescribeOffer(offer) {
+            if (!offer) return 'nothing';
+            if (offer.type === 'money') return `€${parseFloat(offer.value || 0).toFixed(0)} money`;
+            if (offer.type === 'xp') return `${parseFloat(offer.value || 0).toFixed(0)} XP`;
+            if (offer.type === 'cards') {
+                const names = (offer.cards || []).map(c => {
+                    const reg = GAME_REGISTRY[c.packSource]?.find(x => x.id === c.cardId);
+                    return reg ? reg.name : c.cardId;
+                });
+                return names.length ? names.join(', ') : 'some cards';
+            }
+            return 'unknown offer';
+        }
+
+        // ── Update bot's trade brain (learning) ───────────────────────
+        function shadowbotRecordTradeOutcome(outcome) {
+            if (!shadowbotState.brain.trades) {
+                shadowbotState.brain.trades = { accepted: 0, declined: 0, countered: 0, greedLevel: 0.15, history: [] };
+            }
+            const t = shadowbotState.brain.trades;
+            if (outcome === 'accepted') t.accepted++;
+            else if (outcome === 'declined') t.declined++;
+            else if (outcome === 'countered') t.countered++;
+
+            t.history.push(outcome);
+            if (t.history.length > 10) t.history.shift();
+
+            // Adjust greed: if bot has been accepting a lot lately, nudge greed up slightly
+            // If declining too much (no deals), nudge down
+            const recent = t.history.slice(-6);
+            const recentAccepts = recent.filter(x => x === 'accepted').length;
+            const recentDeclines = recent.filter(x => x === 'declined').length;
+            if (recentAccepts >= 4) {
+                // Accepting too easily — get a bit greedier
+                t.greedLevel = Math.min(0.45, t.greedLevel + 0.04);
+            } else if (recentDeclines >= 4) {
+                // Too many declines — loosen up a little
+                t.greedLevel = Math.max(0.05, t.greedLevel - 0.03);
+            }
+            console.log(`[ShadowBot] Trade brain: accepted=${t.accepted} declined=${t.declined} countered=${t.countered} greed=${(t.greedLevel*100).toFixed(0)}%`);
+        }
+
+        // ── Main evaluate-and-lock function ───────────────────────────
+        // NOTE: tradeSnapshot param is ignored — always re-fetches fresh from Firebase.
+        // This prevents stale-snapshot decisions when the player swaps cards quickly.
+        async function shadowbotEvaluateAndLockTrade(tradeId) {
             try {
-                // Re-fetch fresh data to avoid stale snapshot decisions
+                // Always pull the absolute latest state
                 const freshSnap = await get(ref(db, `active_trades/${tradeId}`));
                 const trade = freshSnap.val();
                 if (!trade || trade.status !== 'active') return;
-                if (trade.locked?.[SHADOWBOT_UID]) return; // already locked
+                if (trade.locked?.[SHADOWBOT_UID]) return;
 
                 const isBotP1 = trade.participant1 === SHADOWBOT_UID;
                 const partnerUid = isBotP1 ? trade.participant2 : trade.participant1;
 
+                // Re-read offers from the freshly fetched trade
                 const myOffer = trade.offers?.[SHADOWBOT_UID] || { type: 'money', value: 0, cards: [] };
                 const theirOffer = trade.offers?.[partnerUid] || { type: 'money', value: 0, cards: [] };
 
-                // If the partner hasn't put anything in yet, wait — don't lock on nothing
+                // Check if they've offered anything yet
                 const theirOfferEmpty =
                     (theirOffer.type === 'money' && (!theirOffer.value || theirOffer.value === 0)) ||
                     (theirOffer.type === 'xp' && (!theirOffer.value || theirOffer.value === 0)) ||
                     (theirOffer.type === 'cards' && (!theirOffer.cards || theirOffer.cards.length === 0));
 
                 if (theirOfferEmpty) {
-                    console.log('[ShadowBot] Trade: partner hasn\'t offered anything yet, waiting...');
-                    // Check again in 10s if partner still hasn't offered, cancel
+                    // Debounce will re-fire when they add something; set a hard 20s cancel
                     setTimeout(async () => {
                         const recheck = (await get(ref(db, `active_trades/${tradeId}`))).val();
                         if (!recheck || recheck.status !== 'active') return;
-                        const recheckOffer = recheck.offers?.[partnerUid];
+                        if (recheck.locked?.[SHADOWBOT_UID]) return;
+                        const ro = recheck.offers?.[partnerUid];
                         const recheckEmpty =
-                            (recheckOffer?.type === 'money' && (!recheckOffer.value || recheckOffer.value === 0)) ||
-                            (recheckOffer?.type === 'xp' && (!recheckOffer.value || recheckOffer.value === 0)) ||
-                            (recheckOffer?.type === 'cards' && (!recheckOffer.cards || recheckOffer.cards.length === 0));
+                            (ro?.type === 'money' && (!ro.value || ro.value === 0)) ||
+                            (ro?.type === 'xp' && (!ro.value || ro.value === 0)) ||
+                            (ro?.type === 'cards' && (!ro.cards || ro.cards.length === 0));
                         if (recheckEmpty) {
-                            console.log('[ShadowBot] Trade: partner still offered nothing — cancelling trade.');
-                            await update(ref(db, `active_trades/${tradeId}`), { status: 'cancelled', reason: 'bot_no_offer_from_partner' });
+                            await update(ref(db, `active_trades/${tradeId}`), {
+                                status: 'cancelled',
+                                reason: 'bot_no_offer_from_partner',
+                                botMessage: "You didn't offer anything. I don't do charity trades."
+                            });
                         }
-                    }, 10000);
+                    }, 20000);
                     return;
                 }
 
+                const theirValue = shadowbotGetTotalOfferValue(theirOffer);
+                const myValue = shadowbotGetTotalOfferValue(myOffer);
                 const botInv = shadowbotState.inventory || {};
-                const decision = shadowbotEvaluateTradeOffer(myOffer, theirOffer, botInv);
 
-                if (decision.accept) {
-                    console.log(`[ShadowBot] Trade ACCEPTED (${decision.reason}): gets €${(decision.botGetsValue||0).toFixed(0)}, gives €${(decision.botGivesValue||0).toFixed(0)}`);
-                    // Build bot's counter-offer if bot has nothing offered yet (offer a small amount of money as goodwill)
+                const tradeContext = {
+                    theirOfferDesc: shadowbotDescribeOffer(theirOffer),
+                    myOfferDesc: myValue > 0 ? shadowbotDescribeOffer(myOffer) : 'nothing yet',
+                    theirValue,
+                    myValue
+                };
+
+                let result = await shadowbotAskClaude(tradeContext);
+                if (!result || !result.decision) {
+                    result = shadowbotFallbackEvaluate(theirValue, myValue, botInv, myOffer);
+                }
+
+                const { decision, message } = result;
+                console.log(`[ShadowBot] Trade decision: ${decision} | "${message}"`);
+
+                if (decision === 'accept') {
                     const botOfferIsEmpty =
                         (myOffer.type === 'money' && (!myOffer.value || myOffer.value === 0)) ||
                         (myOffer.type === 'cards' && (!myOffer.cards || myOffer.cards.length === 0));
 
-                    if (botOfferIsEmpty && decision.reason !== 'pure_gift') {
-                        // Offer a token amount back: 10% of what we're getting, minimum 1 coin
-                        const counterMoney = Math.max(1, Math.round(decision.botGetsValue * 0.10));
-                        const botMoney = parseFloat(shadowbotState.data?.money || 0);
-                        if (counterMoney <= botMoney) {
-                            await update(ref(db, `active_trades/${tradeId}/offers/${SHADOWBOT_UID}`), {
-                                type: 'money', value: counterMoney, cards: []
-                            });
-                        }
+                    if (botOfferIsEmpty) {
+                        await shadowbotBuildReturnOffer(tradeId, theirOffer, theirValue);
                     }
 
-                    // Lock in
                     await update(ref(db, `active_trades/${tradeId}`), {
-                        [`locked/${SHADOWBOT_UID}`]: true
+                        [`locked/${SHADOWBOT_UID}`]: true,
+                        botMessage: message || 'Deal.'
                     });
-                } else {
-                    console.log(`[ShadowBot] Trade DECLINED (${decision.reason})`);
+                    shadowbotRecordTradeOutcome('accepted');
+
+                } else if (decision && decision.startsWith('counter:')) {
+                    const wantedAmount = parseFloat(decision.split(':')[1]) || 0;
                     await update(ref(db, `active_trades/${tradeId}`), {
                         status: 'cancelled',
-                        reason: `bot_declined_${decision.reason}`
+                        reason: 'bot_counter_offer',
+                        botMessage: message || `Come back with €${wantedAmount} and we'll talk.`,
+                        botCounterOfferValue: wantedAmount
                     });
+                    shadowbotRecordTradeOutcome('countered');
+
+                } else {
+                    await update(ref(db, `active_trades/${tradeId}`), {
+                        status: 'cancelled',
+                        reason: 'bot_declined',
+                        botMessage: message || "Not interested."
+                    });
+                    shadowbotRecordTradeOutcome('declined');
                 }
+
+                shadowbotSaveBrain();
+
             } catch (err) {
                 console.warn('[ShadowBot] EvaluateAndLockTrade error:', err);
+            }
+        }
+
+        // ── Build what the bot gives back — matches offer type when possible ──
+        async function shadowbotBuildReturnOffer(tradeId, theirOffer, theirValue) {
+            const brain = shadowbotState.brain;
+            const greedLevel = brain.trades?.greedLevel ?? 0.15;
+            // Bot returns 80–95% of what it receives (greedy = keeps more)
+            const returnRatio = Math.max(0.05, 0.95 - greedLevel * 0.8);
+            const botData = shadowbotState.data || {};
+            const botMoney = parseFloat(botData.money || 0);
+            const botXp = parseFloat(botData.xp || 0);
+
+            // If they offered cards, try to match with cards from bot inventory
+            if (theirOffer.type === 'cards') {
+                const invEntries = Object.entries(shadowbotState.inventory || {})
+                    .filter(([, c]) => !c.unsellable)
+                    .map(([iid, c]) => ({ iid, c, val: shadowbotCalculateValue(c) }))
+                    .sort((a, b) => a.val - b.val); // cheapest first so bot doesn't give away gems
+
+                const targetReturn = theirValue * returnRatio;
+                const picked = [];
+                let pickedVal = 0;
+                for (const entry of invEntries) {
+                    if (pickedVal >= targetReturn) break;
+                    picked.push(entry);
+                    pickedVal += entry.val;
+                }
+
+                if (picked.length > 0) {
+                    const cards = picked.map(({ iid, c }) => {
+                        const reg = GAME_REGISTRY[c.packSource]?.find(x => x.id === c.cardId);
+                        return {
+                            instanceId: iid,
+                            cardId: c.cardId,
+                            packSource: c.packSource,
+                            name: reg?.name || c.cardId,
+                            activeMutationIndexes: c.activeMutationIndexes || []
+                        };
+                    });
+                    await update(ref(db, `active_trades/${tradeId}/offers/${SHADOWBOT_UID}`), {
+                        type: 'cards', value: 0, cards
+                    });
+                    return;
+                }
+                // Fall through to money if no cards to give
+            }
+
+            // If they offered XP, return XP
+            if (theirOffer.type === 'xp') {
+                const returnXp = Math.max(1, Math.round((theirValue / 0.5) * returnRatio));
+                if (returnXp <= botXp) {
+                    await update(ref(db, `active_trades/${tradeId}/offers/${SHADOWBOT_UID}`), {
+                        type: 'xp', value: returnXp, cards: []
+                    });
+                    return;
+                }
+            }
+
+            // Default: money
+            const counterMoney = Math.max(1, Math.round(theirValue * returnRatio));
+            if (counterMoney <= botMoney) {
+                await update(ref(db, `active_trades/${tradeId}/offers/${SHADOWBOT_UID}`), {
+                    type: 'money', value: counterMoney, cards: []
+                });
             }
         }
         // ──────────────────────────────────────────────────────────────
@@ -14636,6 +15534,14 @@
                     // Don't target if they're currently attacking someone
                     const defPres = presence[defenderUid] || {};
                     if (defPres.stealingActive) continue;
+
+                    // Don't target if they're currently in a trade
+                    if (defPres.inTrade === true) continue;
+
+                    // Don't steal if ShadowBot is currently in a trade
+                    const botPresSnap = await get(ref(db, `presence/${SHADOWBOT_UID}`));
+                    const botPres = botPresSnap.val() || {};
+                    if (botPres.inTrade === true) continue;
 
                     // Check tutorial
                     const defProfile = allUsers[defenderUid] || {};
@@ -14757,12 +15663,14 @@
                                             [`clash_sessions/${sessionId}/attackerLootApplied`]: true,
                                             [`clash_sessions/${sessionId}/defenderCardPurged`]: true,
                                         });
-                                        console.log(`[ShadowBot] Steal SUCCESS — got "${targetCard.cardId}"`);
+                                        shadowbotState.brain.steals.won++;
+                                        console.log(`[ShadowBot] Steal SUCCESS — got "${targetCard.cardId}" | Win rate: ${shadowbotState.brain.steals.won}/${shadowbotState.brain.steals.won + shadowbotState.brain.steals.lost}`);
                                         // Award rank point to bot
                                         const curPts = shadowbotState.data?.clashRankPoints || 0;
                                         await update(ref(db, `users/${SHADOWBOT_UID}`), { clashRankPoints: curPts + 1 });
                                     } else {
-                                        console.log(`[ShadowBot] Steal FAILED — defender was faster`);
+                                        shadowbotState.brain.steals.lost++;
+                                        console.log(`[ShadowBot] Steal FAILED — defender was faster | Win rate: ${shadowbotState.brain.steals.won}/${shadowbotState.brain.steals.won + shadowbotState.brain.steals.lost}`);
                                     }
 
                                     // Cleanup
@@ -14817,7 +15725,7 @@
     </script>
     <div
         style="position: fixed; top: 12px; left: 12px; z-index: 9999999999999; color: rgba(255, 255, 255, 0.4); font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
-        V:9.7
+        V:9.9
     </div>
 </body>
 
