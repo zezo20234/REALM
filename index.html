@@ -321,6 +321,196 @@
             margin-bottom: 2px;
         }
 
+        /* --- CHAT --- */
+        #view-chat {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            padding: 0 !important;
+        }
+        #view-chat.active {
+            display: flex;
+        }
+        .chat-header {
+            padding: 14px 16px 10px;
+            border-bottom: 1px solid rgba(148,163,184,0.12);
+            background: var(--bg-panel);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .chat-header-title {
+            font-size: 1rem;
+            font-weight: 800;
+            color: #f3f4f6;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .chat-online-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: var(--accent-green);
+            box-shadow: 0 0 6px rgba(16,185,129,0.6);
+            animation: chatPulse 1.8s ease-in-out infinite;
+        }
+        @keyframes chatPulse {
+            0%,100% { opacity:1; transform:scale(1); }
+            50% { opacity:0.5; transform:scale(0.85); }
+        }
+        .chat-notice {
+            font-size: 0.68rem;
+            color: #6b7280;
+            font-weight: 600;
+        }
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            overscroll-behavior-y: contain;
+        }
+        .chat-messages::-webkit-scrollbar { width: 4px; }
+        .chat-messages::-webkit-scrollbar-track { background: transparent; }
+        .chat-messages::-webkit-scrollbar-thumb { background: rgba(148,163,184,0.2); border-radius: 2px; }
+        .chat-msg {
+            display: flex;
+            gap: 9px;
+            align-items: flex-start;
+            animation: msgIn 0.2s ease;
+        }
+        @keyframes msgIn {
+            from { opacity:0; transform:translateY(6px); }
+            to { opacity:1; transform:translateY(0); }
+        }
+        .chat-msg.own {
+            flex-direction: row-reverse;
+        }
+        .chat-avatar {
+            width: 30px; height: 30px;
+            border-radius: 50%;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-glow);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.8rem; font-weight: 800;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+        .chat-avatar img { width:100%; height:100%; object-fit:cover; }
+        .chat-bubble-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            max-width: 72%;
+        }
+        .chat-msg.own .chat-bubble-wrap { align-items: flex-end; }
+        .chat-meta {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.65rem;
+            color: #6b7280;
+            font-weight: 600;
+        }
+        .chat-msg.own .chat-meta { flex-direction: row-reverse; }
+        .chat-sender { color: #93c5fd; font-weight: 700; font-size: 0.7rem; }
+        .chat-msg.own .chat-sender { color: #6ee7b7; }
+        .chat-bubble {
+            background: var(--bg-surface);
+            border: 1px solid rgba(148,163,184,0.14);
+            border-radius: 14px 14px 14px 3px;
+            padding: 8px 12px;
+            font-size: 0.875rem;
+            line-height: 1.4;
+            color: #e5e7eb;
+            word-break: break-word;
+            position: relative;
+        }
+        .chat-msg.own .chat-bubble {
+            background: rgba(37,99,235,0.22);
+            border-color: rgba(37,99,235,0.35);
+            border-radius: 14px 14px 3px 14px;
+            color: #dbeafe;
+        }
+        .chat-timer-bar {
+            height: 2px;
+            background: rgba(37,99,235,0.5);
+            border-radius: 2px;
+            margin-top: 4px;
+            transition: width linear;
+        }
+        .chat-msg.own .chat-timer-bar { background: rgba(16,185,129,0.5); }
+        .chat-timer-bar.expiring { background: rgba(239,68,68,0.6); }
+        .chat-input-row {
+            display: flex;
+            gap: 8px;
+            padding: 10px 12px;
+            padding-bottom: max(12px, env(safe-area-inset-bottom));
+            background: rgba(9,13,22,0.97);
+            border-top: 1px solid rgba(148,163,184,0.12);
+            flex-shrink: 0;
+        }
+        #chat-input {
+            flex: 1;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-glow);
+            border-radius: 22px;
+            padding: 10px 16px;
+            color: #f3f4f6;
+            font-size: 0.9rem;
+            font-family: 'Outfit', sans-serif;
+            outline: none;
+            transition: border-color 0.2s;
+            min-height: 44px;
+        }
+        #chat-input:focus { border-color: rgba(37,99,235,0.5); }
+        #chat-input::placeholder { color: #4b5563; }
+        #chat-send-btn {
+            width: 44px; height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), #1d4ed8);
+            border: none;
+            color: white;
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 0 12px rgba(37,99,235,0.35);
+            transition: transform 0.1s, box-shadow 0.2s;
+        }
+        #chat-send-btn:active { transform: scale(0.92); }
+        #chat-send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .chat-empty {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #4b5563;
+            gap: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .chat-empty-icon { font-size: 2.5rem; }
+        .chat-unread-badge {
+            position: absolute;
+            top: -4px; right: -4px;
+            background: var(--accent-red);
+            color: white;
+            font-size: 0.6rem;
+            font-weight: 900;
+            min-width: 16px; height: 16px;
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            padding: 0 3px;
+            box-shadow: 0 0 6px rgba(239,68,68,0.5);
+        }
+        #nav-chat-tab { position: relative; }
+
         /* --- AUTH SCREEN --- */
         #auth-screen {
             position: fixed;
@@ -5741,14 +5931,15 @@
                     // Open pack for free after applying updates
                     const milestonePackKey = rewards.pack.toLowerCase();
                     const milestonePackPrice = (window.PACK_METADATA && window.PACK_METADATA[milestonePackKey]?.price) || 999999;
+                    // Add the pack price to money first, buy the pack (which deducts it), net = free
+                    updates.money = (updates.money !== undefined ? updates.money : (userDataRecord.money || 0)) + milestonePackPrice;
                     await update(ref(db, `users/${activeUser.uid}`), updates);
-                    const origMoney = userData.money || 0;
-                    try {
-                        userData.money = origMoney + milestonePackPrice + 1;
-                        await purchasePackAsset(milestonePackKey);
-                    } finally {
-                        userData.money = origMoney;
+                    userDataRecord.money = (userDataRecord.money || 0) + milestonePackPrice;
+                    if (sharedGlobalPacks?.stockAllocations && sharedGlobalPacks.stockAllocations[milestonePackKey] <= 0) {
+                        sharedGlobalPacks.stockAllocations[milestonePackKey] = 1;
+                        await update(ref(db, `system/packs/stockAllocations`), { [milestonePackKey]: 1 });
                     }
+                    await purchasePackAsset(milestonePackKey);
                     if (rewards.s1Title) {
                         showToast(`🏅 "${rewards.s1Title.name}" title unlocked! Equip it in your Profile.`, 'success', 4500);
                         setTimeout(() => showToast(`Tier ${nextTier} claimed! 🎁 ${rewardText}`, 'success'), 1000);
@@ -5778,18 +5969,20 @@
                         // Pack reward: open the pack for free
                         const packKey = rewards.pack.toLowerCase();
                         const packPrice = (window.PACK_METADATA && window.PACK_METADATA[packKey]?.price) || 999999;
-                        const originalMoney = userData.money || 0;
+                        // Add the pack price to money first, buy the pack (which deducts it), net = free
+                        const _bpMoneyWithPack = (userDataRecord.money || 0) + packPrice;
+                        await update(ref(db, `users/${activeUser.uid}`), { money: _bpMoneyWithPack });
+                        userDataRecord.money = _bpMoneyWithPack;
+                        if (sharedGlobalPacks?.stockAllocations && sharedGlobalPacks.stockAllocations[packKey] <= 0) {
+                            sharedGlobalPacks.stockAllocations[packKey] = 1;
+                            await update(ref(db, `system/packs/stockAllocations`), { [packKey]: 1 });
+                        }
                         updates = {
                             'battlePass/xpb': currentXPB - XPB_PER_TIER,
                             'battlePass/tier': nextTier
                         };
                         await update(ref(db, `users/${activeUser.uid}`), updates);
-                        try {
-                            userData.money = originalMoney + packPrice + 1;
-                            await purchasePackAsset(packKey);
-                        } finally {
-                            userData.money = originalMoney;
-                        }
+                        await purchasePackAsset(packKey);
                         showToast(`Tier ${nextTier} claimed! 🎁 ${rewards.pack} Pack opened!`, 'success');
                         setTimeout(() => refreshBattlePassUI(), 500);
                         return;
@@ -6605,6 +6798,28 @@
                 </div>
             </section>
 
+            <!-- CHAT PANEL -->
+            <section id="view-chat" class="view-panel">
+                <div class="chat-header">
+                    <div class="chat-header-title">
+                        <span class="chat-online-dot"></span>
+                        Global Chat
+                        <span id="chat-online-count" style="font-size:0.7rem;color:#6b7280;font-weight:600;"></span>
+                    </div>
+                    <span class="chat-notice">⏱ Messages expire in 10 min</span>
+                </div>
+                <div class="chat-messages" id="chat-messages-list">
+                    <div class="chat-empty" id="chat-empty-state">
+                        <span class="chat-empty-icon">💬</span>
+                        <span>No messages yet — be the first!</span>
+                    </div>
+                </div>
+                <div class="chat-input-row">
+                    <input type="text" id="chat-input" placeholder="Type a message…" maxlength="200" autocomplete="off" autocorrect="off" spellcheck="false">
+                    <button id="chat-send-btn" disabled>➤</button>
+                </div>
+            </section>
+
         </main>
 
         <nav id="nav-tabs">
@@ -6619,6 +6834,7 @@
             <div class="nav-tab" data-target="shop"><span class="nav-icon">🛒</span><span>Shop</span></div>
             <div class="nav-tab" data-target="quests"><span class="nav-icon">⚔️</span><span>Quests</span></div>
             <div class="nav-tab" data-target="profile"><span class="nav-icon">👤</span><span>Profile</span></div>
+            <div class="nav-tab" data-target="chat" id="nav-chat-tab"><span class="nav-icon">💬</span><span>Chat</span></div>
         </nav>
     </div>
 
@@ -14457,6 +14673,15 @@
             getActiveUser: () => activeUserSession,
         };
 
+        // Hook initializeUserEnvironmentCore to also start chat
+        const _origInitForChat = initializeUserEnvironmentCore;
+        initializeUserEnvironmentCore = function() {
+            _origInitForChat.call(this);
+            setTimeout(() => {
+                if (window._chatWaitForChat) window._chatWaitForChat();
+            }, 1200);
+        };
+
         // =========================================================
         // SHADOWBOT — Autonomous AI Player (v2 — Learning)
         // =========================================================
@@ -16262,12 +16487,349 @@ or
             }, 4000);
         };
         // =========================================================
+        // GLOBAL CHAT SYSTEM
+        // =========================================================
+        (function initChat() {
+            const CHAT_TTL_MS = 10 * 60 * 1000; // 10 minutes
+            const CHAT_MAX_MESSAGES = 150;
+            const CHAT_PATH = 'global_chat';
+            let chatInitialized = false;
+            let chatListener = null;
+            let chatMessages = {}; // keyed by pushId
+            let unreadCount = 0;
+            let isChatVisible = false;
+            let tickerInterval = null;
+
+            // Wait for Firebase & auth
+            function waitForChat() {
+                const db = window._realm?.getDb?.();
+                const user = window._realm?.getActiveUser?.();
+                if (!db || !user) {
+                    setTimeout(waitForChat, 800);
+                    return;
+                }
+                setupChat(db);
+            }
+
+            function setupChat(db) {
+                if (chatInitialized) return;
+                chatInitialized = true;
+
+                const input = document.getElementById('chat-input');
+                const sendBtn = document.getElementById('chat-send-btn');
+                const msgList = document.getElementById('chat-messages-list');
+
+                // Enable input once auth is present
+                input.disabled = false;
+                sendBtn.disabled = false;
+
+                // Enable/disable send on input
+                input.addEventListener('input', () => {
+                    sendBtn.disabled = input.value.trim().length === 0;
+                });
+
+                // Send on Enter
+                input.addEventListener('keydown', e => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        sendMessage(db);
+                    }
+                });
+
+                sendBtn.addEventListener('click', () => sendMessage(db));
+
+                // Listen to Firebase chat
+                startChatListener(db);
+
+                // Cleanup ticker — removes expired messages from DOM every 10s
+                tickerInterval = setInterval(() => purgeExpired(db), 10000);
+
+                // Track chat tab visibility for unread badge
+                document.getElementById('nav-tabs').addEventListener('click', e => {
+                    const tab = e.target.closest('.nav-tab');
+                    if (!tab) return;
+                    if (tab.dataset.target === 'chat') {
+                        isChatVisible = true;
+                        clearUnreadBadge();
+                        setTimeout(() => scrollChatToBottom(), 80);
+                    } else {
+                        isChatVisible = false;
+                    }
+                });
+            }
+
+            function startChatListener(db) {
+                const chatRef = ref(db, CHAT_PATH);
+                // Listen only to recent messages (last 10 min window)
+                const cutoff = Date.now() - CHAT_TTL_MS;
+                chatListener = onValue(chatRef, snapshot => {
+                    const data = snapshot.val() || {};
+                    chatMessages = data;
+                    renderAllMessages(db);
+                    if (!isChatVisible) {
+                        // Count messages newer than last seen
+                        const newCount = Object.values(data).filter(m => m.timestamp > cutoff).length;
+                        // We just re-render; unread counted per new child below
+                    }
+                });
+
+                // Also listen to new children for unread badge
+                const { query: fbQuery, orderByChild, limitToLast, onChildAdded } = {
+                    query: window.fbQuery || null,
+                    orderByChild: window.fbOrderByChild || null,
+                    limitToLast: window.fbLimitToLast || null,
+                    onChildAdded: window.fbOnChildAdded || null,
+                };
+                // Use onValue snapshot approach (already done above); unread via local tracking
+            }
+
+            function renderAllMessages(db) {
+                const msgList = document.getElementById('chat-messages-list');
+                const emptyState = document.getElementById('chat-empty-state');
+                const now = Date.now();
+                const cutoff = now - CHAT_TTL_MS;
+
+                // Filter valid messages
+                const valid = Object.entries(chatMessages)
+                    .filter(([, m]) => m.timestamp > cutoff)
+                    .sort(([, a], [, b]) => a.timestamp - b.timestamp);
+
+                // Remove expired from Firebase silently
+                Object.entries(chatMessages).forEach(([key, m]) => {
+                    if (m.timestamp <= cutoff) {
+                        const db2 = window._realm?.getDb?.();
+                        if (db2) remove(ref(db2, `${CHAT_PATH}/${key}`)).catch(() => {});
+                    }
+                });
+
+                if (valid.length === 0) {
+                    emptyState.style.display = 'flex';
+                    // Remove all msg elements
+                    msgList.querySelectorAll('.chat-msg').forEach(el => el.remove());
+                    return;
+                }
+                emptyState.style.display = 'none';
+
+                // Sync DOM: remove stale, add new
+                const renderedKeys = new Set([...msgList.querySelectorAll('.chat-msg')].map(el => el.dataset.msgKey));
+                const validKeys = new Set(valid.map(([k]) => k));
+
+                // Remove messages no longer valid
+                msgList.querySelectorAll('.chat-msg').forEach(el => {
+                    if (!validKeys.has(el.dataset.msgKey)) el.remove();
+                });
+
+                // Add new messages
+                let addedNew = false;
+                valid.forEach(([key, msg]) => {
+                    if (!renderedKeys.has(key)) {
+                        const el = buildMsgEl(key, msg, now);
+                        msgList.appendChild(el);
+                        addedNew = true;
+
+                        if (!isChatVisible) {
+                            unreadCount++;
+                            updateUnreadBadge();
+                        }
+                    } else {
+                        // Update timer bar
+                        updateTimerBar(key, msg, now);
+                    }
+                });
+
+                if (addedNew) {
+                    scrollChatToBottom();
+                }
+            }
+
+            function buildMsgEl(key, msg, now) {
+                const user = window._realm?.getActiveUser?.();
+                const uid = user?.uid;
+                const isOwn = msg.uid === uid;
+                const elapsed = now - msg.timestamp;
+                const remaining = CHAT_TTL_MS - elapsed;
+                const pct = Math.max(0, (remaining / CHAT_TTL_MS) * 100);
+                const isExpiring = remaining < 60000; // last minute
+
+                const initials = (msg.username || 'U').substring(0, 2).toUpperCase();
+                const timeAgo = formatTimeAgo(msg.timestamp, now);
+
+                const div = document.createElement('div');
+                div.className = `chat-msg${isOwn ? ' own' : ''}`;
+                div.dataset.msgKey = key;
+                div.dataset.ts = msg.timestamp;
+
+                div.innerHTML = `
+                    <div class="chat-avatar">
+                        ${msg.avatarUrl ? `<img src="${escHtml(msg.avatarUrl)}" onerror="this.style.display='none';this.parentNode.textContent='${initials}'">` : initials}
+                    </div>
+                    <div class="chat-bubble-wrap">
+                        <div class="chat-meta">
+                            <span class="chat-sender">${escHtml(msg.username || 'Unknown')}</span>
+                            <span class="chat-time-label" data-ts="${msg.timestamp}">${timeAgo}</span>
+                        </div>
+                        <div class="chat-bubble">${escHtml(msg.text)}</div>
+                        <div class="chat-timer-bar${isExpiring ? ' expiring' : ''}" style="width:${pct}%;" data-timer-key="${key}"></div>
+                    </div>`;
+                return div;
+            }
+
+            function updateTimerBar(key, msg, now) {
+                const bar = document.querySelector(`[data-timer-key="${key}"]`);
+                if (!bar) return;
+                const elapsed = now - msg.timestamp;
+                const remaining = CHAT_TTL_MS - elapsed;
+                const pct = Math.max(0, (remaining / CHAT_TTL_MS) * 100);
+                bar.style.width = pct + '%';
+                if (remaining < 60000) bar.classList.add('expiring');
+            }
+
+            function purgeExpired(db) {
+                const now = Date.now();
+                const cutoff = now - CHAT_TTL_MS;
+                // Remove expired DOM elements
+                document.querySelectorAll('.chat-msg').forEach(el => {
+                    const ts = parseInt(el.dataset.ts, 10);
+                    if (ts <= cutoff) {
+                        el.style.transition = 'opacity 0.3s';
+                        el.style.opacity = '0';
+                        setTimeout(() => el.remove(), 300);
+                        // Remove from Firebase
+                        const key = el.dataset.msgKey;
+                        const db2 = window._realm?.getDb?.();
+                        if (db2 && key) remove(ref(db2, `${CHAT_PATH}/${key}`)).catch(() => {});
+                    }
+                });
+                // Update timer bars and time labels for remaining
+                document.querySelectorAll('.chat-msg').forEach(el => {
+                    const ts = parseInt(el.dataset.ts, 10);
+                    const key = el.dataset.msgKey;
+                    updateTimerBar(key, { timestamp: ts }, now);
+                    const label = el.querySelector('.chat-time-label');
+                    if (label) label.textContent = formatTimeAgo(ts, now);
+                });
+                // Show empty state if needed
+                const remaining = document.querySelectorAll('.chat-msg').length;
+                if (remaining === 0) {
+                    document.getElementById('chat-empty-state').style.display = 'flex';
+                }
+            }
+
+            function sendMessage(db) {
+                const input = document.getElementById('chat-input');
+                const text = input.value.trim();
+                const user = window._realm?.getActiveUser?.();
+                if (!text || !user) return;
+
+                const profile = window._realm?.getUserData?.() || {};
+                const msg = {
+                    uid: user.uid,
+                    username: profile.username || user.email?.split('@')[0] || 'Player',
+                    avatarUrl: profile.avatarUrl || null,
+                    text: text.substring(0, 200),
+                    timestamp: Date.now(),
+                };
+
+                // Optimistically clear input
+                input.value = '';
+                document.getElementById('chat-send-btn').disabled = true;
+
+                const db2 = window._realm?.getDb?.() || db;
+                push(ref(db2, CHAT_PATH), msg)
+                    .then(() => {
+                        // Enforce max messages: trim oldest if over limit
+                        trimOldMessages(db2);
+                    })
+                    .catch(err => {
+                        console.warn('[CHAT] send failed', err);
+                        showToast('Failed to send message', 'error');
+                    });
+            }
+
+            async function trimOldMessages(db) {
+                try {
+                    const snap = await get(ref(db, CHAT_PATH));
+                    const all = snap.val() || {};
+                    const entries = Object.entries(all).sort(([, a], [, b]) => a.timestamp - b.timestamp);
+                    if (entries.length > CHAT_MAX_MESSAGES) {
+                        const toDelete = entries.slice(0, entries.length - CHAT_MAX_MESSAGES);
+                        const updates = {};
+                        toDelete.forEach(([key]) => updates[`${CHAT_PATH}/${key}`] = null);
+                        await update(ref(db, '/'), updates);
+                    }
+                } catch(e) { /* silent */ }
+            }
+
+            function updateUnreadBadge() {
+                let badge = document.getElementById('chat-unread-badge');
+                const tab = document.getElementById('nav-chat-tab');
+                if (!tab) return;
+                if (unreadCount <= 0) {
+                    if (badge) badge.remove();
+                    return;
+                }
+                if (!badge) {
+                    badge = document.createElement('span');
+                    badge.id = 'chat-unread-badge';
+                    badge.className = 'chat-unread-badge';
+                    tab.appendChild(badge);
+                }
+                badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+            }
+
+            function clearUnreadBadge() {
+                unreadCount = 0;
+                const badge = document.getElementById('chat-unread-badge');
+                if (badge) badge.remove();
+            }
+
+            function scrollChatToBottom() {
+                const list = document.getElementById('chat-messages-list');
+                if (list) list.scrollTop = list.scrollHeight;
+            }
+
+            function formatTimeAgo(ts, now) {
+                const diff = Math.floor((now - ts) / 1000);
+                if (diff < 10) return 'just now';
+                if (diff < 60) return `${diff}s ago`;
+                const mins = Math.floor(diff / 60);
+                if (mins < 10) return `${mins}m ago`;
+                return `${mins}m ago`;
+            }
+
+            function escHtml(str) {
+                return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+            }
+
+            // Boot: wait for user to be authenticated
+            window._chatWaitForChat = waitForChat;
+            document.addEventListener('DOMContentLoaded', () => {
+                // Intercept initializeUserEnvironmentCore to start chat after login
+                const _prev = window.initializeUserEnvironmentCore;
+                window.initializeUserEnvironmentCore = function() {
+                    if (_prev) _prev.call(this);
+                    setTimeout(waitForChat, 1500);
+                };
+                // Fallback in case already called
+                if (window._realm?.getActiveUser?.()) setTimeout(waitForChat, 500);
+            });
+
+            // Also hook after auth state changes
+            setTimeout(() => {
+                if (window._realm?.getActiveUser?.() && !chatInitialized) waitForChat();
+            }, 5000);
+        })();
+        // =========================================================
+        // END GLOBAL CHAT
+        // =========================================================
+
+        // =========================================================
         // END SHADOWBOT
         // =========================================================
     </script>
     <div
         style="position: fixed; top: 12px; left: 12px; z-index: 9999999999999; color: rgba(255, 255, 255, 0.4); font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
-        V:10.1
+        V:10.2
     </div>
 </body>
 
