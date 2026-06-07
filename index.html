@@ -1382,7 +1382,7 @@
             background: rgba(2, 6, 14, 0.88);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            z-index: 200;
+            z-index: 999999999999999999999999999999999999999999999999999;
             display: none;
             align-items: center;
             justify-content: center;
@@ -15296,27 +15296,45 @@
                                     const partnerOffer = trade.offers?.[partnerUid];
                                     const partnerValue = shadowbotGetTotalOfferValue(partnerOffer);
                                     const greed = shadowbotState.brain?.trades?.greedLevel ?? 0.15;
-                                    const offerXp = Math.min(botXp * 0.3, Math.max(1, Math.round((partnerValue / 0.5) * (0.9 - greed))));
+                                    const offerXp = Math.min(botXp * 0.3, Math.max(1, Math.round((partnerValue / SHADOWBOT_XP_TO_MONEY_RATE) * (0.9 - greed))));
                                     newOffer.value = offerXp;
                                     console.log(`[ShadowBot] Want request — switching to XP, offering ${offerXp} XP`);
                                 } else if (requestedType === 'cards') {
-                                    // Pick a sellable card from bot inventory to offer
+                                    // Pick cards from bot inventory to match partner's offer value
                                     const botInv = shadowbotState.inventory || {};
                                     const partnerOffer = trade.offers?.[partnerUid];
                                     const partnerValue = shadowbotGetTotalOfferValue(partnerOffer);
-                                    const offerable = Object.entries(botInv).filter(([, c]) => !c.unsellable && !isRamezCard(c));
-                                    // Sort by value ascending, pick one close to partner's offer value
-                                    offerable.sort((a, b) => shadowbotCalculateValue(a[1]) - shadowbotCalculateValue(b[1]));
-                                    const picked = offerable.find(([, c]) => shadowbotCalculateValue(c) <= partnerValue * 1.2) || offerable[0];
-                                    if (picked) {
-                                        const [instId, pickedCard] = picked;
-                                        const reg = GAME_REGISTRY[pickedCard.packSource]?.find(x => x.id === pickedCard.cardId);
-                                        newOffer.cards = [{ instanceId: instId, cardId: pickedCard.cardId, name: reg?.name || pickedCard.cardId, packSource: pickedCard.packSource }];
-                                        console.log(`[ShadowBot] Want request — switching to cards, offering ${reg?.name || pickedCard.cardId}`);
+                                    const greedNow = shadowbotState.brain?.trades?.greedLevel ?? 0.15;
+                                    const returnRatio = Math.max(0.05, 0.95 - greedNow * 0.8);
+                                    const targetValue = Math.max(1, partnerValue * returnRatio);
+
+                                    const offerable = Object.entries(botInv)
+                                        .filter(([, c]) => c && !c.unsellable && !isRamezCard(c))
+                                        .map(([iid, c]) => ({ iid, c, val: shadowbotCalculateValue(c) }))
+                                        .sort((a, b) => a.val - b.val); // cheapest first
+
+                                    // Greedily pick cards until we reach the target value
+                                    const pickedCards = [];
+                                    let pickedValue = 0;
+                                    for (const entry of offerable) {
+                                        if (pickedValue >= targetValue) break;
+                                        const reg = GAME_REGISTRY[entry.c.packSource]?.find(x => x.id === entry.c.cardId);
+                                        pickedCards.push({
+                                            instanceId: entry.iid, cardId: entry.c.cardId,
+                                            packSource: entry.c.packSource, name: reg?.name || entry.c.cardId,
+                                            activeMutationIndexes: entry.c.activeMutationIndexes || []
+                                        });
+                                        pickedValue += entry.val;
+                                    }
+
+                                    if (pickedCards.length > 0) {
+                                        newOffer.cards = pickedCards;
+                                        console.log(`[ShadowBot] Want request — offering ${pickedCards.length} card(s) worth ~€${pickedValue.toFixed(0)} (target €${targetValue.toFixed(0)})`);
                                     } else {
-                                        // No cards to offer, stay on money
-                                        newOffer = { type: 'money', value: 0, cards: [] };
-                                        console.log('[ShadowBot] Want request — no cards available to offer');
+                                        // No cards available — fall back to money offer
+                                        const fallbackMoney = Math.min(parseFloat(shadowbotState.data?.money || 0) * 0.3, Math.max(1, Math.round(targetValue)));
+                                        newOffer = { type: 'money', value: Math.round(fallbackMoney), cards: [] };
+                                        console.log('[ShadowBot] Want request — no cards available, falling back to money');
                                     }
                                 }
                                 // Write new offer to Firebase
@@ -15353,101 +15371,174 @@
                             const greed = shadowbotState.brain?.trades?.greedLevel ?? 0.15;
                             const botMoney = parseFloat(shadowbotState.data?.money || 0);
 
+                            // ── ESCALATION ORDER: money → xp → cards (and reverse for cuts) ──
+                            // Helper: compute how much bot can actually add in the current offer type,
+                            // and whether we should escalate to a richer type if the current one is maxed.
+                            const botXp = parseFloat(shadowbotState.data?.xp || 0);
+                            const botInvEntries = Object.entries(shadowbotState.inventory || {})
+                                .filter(([, c]) => c && !c.unsellable)
+                                .map(([iid, c]) => ({ iid, c, val: shadowbotCalculateValue(c) }))
+                                .sort((a, b) => a.val - b.val);
+                            const botHasCards = botInvEntries.length > 0;
+
+                            // Returns { type, value, cards } for the bumped offer,
+                            // or null if nothing more can be offered.
+                            function computeBumpedOffer(baseOffer, bumpTarget) {
+                                // bumpTarget = rough extra value we want to add
+                                if (baseOffer.type === 'money') {
+                                    const canAdd = Math.max(0, botMoney - (parseFloat(baseOffer.value) || 0));
+                                    const add = Math.min(canAdd, Math.max(1, Math.round(bumpTarget)));
+                                    if (add >= 1) {
+                                        return { type: 'money', value: (parseFloat(baseOffer.value) || 0) + add, cards: [] };
+                                    }
+                                    // Money maxed out — escalate to XP
+                                    if (botXp >= 10) {
+                                        const xpAdd = Math.min(botXp * 0.25, Math.max(10, Math.round(bumpTarget / SHADOWBOT_XP_TO_MONEY_RATE)));
+                                        return { type: 'xp', value: Math.round(xpAdd), cards: [], _escalated: 'xp' };
+                                    }
+                                    // XP also low — escalate to cards
+                                    if (botHasCards) {
+                                        const card = botInvEntries[0]; // cheapest card as a bonus throw-in
+                                        const reg = GAME_REGISTRY[card.c.packSource]?.find(x => x.id === card.c.cardId);
+                                        return { type: 'cards', value: 0, cards: [{ instanceId: card.iid, cardId: card.c.cardId, packSource: card.c.packSource, name: reg?.name || card.c.cardId, activeMutationIndexes: card.c.activeMutationIndexes || [] }], _escalated: 'cards' };
+                                    }
+                                    return null; // truly nothing left
+                                }
+                                if (baseOffer.type === 'xp') {
+                                    const currentXp = parseFloat(baseOffer.value) || 0;
+                                    const canAdd = Math.max(0, botXp - currentXp);
+                                    const add = Math.min(canAdd, Math.max(1, Math.round(bumpTarget / 0.5)));
+                                    if (add >= 1) {
+                                        return { type: 'xp', value: currentXp + add, cards: [] };
+                                    }
+                                    // XP maxed — escalate to money
+                                    if (botMoney >= 1) {
+                                        const moneyAdd = Math.min(botMoney * 0.15, Math.max(1, Math.round(bumpTarget)));
+                                        return { type: 'money', value: Math.round(moneyAdd), cards: [], _escalated: 'money' };
+                                    }
+                                    // Escalate to cards
+                                    if (botHasCards) {
+                                        const card = botInvEntries[0];
+                                        const reg = GAME_REGISTRY[card.c.packSource]?.find(x => x.id === card.c.cardId);
+                                        return { type: 'cards', value: 0, cards: [{ instanceId: card.iid, cardId: card.c.cardId, packSource: card.c.packSource, name: reg?.name || card.c.cardId, activeMutationIndexes: card.c.activeMutationIndexes || [] }], _escalated: 'cards' };
+                                    }
+                                    return null;
+                                }
+                                if (baseOffer.type === 'cards') {
+                                    // Add another card to sweeten the deal
+                                    const currentCardIds = new Set((baseOffer.cards || []).map(c => c.instanceId));
+                                    const extra = botInvEntries.find(e => !currentCardIds.has(e.iid));
+                                    if (extra) {
+                                        const reg = GAME_REGISTRY[extra.c.packSource]?.find(x => x.id === extra.c.cardId);
+                                        const updatedCards = [...(baseOffer.cards || []), {
+                                            instanceId: extra.iid, cardId: extra.c.cardId,
+                                            packSource: extra.c.packSource, name: reg?.name || extra.c.cardId,
+                                            activeMutationIndexes: extra.c.activeMutationIndexes || []
+                                        }];
+                                        return { type: 'cards', value: 0, cards: updatedCards };
+                                    }
+                                    // No more cards — try adding money on top
+                                    if (botMoney >= 1) {
+                                        const moneyAdd = Math.min(botMoney * 0.15, Math.max(1, Math.round(bumpTarget)));
+                                        return { type: 'money', value: Math.round(moneyAdd), cards: [], _escalated: 'money' };
+                                    }
+                                    return null;
+                                }
+                                return null;
+                            }
+
                             let nudgeResult = null;
 
                             if (direction === 'more') {
-                                // Player wants bot to offer MORE
                                 const moreCount = nudgeCounts.more;
                                 const ratio = theirValue > 0 ? myValue / theirValue : Infinity;
 
-                                if (moreCount >= 3) {
-                                    // Too many "more" requests — ShadowBot gets annoyed
-                                    nudgeResult = {
-                                        action: 'refuse',
-                                        message: moreCount >= 4
-                                            ? "You keep asking for more. We're done here."
-                                            : "That's the third time. I'm not a charity."
-                                    };
+                                if (moreCount >= 4) {
+                                    nudgeResult = { action: 'refuse', message: "You keep asking for more. We're done here." };
+                                } else if (moreCount === 3) {
+                                    nudgeResult = { action: 'refuse', message: "That's the third time. I'm not a charity." };
                                 } else if (ratio > 1.4) {
-                                    // Already offering way more than fair — hard no
                                     nudgeResult = { action: 'refuse', message: "I'm already overpaying. No." };
-                                } else if (ratio > 1.1) {
-                                    // Slightly over — small bump possible but bot complains
-                                    const bump = currentBotOffer.type === 'money'
-                                        ? Math.min(botMoney * 0.05, Math.round(myValue * 0.07))
-                                        : Math.round(myValue * 0.05);
-                                    if (bump < 1) {
-                                        nudgeResult = { action: 'refuse', message: "I've already stretched as far as I go." };
-                                    } else {
-                                        nudgeResult = { action: 'bump', amount: bump, message: `Fine. A little more. Don't push it.` };
-                                    }
                                 } else {
-                                    // Fair or below — bot will consider bumping
-                                    const bump = currentBotOffer.type === 'money'
-                                        ? Math.min(botMoney * 0.12, Math.round(Math.max(theirValue, myValue) * (0.1 + greed * 0.05)))
-                                        : Math.round(Math.max(theirValue, myValue) * 0.1);
-                                    if (currentBotOffer.type === 'money' && bump < 1) {
-                                        nudgeResult = { action: 'refuse', message: "I don't have more to give." };
+                                    // Determine bump target amount
+                                    const bumpTarget = ratio > 1.1
+                                        ? Math.max(1, Math.round(myValue * 0.07))
+                                        : Math.max(1, Math.round(Math.max(theirValue, myValue) * (0.1 + greed * 0.05)));
+                                    const bumped = computeBumpedOffer(currentBotOffer, bumpTarget);
+                                    if (!bumped) {
+                                        nudgeResult = { action: 'refuse', message: "I've got nothing left to give. That's my limit." };
+                                    } else if (bumped._escalated === 'xp') {
+                                        nudgeResult = { action: 'switch', newOffer: bumped, message: `Money's tapped. Throwing in ${bumped.value} XP instead.` };
+                                    } else if (bumped._escalated === 'money') {
+                                        nudgeResult = { action: 'switch', newOffer: bumped, message: `XP's maxed. Adding €${bumped.value} on top.` };
+                                    } else if (bumped._escalated === 'cards') {
+                                        const cname = bumped.cards?.[0]?.name || 'a card';
+                                        nudgeResult = { action: 'switch', newOffer: bumped, message: `Best I can do is throw in ${cname}.` };
+                                    } else if (bumped.type === 'cards' && bumped.cards?.length > (currentBotOffer.cards?.length || 0)) {
+                                        const added = bumped.cards[bumped.cards.length - 1]?.name || 'another card';
+                                        nudgeResult = { action: 'switch', newOffer: bumped, message: moreCount === 0 ? `Fine. Adding ${added} to the deal.` : `Last add. I'm throwing in ${added}.` };
                                     } else {
-                                        nudgeResult = { action: 'bump', amount: bump, message: moreCount === 0 ? `Alright, I'll sweeten it.` : `Last bump. We square after this.` };
+                                        nudgeResult = { action: 'switch', newOffer: bumped, message: ratio > 1.1 ? `Fine. A little more. Don't push it.` : (moreCount === 0 ? `Alright, I'll sweeten it.` : `Last bump. We square after this.`) };
                                     }
                                 }
 
                             } else {
-                                // direction === 'less' — player wants bot to offer LESS (player is being generous)
+                                // direction === 'less'
                                 const lessCount = nudgeCounts.less;
                                 const ratio = theirValue > 0 ? myValue / theirValue : 1;
 
                                 if (lessCount >= 2) {
-                                    // Player keeps asking bot to lower — suspicious
                                     nudgeResult = { action: 'suspicious', message: "Why do you keep asking me to lower my offer? What's the angle here?" };
                                 } else if (ratio < 0.5) {
-                                    // Already offering way below fair — bot is skeptical
                                     nudgeResult = { action: 'suspicious', message: "My offer's already low. Something's off about this deal." };
                                 } else {
-                                    // Reasonable — bot lowers a bit, appreciates it
+                                    // Reduce current offer
                                     const cut = currentBotOffer.type === 'money'
                                         ? Math.round(myValue * (0.1 + greed * 0.08))
-                                        : Math.round(myValue * 0.1);
+                                        : currentBotOffer.type === 'xp'
+                                            ? Math.round((myValue / 0.5) * 0.1)
+                                            : 0;
                                     nudgeResult = { action: 'cut', amount: cut, message: lessCount === 0 ? `Huh. Didn't see that coming. Cutting it down.` : `Generous of you. Adjusting.` };
                                 }
                             }
 
                             // Apply the nudge result
                             if (nudgeResult) {
-                                if (nudgeResult.action === 'bump' || nudgeResult.action === 'cut') {
+                                if (nudgeResult.action === 'switch') {
+                                    // Escalated or bumped offer — write the whole new offer object
+                                    const { _escalated, ...cleanOffer } = nudgeResult.newOffer;
+                                    try {
+                                        await update(ref(db, `active_trades/${tradeId}`), {
+                                            [`offers/${SHADOWBOT_UID}`]: cleanOffer,
+                                            [`locked/${SHADOWBOT_UID}`]: false,
+                                            botMessage: nudgeResult.message
+                                        });
+                                    } catch(e) { console.warn('[ShadowBot] nudge switch error:', e); }
+
+                                } else if (nudgeResult.action === 'cut') {
                                     const newOffer = { ...currentBotOffer };
                                     if (newOffer.type === 'money') {
-                                        if (nudgeResult.action === 'bump') {
-                                            newOffer.value = Math.min(botMoney, (parseFloat(newOffer.value) || 0) + nudgeResult.amount);
-                                        } else {
-                                            newOffer.value = Math.max(0, (parseFloat(newOffer.value) || 0) - nudgeResult.amount);
-                                        }
+                                        newOffer.value = Math.max(0, (parseFloat(newOffer.value) || 0) - nudgeResult.amount);
                                     } else if (newOffer.type === 'xp') {
-                                        const botXp = parseFloat(shadowbotState.data?.xp || 0);
-                                        if (nudgeResult.action === 'bump') {
-                                            newOffer.value = Math.min(botXp, (parseFloat(newOffer.value) || 0) + nudgeResult.amount);
-                                        } else {
-                                            newOffer.value = Math.max(0, (parseFloat(newOffer.value) || 0) - nudgeResult.amount);
-                                        }
+                                        newOffer.value = Math.max(0, (parseFloat(newOffer.value) || 0) - nudgeResult.amount);
+                                    } else if (newOffer.type === 'cards' && newOffer.cards?.length > 1) {
+                                        // Remove cheapest card from the offer
+                                        newOffer.cards = newOffer.cards.slice(1);
                                     }
-                                    // For cards, nudge doesn't change the card selection (just post a message)
                                     try {
                                         await update(ref(db, `active_trades/${tradeId}`), {
                                             [`offers/${SHADOWBOT_UID}`]: newOffer,
                                             [`locked/${SHADOWBOT_UID}`]: false,
                                             botMessage: nudgeResult.message
                                         });
-                                    } catch(e) { console.warn('[ShadowBot] nudge apply error:', e); }
+                                    } catch(e) { console.warn('[ShadowBot] nudge cut error:', e); }
 
                                 } else if (nudgeResult.action === 'refuse') {
-                                    // Just post a message, don't change offer
                                     try {
                                         await update(ref(db, `active_trades/${tradeId}`), { botMessage: nudgeResult.message });
                                     } catch(e) {}
 
                                 } else if (nudgeResult.action === 'suspicious') {
-                                    // Post message, consider cancelling if very suspicious
                                     try {
                                         const sus = nudgeCounts.less >= 3;
                                         const patch = { botMessage: nudgeResult.message };
@@ -15539,10 +15630,15 @@
             });
         }
 
+        // XP exchange rate: how many € one XP point is worth for trade comparison purposes.
+        // 1 XP ≈ €0.5 (matches the pack purchase: 10 XP per pack = €5 floor value / 10).
+        // Adjust this constant if the in-game economy changes.
+        const SHADOWBOT_XP_TO_MONEY_RATE = 0.5;
+
         function shadowbotGetTotalOfferValue(offer) {
             if (!offer) return 0;
             if (offer.type === 'money') return parseFloat(offer.value) || 0;
-            if (offer.type === 'xp') return (parseFloat(offer.value) || 0) * 0.5;
+            if (offer.type === 'xp') return (parseFloat(offer.value) || 0) * SHADOWBOT_XP_TO_MONEY_RATE;
             if (offer.type === 'cards') return (offer.cards || []).reduce((s, c) => s + shadowbotGetOfferCardValue(c), 0);
             return 0;
         }
@@ -15746,7 +15842,8 @@ or
 
                 if (decision === 'accept') {
                     const botOfferIsEmpty =
-                        (myOffer.type === 'money' && (!myOffer.value || myOffer.value === 0)) ||
+                        (myOffer.type === 'money' && (!myOffer.value || parseFloat(myOffer.value) === 0)) ||
+                        (myOffer.type === 'xp' && (!myOffer.value || parseFloat(myOffer.value) === 0)) ||
                         (myOffer.type === 'cards' && (!myOffer.cards || myOffer.cards.length === 0));
 
                     if (botOfferIsEmpty) {
@@ -15786,68 +15883,102 @@ or
         }
 
         // ── Build what the bot gives back — matches offer type when possible ──
+        // Tries: same-type → cross-type fallback chain → partial offer if resource limited
         async function shadowbotBuildReturnOffer(tradeId, theirOffer, theirValue) {
             const brain = shadowbotState.brain;
             const greedLevel = brain.trades?.greedLevel ?? 0.15;
-            // Bot returns 80–95% of what it receives (greedy = keeps more)
             const returnRatio = Math.max(0.05, 0.95 - greedLevel * 0.8);
             const botData = shadowbotState.data || {};
             const botMoney = parseFloat(botData.money || 0);
             const botXp = parseFloat(botData.xp || 0);
+            const targetReturn = Math.max(1, theirValue * returnRatio);
 
-            // If they offered cards, try to match with cards from bot inventory
-            if (theirOffer.type === 'cards') {
+            // Helper: build a cards offer worth ~targetReturn from bot inventory
+            function buildCardsOffer(target) {
                 const invEntries = Object.entries(shadowbotState.inventory || {})
-                    .filter(([, c]) => !c.unsellable)
+                    .filter(([, c]) => c && !c.unsellable)
                     .map(([iid, c]) => ({ iid, c, val: shadowbotCalculateValue(c) }))
-                    .sort((a, b) => a.val - b.val); // cheapest first so bot doesn't give away gems
-
-                const targetReturn = theirValue * returnRatio;
+                    .sort((a, b) => a.val - b.val);
                 const picked = [];
                 let pickedVal = 0;
                 for (const entry of invEntries) {
-                    if (pickedVal >= targetReturn) break;
-                    picked.push(entry);
+                    if (pickedVal >= target) break;
+                    const reg = GAME_REGISTRY[entry.c.packSource]?.find(x => x.id === entry.c.cardId);
+                    picked.push({
+                        instanceId: entry.iid, cardId: entry.c.cardId,
+                        packSource: entry.c.packSource, name: reg?.name || entry.c.cardId,
+                        activeMutationIndexes: entry.c.activeMutationIndexes || []
+                    });
                     pickedVal += entry.val;
                 }
-
-                if (picked.length > 0) {
-                    const cards = picked.map(({ iid, c }) => {
-                        const reg = GAME_REGISTRY[c.packSource]?.find(x => x.id === c.cardId);
-                        return {
-                            instanceId: iid,
-                            cardId: c.cardId,
-                            packSource: c.packSource,
-                            name: reg?.name || c.cardId,
-                            activeMutationIndexes: c.activeMutationIndexes || []
-                        };
-                    });
-                    await update(ref(db, `active_trades/${tradeId}/offers/${SHADOWBOT_UID}`), {
-                        type: 'cards', value: 0, cards
-                    });
-                    return;
-                }
-                // Fall through to money if no cards to give
+                return picked.length > 0 ? { type: 'cards', value: 0, cards: picked } : null;
             }
 
-            // If they offered XP, return XP
+            // ── If they offered cards, try to match with cards ──
+            if (theirOffer.type === 'cards') {
+                const cardOffer = buildCardsOffer(targetReturn);
+                if (cardOffer) {
+                    await update(ref(db, `active_trades/${tradeId}/offers/${SHADOWBOT_UID}`), cardOffer);
+                    return;
+                }
+                // No cards — try XP then money
+                if (botXp >= 1) {
+                    const xpOffer = Math.min(botXp, Math.max(1, Math.round(targetReturn / SHADOWBOT_XP_TO_MONEY_RATE)));
+                    await update(ref(db, `active_trades/${tradeId}/offers/${SHADOWBOT_UID}`), { type: 'xp', value: xpOffer, cards: [] });
+                    return;
+                }
+                if (botMoney >= 1) {
+                    await update(ref(db, `active_trades/${tradeId}/offers/${SHADOWBOT_UID}`), { type: 'money', value: Math.min(botMoney, Math.max(1, Math.round(targetReturn))), cards: [] });
+                }
+                return;
+            }
+
+            // ── If they offered XP, try to return XP first, then money, then cards ──
             if (theirOffer.type === 'xp') {
-                const returnXp = Math.max(1, Math.round((theirValue / 0.5) * returnRatio));
+                const returnXp = Math.max(1, Math.round(targetReturn / SHADOWBOT_XP_TO_MONEY_RATE));
                 if (returnXp <= botXp) {
-                    await update(ref(db, `active_trades/${tradeId}/offers/${SHADOWBOT_UID}`), {
-                        type: 'xp', value: returnXp, cards: []
-                    });
+                    await update(ref(db, `active_trades/${tradeId}/offers/${SHADOWBOT_UID}`), { type: 'xp', value: returnXp, cards: [] });
                     return;
                 }
+                // Not enough XP — offer what we have, plus money top-up if needed
+                if (botXp >= 1) {
+                    // Give all available XP and see if that's enough, or top up with money
+                    const xpValue = botXp * 0.5;
+                    const remaining = targetReturn - xpValue;
+                    if (remaining <= 0) {
+                        await update(ref(db, `active_trades/${tradeId}/offers/${SHADOWBOT_UID}`), { type: 'xp', value: Math.floor(botXp), cards: [] });
+                    } else if (botMoney >= remaining) {
+                        // Give money instead (simpler) since XP alone isn't enough
+                        await update(ref(db, `active_trades/${tradeId}/offers/${SHADOWBOT_UID}`), { type: 'money', value: Math.min(botMoney, Math.max(1, Math.round(targetReturn))), cards: [] });
+                    } else {
+                        // Give all XP we have as partial offer
+                        await update(ref(db, `active_trades/${tradeId}/offers/${SHADOWBOT_UID}`), { type: 'xp', value: Math.floor(botXp), cards: [] });
+                    }
+                    return;
+                }
+                // No XP at all — try money, then cards
+                if (botMoney >= 1) {
+                    await update(ref(db, `active_trades/${tradeId}/offers/${SHADOWBOT_UID}`), { type: 'money', value: Math.min(botMoney, Math.max(1, Math.round(targetReturn))), cards: [] });
+                    return;
+                }
+                const cardOffer = buildCardsOffer(targetReturn);
+                if (cardOffer) await update(ref(db, `active_trades/${tradeId}/offers/${SHADOWBOT_UID}`), cardOffer);
+                return;
             }
 
-            // Default: money
-            const counterMoney = Math.max(1, Math.round(theirValue * returnRatio));
-            if (counterMoney <= botMoney) {
-                await update(ref(db, `active_trades/${tradeId}/offers/${SHADOWBOT_UID}`), {
-                    type: 'money', value: counterMoney, cards: []
-                });
+            // ── Default: they offered money — try money first, then XP, then cards ──
+            if (botMoney >= 1) {
+                const counterMoney = Math.min(botMoney, Math.max(1, Math.round(targetReturn)));
+                await update(ref(db, `active_trades/${tradeId}/offers/${SHADOWBOT_UID}`), { type: 'money', value: counterMoney, cards: [] });
+                return;
             }
+            if (botXp >= 1) {
+                const xpOffer = Math.min(botXp, Math.max(1, Math.round(targetReturn / SHADOWBOT_XP_TO_MONEY_RATE)));
+                await update(ref(db, `active_trades/${tradeId}/offers/${SHADOWBOT_UID}`), { type: 'xp', value: xpOffer, cards: [] });
+                return;
+            }
+            const cardOffer = buildCardsOffer(targetReturn);
+            if (cardOffer) await update(ref(db, `active_trades/${tradeId}/offers/${SHADOWBOT_UID}`), cardOffer);
         }
         // ──────────────────────────────────────────────────────────────
 
@@ -16079,7 +16210,7 @@ or
     </script>
     <div
         style="position: fixed; top: 12px; left: 12px; z-index: 9999999999999; color: rgba(255, 255, 255, 0.4); font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
-        V:10.0
+        V:10.1
     </div>
 </body>
 
