@@ -13480,10 +13480,10 @@
                     const counterVal = tradeData.botCounterOfferValue;
                     if (botMsg) {
                         const isCounter = tradeData.reason === 'bot_counter_offer';
-                        const prefix = isCounter ? '🤖 ShadowBot counter: ' : '🤖 ShadowBot: ';
+                        const prefix = isCounter ? '🤖 DALLAL BOT counter: ' : '🤖 DALLAL BOT: ';
                         showToast(prefix + botMsg, isCounter ? 'info' : 'error');
                         if (isCounter && counterVal) {
-                            setTimeout(() => showToast('💡 Try offering €' + counterVal + ' to ShadowBot next time.', 'info'), 2200);
+                            setTimeout(() => showToast('💡 Try offering €' + counterVal + ' to DALLAL BOT next time.', 'info'), 2200);
                         }
                     } else {
                         showToast('Trade was cancelled.', 'error');
@@ -14476,7 +14476,7 @@
         // =========================================================
 
         const SHADOWBOT_UID = 'shadowbot_uid_v1';
-        const SHADOWBOT_USERNAME = 'ShadowBot';
+        const SHADOWBOT_USERNAME = 'DALLAL BOT';
         const SHADOWBOT_STARTING_MONEY = 1000000;
         const SHADOWBOT_INTERVAL_MS = 30000;
         const SHADOWBOT_STEAL_COOLDOWN_MS = 4 * 60 * 1000; // 4 min like normal user
@@ -14555,12 +14555,12 @@
                     _shadowbotAdaptiveSolveMs = newAverages;
                     await update(ref(db, 'system/shadowbot/avgSolveMsByRank'), newAverages);
                     const summary = Object.entries(newAverages).map(([r, ms]) => `${r}:${ms}ms`).join(', ');
-                    console.log(`[ShadowBot] Adaptive solve times updated — ${summary}`);
+                    console.log(`[DALLAL BOT] Adaptive solve times updated — ${summary}`);
                 } else {
-                    console.log('[ShadowBot] Adaptive update: not enough session data yet, keeping static times.');
+                    console.log('[DALLAL BOT] Adaptive update: not enough session data yet, keeping static times.');
                 }
             } catch (e) {
-                console.warn('[ShadowBot] Adaptive solve-time update failed:', e);
+                console.warn('[DALLAL BOT] Adaptive solve-time update failed:', e);
             }
         }
 
@@ -14570,7 +14570,7 @@
                 if (snap.exists()) {
                     _shadowbotAdaptiveSolveMs = snap.val() || {};
                     const summary = Object.entries(_shadowbotAdaptiveSolveMs).map(([r, ms]) => `${r}:${ms}ms`).join(', ');
-                    console.log(`[ShadowBot] Loaded adaptive solve times — ${summary}`);
+                    console.log(`[DALLAL BOT] Loaded adaptive solve times — ${summary}`);
                 }
             } catch (e) { /* non-critical */ }
         }
@@ -14663,7 +14663,7 @@
                         createdAt: Date.now(),
                         stealCooldownExpiry: 0,
                     });
-                    console.log('[ShadowBot] Account created.');
+                    console.log('[DALLAL BOT] Account created.');
                 }
 
                 // Keep bot presence alive (so it shows as "online")
@@ -14686,7 +14686,7 @@
                     shadowbotState.brain.buys = shadowbotState.brain.buys || { count: 0 };
                     shadowbotState.brain.mutations = shadowbotState.brain.mutations || { applied: 0, totalValueAdded: 0 };
                     shadowbotState.brain.trades = shadowbotState.brain.trades || { accepted: 0, declined: 0, countered: 0, greedLevel: 0.15, history: [] };
-                    console.log(`[ShadowBot] Brain restored — ${shadowbotState.brain.tickCount} prior ticks, steal win rate: ${shadowbotState.brain.steals.won}/${shadowbotState.brain.steals.won + shadowbotState.brain.steals.lost}`);
+                    console.log(`[DALLAL BOT] Brain restored — ${shadowbotState.brain.tickCount} prior ticks, steal win rate: ${shadowbotState.brain.steals.won}/${shadowbotState.brain.steals.won + shadowbotState.brain.steals.lost}`);
                 }
                 const invSnap = await get(ref(db, `inventory/${SHADOWBOT_UID}`));
                 shadowbotState.inventory = invSnap.val() || {};
@@ -14729,7 +14729,7 @@
                 });
 
                 shadowbotState.initialized = true;
-                console.log('[ShadowBot] Initialized. Starting tick loop.');
+                console.log('[DALLAL BOT] Initialized. Starting tick loop.');
 
                 // Load previously-saved adaptive solve times from Firebase,
                 // then kick off the daily update. First run also triggers immediately.
@@ -14740,7 +14740,7 @@
                 shadowbotStartTradeListener();
                 shadowbotStartLoop();
             } catch (err) {
-                console.warn('[ShadowBot] Bootstrap error:', err);
+                console.warn('[DALLAL BOT] Bootstrap error:', err);
             }
         }
 
@@ -14787,7 +14787,7 @@
                     const boostedMs = baseMs - speedup;
                     const finalMs = Math.max(SHADOWBOT_MIN_SOLVE_MS, boostedMs);
                     if (finalMs < baseMs) {
-                        console.log(`[ShadowBot] Loss-streak boost active (${(lossRate*100).toFixed(0)}% loss rate) — solve time ${baseMs}ms → ${finalMs}ms`);
+                        console.log(`[DALLAL BOT] Loss-streak boost active (${(lossRate*100).toFixed(0)}% loss rate) — solve time ${baseMs}ms → ${finalMs}ms`);
                     }
                     return finalMs;
                 }
@@ -14854,12 +14854,12 @@
                                         }
                                     }
                                 }
-                            } catch (e) { console.warn('[ShadowBot] judge error', e); }
+                            } catch (e) { console.warn('[DALLAL BOT] judge error', e); }
                         }, 600);
-                    } catch (e) { console.warn('[ShadowBot] defense submit error', e); }
+                    } catch (e) { console.warn('[DALLAL BOT] defense submit error', e); }
                 }, Math.round(actualSolveMs));
             } catch (err) {
-                console.warn('[ShadowBot] handleIncomingAttack error:', err);
+                console.warn('[DALLAL BOT] handleIncomingAttack error:', err);
             }
         }
 
@@ -14949,14 +14949,14 @@
                         }
                         // If sold out or can't afford yet, chosenPack stays null — bot waits
                         const remaining = (GAME_REGISTRY[targetSet] || []).filter(c => !botDiscovered[c.id]).length;
-                        console.log(`[ShadowBot] Set progress → ${targetSet.toUpperCase()} (${remaining} cards left) | Stock: ${stock} | Can buy: ${chosenPack !== null}`);
+                        console.log(`[DALLAL BOT] Set progress → ${targetSet.toUpperCase()} (${remaining} cards left) | Stock: ${stock} | Can buy: ${chosenPack !== null}`);
                     } else {
                         // All sets complete — buy secret packs freely as a reward loop
                         const secretPrice = PACK_METADATA['secret']?.price || Infinity;
                         if (secretPrice <= botMoney && (liveStock['secret'] || 0) > 0) {
                             chosenPack = 'secret';
                         }
-                        console.log('[ShadowBot] ALL SETS COMPLETE — farming secret packs');
+                        console.log('[DALLAL BOT] ALL SETS COMPLETE — farming secret packs');
                     }
                 }
 
@@ -14995,7 +14995,7 @@
                 }
 
                 const weightSummary = choices.map(c => `${c.action}:${c.weight}`).join(' | ');
-                console.log(`[ShadowBot] Tick #${shadowbotState.brain.tickCount} → ${chosen} | €${botMoney.toFixed(0)} | Cards: ${cardCount}/${SHADOWBOT_MAX_INVENTORY} | [${weightSummary}] | SellBar: ${(sellThreshold*100).toFixed(1)}%`);
+                console.log(`[DALLAL BOT] Tick #${shadowbotState.brain.tickCount} → ${chosen} | €${botMoney.toFixed(0)} | Cards: ${cardCount}/${SHADOWBOT_MAX_INVENTORY} | [${weightSummary}] | SellBar: ${(sellThreshold*100).toFixed(1)}%`);
 
                 if (chosen === 'buy' && chosenPack) {
                     await shadowbotBuyPack(botMoney, chosenPack, liveStock[chosenPack]);
@@ -15018,7 +15018,7 @@
                     shadowbotSaveBrain();
                 }
             } catch (err) {
-                console.warn('[ShadowBot] Tick error:', err);
+                console.warn('[DALLAL BOT] Tick error:', err);
             }
         }
 
@@ -15066,13 +15066,13 @@
                         },
                     };
                     await update(ref(db, '/'), cardPayload);
-                    console.log(`[ShadowBot] ⬆️ Leveled up to ${newLevel} — unlocked hidden card: ${hiddenCard.name}`);
+                    console.log(`[DALLAL BOT] ⬆️ Leveled up to ${newLevel} — unlocked hidden card: ${hiddenCard.name}`);
                 } else {
                     await update(ref(db, `users/${SHADOWBOT_UID}`), payload);
-                    console.log(`[ShadowBot] ⬆️ Leveled up to ${newLevel} (XP spent: ${requiredXp}, cost: €${levelCost})`);
+                    console.log(`[DALLAL BOT] ⬆️ Leveled up to ${newLevel} (XP spent: ${requiredXp}, cost: €${levelCost})`);
                 }
             } catch (err) {
-                console.warn('[ShadowBot] levelUp error:', err);
+                console.warn('[DALLAL BOT] levelUp error:', err);
             }
         }
 
@@ -15099,9 +15099,9 @@
                 shadowbotState.brain.mutations.totalValueAdded += valueAdded;
 
                 const mutDef = MUTATIONS_LIST[newMutIndex];
-                console.log(`[ShadowBot] Mutated "${card.cardId}" → ${mutDef?.name || 'unknown'} (${mutDef?.bonusPercent >= 0 ? '+' : ''}${mutDef?.bonusPercent}%) | Now has ${updatedMutations.length} mutations | Value: €${beforeValue} → €${afterValue.toFixed(2)}`);
+                console.log(`[DALLAL BOT] Mutated "${card.cardId}" → ${mutDef?.name || 'unknown'} (${mutDef?.bonusPercent >= 0 ? '+' : ''}${mutDef?.bonusPercent}%) | Now has ${updatedMutations.length} mutations | Value: €${beforeValue} → €${afterValue.toFixed(2)}`);
             } catch (err) {
-                console.warn('[ShadowBot] applyMutation error:', err);
+                console.warn('[DALLAL BOT] applyMutation error:', err);
             }
         }
 
@@ -15147,7 +15147,7 @@
             });
 
             if (!txResult.committed) {
-                console.log(`[ShadowBot] Pack ${packKey} sold out (transaction aborted)`);
+                console.log(`[DALLAL BOT] Pack ${packKey} sold out (transaction aborted)`);
                 return;
             }
 
@@ -15175,7 +15175,7 @@
                 if (newStreak > 0 && newStreak % 5 === 0) {
                     const streakBonus = (newStreak / 5) * 500;
                     updatedMoney = parseFloat((updatedMoney + streakBonus).toFixed(2));
-                    console.log(`[ShadowBot] 🔥 ${newStreak}-day streak! +€${streakBonus} bonus`);
+                    console.log(`[DALLAL BOT] 🔥 ${newStreak}-day streak! +€${streakBonus} bonus`);
                 }
             }
 
@@ -15210,7 +15210,7 @@
             // Increment global registry count (identical to real player flow)
             runTransaction(ref(db, `system/registryGlobalCounts/${picked.id}`), (cur) => (cur || 0) + 1);
 
-            console.log(`[ShadowBot] Bought ${packKey} pack → got "${picked.name}" (base: €${shadowbotGetCardBaseValue({ cardId: picked.id, packSource: packKey })})${isNewDiscovery ? ' [NEW DISCOVERY]' : ''}`);
+            console.log(`[DALLAL BOT] Bought ${packKey} pack → got "${picked.name}" (base: €${shadowbotGetCardBaseValue({ cardId: picked.id, packSource: packKey })})${isNewDiscovery ? ' [NEW DISCOVERY]' : ''}`);
         }
 
         async function shadowbotSellCard(sellable) {
@@ -15251,7 +15251,7 @@
                 shadowbotState.brain.sells.profitHistory.shift(); // keep last 20
             }
 
-            console.log(`[ShadowBot] Sold "${card.cardId}" for €${liveValue} (${reason}) | Avg sell profit: ${(shadowbotState.brain.sells.profitHistory.reduce((a,b)=>a+b,0)/shadowbotState.brain.sells.profitHistory.length*100).toFixed(1)}%`);
+            console.log(`[DALLAL BOT] Sold "${card.cardId}" for €${liveValue} (${reason}) | Avg sell profit: ${(shadowbotState.brain.sells.profitHistory.reduce((a,b)=>a+b,0)/shadowbotState.brain.sells.profitHistory.length*100).toFixed(1)}%`);
         }
 
         // ── ShadowBot Trade Intelligence v2 — AI-Powered ─────────────
@@ -15347,7 +15347,7 @@
                                     // Bot will offer up to fair value minus greed discount
                                     const offerAmt = Math.min(botMoney * 0.4, Math.max(1, Math.round(partnerValue * (0.9 - greed))));
                                     newOffer.value = offerAmt;
-                                    console.log(`[ShadowBot] Want request — switching to money, offering €${offerAmt}`);
+                                    console.log(`[DALLAL BOT] Want request — switching to money, offering €${offerAmt}`);
                                 } else if (requestedType === 'xp') {
                                     const botXp = parseFloat(shadowbotState.data?.xp || 0);
                                     const partnerOffer = trade.offers?.[partnerUid];
@@ -15355,7 +15355,7 @@
                                     const greed = shadowbotState.brain?.trades?.greedLevel ?? 0.15;
                                     const offerXp = Math.min(botXp * 0.3, Math.max(1, Math.round((partnerValue / SHADOWBOT_XP_TO_MONEY_RATE) * (0.9 - greed))));
                                     newOffer.value = offerXp;
-                                    console.log(`[ShadowBot] Want request — switching to XP, offering ${offerXp} XP`);
+                                    console.log(`[DALLAL BOT] Want request — switching to XP, offering ${offerXp} XP`);
                                 } else if (requestedType === 'cards') {
                                     // Pick cards from bot inventory to match partner's offer value
                                     const botInv = shadowbotState.inventory || {};
@@ -15386,12 +15386,12 @@
 
                                     if (pickedCards.length > 0) {
                                         newOffer.cards = pickedCards;
-                                        console.log(`[ShadowBot] Want request — offering ${pickedCards.length} card(s) worth ~€${pickedValue.toFixed(0)} (target €${targetValue.toFixed(0)})`);
+                                        console.log(`[DALLAL BOT] Want request — offering ${pickedCards.length} card(s) worth ~€${pickedValue.toFixed(0)} (target €${targetValue.toFixed(0)})`);
                                     } else {
                                         // No cards available — fall back to money offer
                                         const fallbackMoney = Math.min(parseFloat(shadowbotState.data?.money || 0) * 0.3, Math.max(1, Math.round(targetValue)));
                                         newOffer = { type: 'money', value: Math.round(fallbackMoney), cards: [] };
-                                        console.log('[ShadowBot] Want request — no cards available, falling back to money');
+                                        console.log('[DALLAL BOT] Want request — no cards available, falling back to money');
                                     }
                                 }
                                 // Write new offer to Firebase
@@ -15400,7 +15400,7 @@
                                     // Reset bot lock so it re-evaluates
                                     await update(ref(db, `active_trades/${tradeId}`), { [`locked/${SHADOWBOT_UID}`]: false });
                                 } catch (e) {
-                                    console.warn('[ShadowBot] Want request offer update error:', e);
+                                    console.warn('[DALLAL BOT] Want request offer update error:', e);
                                 }
                             }
                         }
@@ -15570,7 +15570,7 @@
                                             [`locked/${SHADOWBOT_UID}`]: false,
                                             botMessage: nudgeResult.message
                                         });
-                                    } catch(e) { console.warn('[ShadowBot] nudge switch error:', e); }
+                                    } catch(e) { console.warn('[DALLAL BOT] nudge switch error:', e); }
 
                                 } else if (nudgeResult.action === 'cut') {
                                     const newOffer = { ...currentBotOffer };
@@ -15588,7 +15588,7 @@
                                             [`locked/${SHADOWBOT_UID}`]: false,
                                             botMessage: nudgeResult.message
                                         });
-                                    } catch(e) { console.warn('[ShadowBot] nudge cut error:', e); }
+                                    } catch(e) { console.warn('[DALLAL BOT] nudge cut error:', e); }
 
                                 } else if (nudgeResult.action === 'refuse') {
                                     try {
@@ -15604,7 +15604,7 @@
                                     } catch(e) {}
                                 }
 
-                                console.log(`[ShadowBot] Nudge ${direction} #${nudgeCounts[direction]} → ${nudgeResult.action}: "${nudgeResult.message}"`);
+                                console.log(`[DALLAL BOT] Nudge ${direction} #${nudgeCounts[direction]} → ${nudgeResult.action}: "${nudgeResult.message}"`);
                             }
                         }
                     }
@@ -15623,7 +15623,7 @@
                                 [`locked/${SHADOWBOT_UID}`]: false
                             }).catch(() => {});
                         }
-                        console.log(`[ShadowBot] Offer changed for trade ${tradeId} — resetting eval.`);
+                        console.log(`[DALLAL BOT] Offer changed for trade ${tradeId} — resetting eval.`);
                     }
 
                     if (trade.locked?.[SHADOWBOT_UID]) continue; // already locked (and offer hasn't changed)
@@ -15672,9 +15672,9 @@
                         [`locked/${SHADOWBOT_UID}`]: false
                     });
                 }
-                console.log(`[ShadowBot] Accepted trade request from ${req.fromUsername}`);
+                console.log(`[DALLAL BOT] Accepted trade request from ${req.fromUsername}`);
             } catch (err) {
-                console.warn('[ShadowBot] Trade request response error:', err);
+                console.warn('[DALLAL BOT] Trade request response error:', err);
             }
         }
 
@@ -15755,7 +15755,7 @@ or
                 const parsed = JSON.parse(clean);
                 return parsed;
             } catch (e) {
-                console.warn('[ShadowBot] Claude API call failed, using fallback logic:', e);
+                console.warn('[DALLAL BOT] Claude API call failed, using fallback logic:', e);
                 return null;
             }
         }
@@ -15829,7 +15829,7 @@ or
                 // Too many declines — loosen up a little
                 t.greedLevel = Math.max(0.05, t.greedLevel - 0.03);
             }
-            console.log(`[ShadowBot] Trade brain: accepted=${t.accepted} declined=${t.declined} countered=${t.countered} greed=${(t.greedLevel*100).toFixed(0)}%`);
+            console.log(`[DALLAL BOT] Trade brain: accepted=${t.accepted} declined=${t.declined} countered=${t.countered} greed=${(t.greedLevel*100).toFixed(0)}%`);
         }
 
         // ── Main evaluate-and-lock function ───────────────────────────
@@ -15895,7 +15895,7 @@ or
                 }
 
                 const { decision, message } = result;
-                console.log(`[ShadowBot] Trade decision: ${decision} | "${message}"`);
+                console.log(`[DALLAL BOT] Trade decision: ${decision} | "${message}"`);
 
                 if (decision === 'accept') {
                     const botOfferIsEmpty =
@@ -15935,7 +15935,7 @@ or
                 shadowbotSaveBrain();
 
             } catch (err) {
-                console.warn('[ShadowBot] EvaluateAndLockTrade error:', err);
+                console.warn('[DALLAL BOT] EvaluateAndLockTrade error:', err);
             }
         }
 
@@ -16157,7 +16157,7 @@ or
                     payload[`users/${SHADOWBOT_UID}/stealCooldownExpiry`] = newCooldown;
 
                     await update(ref(db, '/'), payload);
-                    console.log(`[ShadowBot] Initiated steal on ${defProfile.username} (retaliating: ${shadowbotState.attackersLog[defenderUid] || 0} prior attacks)`);
+                    console.log(`[DALLAL BOT] Initiated steal on ${defProfile.username} (retaliating: ${shadowbotState.attackersLog[defenderUid] || 0} prior attacks)`);
 
                     // Bot auto-solves its own attack after rank-based delay
                     const solveMs = shadowbotGetSolveMs();
@@ -16206,13 +16206,13 @@ or
                                             [`clash_sessions/${sessionId}/defenderCardPurged`]: true,
                                         });
                                         shadowbotState.brain.steals.won++;
-                                        console.log(`[ShadowBot] Steal SUCCESS — got "${targetCard.cardId}" | Win rate: ${shadowbotState.brain.steals.won}/${shadowbotState.brain.steals.won + shadowbotState.brain.steals.lost}`);
+                                        console.log(`[DALLAL BOT] Steal SUCCESS — got "${targetCard.cardId}" | Win rate: ${shadowbotState.brain.steals.won}/${shadowbotState.brain.steals.won + shadowbotState.brain.steals.lost}`);
                                         // Award rank point to bot
                                         const curPts = shadowbotState.data?.clashRankPoints || 0;
                                         await update(ref(db, `users/${SHADOWBOT_UID}`), { clashRankPoints: curPts + 1 });
                                     } else {
                                         shadowbotState.brain.steals.lost++;
-                                        console.log(`[ShadowBot] Steal FAILED — defender was faster | Win rate: ${shadowbotState.brain.steals.won}/${shadowbotState.brain.steals.won + shadowbotState.brain.steals.lost}`);
+                                        console.log(`[DALLAL BOT] Steal FAILED — defender was faster | Win rate: ${shadowbotState.brain.steals.won}/${shadowbotState.brain.steals.won + shadowbotState.brain.steals.lost}`);
                                     }
 
                                     // Cleanup
@@ -16220,15 +16220,15 @@ or
                                         await remove(ref(db, `clash_sessions/${sessionId}`));
                                         await remove(ref(db, `steal_payloads/${sessionId}`));
                                     }, 3000);
-                                } catch (e) { console.warn('[ShadowBot] attack judge error', e); }
+                                } catch (e) { console.warn('[DALLAL BOT] attack judge error', e); }
                             }, 600);
-                        } catch (e) { console.warn('[ShadowBot] attack solve error', e); }
+                        } catch (e) { console.warn('[DALLAL BOT] attack solve error', e); }
                     }, Math.round(actual));
 
                     break; // Only one steal per tick
                 }
             } catch (err) {
-                console.warn('[ShadowBot] attemptSteal error:', err);
+                console.warn('[DALLAL BOT] attemptSteal error:', err);
             }
         }
 
@@ -16257,7 +16257,7 @@ or
             // Start bot after 4 seconds (after Firebase connections settle)
             setTimeout(() => {
                 if (!shadowbotState.initialized) {
-                    shadowbotBootstrap().catch(err => console.warn('[ShadowBot] init failed:', err));
+                    shadowbotBootstrap().catch(err => console.warn('[DALLAL BOT] init failed:', err));
                 }
             }, 4000);
         };
