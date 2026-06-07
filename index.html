@@ -9674,12 +9674,33 @@
             const mSecondsField = Math.floor((localizedRemainingMutationTick % 60000) / 1000);
             document.getElementById('timer-mutation').innerText = `${mMinutesField.toString().padStart(2, '0')}:${mSecondsField.toString().padStart(2, '0')}`;
 
-            // Fire mutation once per minute using a reliable minute-bucket tracker
+            // ── SERVER-WIDE MUTATION TICK ──
+            // All online clients race to claim the current minute bucket via a Firebase transaction.
+            // Only ONE client wins per minute; that winner distributes mutations to EVERY user's inventory.
+            // This guarantees every user gets exactly one mutation per minute regardless of tab focus.
             const currentMutationMinuteBucket = Math.floor(currentSystemEpochTime / mutationFrequencyInterval);
             if (typeof window._lastMutationMinuteBucket === 'undefined') window._lastMutationMinuteBucket = currentMutationMinuteBucket;
             if (currentMutationMinuteBucket > window._lastMutationMinuteBucket) {
                 window._lastMutationMinuteBucket = currentMutationMinuteBucket;
-                executeSystemicCardMutationTick();
+                // Race to claim this minute bucket — only the winner distributes
+                runTransaction(ref(db, 'system/mutation/lastTickMinute'), (storedBucket) => {
+                    if (storedBucket >= currentMutationMinuteBucket) return; // already handled — abort
+                    return currentMutationMinuteBucket;
+                }).then(async (txResult) => {
+                    if (!txResult.committed) return; // another client already handled this minute
+                    // We won the race — distribute a mutation to every user in Firebase
+                    try {
+                        const allUsersSnap = await get(ref(db, 'users'));
+                        const allUsers = allUsersSnap.val() || {};
+                        for (const uid in allUsers) {
+                            // Run each user's mutation in background (non-blocking)
+                            executeServerWideMutationForUser(uid).catch(e => console.warn('[MutationTick] user error', uid, e));
+                        }
+                        console.log(`[MutationTick] Distributed mutations to ${Object.keys(allUsers).length} users for minute ${currentMutationMinuteBucket}`);
+                    } catch (e) {
+                        console.warn('[MutationTick] distribution error', e);
+                    }
+                }).catch(e => console.warn('[MutationTick] transaction error', e));
             }
 
             if (userDataRecord.stealCooldownExpiry && userDataRecord.stealCooldownExpiry > currentSystemEpochTime) {
@@ -10670,38 +10691,64 @@
             showToast("Card transferred successfully.", "success");
         };
 
+        // Legacy local function — server-wide distribution now handles all users.
+        // Kept as a fallback for direct calls elsewhere.
         function executeSystemicCardMutationTick() {
-            const arrayKeysOfInventory = Object.keys(userDeckRecord);
-            if (arrayKeysOfInventory.length === 0) return;
+            if (activeUserSession?.uid) {
+                executeServerWideMutationForUser(activeUserSession.uid).catch(e => console.warn('[MutationTick] local fallback error', e));
+            }
+        }
 
-            // If a Mutation Magnet is active on any card, direct all mutations there
-            const magnetInstanceKey = Object.keys(userDeckRecord).find(k => userDeckRecord[k].mutationMagnet === true);
+        // Applies one mutation tick to a specific user by uid.
+        // Reads their inventory fresh from Firebase, picks a target card, writes back atomically.
+        // The magnet card gets priority; otherwise a random eligible card is chosen.
+        async function executeServerWideMutationForUser(uid) {
+            const now = Date.now();
 
-            let targetInstanceKey;
-            let targetCardInstance;
+            // Fetch the user's inventory fresh from Firebase (never rely on stale local cache)
+            const invSnap = await get(ref(db, `inventory/${uid}`));
+            const inv = invSnap.val();
+            if (!inv) return;
 
-            if (magnetInstanceKey) {
-                targetInstanceKey = magnetInstanceKey;
-                targetCardInstance = userDeckRecord[magnetInstanceKey];
+            const allKeys = Object.keys(inv);
+            if (allKeys.length === 0) return;
+
+            // Honor mutation magnet if active
+            const magnetKey = allKeys.find(k => inv[k] && inv[k].mutationMagnet === true);
+
+            let targetKey;
+            let targetCard;
+
+            if (magnetKey) {
+                targetKey = magnetKey;
+                targetCard = inv[magnetKey];
             } else {
-                targetInstanceKey = arrayKeysOfInventory[Math.floor(Math.random() * arrayKeysOfInventory.length)];
-                targetCardInstance = userDeckRecord[targetInstanceKey];
+                // Pick a random eligible card (not locked, not at max mutations)
+                const eligible = allKeys.filter(k => {
+                    const c = inv[k];
+                    if (!c) return false;
+                    if (c.cryptographicLockExpiry && c.cryptographicLockExpiry > now) return false;
+                    if ((c.activeMutationIndexes || []).length >= 10) return false;
+                    return true;
+                });
+                if (eligible.length === 0) return;
+                targetKey = eligible[Math.floor(Math.random() * eligible.length)];
+                targetCard = inv[targetKey];
             }
 
-            if (targetCardInstance.cryptographicLockExpiry && targetCardInstance.cryptographicLockExpiry > Date.now()) return;
+            if (!targetCard) return;
+            if (targetCard.cryptographicLockExpiry && targetCard.cryptographicLockExpiry > now) return;
+            if ((targetCard.activeMutationIndexes || []).length >= 10) return;
 
-            const trackingMutationsListIndexes = targetCardInstance.activeMutationIndexes || [];
-            if (trackingMutationsListIndexes.length >= 10) return;
+            const newMutIndex = pickWeightedMutationIndex();
+            const newMutation = MUTATIONS_LIST[newMutIndex];
+            if (newMutation && newMutation.bonusPercent > MAX_MUTATION_BONUS_PERCENT) return;
 
-            const generatedRandomMutationIndex = pickWeightedMutationIndex();
-            const generatedMutation = MUTATIONS_LIST[generatedRandomMutationIndex];
-            if (generatedMutation && generatedMutation.bonusPercent > MAX_MUTATION_BONUS_PERCENT) return;
-            trackingMutationsListIndexes.push(generatedRandomMutationIndex);
-
-            update(ref(db, `inventory/${activeUserSession.uid}/${targetInstanceKey}`), {
-                activeMutationIndexes: trackingMutationsListIndexes
-            }).catch(error => {
-                console.error('Mutation tick failed:', error);
+            // Transaction on the array prevents race conditions with concurrent writes
+            await runTransaction(ref(db, `inventory/${uid}/${targetKey}/activeMutationIndexes`), (current) => {
+                const arr = Array.isArray(current) ? current : [];
+                if (arr.length >= 10) return; // abort — already full
+                return [...arr, newMutIndex];
             });
         }
 
@@ -14871,24 +14918,45 @@
                 const stockSnap = await get(ref(db, 'system/packs/stockAllocations'));
                 const liveStock = stockSnap.val() || {};
 
-                // Find best affordable pack — only if under inventory cap
+                // ── SET-BY-SET PACK SELECTION ──
+                // ShadowBot completes sets in order: paper → wood → stone → ... → secret.
+                // It only buys packs from the current target set until every card in that
+                // set has been discovered (at least once), then advances to the next set.
+                // If the current set's pack is sold out, it waits — it does NOT skip ahead.
                 const canBuyPack = cardCount < SHADOWBOT_MAX_INVENTORY;
                 let chosenPack = null;
                 if (canBuyPack) {
-                    const affordablePacks = PACK_TYPES.filter(p =>
-                        PACK_METADATA[p].price <= botMoney && (liveStock[p] || 0) > 0
-                    );
-                    if (affordablePacks.length > 0) {
-                        // Learning-adjusted pack selection: brain prefers mid-tier but shifts toward
-                        // higher tiers if sell profit history shows mutations add more value on rarer cards
-                        const avgProfit = shadowbotState.brain.sells.profitHistory.length >= 5
-                            ? shadowbotState.brain.sells.profitHistory.slice(-10).reduce((a, b) => a + b, 0) / Math.min(10, shadowbotState.brain.sells.profitHistory.length)
-                            : 0.05;
-                        // High profit history → be bolder, pick higher tier (upper 40%)
-                        // Low profit history → stay conservative, pick lower-mid (lower 40%)
-                        const bias = avgProfit > 0.08 ? 0.6 : 0.4;
-                        const midIdx = Math.floor(affordablePacks.length * bias + Math.random() * affordablePacks.length * 0.3);
-                        chosenPack = affordablePacks[Math.min(midIdx, affordablePacks.length - 1)];
+                    const botDiscovered = (shadowbotState.data || {}).discovered || {};
+
+                    // Determine which set the bot should be working on right now
+                    let targetSet = null;
+                    for (const setName of PACK_TYPES) {
+                        const setCards = GAME_REGISTRY[setName] || [];
+                        if (setCards.length === 0) continue; // skip empty sets
+                        const allDiscovered = setCards.every(card => !!botDiscovered[card.id]);
+                        if (!allDiscovered) {
+                            targetSet = setName;
+                            break; // found the first incomplete set
+                        }
+                    }
+
+                    if (targetSet !== null) {
+                        // Only buy from the target set if affordable and in stock
+                        const price = PACK_METADATA[targetSet]?.price || Infinity;
+                        const stock = liveStock[targetSet] || 0;
+                        if (price <= botMoney && stock > 0) {
+                            chosenPack = targetSet;
+                        }
+                        // If sold out or can't afford yet, chosenPack stays null — bot waits
+                        const remaining = (GAME_REGISTRY[targetSet] || []).filter(c => !botDiscovered[c.id]).length;
+                        console.log(`[ShadowBot] Set progress → ${targetSet.toUpperCase()} (${remaining} cards left) | Stock: ${stock} | Can buy: ${chosenPack !== null}`);
+                    } else {
+                        // All sets complete — buy secret packs freely as a reward loop
+                        const secretPrice = PACK_METADATA['secret']?.price || Infinity;
+                        if (secretPrice <= botMoney && (liveStock['secret'] || 0) > 0) {
+                            chosenPack = 'secret';
+                        }
+                        console.log('[ShadowBot] ALL SETS COMPLETE — farming secret packs');
                     }
                 }
 
@@ -16011,7 +16079,7 @@ or
     </script>
     <div
         style="position: fixed; top: 12px; left: 12px; z-index: 9999999999999; color: rgba(255, 255, 255, 0.4); font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
-        V:9.9
+        V:10.0
     </div>
 </body>
 
