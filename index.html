@@ -10057,6 +10057,10 @@
 
             operationsPayloadBatch[`users/${activeUserSession.uid}/lastPackPurchaseTimestamp`] = currentTimestampMarker;
 
+            // Decrement pack stock by 1
+            const currentStock = sharedGlobalPacks.stockAllocations[packKey] || 0;
+            operationsPayloadBatch[`system/packs/stockAllocations/${packKey}`] = Math.max(0, currentStock - 1);
+
             const newCardGeneratedInstanceUid = push(ref(db, `inventory/${activeUserSession.uid}`)).key;
             operationsPayloadBatch[`inventory/${activeUserSession.uid}/${newCardGeneratedInstanceUid}`] = {
                 instanceId: newCardGeneratedInstanceUid,
