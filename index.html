@@ -199,6 +199,13 @@
             font-weight: 600;
         }
 
+        .playtime-badge {
+            font-size: 0.72rem;
+            color: #7dd3fc;
+            font-weight: 600;
+            opacity: 0.85;
+        }
+
         .currency-display {
             font-size: 1.2rem;
             font-weight: 800;
@@ -6928,6 +6935,7 @@
                         </div>
                         <span class="title-chip" id="hud-title">Rookie</span>
                         <span class="streak-badge" id="hud-streak">🔥 Daily Streak: 0 days</span>
+                        <span class="playtime-badge" id="hud-playtime">⏱ Today: 0m</span>
                     </div>
                 </div>
                 <div class="hud-right-col">
@@ -18792,7 +18800,7 @@ Respond with ONLY the chat message text — no JSON, no labels, no quotes, just 
                              from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
     (function() {
-        const TRACKS      = ['1.mp3', '2.mp3', '3.mp3'];
+        const TRACKS      = ['1.mp3', '2.mp3', '3.mp3', '4.mp3', '5.mp3']; // must match server-stored filenames
         const TRACK_NAMES = ['Track 1', 'Track 2', 'Track 3'];
 
         // How far (seconds) we allow the local position to drift before we
@@ -18993,6 +19001,86 @@ Respond with ONLY the chat message text — no JSON, no labels, no quotes, just 
         };
 
         document.addEventListener('DOMContentLoaded', updateToggleBtn);
+    })();
+    </script>
+
+    <script>
+    // ── DAILY PLAYTIME TRACKER ─────────────────────────────────────────────
+    (function() {
+        const STORE_KEY   = 'realm_playtime_v1'; // { date: 'YYYY-MM-DD', seconds: N }
+        let sessionStart  = null;   // Date.now() when session began
+        let tickTimer     = null;
+
+        function todayStr() {
+            const d = new Date();
+            return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        }
+
+        function loadRecord() {
+            try {
+                const raw = localStorage.getItem(STORE_KEY);
+                if (raw) {
+                    const rec = JSON.parse(raw);
+                    if (rec.date === todayStr()) return rec;
+                }
+            } catch(e) {}
+            return { date: todayStr(), seconds: 0 };
+        }
+
+        function saveRecord(rec) {
+            try { localStorage.setItem(STORE_KEY, JSON.stringify(rec)); } catch(e) {}
+        }
+
+        function formatPlaytime(totalSeconds) {
+            const h = Math.floor(totalSeconds / 3600);
+            const m = Math.floor((totalSeconds % 3600) / 60);
+            if (h > 0) return `⏱ Today: ${h}h ${m}m`;
+            return `⏱ Today: ${m}m`;
+        }
+
+        function updateBadge() {
+            const el = document.getElementById('hud-playtime');
+            if (!el) return;
+            const rec = loadRecord();
+            const sessionSecs = sessionStart ? Math.floor((Date.now() - sessionStart) / 1000) : 0;
+            el.textContent = formatPlaytime(rec.seconds + sessionSecs);
+        }
+
+        function flushSession() {
+            if (!sessionStart) return;
+            const rec = loadRecord();
+            rec.seconds += Math.floor((Date.now() - sessionStart) / 1000);
+            rec.date = todayStr(); // in case midnight rolled over mid-session
+            saveRecord(rec);
+            sessionStart = Date.now(); // reset so next flush doesn't double-count
+        }
+
+        function startTracking() {
+            if (sessionStart) return; // already running
+            sessionStart = Date.now();
+            updateBadge();
+            // Update badge every 60 seconds; flush accumulated seconds every 5 min
+            tickTimer = setInterval(() => {
+                updateBadge();
+            }, 60000);
+            setInterval(flushSession, 5 * 60 * 1000);
+        }
+
+        // Flush when tab loses focus or closes
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) flushSession();
+        });
+        window.addEventListener('beforeunload', flushSession);
+
+        // Start tracking when the user enters the realm (presence activates)
+        const _origActivate = window._activatePresence;
+        window._activatePresence = function() {
+            if (_origActivate) _origActivate();
+            startTracking();
+        };
+
+        // Also update badge immediately on DOMContentLoaded (shows stored time)
+        document.addEventListener('DOMContentLoaded', updateBadge);
     })();
     </script>
 
