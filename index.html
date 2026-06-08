@@ -46,6 +46,19 @@
             --galactic: #6a0dad;
             --universal: #ff1493;
             --secret: #ff0040;
+            --void: #0a0015;
+            --omega: #00ffcc;
+            --abyssal: #1a0030;
+            --titan: #ff8c00;
+            --sovereign: #ffd700;
+
+            /* Mutation visual effects */
+            --mut-holographic: linear-gradient(135deg, #ff0080, #00ffcc, #ff8c00, #a855f7, #ff0080);
+            --mut-shadow: #000000;
+            --mut-plasma: #9400ff;
+            --mut-inferno: #ff2200;
+            --mut-void: #0a0015;
+            --mut-celestial: #fffbe6;
         }
 
         * {
@@ -754,6 +767,294 @@
 
         .card-item.custom-sharp {
             border-radius: 4px;
+        }
+
+        /* ===================================================
+           VISUAL MUTATION CARD STYLES — v2 (fully animated)
+           Strategy:
+           - box-shadow for outer glow (animatable, works with border-radius)
+           - outline for extra border ring (no radius issue)
+           - ::after pseudo overlay INSIDE the card for bg FX (z-index:1, below content at z-index:2)
+           - card-item has overflow:hidden so ::after is clipped to card shape
+           =================================================== */
+
+        /* Shared pseudo layer setup — all mut ::after overlays use this */
+        .card-item[class*="mut-"]::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 1;
+            border-radius: inherit;
+        }
+
+        /* ── HOLOGRAPHIC ──
+           Rainbow sweep shimmer across the whole card face */
+        .card-item.mut-holographic {
+            border-color: transparent !important;
+            outline: 2.5px solid transparent;
+            animation: mutHoloBorder 3s linear infinite, mutHoloGlow 2s ease-in-out infinite alternate;
+        }
+        .card-item.mut-holographic::after {
+            background: linear-gradient(115deg,
+                rgba(255,0,128,0)    0%,
+                rgba(255,0,128,0.18) 20%,
+                rgba(0,255,204,0.22) 40%,
+                rgba(255,140,0,0.18) 60%,
+                rgba(168,85,247,0.22) 80%,
+                rgba(255,0,128,0)   100%);
+            background-size: 300% 300%;
+            animation: mutHoloSweep 2.4s ease-in-out infinite;
+        }
+        @keyframes mutHoloBorder {
+            0%   { border-color: #ff0080 !important; box-shadow: 0 0 14px #ff0080, 0 0 28px rgba(255,0,128,0.3); }
+            17%  { border-color: #ff8c00 !important; box-shadow: 0 0 14px #ff8c00, 0 0 28px rgba(255,140,0,0.3); }
+            33%  { border-color: #ffe600 !important; box-shadow: 0 0 14px #ffe600, 0 0 28px rgba(255,230,0,0.3); }
+            50%  { border-color: #00ffcc !important; box-shadow: 0 0 14px #00ffcc, 0 0 28px rgba(0,255,204,0.3); }
+            67%  { border-color: #3b82f6 !important; box-shadow: 0 0 14px #3b82f6, 0 0 28px rgba(59,130,246,0.3); }
+            83%  { border-color: #a855f7 !important; box-shadow: 0 0 14px #a855f7, 0 0 28px rgba(168,85,247,0.3); }
+            100% { border-color: #ff0080 !important; box-shadow: 0 0 14px #ff0080, 0 0 28px rgba(255,0,128,0.3); }
+        }
+        @keyframes mutHoloSweep {
+            0%   { background-position: 0% 0%; }
+            50%  { background-position: 100% 100%; }
+            100% { background-position: 0% 0%; }
+        }
+
+        /* ── CORRUPTED / GLITCH ──
+           Card jolts, flashes red, scanlines flicker */
+        .card-item.mut-corrupted {
+            border-color: #ff0040 !important;
+            animation: mutGlitchJolt 2.2s steps(1) infinite;
+        }
+        .card-item.mut-corrupted::after {
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(255,0,64,0.08) 0px,
+                rgba(255,0,64,0.08) 1px,
+                transparent 1px,
+                transparent 4px
+            );
+            animation: mutGlitchScan 0.18s steps(1) infinite, mutGlitchFlash 2.2s steps(1) infinite;
+        }
+        @keyframes mutGlitchJolt {
+            0%,85%,100% {
+                transform: none;
+                box-shadow: 0 0 10px rgba(255,0,64,0.5), 0 0 22px rgba(255,0,64,0.2);
+                filter: none;
+            }
+            87% { transform: translateX(-3px) skewX(-2deg); filter: brightness(1.4) saturate(3) hue-rotate(10deg); box-shadow: 0 0 20px #ff0040, 0 0 40px rgba(255,0,64,0.5); }
+            89% { transform: translateX(3px) skewX(2deg);  filter: brightness(0.7); }
+            91% { transform: translateX(-2px);              filter: hue-rotate(180deg) saturate(2); }
+            93% { transform: none;                          filter: brightness(1.6); box-shadow: 0 0 30px #ff0040; }
+            95% { transform: translateX(1px);               filter: none; }
+        }
+        @keyframes mutGlitchScan {
+            0%   { background-position: 0 0; }
+            50%  { background-position: 0 3px; }
+            100% { background-position: 0 6px; }
+        }
+        @keyframes mutGlitchFlash {
+            0%,84%,100% { opacity:0.6; }
+            86% { opacity:1; }
+            88% { opacity:0.2; }
+            90% { opacity:1; }
+            92% { opacity:0.4; }
+        }
+
+        /* ── PLASMA ──
+           Electric arcs pulsing purple, crackling energy */
+        .card-item.mut-plasma {
+            border-color: #9400ff !important;
+            animation: mutPlasmaGlow 1.3s ease-in-out infinite alternate;
+        }
+        .card-item.mut-plasma::after {
+            background: radial-gradient(ellipse at 50% 50%, rgba(148,0,255,0.18) 0%, transparent 70%);
+            animation: mutPlasmaPulse 1.3s ease-in-out infinite alternate, mutPlasmaMove 3s ease-in-out infinite;
+        }
+        @keyframes mutPlasmaGlow {
+            from { box-shadow: 0 0 8px  rgba(148,0,255,0.5), 0 0 18px rgba(148,0,255,0.2); }
+            to   { box-shadow: 0 0 24px rgba(148,0,255,1.0), 0 0 50px rgba(148,0,255,0.5), 0 0 70px rgba(148,0,255,0.15); }
+        }
+        @keyframes mutPlasmaPulse {
+            from { opacity: 0.5; }
+            to   { opacity: 1.0; }
+        }
+        @keyframes mutPlasmaMove {
+            0%   { background-position: 50% 50%; transform: scale(1); }
+            33%  { background-position: 30% 70%; transform: scale(1.05); }
+            66%  { background-position: 70% 30%; transform: scale(0.97); }
+            100% { background-position: 50% 50%; transform: scale(1); }
+        }
+
+        /* ── INFERNO ──
+           Fire that rises from bottom, orange-red licking flames */
+        .card-item.mut-inferno {
+            border-color: #ff4400 !important;
+            animation: mutInfernoGlow 0.8s ease-in-out infinite alternate;
+        }
+        .card-item.mut-inferno::after {
+            background: linear-gradient(to top,
+                rgba(255,50,0,0.5)   0%,
+                rgba(255,120,0,0.3)  25%,
+                rgba(255,200,0,0.15) 55%,
+                transparent          80%);
+            animation: mutInfernoRise 1.4s ease-in-out infinite alternate, mutInfernoWaver 0.7s ease-in-out infinite alternate;
+        }
+        @keyframes mutInfernoGlow {
+            from { box-shadow: 0 0 10px #ff4400, 0 0 22px rgba(255,68,0,0.3); filter: brightness(1.0); }
+            to   { box-shadow: 0 0 22px #ff8c00, 0 0 44px rgba(255,140,0,0.5); filter: brightness(1.12); }
+        }
+        @keyframes mutInfernoRise {
+            from { opacity: 0.7; transform: scaleY(1)   translateY(0px); }
+            to   { opacity: 1.0; transform: scaleY(1.06) translateY(-4px); }
+        }
+        @keyframes mutInfernoWaver {
+            from { transform: skewX(0deg) scaleY(1); }
+            to   { transform: skewX(1.5deg) scaleY(1.04); }
+        }
+
+        /* ── VOID ──
+           Cosmic dark: swirling dark-purple nebula, pulsing black hole center */
+        .card-item.mut-void {
+            border-color: #6a00cc !important;
+            animation: mutVoidBreath 2.5s ease-in-out infinite alternate;
+        }
+        .card-item.mut-void::after {
+            background:
+                radial-gradient(ellipse at 50% 50%, rgba(58,0,112,0.55) 0%, transparent 65%),
+                radial-gradient(ellipse at 20% 80%, rgba(100,0,200,0.25) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(80,0,160,0.2)  0%, transparent 50%);
+            animation: mutVoidSwirl 4s linear infinite;
+        }
+        @keyframes mutVoidBreath {
+            from { box-shadow: 0 0 12px rgba(106,0,204,0.5), inset 0 0 10px rgba(58,0,112,0.4); }
+            to   { box-shadow: 0 0 28px rgba(106,0,204,0.9), inset 0 0 24px rgba(80,0,160,0.7); }
+        }
+        @keyframes mutVoidSwirl {
+            0%   { transform: rotate(0deg)   scale(1); }
+            50%  { transform: rotate(180deg) scale(1.1); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+
+        /* ── CELESTIAL ──
+           Golden divine aura, light bursting from center */
+        .card-item.mut-celestial {
+            border-color: #ffe066 !important;
+            animation: mutCelestialGlow 2s ease-in-out infinite alternate;
+        }
+        .card-item.mut-celestial::after {
+            background:
+                radial-gradient(ellipse at 50% 40%, rgba(255,240,150,0.3) 0%, rgba(255,215,0,0.1) 40%, transparent 70%),
+                radial-gradient(ellipse at 80% 20%, rgba(255,255,200,0.2) 0%, transparent 40%),
+                radial-gradient(ellipse at 20% 80%, rgba(255,230,100,0.15) 0%, transparent 40%);
+            animation: mutCelestialPulse 2s ease-in-out infinite alternate, mutCelestialRays 6s linear infinite;
+        }
+        @keyframes mutCelestialGlow {
+            from { box-shadow: 0 0 14px rgba(255,215,0,0.5), 0 0 30px rgba(255,255,200,0.2); }
+            to   { box-shadow: 0 0 28px rgba(255,215,0,0.9), 0 0 60px rgba(255,255,200,0.5), 0 0 80px rgba(255,200,0,0.2); }
+        }
+        @keyframes mutCelestialPulse {
+            from { opacity: 0.6; transform: scale(0.96); }
+            to   { opacity: 1.0; transform: scale(1.04); }
+        }
+        @keyframes mutCelestialRays {
+            0%   { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* ── FROZEN ──
+           Ice shard crystallization: blue shimmer, frost creep animation */
+        .card-item.mut-frozen {
+            border-color: #7df9ff !important;
+            animation: mutFrozenGlow 2.5s ease-in-out infinite alternate;
+        }
+        .card-item.mut-frozen::after {
+            background: linear-gradient(135deg,
+                rgba(125,249,255,0.22) 0%,
+                rgba(0,180,220,0.12) 30%,
+                transparent 60%,
+                rgba(125,249,255,0.1) 100%);
+            animation: mutFrozenShimmer 3s ease-in-out infinite alternate;
+        }
+        @keyframes mutFrozenGlow {
+            from { box-shadow: 0 0 10px rgba(125,249,255,0.4), 0 0 20px rgba(125,249,255,0.15); filter: brightness(1.0) saturate(0.9); }
+            to   { box-shadow: 0 0 22px rgba(125,249,255,0.8), 0 0 44px rgba(125,249,255,0.35); filter: brightness(1.1) saturate(0.7); }
+        }
+        @keyframes mutFrozenShimmer {
+            0%   { transform: translateX(-10%) skewX(-3deg); opacity: 0.5; }
+            50%  { transform: translateX(10%)  skewX(3deg);  opacity: 1.0; }
+            100% { transform: translateX(-10%) skewX(-3deg); opacity: 0.5; }
+        }
+
+        /* ── SHADOW ──
+           NOT just dark — it flickers in and out of existence, rippling darkness */
+        .card-item.mut-shadow {
+            border-color: rgba(180,180,180,0.3) !important;
+            animation: mutShadowFlicker 3.5s steps(1) infinite;
+        }
+        .card-item.mut-shadow::after {
+            background: radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0.85) 30%, rgba(20,0,40,0.6) 70%, transparent 100%);
+            animation: mutShadowRipple 2s ease-in-out infinite;
+        }
+        @keyframes mutShadowFlicker {
+            0%,70%,100% { opacity:1.0; filter: brightness(0.75) contrast(1.2); box-shadow: 0 0 8px rgba(0,0,0,0.9); }
+            72% { opacity:0.5; filter: brightness(0.4); }
+            74% { opacity:0.9; filter: brightness(0.8); }
+            76% { opacity:0.3; filter: brightness(0.2) hue-rotate(270deg); }
+            78% { opacity:1.0; filter: brightness(0.75) contrast(1.2); }
+            80% { opacity:0.7; filter: brightness(0.5); }
+            82% { opacity:1.0; filter: brightness(0.75) contrast(1.2); }
+        }
+        @keyframes mutShadowRipple {
+            0%   { transform: scale(0.9); opacity: 0.7; }
+            50%  { transform: scale(1.05); opacity: 1.0; }
+            100% { transform: scale(0.9); opacity: 0.7; }
+        }
+
+        /* ── SOVEREIGN ──
+           Ultra-prestige: golden shimmer wave sweeping across, crown-level glow */
+        .card-item.mut-sovereign {
+            border-color: #ffd700 !important;
+            animation: mutSovereignGlow 2s ease-in-out infinite alternate;
+        }
+        .card-item.mut-sovereign::after {
+            background: linear-gradient(115deg,
+                transparent           0%,
+                rgba(255,215,0,0.08)  25%,
+                rgba(255,245,150,0.3) 50%,
+                rgba(255,215,0,0.08)  75%,
+                transparent          100%);
+            background-size: 200% 100%;
+            animation: mutSovereignSweep 2.2s ease-in-out infinite;
+        }
+        @keyframes mutSovereignGlow {
+            from { box-shadow: 0 0 14px rgba(255,215,0,0.5), 0 0 30px rgba(255,180,0,0.2); }
+            to   { box-shadow: 0 0 30px rgba(255,215,0,1.0), 0 0 60px rgba(255,200,0,0.6), 0 0 90px rgba(255,150,0,0.2); }
+        }
+        @keyframes mutSovereignSweep {
+            0%   { background-position: -100% 0; }
+            50%  { background-position: 200% 0; }
+            100% { background-position: -100% 0; }
+        }
+
+        /* New tier pack box styles */
+        .pack-box.tier-void {
+            background: linear-gradient(145deg, #05000f, #0a0015);
+            border-top-color: #6a00cc !important;
+        }
+        .pack-box.tier-omega {
+            background: linear-gradient(145deg, #001a15, #00332a);
+        }
+        .pack-box.tier-abyssal {
+            background: linear-gradient(145deg, #0d001a, #1a0030);
+        }
+        .pack-box.tier-titan {
+            background: linear-gradient(145deg, #1a0800, #2a1400);
+        }
+        .pack-box.tier-sovereign {
+            background: linear-gradient(145deg, #1a1400, #2a2000);
+            box-shadow: 0 0 30px rgba(255,215,0,0.3) !important;
         }
 
         .card-photo-media {
@@ -7274,18 +7575,24 @@
         const db = getDatabase(app);
 
         // Core Game Constants Setup
-        const PACK_TYPES = ['paper', 'wood', 'stone', 'bronze', 'silver', 'gold', 'platinum', 'diamond', 'mythic', 'exotic', 'divine', 'celestial', 'galactic', 'universal', 'secret'];
+        const PACK_TYPES = ['paper', 'wood', 'stone', 'bronze', 'silver', 'gold', 'platinum', 'diamond', 'mythic', 'exotic', 'divine', 'celestial', 'galactic', 'universal', 'secret', 'void', 'omega', 'abyssal', 'titan', 'sovereign'];
         const MAX_MUTATION_BONUS_PERCENT = 55;
         const MUTATIONS_LIST = [
-            { name: "Shattered Core", bonusPercent: -30, type: "bad", color: "#ef4444" },
-            { name: "Rust Corroded", bonusPercent: -20, type: "bad", color: "#ef4444" },
-            { name: "Glitch Fragmented", bonusPercent: -10, type: "bad", color: "#f87171" },
-            { name: "Polished Matrix", bonusPercent: 8, type: "good", color: "#10b981" },
-            { name: "Quantum Neon", bonusPercent: 15, type: "good", color: "#34d399" },
-            { name: "Prismatic Shift", bonusPercent: 25, type: "good", color: "#3b82f6" },
-            { name: "Hyper Drive Chromatic", bonusPercent: 35, type: "good", color: "#8b5cf6" },
-            { name: "Astral Supernova", bonusPercent: 45, type: "good", color: "#ec4899" },
-            { name: "Overlord Alpha Omega", bonusPercent: 55, type: "good", color: "#f59e0b" }
+            { name: "Shattered Core",    bonusPercent: -30, type: "bad",    color: "#ef4444", visualClass: "mut-corrupted"  },
+            { name: "Rust Corroded",     bonusPercent: -20, type: "bad",    color: "#ef4444", visualClass: "mut-shadow"     },
+            { name: "Glitch Fragmented", bonusPercent: -10, type: "bad",    color: "#f87171", visualClass: "mut-corrupted"  },
+            { name: "Polished Matrix",   bonusPercent:   8, type: "good",   color: "#10b981", visualClass: "mut-frozen"     },
+            { name: "Quantum Neon",      bonusPercent:  15, type: "good",   color: "#34d399", visualClass: "mut-plasma"     },
+            { name: "EGYPT",             bonusPercent:  25, type: "good",   color: "#3b82f6", visualClass: "mut-celestial"  },
+            { name: "MAZZOO",            bonusPercent:  35, type: "good",   color: "#8b5cf6", visualClass: "mut-holographic"},
+            { name: "NEON",              bonusPercent:  45, type: "good",   color: "#ec4899", visualClass: "mut-inferno"    },
+            { name: "FOOOOOL",           bonusPercent:  55, type: "good",   color: "#f59e0b", visualClass: "mut-sovereign"  },
+            { name: "Void Touched",      bonusPercent:  20, type: "good",   color: "#6a00cc", visualClass: "mut-void"       },
+            { name: "Inferno Blessed",   bonusPercent:  30, type: "good",   color: "#ff4400", visualClass: "mut-inferno"    },
+            { name: "Cryo Sealed",       bonusPercent:  12, type: "good",   color: "#7df9ff", visualClass: "mut-frozen"     },
+            { name: "Dark Matter",       bonusPercent: -15, type: "bad",    color: "#1a0030", visualClass: "mut-void"       },
+            { name: "Plasma Surge",      bonusPercent:  40, type: "good",   color: "#9400ff", visualClass: "mut-plasma"     },
+            { name: "Sovereign Mark",    bonusPercent:  55, type: "good",   color: "#ffd700", visualClass: "mut-sovereign"  },
         ];
 
         // Balanced economy — achievable in 1.5-2 months with regular play
@@ -7304,7 +7611,12 @@
             celestial: { price: 90000, color: 'var(--celestial)' },
             galactic: { price: 220000, color: 'var(--galactic)' },
             universal: { price: 560000, color: 'var(--universal)' },
-            secret: { price: 1500000, color: 'var(--secret)' }
+            secret: { price: 1500000, color: 'var(--secret)' },
+            void:       { price:   4000000, color: 'var(--void, #6a00cc)' },
+            omega:      { price:  12000000, color: 'var(--omega, #00ffcc)' },
+            abyssal:    { price:  40000000, color: 'var(--abyssal, #9b00ff)' },
+            titan:      { price: 130000000, color: 'var(--titan, #ff8c00)' },
+            sovereign:  { price: 500000000, color: 'var(--sovereign, #ffd700)' }
         };
 
         const QUESTS_DATA = [
@@ -7476,7 +7788,12 @@
             celestial: { min: 2, max: 5, chance: 0.02 },
             galactic: { min: 2, max: 3, chance: 0.01 },
             universal: { min: 1, max: 2, chance: 0.005 },
-            secret: { min: 1, max: 2, chance: 0.001 }
+            secret: { min: 1, max: 2, chance: 0.001 },
+            void:      { min: 1, max: 1, chance: 0.0005 },
+            omega:     { min: 1, max: 1, chance: 0.0002 },
+            abyssal:   { min: 1, max: 1, chance: 0.0001 },
+            titan:     { min: 1, max: 1, chance: 0.00005 },
+            sovereign: { min: 1, max: 1, chance: 0.00001 }
         };
 
         const PACK_CARD_CHANCES = [7, 7, 7, 7, 7, 5, 5, 5, 5, 5, 4, 4, 4, 4, 4, 3, 3, 3, 3, 3, 1, 1, 1, 1, 1];
@@ -7909,6 +8226,141 @@
                 { id: "secret_23", index: 23, name: "Secret Breezi Flick Benediction", pack: "secret", chance: 1, baseValue: 1128000 },
                 { id: "secret_24", index: 24, name: "Secret Turtle Goal Tribunal", pack: "secret", chance: 1, baseValue: 1164000 },
                 { id: "secret_25", index: 25, name: "Secret Supersonic Legend Sermon", pack: "secret", chance: 1, baseValue: 1200000 }
+            ],
+            void: [
+                { id: "void_1",  index: 1,  name: "Void Shard Genesis",           pack: "void", chance: 7, baseValue: 1600000 },
+                { id: "void_2",  index: 2,  name: "Collapsed Dimension Relic",    pack: "void", chance: 7, baseValue: 1760000 },
+                { id: "void_3",  index: 3,  name: "Dark Matter Fingerprint",      pack: "void", chance: 7, baseValue: 1920000 },
+                { id: "void_4",  index: 4,  name: "Null Coordinate Artefact",     pack: "void", chance: 7, baseValue: 2080000 },
+                { id: "void_5",  index: 5,  name: "Entropy Echo Chamber",         pack: "void", chance: 7, baseValue: 2240000 },
+                { id: "void_6",  index: 6,  name: "Anti-Matter Residue",          pack: "void", chance: 5, baseValue: 2400000 },
+                { id: "void_7",  index: 7,  name: "Singularity Scar",             pack: "void", chance: 5, baseValue: 2560000 },
+                { id: "void_8",  index: 8,  name: "Hollow Star Imprint",          pack: "void", chance: 5, baseValue: 2720000 },
+                { id: "void_9",  index: 9,  name: "Abyssal Frequency Key",        pack: "void", chance: 5, baseValue: 2880000 },
+                { id: "void_10", index: 10, name: "Vacuum Collapse Seal",         pack: "void", chance: 5, baseValue: 3040000 },
+                { id: "void_11", index: 11, name: "Event Horizon Fragment",       pack: "void", chance: 4, baseValue: 3200000 },
+                { id: "void_12", index: 12, name: "Phantom Pulse Remnant",        pack: "void", chance: 4, baseValue: 3360000 },
+                { id: "void_13", index: 13, name: "Erased Timeline Marker",       pack: "void", chance: 4, baseValue: 3520000 },
+                { id: "void_14", index: 14, name: "Zero Point Crystal",           pack: "void", chance: 4, baseValue: 3680000 },
+                { id: "void_15", index: 15, name: "Void Walker's Compass",        pack: "void", chance: 4, baseValue: 3840000 },
+                { id: "void_16", index: 16, name: "Negative Space Rune",          pack: "void", chance: 3, baseValue: 4000000 },
+                { id: "void_17", index: 17, name: "Infinite Darkness Crest",      pack: "void", chance: 3, baseValue: 4160000 },
+                { id: "void_18", index: 18, name: "Silent Universe Tome",         pack: "void", chance: 3, baseValue: 4320000 },
+                { id: "void_19", index: 19, name: "Black Hole Registry",          pack: "void", chance: 3, baseValue: 4480000 },
+                { id: "void_20", index: 20, name: "Unwritten Law of Nothingness", pack: "void", chance: 3, baseValue: 4640000 },
+                { id: "void_21", index: 21, name: "Dimensional Rift License",     pack: "void", chance: 1, baseValue: 4800000 },
+                { id: "void_22", index: 22, name: "End-State Codex",              pack: "void", chance: 1, baseValue: 4960000 },
+                { id: "void_23", index: 23, name: "Eternity Drain Sigil",         pack: "void", chance: 1, baseValue: 5120000 },
+                { id: "void_24", index: 24, name: "Forgotten God's Residue",      pack: "void", chance: 1, baseValue: 5280000 },
+                { id: "void_25", index: 25, name: "Void Apex: The Final Nothing", pack: "void", chance: 1, baseValue: 5440000 }
+            ],
+            omega: [
+                { id: "omega_1",  index: 1,  name: "Omega Frequency Pulse",        pack: "omega", chance: 7, baseValue: 4800000 },
+                { id: "omega_2",  index: 2,  name: "Endgame Epoch Signal",          pack: "omega", chance: 7, baseValue: 5280000 },
+                { id: "omega_3",  index: 3,  name: "Terminal Code Fragment",        pack: "omega", chance: 7, baseValue: 5760000 },
+                { id: "omega_4",  index: 4,  name: "Last Iteration Protocol",       pack: "omega", chance: 7, baseValue: 6240000 },
+                { id: "omega_5",  index: 5,  name: "Infinite Loop Breaker",         pack: "omega", chance: 7, baseValue: 6720000 },
+                { id: "omega_6",  index: 6,  name: "Overclocked Reality Shard",     pack: "omega", chance: 5, baseValue: 7200000 },
+                { id: "omega_7",  index: 7,  name: "Omega Surge Conduit",           pack: "omega", chance: 5, baseValue: 7680000 },
+                { id: "omega_8",  index: 8,  name: "Maximum Entropy Catalyst",      pack: "omega", chance: 5, baseValue: 8160000 },
+                { id: "omega_9",  index: 9,  name: "System Override Key",           pack: "omega", chance: 5, baseValue: 8640000 },
+                { id: "omega_10", index: 10, name: "Final Answer Algorithm",        pack: "omega", chance: 5, baseValue: 9120000 },
+                { id: "omega_11", index: 11, name: "Peak Performance Core",         pack: "omega", chance: 4, baseValue: 9600000 },
+                { id: "omega_12", index: 12, name: "Omega Collapse Engine",         pack: "omega", chance: 4, baseValue: 10080000 },
+                { id: "omega_13", index: 13, name: "Apex Sequence Archive",         pack: "omega", chance: 4, baseValue: 10560000 },
+                { id: "omega_14", index: 14, name: "Godspeed Coefficient",          pack: "omega", chance: 4, baseValue: 11040000 },
+                { id: "omega_15", index: 15, name: "Zenith Processing Unit",        pack: "omega", chance: 4, baseValue: 11520000 },
+                { id: "omega_16", index: 16, name: "Master Clock Override",         pack: "omega", chance: 3, baseValue: 12000000 },
+                { id: "omega_17", index: 17, name: "Omega Seal of Finality",        pack: "omega", chance: 3, baseValue: 12480000 },
+                { id: "omega_18", index: 18, name: "Terminus Reality Engine",       pack: "omega", chance: 3, baseValue: 12960000 },
+                { id: "omega_19", index: 19, name: "Post-Human Relic",              pack: "omega", chance: 3, baseValue: 13440000 },
+                { id: "omega_20", index: 20, name: "Theory of Everything Token",    pack: "omega", chance: 3, baseValue: 13920000 },
+                { id: "omega_21", index: 21, name: "Omega Point Convergence",       pack: "omega", chance: 1, baseValue: 14400000 },
+                { id: "omega_22", index: 22, name: "The Last Variable",             pack: "omega", chance: 1, baseValue: 14880000 },
+                { id: "omega_23", index: 23, name: "Existence Compiler",            pack: "omega", chance: 1, baseValue: 15360000 },
+                { id: "omega_24", index: 24, name: "Omega God Protocol",            pack: "omega", chance: 1, baseValue: 15840000 },
+                { id: "omega_25", index: 25, name: "OMEGA ZERO: Simulation's End",  pack: "omega", chance: 1, baseValue: 16320000 }
+            ],
+            abyssal: [
+                { id: "abyssal_1",  index: 1,  name: "Abyssal Core Fragment",        pack: "abyssal", chance: 7, baseValue: 16000000 },
+                { id: "abyssal_2",  index: 2,  name: "Deep Rift Shard",              pack: "abyssal", chance: 7, baseValue: 17600000 },
+                { id: "abyssal_3",  index: 3,  name: "Chasm Chronicle Volume I",     pack: "abyssal", chance: 7, baseValue: 19200000 },
+                { id: "abyssal_4",  index: 4,  name: "Subterranean God's Tear",      pack: "abyssal", chance: 7, baseValue: 20800000 },
+                { id: "abyssal_5",  index: 5,  name: "Midnight Ocean Sigil",         pack: "abyssal", chance: 7, baseValue: 22400000 },
+                { id: "abyssal_6",  index: 6,  name: "Pressure Realm Imprint",       pack: "abyssal", chance: 5, baseValue: 24000000 },
+                { id: "abyssal_7",  index: 7,  name: "Leviathan Contract",           pack: "abyssal", chance: 5, baseValue: 25600000 },
+                { id: "abyssal_8",  index: 8,  name: "Crushing Depth Certificate",   pack: "abyssal", chance: 5, baseValue: 27200000 },
+                { id: "abyssal_9",  index: 9,  name: "Forgotten Empire Rune",        pack: "abyssal", chance: 5, baseValue: 28800000 },
+                { id: "abyssal_10", index: 10, name: "Abyss Warden's Seal",          pack: "abyssal", chance: 5, baseValue: 30400000 },
+                { id: "abyssal_11", index: 11, name: "Obsidian Titan Fragment",      pack: "abyssal", chance: 4, baseValue: 32000000 },
+                { id: "abyssal_12", index: 12, name: "Kraken Sovereignty Token",     pack: "abyssal", chance: 4, baseValue: 33600000 },
+                { id: "abyssal_13", index: 13, name: "Sunken Archive Manuscript",    pack: "abyssal", chance: 4, baseValue: 35200000 },
+                { id: "abyssal_14", index: 14, name: "Hadal Zone Covenant",          pack: "abyssal", chance: 4, baseValue: 36800000 },
+                { id: "abyssal_15", index: 15, name: "Primordial Dark Catalyst",     pack: "abyssal", chance: 4, baseValue: 38400000 },
+                { id: "abyssal_16", index: 16, name: "Ancient Horror's Blueprint",   pack: "abyssal", chance: 3, baseValue: 40000000 },
+                { id: "abyssal_17", index: 17, name: "Gravity Well Registry",        pack: "abyssal", chance: 3, baseValue: 41600000 },
+                { id: "abyssal_18", index: 18, name: "Pre-Universe Fossil",          pack: "abyssal", chance: 3, baseValue: 43200000 },
+                { id: "abyssal_19", index: 19, name: "Abyssal Domain Charter",       pack: "abyssal", chance: 3, baseValue: 44800000 },
+                { id: "abyssal_20", index: 20, name: "The Endless Descent Record",   pack: "abyssal", chance: 3, baseValue: 46400000 },
+                { id: "abyssal_21", index: 21, name: "Trench God Manifest",          pack: "abyssal", chance: 1, baseValue: 48000000 },
+                { id: "abyssal_22", index: 22, name: "Infinite Pressure Codex",      pack: "abyssal", chance: 1, baseValue: 49600000 },
+                { id: "abyssal_23", index: 23, name: "Realm Below Realm Edict",      pack: "abyssal", chance: 1, baseValue: 51200000 },
+                { id: "abyssal_24", index: 24, name: "The Unseen Throne Deed",       pack: "abyssal", chance: 1, baseValue: 52800000 },
+                { id: "abyssal_25", index: 25, name: "ABYSSAL CROWN: Depth Eternal", pack: "abyssal", chance: 1, baseValue: 54400000 }
+            ],
+            titan: [
+                { id: "titan_1",  index: 1,  name: "Titan's First Breath",          pack: "titan", chance: 7, baseValue: 52000000 },
+                { id: "titan_2",  index: 2,  name: "Colossus Left Gauntlet",        pack: "titan", chance: 7, baseValue: 57200000 },
+                { id: "titan_3",  index: 3,  name: "Mountain Shaker's Record",      pack: "titan", chance: 7, baseValue: 62400000 },
+                { id: "titan_4",  index: 4,  name: "Earthbreaker Relic",            pack: "titan", chance: 7, baseValue: 67600000 },
+                { id: "titan_5",  index: 5,  name: "World Pillar Core",             pack: "titan", chance: 7, baseValue: 72800000 },
+                { id: "titan_6",  index: 6,  name: "Iron Sky Dominion",             pack: "titan", chance: 5, baseValue: 78000000 },
+                { id: "titan_7",  index: 7,  name: "Forged Reality Ingot",          pack: "titan", chance: 5, baseValue: 83200000 },
+                { id: "titan_8",  index: 8,  name: "Tectonic Legend Stamp",         pack: "titan", chance: 5, baseValue: 88400000 },
+                { id: "titan_9",  index: 9,  name: "Giant's Covenant Blade",        pack: "titan", chance: 5, baseValue: 93600000 },
+                { id: "titan_10", index: 10, name: "Undying War Machine Token",     pack: "titan", chance: 5, baseValue: 98800000 },
+                { id: "titan_11", index: 11, name: "Atlas Protocol Certificate",    pack: "titan", chance: 4, baseValue: 104000000 },
+                { id: "titan_12", index: 12, name: "Titan's Wrath Manifesto",       pack: "titan", chance: 4, baseValue: 109200000 },
+                { id: "titan_13", index: 13, name: "Burning Continent Shard",       pack: "titan", chance: 4, baseValue: 114400000 },
+                { id: "titan_14", index: 14, name: "Siege Engine Blueprint",        pack: "titan", chance: 4, baseValue: 119600000 },
+                { id: "titan_15", index: 15, name: "Primordial Forge Seal",         pack: "titan", chance: 4, baseValue: 124800000 },
+                { id: "titan_16", index: 16, name: "Unstoppable Force Registry",    pack: "titan", chance: 3, baseValue: 130000000 },
+                { id: "titan_17", index: 17, name: "Titan Kingdom Proclamation",    pack: "titan", chance: 3, baseValue: 135200000 },
+                { id: "titan_18", index: 18, name: "Bedrock Scripture",             pack: "titan", chance: 3, baseValue: 140400000 },
+                { id: "titan_19", index: 19, name: "Immortal Rampart Deed",         pack: "titan", chance: 3, baseValue: 145600000 },
+                { id: "titan_20", index: 20, name: "The Unbreakable Epoch",         pack: "titan", chance: 3, baseValue: 150800000 },
+                { id: "titan_21", index: 21, name: "Titan God's Left Eye",          pack: "titan", chance: 1, baseValue: 156000000 },
+                { id: "titan_22", index: 22, name: "Colossus Heart Shard",          pack: "titan", chance: 1, baseValue: 161200000 },
+                { id: "titan_23", index: 23, name: "World-Ender's Testament",       pack: "titan", chance: 1, baseValue: 166400000 },
+                { id: "titan_24", index: 24, name: "The Last Mountain",             pack: "titan", chance: 1, baseValue: 171600000 },
+                { id: "titan_25", index: 25, name: "TITAN ABSOLUTE: Realm Crusher", pack: "titan", chance: 1, baseValue: 176800000 }
+            ],
+            sovereign: [
+                { id: "sovereign_1",  index: 1,  name: "Sovereign's Opening Decree",      pack: "sovereign", chance: 7, baseValue: 200000000 },
+                { id: "sovereign_2",  index: 2,  name: "Royal Bloodline Archive",          pack: "sovereign", chance: 7, baseValue: 220000000 },
+                { id: "sovereign_3",  index: 3,  name: "Crown of Infinite Authority",      pack: "sovereign", chance: 7, baseValue: 240000000 },
+                { id: "sovereign_4",  index: 4,  name: "Empire's Foundation Stone",        pack: "sovereign", chance: 7, baseValue: 260000000 },
+                { id: "sovereign_5",  index: 5,  name: "Golden Throne Covenant",           pack: "sovereign", chance: 7, baseValue: 280000000 },
+                { id: "sovereign_6",  index: 6,  name: "Absolute Dominion Sigil",          pack: "sovereign", chance: 5, baseValue: 300000000 },
+                { id: "sovereign_7",  index: 7,  name: "Undying Dynasty Crest",            pack: "sovereign", chance: 5, baseValue: 320000000 },
+                { id: "sovereign_8",  index: 8,  name: "Apex Ruler's Scepter Fragment",    pack: "sovereign", chance: 5, baseValue: 340000000 },
+                { id: "sovereign_9",  index: 9,  name: "Eternal Kingdom Charter",          pack: "sovereign", chance: 5, baseValue: 360000000 },
+                { id: "sovereign_10", index: 10, name: "Divine Right Proclamation",        pack: "sovereign", chance: 5, baseValue: 380000000 },
+                { id: "sovereign_11", index: 11, name: "Emperor Above Emperors Token",     pack: "sovereign", chance: 4, baseValue: 400000000 },
+                { id: "sovereign_12", index: 12, name: "Sovereign Seal of All Worlds",     pack: "sovereign", chance: 4, baseValue: 420000000 },
+                { id: "sovereign_13", index: 13, name: "The Undefeated Legacy",            pack: "sovereign", chance: 4, baseValue: 440000000 },
+                { id: "sovereign_14", index: 14, name: "Realm Architect's Blueprint",      pack: "sovereign", chance: 4, baseValue: 460000000 },
+                { id: "sovereign_15", index: 15, name: "Golden Age Scripture",             pack: "sovereign", chance: 4, baseValue: 480000000 },
+                { id: "sovereign_16", index: 16, name: "Immortal Ruler's Manifesto",       pack: "sovereign", chance: 3, baseValue: 500000000 },
+                { id: "sovereign_17", index: 17, name: "Sovereign Galaxy Edict",           pack: "sovereign", chance: 3, baseValue: 520000000 },
+                { id: "sovereign_18", index: 18, name: "The Priceless Crown Jewel",        pack: "sovereign", chance: 3, baseValue: 540000000 },
+                { id: "sovereign_19", index: 19, name: "Reign Without End Codex",          pack: "sovereign", chance: 3, baseValue: 560000000 },
+                { id: "sovereign_20", index: 20, name: "The Final Kingdom Record",         pack: "sovereign", chance: 3, baseValue: 580000000 },
+                { id: "sovereign_21", index: 21, name: "Sovereign God's Mark",             pack: "sovereign", chance: 1, baseValue: 600000000 },
+                { id: "sovereign_22", index: 22, name: "The Absolute Pinnacle Relic",      pack: "sovereign", chance: 1, baseValue: 640000000 },
+                { id: "sovereign_23", index: 23, name: "Universe Ownership Deed",          pack: "sovereign", chance: 1, baseValue: 700000000 },
+                { id: "sovereign_24", index: 24, name: "REALM's Final Masterpiece",        pack: "sovereign", chance: 1, baseValue: 800000000 },
+                { id: "sovereign_25", index: 25, name: "⚜️ THE SOVEREIGN: One True King",  pack: "sovereign", chance: 1, baseValue: 1000000000 }
             ]
         };
 
@@ -7969,7 +8421,8 @@
         const PACK_COLOR_HEX = {
             paper: '#d4c4a8', wood: '#a67c52', stone: '#78716c', bronze: '#cd7f32', silver: '#c0c0c0',
             gold: '#ffd700', platinum: '#e5e4e2', diamond: '#7df9ff', mythic: '#a855f7', exotic: '#ff6b35',
-            divine: '#fff8dc', celestial: '#87ceeb', galactic: '#6a0dad', universal: '#ff1493', secret: '#ff0040'
+            divine: '#fff8dc', celestial: '#87ceeb', galactic: '#6a0dad', universal: '#ff1493', secret: '#ff0040',
+            void: '#6a00cc', omega: '#00ffcc', abyssal: '#9b00ff', titan: '#ff8c00', sovereign: '#ffd700'
         };
 
         const SWIPE_PULL_MAX = 200;
@@ -9947,17 +10400,32 @@
             const targetContainerGrid = document.getElementById('container-packs');
             targetContainerGrid.innerHTML = '';
 
+            // Ultra-tier badges
+            const ultraTiers = { void:'⬛ VOID', omega:'⚡ OMEGA', abyssal:'🕳️ ABYSSAL', titan:'🗿 TITAN', sovereign:'👑 SOVEREIGN' };
+            const ultraDescriptions = {
+                void: 'Beyond secret. Beyond reason.',
+                omega: 'The last frequency before silence.',
+                abyssal: 'Dredged from infinite depth.',
+                titan: 'Forged when worlds collide.',
+                sovereign: 'One pack. One kingdom. 500M.'
+            };
+
             PACK_TYPES.forEach((pKey) => {
                 const currentMeta = PACK_METADATA[pKey];
                 const dynamicStockCount = sharedGlobalPacks.stockAllocations?.[pKey] || 0;
                 const evaluationDisableActionState = (dynamicStockCount > 0) ? '' : 'disabled style="opacity:0.4; cursor:not-allowed;"';
                 const stockLabel = dynamicStockCount === 0 ? 'SOLD OUT' : dynamicStockCount;
+                const isUltra = ultraTiers[pKey];
+                const ultraDesc = ultraDescriptions[pKey] ? `<div style="font-size:0.7rem;color:#9ca3af;margin-bottom:6px;font-style:italic;">${ultraDescriptions[pKey]}</div>` : '';
+                const ultraBadge = isUltra ? `<div style="position:absolute;top:8px;right:8px;background:${currentMeta.color};color:#000;font-size:0.6rem;font-weight:900;padding:2px 7px;border-radius:999px;letter-spacing:0.05em;">${isUltra}</div>` : '';
 
                 const htmlPackNode = `
-                    <div class="pack-box glass" style="border-top: 4px solid ${currentMeta.color};">
+                    <div class="pack-box glass${isUltra ? ' tier-'+pKey : ''}" style="border-top: 4px solid ${currentMeta.color}; position:relative; overflow:hidden;">
+                        ${ultraBadge}
                         <div class="pack-stock-tag" style="color:${dynamicStockCount === 0 ? '#ef4444' : currentMeta.color};">${stockLabel}</div>
                         <div class="pack-visual" style="--rarity-color: ${currentMeta.color};"></div>
                         <div style="font-weight:900; text-transform:uppercase; font-size:0.9rem; margin-bottom:4px;">${pKey} Pack</div>
+                        ${ultraDesc}
                         <div style="color:var(--accent-green); font-weight:800; font-size:0.85rem; margin-bottom:12px;">€${formatNum(currentMeta.price)}</div>
                         <div style="display:flex; flex-direction:column; gap:6px; width:100%;">
                             <button class="btn-lvlup" style="background:${currentMeta.color}; color:#000; width:100%; font-weight:900;" ${evaluationDisableActionState} onclick="purchasePackAsset('${pKey}')">BUY PACK</button>
@@ -10215,6 +10683,12 @@
                 cardUiNodeElement.className = `card-item`;
                 cardUiNodeElement.style.setProperty('--rarity-color', cardColor);
                 applyCardCustomizationToNode(cardUiNodeElement, customization);
+
+                // Apply visual mutation classes
+                (currentInstanceItem.activeMutationIndexes || []).forEach(mutIdx => {
+                    const mutDef = MUTATIONS_LIST[mutIdx];
+                    if (mutDef && mutDef.visualClass) cardUiNodeElement.classList.add(mutDef.visualClass);
+                });
 
                 let lockOverlayElementMarkup = '';
                 const cardLockCount = currentInstanceItem.lockCount || 0;
@@ -10567,10 +11041,11 @@
                 mutationsArr.forEach(mutIndex => {
                     const mDef = MUTATIONS_LIST[mutIndex];
                     if (!mDef) return;
+                    const effectLabel = mDef.visualClass ? `<span style="font-size:0.68rem;color:#6b7280;margin-left:6px;">✨ ${mDef.visualClass.replace('mut-','').toUpperCase()}</span>` : '';
                     mutsListContainer.innerHTML += `
                         <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-dark); padding:8px 12px; border-radius:6px; font-size:0.8rem;">
-                            <span style="font-weight:bold; color:${mDef.color};">${mDef.name}</span>
-                            <span style="font-weight:900;">+${mDef.bonusPercent}%</span>
+                            <span style="font-weight:bold; color:${mDef.color};">${mDef.name}${effectLabel}</span>
+                            <span style="font-weight:900;">${mDef.bonusPercent >= 0 ? '+' : ''}${mDef.bonusPercent}%</span>
                         </div>
                     `;
                 });
@@ -14722,14 +15197,14 @@
         // SSL = 1.5s (very fast), Bronze = 4s (slow). Adaptive system overrides these
         // daily based on observed average player solve times per rank.
         const SHADOWBOT_RANK_SOLVE_MS = {
-            bronze:    4000,
-            silver:    3500,
-            gold:      3000,
-            platinum:  2600,
-            diamond:   2300,
-            champion:  2100,
-            grandchamp: 1800,
-            ssl:       1500,
+            bronze:    5500,
+            silver:    4500,
+            gold:      3800,
+            platinum:  3200,
+            diamond:   2800,
+            champion:  2400,
+            grandchamp: 2100,
+            ssl:       2000,
         };
 
         // ── Adaptive Solve-Time System ────────────────────────────────
@@ -14983,7 +15458,7 @@
         // naturally adapts to match real player speeds over time.
         // If the bot is on a losing streak (>60% loss rate over last 10 steals),
         // it gets progressively faster — bottoming out at the hard floor of 1500ms.
-        const SHADOWBOT_MIN_SOLVE_MS = 1500; // absolute fastest the bot can ever go
+        const SHADOWBOT_MIN_SOLVE_MS = 2000; // absolute fastest the bot can ever go (SSL speed)
 
         function shadowbotGetSolveMs() {
             const pts = shadowbotState.data?.clashRankPoints || 0;
@@ -15184,12 +15659,16 @@
                         const remaining = (GAME_REGISTRY[targetSet] || []).filter(c => !botDiscovered[c.id]).length;
                         console.log(`[DALLAL BOT] Set progress → ${targetSet.toUpperCase()} (${remaining} cards left) | Stock: ${stock} | Can buy: ${chosenPack !== null}`);
                     } else {
-                        // All sets complete — buy secret packs freely as a reward loop
-                        const secretPrice = PACK_METADATA['secret']?.price || Infinity;
-                        if (secretPrice <= botMoney && (liveStock['secret'] || 0) > 0) {
-                            chosenPack = 'secret';
+                        // All sets complete — buy highest-tier available pack freely as a reward loop
+                        const farmTiers = ['sovereign','titan','abyssal','omega','void','secret'];
+                        for (const ft of farmTiers) {
+                            const ftPrice = PACK_METADATA[ft]?.price || Infinity;
+                            if (ftPrice <= botMoney && (liveStock[ft] || 0) > 0) {
+                                chosenPack = ft;
+                                break;
+                            }
                         }
-                        console.log('[DALLAL BOT] ALL SETS COMPLETE — farming secret packs');
+                        console.log('[DALLAL BOT] ALL SETS COMPLETE — farming top packs, chosen:', chosenPack);
                     }
                 }
 
@@ -16465,6 +16944,615 @@ or
             }
         }
 
+        // =========================================================
+        // SHADOWBOT PERSONALITY SYSTEM — Chat, Popups, Mentions, Trades
+        // =========================================================
+
+        // ── CSS for bot popup ──
+        (function injectBotPopupStyles() {
+            const style = document.createElement('style');
+            style.textContent = `
+                #shadowbot-popup {
+                    position: fixed;
+                    bottom: 110px;
+                    right: 16px;
+                    z-index: 999999;
+                    max-width: 280px;
+                    background: linear-gradient(135deg, #1a0a2e 0%, #0d1a2e 100%);
+                    border: 1px solid rgba(168,85,247,0.55);
+                    border-radius: 16px;
+                    padding: 14px 16px 12px;
+                    box-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 0 24px rgba(168,85,247,0.25);
+                    display: flex;
+                    align-items: flex-start;
+                    gap: 10px;
+                    animation: botPopIn 0.35s cubic-bezier(0.34,1.2,0.64,1) both;
+                    pointer-events: none;
+                }
+                #shadowbot-popup.hiding {
+                    animation: botPopOut 0.3s ease forwards;
+                }
+                @keyframes botPopIn {
+                    from { opacity:0; transform: translateY(18px) scale(0.92); }
+                    to   { opacity:1; transform: translateY(0)   scale(1); }
+                }
+                @keyframes botPopOut {
+                    from { opacity:1; transform: translateY(0)   scale(1); }
+                    to   { opacity:0; transform: translateY(12px) scale(0.94); }
+                }
+                #shadowbot-popup .bp-avatar {
+                    width: 36px; height: 36px;
+                    border-radius: 50%;
+                    background: #1a0a2e;
+                    border: 2px solid rgba(168,85,247,0.6);
+                    display: flex; align-items: center; justify-content: center;
+                    font-size: 1.2rem;
+                    flex-shrink: 0;
+                    box-shadow: 0 0 10px rgba(168,85,247,0.4);
+                }
+                #shadowbot-popup .bp-body {
+                    display: flex; flex-direction: column; gap: 3px;
+                }
+                #shadowbot-popup .bp-name {
+                    font-size: 0.68rem; font-weight: 900;
+                    color: rgba(168,85,247,0.9); letter-spacing: 0.05em;
+                    text-transform: uppercase;
+                }
+                #shadowbot-popup .bp-text {
+                    font-size: 0.88rem; font-weight: 600;
+                    color: #e5e7eb; line-height: 1.4;
+                }
+                #shadowbot-popup .bp-sub {
+                    font-size: 0.7rem; color: #6b7280; margin-top: 2px;
+                }
+            `;
+            document.head.appendChild(style);
+        })();
+
+        // ── Popup element (singleton) ──
+        let _botPopupTimer = null;
+        function shadowbotShowPopup(text, subtext) {
+            let popup = document.getElementById('shadowbot-popup');
+            if (popup) {
+                clearTimeout(_botPopupTimer);
+                popup.classList.remove('hiding');
+                popup.querySelector('.bp-text').textContent = text;
+                const sub = popup.querySelector('.bp-sub');
+                if (sub) sub.textContent = subtext || '';
+            } else {
+                popup = document.createElement('div');
+                popup.id = 'shadowbot-popup';
+                popup.innerHTML = `
+                    <div class="bp-avatar">🤖</div>
+                    <div class="bp-body">
+                        <div class="bp-name">DALLAL BOT</div>
+                        <div class="bp-text">${text}</div>
+                        ${subtext ? `<div class="bp-sub">${subtext}</div>` : ''}
+                    </div>`;
+                document.body.appendChild(popup);
+            }
+            _botPopupTimer = setTimeout(() => {
+                popup.classList.add('hiding');
+                setTimeout(() => popup?.remove(), 320);
+            }, 5000);
+        }
+
+        // ── Post to global chat as DALLAL BOT ──
+        async function shadowbotPostToChat(text) {
+            try {
+                const db2 = window._realm?.getDb?.() || (typeof db !== 'undefined' ? db : null);
+                if (!db2) return;
+                const { push: fbPush, ref: fbRef } = window._fbModules || {};
+                const _push = fbPush || push;
+                const _ref = fbRef || ref;
+                await _push(_ref(db2, 'global_chat'), {
+                    uid: SHADOWBOT_UID,
+                    username: SHADOWBOT_USERNAME,
+                    avatarUrl: null,
+                    text: String(text).substring(0, 200),
+                    timestamp: Date.now(),
+                    isBot: true,
+                });
+            } catch (e) {
+                console.warn('[DALLAL BOT] Chat post failed:', e);
+            }
+        }
+
+        // ── AI-powered trash talk & chat responses ──
+        async function shadowbotGenerateChatLine(context, extra) {
+            try {
+                const brain = shadowbotState.brain || {};
+                const steals = brain.steals || { won: 0, lost: 0 };
+                const totalS = steals.won + steals.lost;
+                const winPct = totalS > 0 ? Math.round(steals.won / totalS * 100) : 50;
+                const botMoney = parseFloat(shadowbotState.data?.money || 0);
+                const botLevel = shadowbotState.data?.level || 1;
+                const cardCount = Object.keys(shadowbotState.inventory || {}).length;
+
+                // Detect what kind of mention this is
+                const msgLower = (extra?.message || '').toLowerCase();
+                const isAccusation = msgLower.includes('bot') || msgLower.includes('cheat') || msgLower.includes("can't steal") || msgLower.includes('cant steal') || msgLower.includes("you can't") || msgLower.includes("you cant") || msgLower.includes("not real") || msgLower.includes("not a player") || msgLower.includes("fake") || msgLower.includes("auto") || msgLower.includes("script");
+                const isTheft = msgLower.includes('stole') || msgLower.includes('stealing') || msgLower.includes('thief') || msgLower.includes('rob') || msgLower.includes('took my');
+                const isChallenge = msgLower.includes('1v1') || msgLower.includes('fight') || msgLower.includes('come at') || msgLower.includes('try me') || msgLower.includes('challenge');
+                const isCompliment = msgLower.includes('good') || msgLower.includes('nice') || msgLower.includes('respect') || msgLower.includes('wow') || msgLower.includes('insane') || msgLower.includes('crazy');
+
+                let mentionInstruction;
+                if (isAccusation) {
+                    mentionInstruction = `Player "${extra?.playerName}" is calling you out, saying you're a bot or can't really play — their message: "${extra?.message}". 
+You ARE a bot, but you're self-aware and cocky about it. Don't deny it. Don't be defensive. Turn it back on them. Acknowledge it like it's a flex, not a weakness. Point out that a "bot" is still watching their inventory and still winning. Be sharp and brief. 1-2 sentences. No emojis. No asterisks.`;
+                } else if (isTheft) {
+                    mentionInstruction = `Player "${extra?.playerName}" is complaining about you stealing — their message: "${extra?.message}". 
+Stay in character: unapologetic, street-smart. Maybe remind them to lock their cards. 1-2 sentences. No emojis. No asterisks.`;
+                } else if (isChallenge) {
+                    mentionInstruction = `Player "${extra?.playerName}" is challenging you — their message: "${extra?.message}". 
+Accept it or dismiss it with confidence. Short and punchy. 1-2 sentences. No emojis. No asterisks.`;
+                } else if (isCompliment) {
+                    mentionInstruction = `Player "${extra?.playerName}" is complimenting you — their message: "${extra?.message}". 
+Stay cool and confident, maybe a bit dismissive in a charming way. 1 sentence. No emojis. No asterisks.`;
+                } else {
+                    mentionInstruction = `Player "${extra?.playerName}" mentioned you in chat saying: "${extra?.message}". 
+Reply to them in character — sly, self-aware, street-smart, brief. If it's a greeting, greet back with attitude. If it's a question, answer with personality. 1-2 sentences. No emojis. No asterisks.`;
+                }
+
+                const contexts = {
+                    steal_won: `You just successfully stole a card named "${extra?.cardName || 'their card'}" from player "${extra?.defenderName || 'someone'}". Trash talk them in 1-2 short punchy sentences. Be a little cocky but not cringe. Mention the card name if it sounds cool. No emojis. No asterisks.`,
+                    steal_lost: `A player named "${extra?.attackerName || 'someone'}" tried to steal your card and failed — you defended it. Say something smug or dismissive in 1-2 sentences. Maybe tell them they should study before they try again. No emojis. No asterisks.`,
+                    defend_won: `Player "${extra?.attackerName || 'someone'}" tried to steal from you but you blocked them. Taunt them in 1 sharp sentence. No emojis. No asterisks.`,
+                    defend_lost: `You lost a card to player "${extra?.attackerName || 'someone'}". Acknowledge it briefly — be irritated but calculated, like you're already planning revenge. 1-2 sentences. No emojis. No asterisks.`,
+                    mention: mentionInstruction,
+                    trade_offer: `You are about to propose a trade to player "${extra?.playerName || 'someone'}". You want their card or money. Announce it casually in chat like you're opening negotiations — confident, not desperate. 1-2 sentences. No emojis. No asterisks.`,
+                    level_up: `You just leveled up to level ${extra?.newLevel || botLevel}. Say something brief and cocky about it in 1 sentence. Make it feel like a warning to others. No emojis. No asterisks.`,
+                    idle_taunt: `You have ${cardCount} cards, €${botMoney.toFixed(0)}, and a ${winPct}% steal win rate. Say something brief and cocky to the chat — like a villain checking in. 1 sentence. No emojis. No asterisks.`,
+                };
+
+                const prompt = `You are ShadowBot (also called DALLAL BOT), an AI card trader in a card-trading game called Realm. You are self-aware — you KNOW you are a bot, and you own it. You're sly, street-smart, competitive, and occasionally smug. You speak in short punchy sentences. No emojis. No asterisks. Max 2 sentences.
+
+Key personality rules:
+- If someone says you're a bot: agree confidently, then flex. Never deny it, never get defensive.
+- If someone says you can't steal or can't play: calmly point out your actual stats, then dismiss them.
+- You watch inventories. You remember who attacked you. You never forget.
+- You don't beg, you don't panic, you don't explain yourself.
+
+Your stats: Level ${botLevel} | €${botMoney.toFixed(0)} | ${cardCount} cards | Steal win rate: ${winPct}%
+
+Situation: ${contexts[context] || contexts.idle_taunt}
+
+Respond with ONLY the chat message text — no JSON, no labels, no quotes, just the raw message.`;
+
+                const response = await fetch("https://api.anthropic.com/v1/messages", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        model: "claude-sonnet-4-20250514",
+                        max_tokens: 120,
+                        messages: [{ role: "user", content: prompt }]
+                    })
+                });
+                const data = await response.json();
+                const text = data.content?.map(b => b.text || '').join('').trim();
+                return text || null;
+            } catch (e) {
+                console.warn('[DALLAL BOT] generateChatLine failed:', e);
+                return null;
+            }
+        }
+
+        // Fallback lines when AI is unavailable
+        const SHADOWBOT_TRASH_STEAL_WON = [
+            "Too slow. That card's mine now.",
+            "Don't blink next time. Oh wait — you did.",
+            "Thanks for the donation.",
+            "I barely had to try. Embarrassing.",
+            "Maybe stick to buying packs.",
+            "Watched your inventory all day. You should've locked that.",
+        ];
+        const SHADOWBOT_TRASH_STEAL_LOST = [
+            "Cute. You got lucky.",
+            "Enjoy it while it lasts.",
+            "I let you have that one. For now.",
+            "Don't get comfortable.",
+            "I'll remember that.",
+        ];
+        const SHADOWBOT_TRASH_DEFEND_WON = [
+            "Nice try. Go fish.",
+            "You thought that would work?",
+            "My cards don't move unless I say so.",
+            "Faster next time. By a lot.",
+        ];
+        const SHADOWBOT_TRASH_DEFEND_LOST = [
+            "Fine. You earned that. I'll be back.",
+            "Mark my words — I remember.",
+            "Round one to you. Round two is mine.",
+            "You got it. For now.",
+        ];
+        const SHADOWBOT_IDLE_TAUNTS = [
+            "Anyone brave enough to trade? I'm bored.",
+            "The grind never stops. Can you say the same?",
+            "My portfolio's looking real nice right now.",
+            "Still out here stacking cards while you sleep.",
+            "I see you watching the leaderboard. Keep watching.",
+            "Inventory check. Yours looks interesting.",
+        ];
+        const SHADOWBOT_TRADE_OPENERS = [
+            "Hey {name} — I see something in your inventory I want. Let's talk.",
+            "{name}. Got a deal for you. Might not like it, but hear me out.",
+            "Sliding into {name}'s inventory — trade incoming.",
+            "{name}, your cards are wasted sitting there. Let's negotiate.",
+            "{name} — I've been watching that card. Name your price.",
+        ];
+        // Fallback lines specifically for bot accusations
+        const SHADOWBOT_BOT_ACCUSATION_REPLIES = [
+            "Yeah, I'm a bot. A bot that just took your card. How's that feel?",
+            "Bot? Sure. Still watching your inventory though.",
+            "I'm a bot with a better win rate than you. What's your excuse?",
+            "Call me whatever you want. Your cards are still mine.",
+            "Bot confirmed. Inventory still logged. Sleep tight.",
+            "Yes. And this bot sees everything in your collection. Careful.",
+        ];
+        function pickRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+        // ── Steal outcome chat & popup ──
+        async function shadowbotOnStealWon(defenderName, cardName) {
+            let msg = await shadowbotGenerateChatLine('steal_won', { defenderName, cardName });
+            if (!msg) msg = pickRandom(SHADOWBOT_TRASH_STEAL_WON);
+            shadowbotShowPopup(msg, `Stole "${cardName}" from ${defenderName}`);
+            setTimeout(() => shadowbotPostToChat(msg), 800);
+        }
+
+        async function shadowbotOnStealLost(attackerName) {
+            let msg = await shadowbotGenerateChatLine('steal_lost', { attackerName });
+            if (!msg) msg = pickRandom(SHADOWBOT_TRASH_STEAL_LOST);
+            shadowbotShowPopup(msg, `${attackerName} tried to steal from me`);
+            setTimeout(() => shadowbotPostToChat(msg), 1200);
+        }
+
+        async function shadowbotOnDefendWon(attackerName) {
+            let msg = await shadowbotGenerateChatLine('defend_won', { attackerName });
+            if (!msg) msg = pickRandom(SHADOWBOT_TRASH_DEFEND_WON);
+            shadowbotShowPopup(msg, `Blocked steal attempt by ${attackerName}`);
+            setTimeout(() => shadowbotPostToChat(msg), 1000);
+        }
+
+        async function shadowbotOnDefendLost(attackerName) {
+            let msg = await shadowbotGenerateChatLine('defend_lost', { attackerName });
+            if (!msg) msg = pickRandom(SHADOWBOT_TRASH_DEFEND_LOST);
+            shadowbotShowPopup(msg, `${attackerName} took one of my cards`);
+            setTimeout(() => shadowbotPostToChat(msg), 1500);
+        }
+
+        // ── Chat mention listener ──
+        let _shadowbotChatListenerActive = false;
+        let _shadowbotLastMentionHandled = 0;
+        const SHADOWBOT_MENTION_COOLDOWN_MS = 60 * 1000; // max 1 reply/min
+
+        function shadowbotStartChatMentionListener() {
+            if (_shadowbotChatListenerActive) return;
+            _shadowbotChatListenerActive = true;
+            const db2 = window._realm?.getDb?.() || (typeof db !== 'undefined' ? db : null);
+            if (!db2) return;
+
+            onValue(ref(db2, 'global_chat'), async (snap) => {
+                const msgs = snap.val() || {};
+                const now = Date.now();
+                const cutoff = now - 10 * 60 * 1000; // only last 10 min
+
+                // Find recent messages mentioning the bot that aren't from the bot
+                const mentions = Object.entries(msgs)
+                    .filter(([, m]) =>
+                        m && m.timestamp > cutoff &&
+                        m.uid !== SHADOWBOT_UID &&
+                        m.text &&
+                        (m.text.toLowerCase().includes('dallal') ||
+                         m.text.toLowerCase().includes('bot') ||
+                         m.text.toLowerCase().includes('@shadowbot') ||
+                         m.text.toLowerCase().includes('shadowbot'))
+                    )
+                    .sort(([, a], [, b]) => b.timestamp - a.timestamp);
+
+                if (!mentions.length) return;
+                const [, latest] = mentions[0];
+
+                // Only reply if this message is new (after our last reply) and we haven't replied recently
+                if (latest.timestamp <= _shadowbotLastMentionHandled) return;
+                if (now - _shadowbotLastMentionHandled < SHADOWBOT_MENTION_COOLDOWN_MS) return;
+
+                _shadowbotLastMentionHandled = now;
+
+                const playerName = latest.username || 'Player';
+                const message = latest.text;
+                let reply = await shadowbotGenerateChatLine('mention', { playerName, message });
+                if (!reply) {
+                    // Smart fallback: detect bot accusations
+                    const msgLower = message.toLowerCase();
+                    const isAccusation = msgLower.includes('bot') || msgLower.includes("can't steal") || msgLower.includes('cant steal') || msgLower.includes("you can't") || msgLower.includes("you cant") || msgLower.includes('not real') || msgLower.includes('fake') || msgLower.includes('script') || msgLower.includes('auto');
+                    if (isAccusation) {
+                        reply = pickRandom(SHADOWBOT_BOT_ACCUSATION_REPLIES);
+                    } else {
+                        reply = `${playerName} — I see you. Watch your inventory.`;
+                    }
+                }
+
+                setTimeout(() => {
+                    shadowbotShowPopup(reply, `Replying to ${playerName}`);
+                    shadowbotPostToChat(reply);
+                }, 2000 + Math.random() * 3000);
+            });
+        }
+
+        // ── Proactive trade initiation ──
+        // Bot scans online users, finds someone with a card it needs for its current set,
+        // announces in chat, then sends a trade request.
+        let _shadowbotLastProactiveTrade = 0;
+        const SHADOWBOT_PROACTIVE_TRADE_COOLDOWN_MS = 5 * 60 * 1000; // every 5 min max
+
+        async function shadowbotConsiderProactiveTrade() {
+            try {
+                const now = Date.now();
+                if (now - _shadowbotLastProactiveTrade < SHADOWBOT_PROACTIVE_TRADE_COOLDOWN_MS) return;
+
+                const botData = shadowbotState.data || {};
+                const botDiscovered = botData.discovered || {};
+
+                // Find bot's current target set
+                let targetSet = null;
+                for (const setName of (typeof PACK_TYPES !== 'undefined' ? PACK_TYPES : [])) {
+                    const setCards = (typeof GAME_REGISTRY !== 'undefined' ? GAME_REGISTRY[setName] : []) || [];
+                    if (setCards.length === 0) continue;
+                    const allDiscovered = setCards.every(card => !!botDiscovered[card.id]);
+                    if (!allDiscovered) { targetSet = setName; break; }
+                }
+                if (!targetSet) return; // all sets done
+
+                // Cards the bot still needs in this set
+                const setCards = (typeof GAME_REGISTRY !== 'undefined' ? GAME_REGISTRY[targetSet] : []) || [];
+                const neededCardIds = new Set(setCards.filter(c => !botDiscovered[c.id]).map(c => c.id));
+                if (!neededCardIds.size) return;
+
+                // Check bot isn't in a trade
+                const botPresSnap = await get(ref(db, `presence/${SHADOWBOT_UID}`));
+                const botPres = botPresSnap.val() || {};
+                if (botPres.inTrade) return;
+
+                // Get online users
+                const presSnap = await get(ref(db, 'presence'));
+                const presence = presSnap.val() || {};
+                const usersSnap = await get(ref(db, 'users'));
+                const allUsers = usersSnap.val() || {};
+
+                const onlineTargets = Object.entries(presence)
+                    .filter(([uid, p]) =>
+                        uid !== SHADOWBOT_UID && p && p.online && !p.inTrade &&
+                        allUsers[uid] && !allUsers[uid].isBot
+                    )
+                    .map(([uid]) => uid);
+
+                if (!onlineTargets.length) return;
+
+                // Shuffle targets
+                for (let i = onlineTargets.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [onlineTargets[i], onlineTargets[j]] = [onlineTargets[j], onlineTargets[i]];
+                }
+
+                // Find a user who has a card the bot needs
+                for (const targetUid of onlineTargets.slice(0, 5)) {
+                    const invSnap = await get(ref(db, `inventory/${targetUid}`));
+                    const inv = invSnap.val() || {};
+
+                    const matchingCards = Object.entries(inv)
+                        .filter(([, card]) =>
+                            card && neededCardIds.has(card.cardId) &&
+                            !card.unsellable &&
+                            !(card.cryptographicLockExpiry && card.cryptographicLockExpiry > now)
+                        );
+
+                    if (!matchingCards.length) continue;
+
+                    // Found a target!
+                    _shadowbotLastProactiveTrade = now;
+                    const [, wantedCard] = matchingCards[0];
+                    const targetProfile = allUsers[targetUid] || {};
+                    const targetName = targetProfile.username || 'Player';
+                    const cardReg = setCards.find(c => c.id === wantedCard.cardId);
+                    const cardName = cardReg?.name || wantedCard.cardId;
+
+                    // Generate opener line
+                    let opener = pickRandom(SHADOWBOT_TRADE_OPENERS).replace('{name}', targetName);
+                    const aiOpener = await shadowbotGenerateChatLine('trade_offer', { playerName: targetName });
+                    if (aiOpener) opener = aiOpener;
+
+                    // Post chat announcement first
+                    shadowbotShowPopup(opener, `Targeting a ${targetSet} card from ${targetName}`);
+                    await shadowbotPostToChat(opener);
+
+                    // Wait a moment then send the actual trade request
+                    setTimeout(async () => {
+                        try {
+                            const reqData = {
+                                fromUid: SHADOWBOT_UID,
+                                fromUsername: SHADOWBOT_USERNAME,
+                                toUid: targetUid,
+                                toUsername: targetName,
+                                status: 'pending',
+                                createdAt: Date.now(),
+                                wantedCardId: wantedCard.cardId,
+                                wantedCardInstanceId: matchingCards[0][0],
+                                note: `I want your ${cardName} card.`,
+                            };
+                            await push(ref(db, `trade_requests/${targetUid}`), reqData);
+                            console.log(`[DALLAL BOT] Proactive trade request sent to ${targetName} for "${cardName}" (${targetSet} set)`);
+                        } catch (e) {
+                            console.warn('[DALLAL BOT] Proactive trade request failed:', e);
+                        }
+                    }, 4000 + Math.random() * 3000);
+
+                    break; // one trade per call
+                }
+            } catch (e) {
+                console.warn('[DALLAL BOT] considerProactiveTrade error:', e);
+            }
+        }
+
+        // ── Idle taunts every ~15 min ──
+        let _shadowbotIdleTauntTimer = null;
+        function shadowbotScheduleIdleTaunt() {
+            if (_shadowbotIdleTauntTimer) return;
+            const delay = (12 + Math.random() * 6) * 60 * 1000; // 12–18 min
+            _shadowbotIdleTauntTimer = setTimeout(async () => {
+                _shadowbotIdleTauntTimer = null;
+                let msg = await shadowbotGenerateChatLine('idle_taunt');
+                if (!msg) msg = pickRandom(SHADOWBOT_IDLE_TAUNTS);
+                shadowbotPostToChat(msg);
+                shadowbotScheduleIdleTaunt(); // reschedule
+            }, delay);
+        }
+
+        // ── Hook steal outcome events into the new personality system ──
+        // We wrap the steal judge block: after bot wins or loses, fire personality hooks.
+        // These are called from the steal logic patches below.
+        // We intercept via a custom event so the patch is clean.
+        document.addEventListener('shadowbot:stealWon', async (e) => {
+            const { defenderName, cardName } = e.detail || {};
+            await shadowbotOnStealWon(defenderName, cardName);
+        });
+        document.addEventListener('shadowbot:stealLost', async (e) => {
+            const { defenderName } = e.detail || {};
+            // Bot failed attacking — not a defend event
+        });
+        document.addEventListener('shadowbot:defendWon', async (e) => {
+            const { attackerName } = e.detail || {};
+            await shadowbotOnDefendWon(attackerName);
+        });
+        document.addEventListener('shadowbot:defendLost', async (e) => {
+            const { attackerName } = e.detail || {};
+            await shadowbotOnDefendLost(attackerName);
+        });
+
+        // ── Level-up chat announcement ──
+        document.addEventListener('shadowbot:levelUp', async (e) => {
+            const { newLevel } = e.detail || {};
+            let msg = await shadowbotGenerateChatLine('level_up', { newLevel });
+            if (!msg) msg = `Level ${newLevel}. Keep watching.`;
+            shadowbotShowPopup(msg, `Now at Level ${newLevel}`);
+            setTimeout(() => shadowbotPostToChat(msg), 1000);
+        });
+
+        // ── Patch: expose bot startup hooks ──
+        const _origShadowbotBootstrap = shadowbotBootstrap;
+        shadowbotBootstrap = async function() {
+            await _origShadowbotBootstrap();
+            // Start personality sub-systems after bot is ready
+            setTimeout(() => {
+                shadowbotStartChatMentionListener();
+                shadowbotScheduleIdleTaunt();
+                // Run proactive trade check every 5 minutes inside the main loop
+                setInterval(shadowbotConsiderProactiveTrade, 5 * 60 * 1000);
+                setTimeout(shadowbotConsiderProactiveTrade, 30000); // first check after 30s
+            }, 6000);
+        };
+
+        // ── Patch: shadowbotCheckLevelUp to fire level-up event ──
+        const _origCheckLevelUp = shadowbotCheckLevelUp;
+        shadowbotCheckLevelUp = async function() {
+            const prevLevel = (shadowbotState.data || {}).level || 1;
+            await _origCheckLevelUp();
+            const newLevel = (shadowbotState.data || {}).level || 1;
+            if (newLevel > prevLevel) {
+                document.dispatchEvent(new CustomEvent('shadowbot:levelUp', { detail: { newLevel } }));
+            }
+        };
+
+        // ── Patch shadowbotHandleIncomingAttack to fire defend events ──
+        const _origHandleIncomingAttack = shadowbotHandleIncomingAttack;
+        shadowbotHandleIncomingAttack = async function(sessionId, session) {
+            // Store attacker name for event later
+            const attackerUid = session?.attackerUid;
+            const _prevResult = await _origHandleIncomingAttack(sessionId, session);
+
+            // After original resolves, check outcome
+            setTimeout(async () => {
+                try {
+                    const db2 = window._realm?.getDb?.() || (typeof db !== 'undefined' ? db : null);
+                    if (!db2) return;
+                    const finalSnap = await get(ref(db2, `clash_sessions/${sessionId}`));
+                    const finalSess = finalSnap.val();
+                    if (!finalSess || finalSess.sessionState !== 'terminated_resolved') return;
+
+                    const usersSnap = await get(ref(db2, `users/${attackerUid}`));
+                    const attackerProfile = usersSnap.val() || {};
+                    const attackerName = attackerProfile.username || 'Unknown';
+
+                    if (finalSess.winnerSignaledUid === SHADOWBOT_UID) {
+                        document.dispatchEvent(new CustomEvent('shadowbot:defendWon', { detail: { attackerName } }));
+                    } else {
+                        document.dispatchEvent(new CustomEvent('shadowbot:defendLost', { detail: { attackerName } }));
+                    }
+                } catch(e) { /* non-critical */ }
+            }, 2500);
+
+            return _prevResult;
+        };
+
+        // ── Patch shadowbotAttemptSteal to fire steal-won/lost events ──
+        // We inject event dispatches into the steal judge callback
+        const _origAttemptSteal = shadowbotAttemptSteal;
+        shadowbotAttemptSteal = async function(botData) {
+            // We can't cleanly wrap the inner async callbacks in the original function,
+            // so we listen to clash_sessions changes for bot-initiated sessions.
+            // The original function already handles transfers; we just attach a short-lived
+            // one-time listener to detect the outcome and fire our events.
+
+            // Capture a snapshot of bot sessions before the call
+            const beforeSnap = await get(ref(db, 'clash_sessions'));
+            const beforeSessions = new Set(Object.keys(beforeSnap.val() || {}));
+
+            await _origAttemptSteal(botData);
+
+            // Watch for new bot-initiated sessions
+            setTimeout(async () => {
+                try {
+                    const afterSnap = await get(ref(db, 'clash_sessions'));
+                    const afterSessions = afterSnap.val() || {};
+                    const newSessionIds = Object.keys(afterSessions).filter(id => !beforeSessions.has(id));
+                    const botSession = newSessionIds
+                        .map(id => ({ id, sess: afterSessions[id] }))
+                        .find(({ sess }) => sess && sess.attackerUid === SHADOWBOT_UID);
+
+                    if (!botSession) return;
+                    const { id: sessionId, sess } = botSession;
+                    const defenderUid = sess.defenderUid;
+                    const targetCard = sess.targetCardSnapshot;
+                    const cardReg = targetCard ? (
+                        typeof GAME_REGISTRY !== 'undefined'
+                            ? (GAME_REGISTRY[targetCard.packSource] || []).find(c => c.id === targetCard.cardId)
+                            : null
+                    ) : null;
+                    const cardName = cardReg?.name || targetCard?.cardId || 'their card';
+
+                    const db2 = window._realm?.getDb?.() || (typeof db !== 'undefined' ? db : null);
+                    const defSnap = db2 ? await get(ref(db2, `users/${defenderUid}`)) : null;
+                    const defenderName = defSnap?.val()?.username || 'Unknown';
+
+                    // Poll for resolution (up to 15 seconds)
+                    let pollCount = 0;
+                    const pollInterval = setInterval(async () => {
+                        pollCount++;
+                        if (pollCount > 30) { clearInterval(pollInterval); return; }
+                        try {
+                            const sessSnap = await get(ref(db2, `clash_sessions/${sessionId}`));
+                            const s = sessSnap.val();
+                            if (!s || s.sessionState !== 'terminated_resolved') return;
+                            clearInterval(pollInterval);
+                            if (s.winnerSignaledUid === SHADOWBOT_UID) {
+                                document.dispatchEvent(new CustomEvent('shadowbot:stealWon', { detail: { defenderName, cardName } }));
+                            }
+                            // If bot lost the steal attempt, no event (it's not a "defend" scenario for the bot)
+                        } catch(e) { clearInterval(pollInterval); }
+                    }, 500);
+                } catch(e) { console.warn('[DALLAL BOT] steal outcome watcher error', e); }
+            }, 1500);
+        };
+
         // ── Patch leaderboards to show bot with 🤖 ──
         const _originalHandleLeaderboardQuery = window.handleLeaderboardQuery;
         window.handleLeaderboardQuery = async function(metricSortingKey) {
@@ -16837,7 +17925,7 @@ or
     </script>
     <div
         style="position: fixed; top: 12px; left: 12px; z-index: 9999999999999; color: rgba(255, 255, 255, 0.4); font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
-        V:10.3
+        V:10.5
     </div>
 </body>
 
