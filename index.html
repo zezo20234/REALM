@@ -7077,7 +7077,7 @@
                         <div style="background:var(--bg-surface); padding:12px; border-radius:8px;">
                             <div style="font-size:0.7rem; color:#9ca3af;">UNIQUE DISCOVERIES</div>
                             <div style="font-size:1.1rem; font-weight:bold; color:var(--primary);"
-                                id="prof-stat-discovery">0 / 375</div>
+                                id="prof-stat-discovery">0 / —</div>
                         </div>
                     </div>
                     <button class="btn-action btn-blue" id="btn-sell-all-profile"
@@ -12865,7 +12865,7 @@
             structuredRankingArrayData.slice(0, 50).forEach((rankItem, indexValue) => {
                 let displayedSortingMetricValueField = `€${formatNum(rankItem.money)}`;
                 if (metricSortingKey === 'level') displayedSortingMetricValueField = `LV ${rankItem.level}`;
-                if (metricSortingKey === 'collection') displayedSortingMetricValueField = `${rankItem.collectionCount} / 375 Unlocked`;
+                if (metricSortingKey === 'collection') displayedSortingMetricValueField = `${rankItem.collectionCount} / ${Object.values(GAME_REGISTRY).reduce((s,a)=>s+a.length,0)} Unlocked`;
 
                 const entryHtmlNode = `
                     <div class="rank-entry">
@@ -13005,7 +13005,8 @@
             const uniqueDiscoveredCount = Object.keys(userDataRecord.discovered || {}).length;
 
             document.getElementById('prof-stat-wealth').innerText = `€${formatNum(aggregateWealthValuation)}`;
-            document.getElementById('prof-stat-discovery').innerText = `${uniqueDiscoveredCount} / 375`;
+            const totalCardCount = Object.values(GAME_REGISTRY).reduce((s, arr) => s + arr.length, 0);
+            document.getElementById('prof-stat-discovery').innerText = `${uniqueDiscoveredCount} / ${totalCardCount}`;
             renderProfileClashRankBadge();
 
             const prestigePanel = document.getElementById('prestige-profile-panel');
