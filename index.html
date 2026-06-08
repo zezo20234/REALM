@@ -1981,48 +1981,66 @@
 
         #toast-host {
             position: fixed;
-            top: 16px;
+            bottom: calc(72px + max(8px, env(safe-area-inset-bottom)));
             left: 50%;
             transform: translateX(-50%);
-            z-index: 9999;
+            z-index: 9800;
             display: flex;
-            flex-direction: column;
+            flex-direction: column-reverse;
             gap: 8px;
-            width: min(92vw, 380px);
+            width: min(92vw, 400px);
             pointer-events: none;
         }
 
         .toast {
-            padding: 12px 16px;
-            border-radius: 10px;
+            padding: 13px 18px;
+            border-radius: 14px;
             font-weight: 700;
-            font-size: 0.85rem;
-            background: rgba(17, 24, 39, 0.95);
-            border: 1px solid rgba(148, 163, 184, 0.18);
+            font-size: 0.88rem;
+            background: rgba(13, 18, 30, 0.97);
+            border: 1px solid rgba(148, 163, 184, 0.22);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.55), 0 2px 8px rgba(0,0,0,0.3);
             opacity: 0;
-            transform: translateY(-12px);
-            transition: opacity 0.3s, transform 0.3s;
+            transform: translateY(16px) scale(0.96);
+            transition: opacity 0.28s cubic-bezier(0.22,1,0.36,1), transform 0.28s cubic-bezier(0.34,1.4,0.64,1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            line-height: 1.35;
+        }
+
+        .toast::before {
+            flex-shrink: 0;
+            font-size: 1.1rem;
         }
 
         .toast.is-visible {
             opacity: 1;
-            transform: translateY(0);
+            transform: translateY(0) scale(1);
         }
 
         .toast-success {
-            border-color: rgba(16, 185, 129, 0.5);
+            border-color: rgba(16, 185, 129, 0.55);
             color: #6ee7b7;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.55), 0 0 20px rgba(16,185,129,0.12);
         }
+        .toast-success::before { content: '✓'; color: #10b981; }
 
         .toast-error {
-            border-color: rgba(239, 68, 68, 0.5);
+            border-color: rgba(239, 68, 68, 0.55);
             color: #fca5a5;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.55), 0 0 20px rgba(239,68,68,0.12);
         }
+        .toast-error::before { content: '✕'; color: #ef4444; }
 
         .toast-info {
-            border-color: rgba(59, 130, 246, 0.5);
+            border-color: rgba(59, 130, 246, 0.55);
             color: #93c5fd;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.55), 0 0 20px rgba(59,130,246,0.12);
         }
+        .toast-info::before { content: 'ℹ'; color: #3b82f6; }
 
         #nav-indicator {
             position: absolute;
@@ -5104,12 +5122,7 @@
                 font-size: 0.7rem;
             }
 
-            /* Toast notifications - adjust for mobile */
-            #toast-host {
-                left: 8px;
-                right: 8px;
-                bottom: 8px;
-            }
+            /* Toast notifications - bottom-anchored, no override needed */
 
             /* Coming soon screen - adjust for mobile */
             .cs-logo {
@@ -5237,6 +5250,273 @@
 
         /* ── END CLASH RANK ─────────────────────────────────────── */
 
+        /* ── RANK CHANGE CINEMATIC OVERLAY ───────────────────────── */
+        #rank-change-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            visibility: hidden;
+        }
+
+        #rank-change-overlay.show {
+            pointer-events: all;
+            visibility: visible;
+        }
+
+        .rco-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.82);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            opacity: 0;
+            transition: opacity 0.35s ease;
+        }
+
+        #rank-change-overlay.show .rco-backdrop {
+            opacity: 1;
+        }
+
+        .rco-card {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            padding: 40px 32px 36px;
+            background: linear-gradient(160deg, rgba(17,24,39,0.98), rgba(8,12,22,0.99));
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 24px;
+            width: min(88vw, 360px);
+            box-shadow: 0 40px 120px rgba(0,0,0,0.8), 0 0 60px rgba(255,255,255,0.04);
+            transform: scale(0.8) translateY(30px);
+            opacity: 0;
+            transition: transform 0.5s cubic-bezier(0.34,1.4,0.64,1), opacity 0.4s ease;
+        }
+
+        #rank-change-overlay.show .rco-card {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+
+        .rco-label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.65rem;
+            font-weight: 900;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            margin-bottom: 24px;
+            opacity: 0;
+            transform: translateY(-8px);
+            transition: opacity 0.3s 0.3s ease, transform 0.3s 0.3s ease;
+        }
+
+        #rank-change-overlay.show .rco-label {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .rco-label.up   { color: #10b981; }
+        .rco-label.down { color: #ef4444; }
+
+        .rco-ranks {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .rco-rank-pill {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            padding: 14px 20px;
+            border-radius: 14px;
+            border: 2px solid;
+            min-width: 100px;
+            opacity: 0;
+        }
+
+        .rco-rank-pill.old-rank {
+            transform: translateX(-20px);
+            transition: opacity 0.35s 0.35s ease, transform 0.45s 0.35s cubic-bezier(0.22,1,0.36,1);
+        }
+
+        .rco-rank-pill.new-rank {
+            transform: translateX(20px);
+            transition: opacity 0.35s 0.5s ease, transform 0.45s 0.5s cubic-bezier(0.22,1,0.36,1);
+        }
+
+        #rank-change-overlay.show .rco-rank-pill {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .rco-rank-icon {
+            font-size: 1.8rem;
+            line-height: 1;
+        }
+
+        .rco-rank-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.65rem;
+            font-weight: 900;
+            letter-spacing: 0.1em;
+        }
+
+        .rco-rank-div {
+            font-size: 0.7rem;
+            font-weight: 700;
+            opacity: 0.7;
+        }
+
+        .rco-arrow {
+            font-size: 1.6rem;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: opacity 0.3s 0.6s ease, transform 0.4s 0.6s cubic-bezier(0.34,1.6,0.64,1);
+        }
+
+        #rank-change-overlay.show .rco-arrow {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .rco-arrow.up   { color: #10b981; }
+        .rco-arrow.down { color: #ef4444; }
+
+        .rco-msg {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #e5e7eb;
+            line-height: 1.45;
+            margin-bottom: 24px;
+            opacity: 0;
+            transition: opacity 0.3s 0.7s ease;
+        }
+
+        #rank-change-overlay.show .rco-msg {
+            opacity: 1;
+        }
+
+        .rco-close-btn {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.14);
+            color: #e5e7eb;
+            padding: 12px 36px;
+            border-radius: 10px;
+            font-weight: 800;
+            font-size: 0.85rem;
+            letter-spacing: 0.06em;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.25s 0.8s ease, background 0.15s ease;
+        }
+
+        .rco-close-btn:hover { background: rgba(255,255,255,0.14); }
+
+        #rank-change-overlay.show .rco-close-btn {
+            opacity: 1;
+        }
+
+        /* Particles for rank-up */
+        .rco-particle {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: rcoParticle var(--dur, 1.2s) ease-out forwards;
+        }
+
+        @keyframes rcoParticle {
+            0%   { transform: translate(0,0) scale(1); opacity: 1; }
+            100% { transform: translate(var(--tx),var(--ty)) scale(0); opacity: 0; }
+        }
+
+        /* Pulse ring behind new rank pill */
+        @keyframes rcoPulseRing {
+            0%   { transform: scale(0.8); opacity: 0.8; }
+            100% { transform: scale(1.8); opacity: 0; }
+        }
+
+        .rco-pulse-ring {
+            position: absolute;
+            inset: -6px;
+            border-radius: 18px;
+            border: 2px solid currentColor;
+            animation: rcoPulseRing 1s ease-out 0.7s forwards;
+            pointer-events: none;
+        }
+
+        /* ── MATH MODAL CHECK BUTTON (mobile keyboard shortcut) ───── */
+        #math-check-btn {
+            display: none;
+            position: fixed;
+            right: 16px;
+            z-index: 99998;
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            font-size: 2rem;
+            font-weight: 900;
+            box-shadow: 0 4px 24px rgba(16,185,129,0.55), 0 0 0 3px rgba(16,185,129,0.18);
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            animation: mathCheckPop 0.35s cubic-bezier(0.34,1.5,0.64,1) both;
+        }
+
+        #math-check-btn.visible {
+            display: flex;
+        }
+
+        #math-check-btn:active {
+            transform: scale(0.92);
+            box-shadow: 0 2px 12px rgba(16,185,129,0.4);
+        }
+
+        @keyframes mathCheckPop {
+            from { transform: scale(0) rotate(-20deg); opacity: 0; }
+            to   { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        /* Better math modal styles for mobile */
+        #modal-game-math .modal-body {
+            position: relative;
+        }
+
+        .math-equation-container {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 20px 24px;
+            margin-bottom: 20px;
+        }
+
+        #math-equation-prompt {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* Shake animation for wrong answer */
+        @keyframes mathInputShake {
+            0%,100% { transform: translateX(0); border-color: rgba(148,163,184,0.25); }
+            20% { transform: translateX(-8px); border-color: #ef4444; }
+            40% { transform: translateX(8px); border-color: #ef4444; }
+            60% { transform: translateX(-5px); border-color: #ef4444; }
+            80% { transform: translateX(5px); border-color: #ef4444; }
+        }
+
+        #math-player-input.shake {
+            animation: mathInputShake 0.4s ease;
+        }
+
         @media (max-width: 480px) {
 
             /* Extra small mobile adjustments */
@@ -5292,6 +5572,7 @@
                 <div id="loading-progress" style="height:100%; width:0%; background:linear-gradient(90deg,#dc2626,#ff4444); transition:width 0.3s ease; box-shadow:0 0 20px #dc2626;"></div>
             </div>
             <div id="loading-status" style="font-family:'Orbitron',sans-serif; font-size:0.85rem; color:#6b7280; letter-spacing:1px;">Connecting to servers...</div>
+            <button id="enter-btn" onclick="enterRealm()">⚡ ENTER REALM</button>
         </div>
     </div>
     <style>
@@ -5302,6 +5583,69 @@
         }
         #loading-screen.hidden {
             display: none !important;
+        }
+        #enter-btn {
+            display: none;
+            margin-top: 32px;
+            padding: 16px 48px;
+            background: linear-gradient(135deg, #dc2626, #ff4444);
+            border: none;
+            border-radius: 14px;
+            color: #fff;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 900;
+            letter-spacing: 0.15em;
+            cursor: pointer;
+            box-shadow: 0 0 40px rgba(220,38,38,0.5), 0 0 80px rgba(220,38,38,0.2);
+            animation: enterPulse 1.5s ease-in-out infinite;
+            position: relative;
+            overflow: hidden;
+        }
+        #enter-btn::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -60%;
+            width: 40%; height: 200%;
+            background: rgba(255,255,255,0.15);
+            transform: skewX(-20deg);
+            animation: enterShine 2.5s ease-in-out infinite;
+        }
+        @keyframes enterPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 40px rgba(220,38,38,0.5), 0 0 80px rgba(220,38,38,0.2); }
+            50% { transform: scale(1.04); box-shadow: 0 0 60px rgba(220,38,38,0.8), 0 0 120px rgba(220,38,38,0.3); }
+        }
+        @keyframes enterShine {
+            0% { left: -60%; }
+            100% { left: 160%; }
+        }
+        #enter-btn.show {
+            display: block;
+            animation: enterPulse 1.5s ease-in-out infinite, enterAppear 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+        }
+        @keyframes enterAppear {
+            from { opacity: 0; transform: scale(0.8) translateY(12px); }
+            to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        #music-track-label {
+            position: fixed;
+            bottom: 130px;
+            right: 10px;
+            background: rgba(17,24,39,0.85);
+            border: 1px solid rgba(220,38,38,0.3);
+            border-radius: 8px;
+            padding: 5px 10px;
+            font-size: 0.65rem;
+            font-family: 'Orbitron', sans-serif;
+            color: #ef4444;
+            letter-spacing: 0.05em;
+            z-index: 8000;
+            display: none;
+            backdrop-filter: blur(8px);
+            opacity: 0;
+            transition: opacity 0.5s;
+            pointer-events: none;
         }
     </style>
 
@@ -5430,17 +5774,18 @@
             ];
 
             let messageIndex = 0;
-            const targetProgress = 85;
+            const targetProgress = 75;
             const progressIncrement = targetProgress / statusMessages.length;
 
             function animateLoading() {
-                if (loadingDismissed) return;
+                if (loadingDismissed || enterButtonShown) return;
 
                 if (currentProgress < targetProgress) {
-                    currentProgress += 0.5;
+                    // Slow down as we get closer to targetProgress (feels like waiting for server)
+                    const speed = currentProgress > 60 ? 0.18 : 0.5;
+                    currentProgress += speed;
                     loadingProgress.style.width = currentProgress + '%';
 
-                    // Update status message at certain progress points
                     const newMessageIndex = Math.min(
                         Math.floor(currentProgress / progressIncrement),
                         statusMessages.length - 1
@@ -5458,32 +5803,83 @@
             // Start loading animation
             setTimeout(animateLoading, 500);
 
-            // 12 second safety fallback
+            // Safety fallbacks — show enter button if Firebase is slow or fails on iOS
+            // 8 seconds: gentle nudge
+            setTimeout(() => {
+                if (!loadingDismissed && !enterButtonShown) {
+                    console.warn('[Loading] 8s: no ready signal yet — showing enter button');
+                    showEnterButton();
+                }
+            }, 8000);
+
+            // 15 seconds: hard fallback — force-dismiss even if enterButton somehow failed
             setTimeout(() => {
                 if (!loadingDismissed) {
-                    console.warn('Loading screen safety fallback triggered');
+                    console.warn('[Loading] 15s hard fallback — force dismissing');
                     dismissLoadingScreen();
                 }
-            }, 12000);
+            }, 15000);
 
-            // Function to dismiss loading screen
+            // Function to dismiss loading screen — now shows ENTER button
             window.appReadyToShow = function() {
-                if (loadingDismissed) return;
-                dismissLoadingScreen();
+                if (loadingDismissed || enterButtonShown) return;
+                window.appReadyToShow = null; // prevent double-calls
+                showEnterButton();
             };
+
+            let enterButtonShown = false;
+            function showEnterButton() {
+                if (loadingDismissed || enterButtonShown) return;
+                enterButtonShown = true;
+
+                // Smoothly fill bar to 100%, THEN show button
+                const remaining = 100 - currentProgress;
+                const fillDuration = Math.max(300, remaining * 12);
+                const steps = 40;
+                const stepSize = remaining / steps;
+                const stepTime = fillDuration / steps;
+                let step = 0;
+
+                function fillBar() {
+                    step++;
+                    currentProgress = Math.min(100, currentProgress + stepSize);
+                    loadingProgress.style.width = currentProgress + '%';
+                    if (step < steps) {
+                        setTimeout(fillBar, stepTime);
+                    } else {
+                        loadingProgress.style.width = '100%';
+                        loadingStatus.textContent = '✦ READY ✦';
+                        loadingStatus.style.color = '#ef4444';
+                        loadingStatus.style.textShadow = '0 0 12px rgba(220,38,38,0.8)';
+                        const enterBtn = document.getElementById('enter-btn');
+                        if (enterBtn) {
+                            setTimeout(() => enterBtn.classList.add('show'), 350);
+                        }
+                    }
+                }
+                fillBar();
+            }
 
             function dismissLoadingScreen() {
                 if (loadingDismissed) return;
                 loadingDismissed = true;
-                loadingProgress.style.width = '100%';
-                loadingStatus.textContent = 'Ready!';
+                loadingScreen.classList.add('fade-out');
                 setTimeout(() => {
-                    loadingScreen.classList.add('fade-out');
-                    setTimeout(() => {
-                        loadingScreen.classList.add('hidden');
-                    }, 500);
-                }, 300);
+                    loadingScreen.classList.add('hidden');
+                }, 500);
             }
+
+            // Called when user taps ENTER
+            window.enterRealm = function() {
+                // Allow presence now that the user has explicitly entered the game
+                window._presenceAllowed = true;
+
+                // Activate presence via the main module (which has Firebase in scope)
+                if (window._activatePresence) window._activatePresence();
+
+                dismissLoadingScreen();
+                startMusic();
+            };
         })();
     </script>
 
@@ -6406,6 +6802,33 @@
     </div>
     <div id="toast-host" aria-live="polite"></div>
 
+    <!-- RANK CHANGE CINEMATIC OVERLAY -->
+    <div id="rank-change-overlay" role="dialog" aria-modal="true">
+        <div class="rco-backdrop" onclick="closeRankChangeOverlay()"></div>
+        <div class="rco-card" id="rco-card">
+            <div class="rco-label" id="rco-label">RANK UP</div>
+            <div class="rco-ranks">
+                <div class="rco-rank-pill old-rank" id="rco-old-rank" style="border-color: #6b7280; background: rgba(107,114,128,0.08);">
+                    <div class="rco-rank-icon" id="rco-old-icon">🥉</div>
+                    <div class="rco-rank-name" id="rco-old-name">BRONZE</div>
+                    <div class="rco-rank-div" id="rco-old-div">Division I</div>
+                </div>
+                <div class="rco-arrow up" id="rco-arrow">→</div>
+                <div class="rco-rank-pill new-rank" id="rco-new-rank" style="border-color: #c0c0c0; background: rgba(192,192,192,0.08);">
+                    <div class="rco-pulse-ring"></div>
+                    <div class="rco-rank-icon" id="rco-new-icon">🥈</div>
+                    <div class="rco-rank-name" id="rco-new-name">SILVER</div>
+                    <div class="rco-rank-div" id="rco-new-div">Division I</div>
+                </div>
+            </div>
+            <div class="rco-msg" id="rco-msg">You climbed to a new rank!</div>
+            <button class="rco-close-btn" onclick="closeRankChangeOverlay()">GOT IT</button>
+        </div>
+    </div>
+
+    <!-- MATH CHALLENGE CHECK BUTTON (mobile) -->
+    <button id="math-check-btn" aria-label="Submit answer" onclick="submitMathFromCheckBtn()">✓</button>
+
     <div id="global-broadcast-banner" aria-live="polite">
         <div class="broadcast-inner" id="broadcast-text"></div>
     </div>
@@ -6499,7 +6922,10 @@
                 <div class="user-meta">
                     <div class="profile-badge" id="hud-avatar" style="background: var(--primary);">P</div>
                     <div class="user-name-wrapper">
-                        <span class="username-txt" id="hud-username">Loading...</span>
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <span class="username-txt" id="hud-username">Loading...</span>
+                            <button id="music-toggle" onclick="toggleMusic()" title="Toggle Music" style="display:none;background:none;border:none;cursor:pointer;font-size:1rem;padding:0;line-height:1;opacity:0.75;transition:opacity 0.2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.75">🔇</button>
+                        </div>
                         <span class="title-chip" id="hud-title">Rookie</span>
                         <span class="streak-badge" id="hud-streak">🔥 Daily Streak: 0 days</span>
                     </div>
@@ -8396,6 +8822,9 @@
         let presenceHeartbeatTimer = null;
         let presenceOffsetUnsub = null;
         let presenceConnectedUnsub = null;
+
+        // Presence is deferred until the user explicitly clicks "ENTER REALM"
+        window._presenceAllowed = false;
         let userProfileUnsub = null;
         let userInventoryUnsub = null;
         let userCardCustomizationUnsub = null;
@@ -8446,23 +8875,233 @@
             if (!host) return;
             const toast = document.createElement('div');
             toast.className = `toast toast-${type}`;
+            // Strip the icon prefix since CSS ::before handles it
             toast.textContent = message;
             host.appendChild(toast);
-            requestAnimationFrame(() => toast.classList.add('is-visible'));
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => toast.classList.add('is-visible'));
+            });
             setTimeout(() => {
                 toast.classList.remove('is-visible');
-                setTimeout(() => toast.remove(), 300);
+                setTimeout(() => toast.remove(), 320);
             }, durationMs);
         }
 
+        /* ── RANK CHANGE CINEMATIC OVERLAY ──────────────────────────── */
+        const RANK_ICONS = {
+            'Bronze':           '🥉',
+            'Silver':           '🥈',
+            'Gold':             '🥇',
+            'Platinum':         '💠',
+            'Diamond':          '💎',
+            'Champion':         '🏅',
+            'Grand Champion':   '👑',
+            'SSL':              '⚡',
+        };
+
+        const RANK_COLORS = {
+            'Bronze':           '#cd7f32',
+            'Silver':           '#c0c0c0',
+            'Gold':             '#ffd700',
+            'Platinum':         '#e5e4e2',
+            'Diamond':          '#7df9ff',
+            'Champion':         '#f59e0b',
+            'Grand Champion':   '#a855f7',
+            'SSL':              '#ff1493',
+        };
+
+        let _rankOverlayAutoCloseTimer = null;
+
+        function showRankChangeOverlay(isUp, prevRankName, prevDivLabel, newRankName, newDivLabel) {
+            const overlay  = document.getElementById('rank-change-overlay');
+            const labelEl  = document.getElementById('rco-label');
+            const arrowEl  = document.getElementById('rco-arrow');
+            const oldIcon  = document.getElementById('rco-old-icon');
+            const oldName  = document.getElementById('rco-old-name');
+            const oldDiv   = document.getElementById('rco-old-div');
+            const oldPill  = document.getElementById('rco-old-rank');
+            const newIcon  = document.getElementById('rco-new-icon');
+            const newName  = document.getElementById('rco-new-name');
+            const newDiv   = document.getElementById('rco-new-div');
+            const newPill  = document.getElementById('rco-new-rank');
+            const msgEl    = document.getElementById('rco-msg');
+
+            if (!overlay) return;
+
+            // Clear any running auto-close
+            if (_rankOverlayAutoCloseTimer) {
+                clearTimeout(_rankOverlayAutoCloseTimer);
+                _rankOverlayAutoCloseTimer = null;
+            }
+
+            const prevColor = RANK_COLORS[prevRankName] || '#9ca3af';
+            const newColor  = RANK_COLORS[newRankName]  || '#9ca3af';
+
+            labelEl.textContent = isUp ? '⬆ RANK UP' : '⬇ RANK DOWN';
+            labelEl.className   = `rco-label ${isUp ? 'up' : 'down'}`;
+            arrowEl.textContent = '→';
+            arrowEl.className   = `rco-arrow ${isUp ? 'up' : 'down'}`;
+
+            oldIcon.textContent = RANK_ICONS[prevRankName] || '🏅';
+            oldName.textContent = prevRankName.toUpperCase();
+            oldDiv.textContent  = `Division ${prevDivLabel}`;
+            oldPill.style.borderColor = prevColor;
+            oldPill.style.background  = `rgba(${hexToRgb(prevColor)}, 0.10)`;
+
+            newIcon.textContent = RANK_ICONS[newRankName] || '🏅';
+            newName.textContent = newRankName.toUpperCase();
+            newDiv.textContent  = `Division ${newDivLabel}`;
+            newPill.style.borderColor = newColor;
+            newPill.style.background  = `rgba(${hexToRgb(newColor)}, 0.14)`;
+
+            // Refresh pulse ring colour
+            const pulseRing = newPill.querySelector('.rco-pulse-ring');
+            if (pulseRing) pulseRing.style.color = newColor;
+
+            msgEl.textContent = isUp
+                ? `You climbed to ${newRankName} — Div ${newDivLabel}!`
+                : `Dropped to ${newRankName} — Div ${newDivLabel}.`;
+
+            // Remove show first, force reflow so CSS transitions replay
+            overlay.classList.remove('show');
+            void overlay.offsetWidth;
+            overlay.classList.add('show');
+
+            // Spawn particles on rank-up
+            if (isUp) {
+                const card = document.getElementById('rco-card');
+                setTimeout(() => spawnRankParticles(card, newColor), 600);
+            }
+
+            // Haptic
+            if (navigator.vibrate) {
+                navigator.vibrate(isUp ? [30, 50, 80, 30, 120] : [80, 30, 40]);
+            }
+
+            // Auto-close after 5 seconds
+            _rankOverlayAutoCloseTimer = setTimeout(() => closeRankChangeOverlay(), 5000);
+        }
+
+        function closeRankChangeOverlay() {
+            const overlay = document.getElementById('rank-change-overlay');
+            if (!overlay) return;
+            overlay.classList.remove('show');
+            if (_rankOverlayAutoCloseTimer) {
+                clearTimeout(_rankOverlayAutoCloseTimer);
+                _rankOverlayAutoCloseTimer = null;
+            }
+        }
+
+        function spawnRankParticles(container, color) {
+            if (!container) return;
+            const count = 18;
+            for (let i = 0; i < count; i++) {
+                const el = document.createElement('div');
+                el.className = 'rco-particle';
+                const angle  = (360 / count) * i + Math.random() * 15;
+                const dist   = 120 + Math.random() * 80;
+                const tx     = Math.cos(angle * Math.PI / 180) * dist;
+                const ty     = Math.sin(angle * Math.PI / 180) * dist;
+                const size   = 5 + Math.random() * 6;
+                el.style.cssText = `
+                    width: ${size}px; height: ${size}px;
+                    background: ${color};
+                    top: 50%; left: 50%;
+                    margin-left: -${size/2}px; margin-top: -${size/2}px;
+                    --tx: ${tx}px; --ty: ${ty}px;
+                    --dur: ${0.9 + Math.random() * 0.5}s;
+                    box-shadow: 0 0 6px ${color};
+                `;
+                container.appendChild(el);
+                setTimeout(() => el.remove(), 1600);
+            }
+        }
+
+        function hexToRgb(hex) {
+            const h = hex.replace('#', '');
+            const full = h.length === 3 ? h.split('').map(c => c + c).join('') : h;
+            const n = parseInt(full, 16);
+            return `${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}`;
+        }
+
+        /* ── MATH CHECK BUTTON (mobile) ─────────────────────────────── */
+        function showMathCheckBtn() {
+            const btn = document.getElementById('math-check-btn');
+            if (!btn) return;
+            // Only show on touch devices
+            if (!('ontouchstart' in window) && !navigator.maxTouchPoints) return;
+            // Position above iOS keyboard — use visualViewport if available
+            function positionBtn() {
+                const vv = window.visualViewport;
+                if (vv) {
+                    const keyboardTop = vv.offsetTop + vv.height;
+                    const fromBottom  = window.innerHeight - keyboardTop;
+                    btn.style.bottom = `${fromBottom + 12}px`;
+                } else {
+                    btn.style.bottom = '80px';
+                }
+            }
+            positionBtn();
+            if (window.visualViewport) {
+                window.visualViewport.addEventListener('resize', positionBtn);
+                window.visualViewport.addEventListener('scroll', positionBtn);
+            }
+            btn.classList.add('visible');
+        }
+
+        function hideMathCheckBtn() {
+            const btn = document.getElementById('math-check-btn');
+            if (!btn) return;
+            btn.classList.remove('visible');
+            btn.style.bottom = '';
+        }
+
+        function submitMathFromCheckBtn() {
+            if (clashUiLocked || !activeStealSequenceId) return;
+            const mathInput = document.getElementById('math-player-input');
+            if (!mathInput) return;
+            const parsedVal    = parseInt(mathInput.value.trim(), 10);
+            const expectedVal  = parseInt(mathInput.dataset.expectedResult, 10);
+            if (parsedVal === expectedVal) {
+                const solveTimeMs = Date.now() - mathChallengeStartTime;
+                hideMathCheckBtn();
+                signalClashVictoryCaptureLock(solveTimeMs);
+            } else {
+                // Shake the input
+                mathInput.classList.remove('shake');
+                void mathInput.offsetWidth;
+                mathInput.classList.add('shake');
+                setTimeout(() => mathInput.classList.remove('shake'), 450);
+                // Brief red flash on check btn
+                const btn = document.getElementById('math-check-btn');
+                if (btn) {
+                    btn.style.background = 'linear-gradient(135deg,#ef4444,#b91c1c)';
+                    setTimeout(() => btn.style.background = '', 500);
+                }
+            }
+        }
+
+        // Show/hide check btn with math modal
+
         function openModal(modalId) {
             const el = document.getElementById(modalId);
-            if (el) el.classList.add('is-open');
+            if (el) {
+                el.classList.add('is-open');
+                if (modalId === 'modal-game-math') {
+                    // Slight delay so keyboard can open first
+                    setTimeout(showMathCheckBtn, 400);
+                }
+            }
         }
 
         function closeModal(modalId) {
             const el = document.getElementById(modalId);
-            if (el) el.classList.remove('is-open');
+            if (el) {
+                el.classList.remove('is-open');
+                if (modalId === 'modal-game-math') {
+                    hideMathCheckBtn();
+                }
+            }
         }
 
         function getLevelTitle(levelValue) {
@@ -9481,11 +10120,6 @@
                 document.getElementById('app-workspace').style.display = 'flex';
                 requestAnimationFrame(updateNavIndicator);
                 
-                // Set loading: true in presence for steal protection
-                set(ref(db, `presence/${userEntity.uid}/loading`), true).catch(() => {});
-                // Set 15-second join protection so new entrants can't be stolen from immediately
-                update(ref(db, `presence/${userEntity.uid}`), { joinProtectionExpiry: Date.now() + 15000 }).catch(() => {});
-                
                 initializeUserEnvironmentCore();
                 startBanPolling(userEntity);
             } else {
@@ -9537,6 +10171,7 @@
         }
 
         function tryPublishPresenceWhenReady() {
+            if (!window._presenceAllowed) return;
             if (!activeUserSession?.uid || !userProfileHydrated) return;
             publishLocalPresence();
         }
@@ -9559,8 +10194,7 @@
         }
 
         let _presenceInitialDelayTimer = null;
-        function setupPresenceSystem() {
-            const uid = activeUserSession.uid;
+        function setupPresenceSystem() {            const uid = activeUserSession.uid;
             const presenceNodeRef = ref(db, `presence/${uid}`);
             let _firstConnect = true;
 
@@ -9588,6 +10222,18 @@
                 }
             });
         }
+
+        // Called by enterRealm() (different script scope) once the user clicks ENTER REALM
+        window._activatePresence = function() {
+            const uid = activeUserSession?.uid;
+            if (!uid) return;
+            // Write join-protection flags now
+            set(ref(db, `presence/${uid}/loading`), true).catch(() => {});
+            update(ref(db, `presence/${uid}`), { joinProtectionExpiry: Date.now() + 15000 }).catch(() => {});
+            // Start the presence system
+            setupPresenceSystem();
+            tryPublishPresenceWhenReady();
+        };
 
         function initializeUserEnvironmentCore() {
             userProfileHydrated = false;
@@ -9651,8 +10297,10 @@
                 renderTutorialOverlay();
                 tryPublishPresenceWhenReady();
                 
-                // Clear loading flag after user data loads
-                set(ref(db, `presence/${activeUserSession.uid}/loading`), false).catch(() => {});
+                // Clear loading flag after user data loads (only if presence is active)
+                if (window._presenceAllowed) {
+                    set(ref(db, `presence/${activeUserSession.uid}/loading`), false).catch(() => {});
+                }
                 
                 // Initialize global rank reward cycle listener + timer (only once)
                 if (!window._rankCycleListenerStarted) {
@@ -9662,7 +10310,9 @@
                 
                 // Call appReadyToShow on first data load
                 if (window.appReadyToShow) {
-                    setTimeout(() => window.appReadyToShow(), 500);
+                    const _readyFn = window.appReadyToShow;
+                    window.appReadyToShow = null; // consume immediately so subsequent onValue calls don't re-trigger
+                    setTimeout(() => _readyFn(), 500);
                     
                     // Check daily login XPB reward
                     setTimeout(() => {
@@ -9699,7 +10349,7 @@
 
             initQuestsListener();
 
-            setupPresenceSystem();
+            if (window._presenceAllowed) setupPresenceSystem();
 
             if (clashSessionsGlobalUnsub) clashSessionsGlobalUnsub();
             clashSessionsGlobalUnsub = onValue(ref(db, 'clash_sessions'), snapshot => {
@@ -12117,10 +12767,33 @@
 
             if (parsedPlayerInputVal === calculatedExpectedTargetResult) {
                 const solveTimeMs = Date.now() - mathChallengeStartTime;
+                hideMathCheckBtn();
                 signalClashVictoryCaptureLock(solveTimeMs);
             } else {
+                const inp = document.getElementById('math-player-input');
+                inp.classList.remove('shake'); void inp.offsetWidth; inp.classList.add('shake');
+                setTimeout(() => inp.classList.remove('shake'), 450);
                 showToast('Wrong answer — try again.', 'error');
             }
+        });
+
+        document.getElementById('math-player-input')?.addEventListener('focus', () => {
+            if (document.getElementById('modal-game-math')?.classList.contains('is-open')) {
+                setTimeout(showMathCheckBtn, 300);
+            }
+        });
+
+        document.getElementById('math-player-input')?.addEventListener('blur', () => {
+            // Small delay so the check btn tap can register
+            setTimeout(() => {
+                const btn = document.getElementById('math-check-btn');
+                if (btn && !document.activeElement?.id?.includes('math')) {
+                    // Only hide if math modal is closed
+                    if (!document.getElementById('modal-game-math')?.classList.contains('is-open')) {
+                        hideMathCheckBtn();
+                    }
+                }
+            }, 150);
         });
 
         document.getElementById('math-player-input')?.addEventListener('keydown', (e) => {
@@ -12536,9 +13209,9 @@
 
             // Notify on rank-up
             if (newData.rankIndex > prevData.rankIndex) {
-                showToast(`🏆 Rank Up! You are now ${newData.rank.name} Division ${newData.divisionLabel}!`, 'success');
+                showRankChangeOverlay(true, prevData.rank.name, prevData.divisionLabel, newData.rank.name, newData.divisionLabel);
             } else if (newData.division > prevData.division) {
-                showToast(`⬆️ Division Up! ${newData.rank.name} Division ${newData.divisionLabel}`, 'success');
+                showToast(`⬆️ Division Up! ${newData.rank.name} ${newData.divisionLabel}`, 'success');
             }
 
             renderHudClashRankBadge();
@@ -12560,9 +13233,9 @@
             userDataRecord.clashRankPoints = newPts;
 
             if (newData.rankIndex < prevData.rankIndex) {
-                showToast(`📉 Rank Down! You are now ${newData.rank.name} Division ${newData.divisionLabel}`, 'error');
+                showRankChangeOverlay(false, prevData.rank.name, prevData.divisionLabel, newData.rank.name, newData.divisionLabel);
             } else {
-                showToast(`📉 Division Down! ${newData.rank.name} Division ${newData.divisionLabel}`, 'error');
+                showToast(`📉 Division Down! ${newData.rank.name} ${newData.divisionLabel}`, 'error');
             }
 
             renderHudClashRankBadge();
@@ -18081,7 +18754,7 @@ Respond with ONLY the chat message text — no JSON, no labels, no quotes, just 
     </script>
     <div
         style="position: fixed; top: 12px; left: 12px; z-index: 9999999999999; color: rgba(255, 255, 255, 0.4); font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
-        V:10.5
+        V:11.0
     </div>
 
     <!-- ═══════════════════════════════════════════
@@ -18101,6 +18774,227 @@ Respond with ONLY the chat message text — no JSON, no labels, no quotes, just 
         </div>
       </div>
     </div>
+
+
+    <div id="music-track-label">♪ Track 1</div>
+
+    <!-- ═══════════════════════════════════════════
+         MUSIC SYSTEM — FIREBASE SYNCED
+         All users hear the same track at the same
+         position in real-time via /music_sync node.
+    ═══════════════════════════════════════════ -->
+    <script type="module">
+    // Re-import Firebase so this classic IIFE-style block can reach the db.
+    // (The main module script above already loaded it; we just grab the same
+    //  app instance via getApp so we don't double-initialise.)
+    import { getApp }        from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getDatabase, ref, onValue, set, serverTimestamp }
+                             from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+
+    (function() {
+        const TRACKS      = ['1.mp3', '2.mp3', '3.mp3'];
+        const TRACK_NAMES = ['Track 1', 'Track 2', 'Track 3'];
+
+        // How far (seconds) we allow the local position to drift before we
+        // snap-seek to correct it.
+        const SYNC_TOLERANCE  = 1.5;
+        // How often (ms) we push the current state to Firebase (admin cadence).
+        const PUSH_INTERVAL   = 5000;
+        // How often (ms) a non-admin listener re-checks drift.
+        const CHECK_INTERVAL  = 3000;
+
+        let audio       = null;
+        let isMuted     = false;
+        let started     = false;
+        let isAdmin     = false;   // first user to write the sync node becomes admin
+        let pushTimer   = null;
+        let checkTimer  = null;
+
+        // The latest state received from Firebase
+        let syncState   = null;   // { trackIndex, startedAt, positionAtWrite }
+
+        try { isMuted = localStorage.getItem('realm_music_muted') === 'true'; } catch(e) {}
+
+        /* ── helpers ─────────────────────────────────────────── */
+
+        function fadeTo(targetVol, durationMs, cb) {
+            if (!audio) { if (cb) cb(); return; }
+            const startVol = audio.volume;
+            const steps    = 20;
+            const stepTime = durationMs / steps;
+            const stepVol  = (targetVol - startVol) / steps;
+            let step = 0;
+            const iv = setInterval(() => {
+                step++;
+                audio.volume = Math.max(0, Math.min(1, startVol + stepVol * step));
+                if (step >= steps) { clearInterval(iv); audio.volume = targetVol; if (cb) cb(); }
+            }, stepTime);
+        }
+
+        function updateToggleBtn() {
+            const btn = document.getElementById('music-toggle');
+            if (btn) btn.textContent = isMuted ? '🔇' : '🔊';
+        }
+
+        function showTrackLabel(idx) {
+            const label = document.getElementById('music-track-label');
+            if (!label) return;
+            label.textContent = '♪ ' + TRACK_NAMES[idx];
+            label.style.display = 'block';
+            label.style.opacity = '1';
+            clearTimeout(label._hideTimer);
+            label._hideTimer = setTimeout(() => {
+                label.style.opacity = '0';
+                setTimeout(() => label.style.display = 'none', 500);
+            }, 3000);
+        }
+
+        /* ── compute expected playback position from a sync snapshot ── */
+        function expectedPosition(state) {
+            // state.positionAtWrite  = audio.currentTime at the moment of the write
+            // state.clientTimestamp  = Date.now() at the moment of the write (written by admin)
+            const elapsed = (Date.now() - state.clientTimestamp) / 1000;
+            return state.positionAtWrite + elapsed;
+        }
+
+        /* ── apply a Firebase sync state to local audio ───────── */
+        function applyState(state) {
+            if (!audio) return;
+            const targetTrack = state.trackIndex;
+
+            // Need to switch track?
+            if (audio.src !== location.origin + '/' + TRACKS[targetTrack] &&
+                !audio.src.endsWith(TRACKS[targetTrack])) {
+                fadeTo(0, 400, () => {
+                    audio.src = TRACKS[targetTrack];
+                    audio.load();
+                    const targetPos = expectedPosition(state);
+                    audio.addEventListener('canplay', function seek() {
+                        audio.removeEventListener('canplay', seek);
+                        audio.currentTime = Math.min(targetPos, audio.duration || 0);
+                        audio.play().then(() => {
+                            if (!isMuted) fadeTo(0.35, 600);
+                            showTrackLabel(targetTrack);
+                        }).catch(e => console.warn('[Music] play blocked:', e));
+                    });
+                });
+                return;
+            }
+
+            // Same track — check drift
+            const targetPos = expectedPosition(state);
+            const drift     = Math.abs(audio.currentTime - targetPos);
+            if (drift > SYNC_TOLERANCE) {
+                console.log(`[Music] Syncing drift ${drift.toFixed(2)}s → seeking to ${targetPos.toFixed(2)}s`);
+                audio.currentTime = Math.min(targetPos, audio.duration || targetPos);
+            }
+            if (audio.paused && !isMuted) {
+                audio.play().catch(() => {});
+            }
+        }
+
+        /* ── write current state to Firebase (admin only) ──────── */
+        function pushStateToFirebase() {
+            if (!audio || !isAdmin) return;
+            const db    = getDatabase(getApp());
+            const state = {
+                trackIndex      : TRACKS.indexOf(audio.src.split('/').pop()),
+                positionAtWrite : audio.currentTime,
+                clientTimestamp : Date.now(),   // wall-clock written by admin
+                updatedAt       : serverTimestamp()
+            };
+            set(ref(db, 'music_sync'), state).catch(e => console.warn('[Music] push error', e));
+        }
+
+        /* ── track ended: admin advances, writes new state ──────── */
+        function onTrackEnded() {
+            if (!isAdmin) return;
+            const db       = getDatabase(getApp());
+            const nextIdx  = (TRACKS.indexOf(audio.src.split('/').pop()) + 1) % TRACKS.length;
+            audio.src      = TRACKS[nextIdx];
+            audio.load();
+            audio.play().then(() => {
+                if (!isMuted) fadeTo(0.35, 600);
+                showTrackLabel(nextIdx);
+                pushStateToFirebase();
+            }).catch(() => {});
+        }
+
+        /* ── start ───────────────────────────────────────────── */
+        window.startMusic = function() {
+            if (started) return;
+            started = true;
+
+            const db        = getDatabase(getApp());
+            const syncRef   = ref(db, 'music_sync');
+
+            // Show toggle button
+            const btn = document.getElementById('music-toggle');
+            if (btn) btn.style.display = 'inline';
+            updateToggleBtn();
+
+            // Create the audio element (don't play yet)
+            audio         = new Audio();
+            audio.volume  = isMuted ? 0 : 0.35;
+            audio.loop    = false;
+            audio.addEventListener('ended', onTrackEnded);
+            audio.addEventListener('error', () => {
+                console.warn('[Music] load error, skipping');
+                if (isAdmin) onTrackEnded();
+            });
+
+            // Listen for sync state changes in real-time
+            onValue(syncRef, (snap) => {
+                const data = snap.val();
+
+                if (!data) {
+                    // Nobody has written yet — this client becomes admin
+                    isAdmin = true;
+                    console.log('[Music] No sync state found — becoming admin');
+                    const startIdx = Math.floor(Math.random() * TRACKS.length);
+                    audio.src = TRACKS[startIdx];
+                    audio.load();
+                    audio.play().then(() => {
+                        if (!isMuted) audio.volume = 0.35;
+                        showTrackLabel(startIdx);
+                        pushStateToFirebase();
+                        pushTimer = setInterval(pushStateToFirebase, PUSH_INTERVAL);
+                    }).catch(e => console.warn('[Music] autoplay blocked (need user gesture first):', e));
+                    return;
+                }
+
+                syncState = data;
+
+                if (isAdmin) return; // admin drives, doesn't follow
+
+                // Follower: apply state
+                applyState(data);
+            });
+
+            // Followers: periodically re-check drift even without a Firebase event
+            checkTimer = setInterval(() => {
+                if (!isAdmin && syncState) applyState(syncState);
+            }, CHECK_INTERVAL);
+        };
+
+        /* ── mute toggle ─────────────────────────────────────── */
+        window.toggleMusic = function() {
+            isMuted = !isMuted;
+            try { localStorage.setItem('realm_music_muted', isMuted); } catch(e) {}
+            if (audio) {
+                if (isMuted) {
+                    fadeTo(0, 400);
+                } else {
+                    fadeTo(0.35, 400);
+                    if (audio.paused) audio.play().catch(() => {});
+                }
+            }
+            updateToggleBtn();
+        };
+
+        document.addEventListener('DOMContentLoaded', updateToggleBtn);
+    })();
+    </script>
 
 </body>
 
