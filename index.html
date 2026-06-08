@@ -6587,7 +6587,10 @@
                 <p class="section-desc">Infiltrate active online users to steal unlocked relics</p>
                 <div id="container-steal-cooldown"
                     style="display:none; background:rgba(239,68,68,0.2); border:1px solid var(--accent-red); padding:12px; border-radius:8px; margin-bottom:12px; font-weight:bold; text-align:center; color:var(--accent-red);">
-                    Steal systems recharging! Cooldown active.
+                    <div id="steal-cooldown-text">Steal systems recharging! Cooldown active.</div>
+                    <button id="btn-skip-steal-cooldown" onclick="skipStealCooldown()" style="margin-top:10px; padding:8px 18px; background:linear-gradient(135deg,#f59e0b,#ef4444); color:#fff; border:none; border-radius:8px; font-weight:800; font-size:0.9rem; cursor:pointer; letter-spacing:0.03em; box-shadow:0 0 12px rgba(245,158,11,0.4);">
+                        ⚡ Skip Cooldown — €250,000
+                    </button>
                 </div>
                 <div class="panel-glass">
                     <div id="container-online-players"></div>
@@ -7080,6 +7083,8 @@
                     <button class="btn-action btn-blue" id="btn-sell-all-profile"
                         style="margin-bottom:12px; min-height:44px;">SELL ALL</button>
                     <div id="prestige-profile-panel"></div>
+                    <button class="btn-action btn-blue" onclick="openRedeemModal()"
+                        style="margin-bottom:12px; min-height:44px;">🎟️ REDEEM CODE</button>
                     <button class="btn-action btn-outline"
                         style="border-color:var(--accent-red); color:var(--accent-red);" id="action-signout">SIGN OUT
                         OPERATIONS</button>
@@ -10380,7 +10385,7 @@
             if (userDataRecord.stealCooldownExpiry && userDataRecord.stealCooldownExpiry > currentSystemEpochTime) {
                 document.getElementById('container-steal-cooldown').style.display = "block";
                 const clRemaining = userDataRecord.stealCooldownExpiry - currentSystemEpochTime;
-                document.getElementById('container-steal-cooldown').innerText = `Steal infrastructure recharging! Available in: ${Math.ceil(clRemaining / 1000)}s`;
+                document.getElementById('steal-cooldown-text').innerText = `Steal infrastructure recharging! Available in: ${Math.ceil(clRemaining / 1000)}s`;
             } else {
                 document.getElementById('container-steal-cooldown').style.display = "none";
             }
@@ -11514,6 +11519,27 @@
                 targetContainerNode.innerHTML = `<div style="text-align:center; padding:32px; color:#6b7280; font-weight:bold;">No active alternative network operations entities discovered online.</div>`;
             }
         }
+
+        window.skipStealCooldown = async function () {
+            const SKIP_COST = 250000;
+            if ((userDataRecord.money || 0) < SKIP_COST) {
+                return showToast(`Need €250,000 to skip cooldown.`, 'error');
+            }
+            try {
+                const updates = {};
+                updates[`users/${activeUserSession.uid}/stealCooldownExpiry`] = 0;
+                updates[`users/${activeUserSession.uid}/money`] = (userDataRecord.money || 0) - SKIP_COST;
+                await update(ref(db, '/'), updates);
+                userDataRecord.stealCooldownExpiry = 0;
+                userDataRecord.money = (userDataRecord.money || 0) - SKIP_COST;
+                document.getElementById('container-steal-cooldown').style.display = 'none';
+                document.getElementById("hud-currency").innerText = `€${formatNum(userDataRecord.money || 0)}`;
+                showToast('⚡ Steal cooldown skipped!', 'success');
+            } catch (e) {
+                console.error('[SkipCooldown] error', e);
+                showToast('Failed to skip cooldown. Try again.', 'error');
+            }
+        };
 
         window.executeTargetInventoryInspectionScan = async function (targetPlayerUid) {
             if (userDataRecord.stealCooldownExpiry && userDataRecord.stealCooldownExpiry > Date.now()) {
@@ -17919,6 +17945,135 @@ Respond with ONLY the chat message text — no JSON, no labels, no quotes, just 
         // END GLOBAL CHAT
         // =========================================================
 
+
+        // =========================================================
+        // REDEEM CODE SYSTEM
+        // =========================================================
+        window.openRedeemModal = function() {
+            const mask = document.getElementById('redeem-modal-mask');
+            mask.style.display = 'flex';
+            document.getElementById('redeem-code-input').value = '';
+            document.getElementById('redeem-result').style.display = 'none';
+            setTimeout(() => document.getElementById('redeem-code-input').focus(), 100);
+        };
+
+        window.closeRedeemModal = function() {
+            document.getElementById('redeem-modal-mask').style.display = 'none';
+        };
+
+        document.getElementById('redeem-modal-mask').addEventListener('click', function(e) {
+            if (e.target === this) window.closeRedeemModal();
+        });
+
+        document.getElementById('redeem-code-input').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') window.submitRedeemCode();
+        });
+
+        window.submitRedeemCode = async function() {
+            const rawInput = document.getElementById('redeem-code-input').value.trim().toUpperCase().replace(/\s+/g,'');
+            if (!rawInput) return;
+
+            const btn = document.getElementById('redeem-submit-btn');
+            const resultDiv = document.getElementById('redeem-result');
+            btn.disabled = true;
+            btn.textContent = 'Checking…';
+            resultDiv.style.display = 'none';
+
+            const showResult = (msg, ok) => {
+                resultDiv.textContent = msg;
+                resultDiv.style.display = 'block';
+                resultDiv.style.background = ok ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)';
+                resultDiv.style.border = ok ? '1px solid rgba(16,185,129,0.35)' : '1px solid rgba(239,68,68,0.35)';
+                resultDiv.style.color = ok ? '#10b981' : '#ef4444';
+                btn.disabled = false;
+                btn.textContent = 'CLAIM REWARDS';
+            };
+
+            try {
+                const codeSnap = await get(ref(db, `codes/${rawInput}`));
+                if (!codeSnap.exists()) return showResult('❌ Invalid code.', false);
+
+                const code = codeSnap.val();
+                const now = Date.now();
+                const uid = activeUserSession.uid;
+
+                if (!code.active) return showResult('❌ This code is no longer active.', false);
+                if (code.expiresAt && code.expiresAt < now) return showResult('❌ This code has expired.', false);
+                if (code.maxUses && code.uses >= code.maxUses) return showResult('❌ This code has reached its usage limit.', false);
+
+                // Check per-user usage
+                const userUseSnap = await get(ref(db, `code_redemptions_users/${rawInput}/${uid}`));
+                const userUses = userUseSnap.exists() ? (userUseSnap.val().count || 0) : 0;
+                const maxPerUser = code.maxPerUser || 1;
+                if (userUses >= maxPerUser) return showResult('❌ You have already used this code.', false);
+
+                // All checks passed — apply rewards
+                const updates = {};
+                const rewardLines = [];
+                const rewards = code.rewards || {};
+
+                if (rewards.money) {
+                    const newMoney = (userDataRecord.money || 0) + rewards.money;
+                    updates[`users/${uid}/money`] = newMoney;
+                    userDataRecord.money = newMoney;
+                    rewardLines.push(`💰 €${rewards.money.toLocaleString()}`);
+                }
+                if (rewards.xp) {
+                    const newXP = (userDataRecord.xp || 0) + rewards.xp;
+                    updates[`users/${uid}/xp`] = newXP;
+                    userDataRecord.xp = newXP;
+                    rewardLines.push(`⭐ ${rewards.xp.toLocaleString()} XP`);
+                }
+                if (rewards.xpb) {
+                    const currentXPB = userDataRecord.battlePass?.xpb || 0;
+                    const newXPB = currentXPB + rewards.xpb;
+                    updates[`users/${uid}/battlePass/xpb`] = newXPB;
+                    if (!userDataRecord.battlePass) userDataRecord.battlePass = {};
+                    userDataRecord.battlePass.xpb = newXPB;
+                    rewardLines.push(`🎖️ ${rewards.xpb} XPB`);
+                }
+
+                // Increment code usage counter
+                updates[`codes/${rawInput}/uses`] = (code.uses || 0) + 1;
+
+                // Log per-user redemption
+                updates[`code_redemptions_users/${rawInput}/${uid}/count`] = userUses + 1;
+                updates[`code_redemptions_users/${rawInput}/${uid}/lastAt`] = now;
+
+                // Log global redemption
+                const logKey = `${rawInput}_${uid}_${now}`;
+                updates[`code_redemptions/${logKey}`] = { code: rawInput, uid, redeemedAt: now };
+
+                await update(ref(db, '/'), updates);
+
+                // Grant pack last (needs separate flow)
+                if (rewards.pack) {
+                    rewardLines.push(`📦 ${rewards.pack.toUpperCase()} Pack`);
+                    if (typeof grantBattlePassPack === 'function') {
+                        await grantBattlePassPack(rewards.pack);
+                    }
+                }
+
+                // Update HUD
+                document.getElementById('hud-currency').innerText = `€${formatNum(userDataRecord.money || 0)}`;
+
+                showResult(`✅ Rewards claimed! ${rewardLines.join(' + ')}`, true);
+                showToast(`🎟️ Code redeemed! ${rewardLines.join(' + ')}`, 'success');
+
+                // Auto-close after 2.5s
+                setTimeout(() => window.closeRedeemModal(), 2500);
+
+            } catch(e) {
+                console.error('[Redeem]', e);
+                showResult('❌ Error redeeming code. Try again.', false);
+                btn.disabled = false;
+                btn.textContent = 'CLAIM REWARDS';
+            }
+        };
+        // =========================================================
+        // END REDEEM CODE SYSTEM
+        // =========================================================
+
         // =========================================================
         // END SHADOWBOT
         // =========================================================
@@ -17927,6 +18082,25 @@ Respond with ONLY the chat message text — no JSON, no labels, no quotes, just 
         style="position: fixed; top: 12px; left: 12px; z-index: 9999999999999; color: rgba(255, 255, 255, 0.4); font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
         V:10.5
     </div>
+
+    <!-- ═══════════════════════════════════════════
+         REDEEM CODE MODAL
+    ═══════════════════════════════════════════ -->
+    <div id="redeem-modal-mask" style="display:none; position:fixed; inset:0; background:rgba(5,8,16,0.85); z-index:9000; align-items:center; justify-content:center; backdrop-filter:blur(8px);">
+      <div style="background:#111827; border:1px solid rgba(99,130,200,0.25); border-radius:20px; padding:28px 24px; width:90%; max-width:380px; text-align:center; box-shadow:0 0 60px rgba(37,99,235,0.15);">
+        <div style="font-size:2rem; margin-bottom:8px;">🎟️</div>
+        <h2 style="font-family:'Orbitron',sans-serif; font-size:1rem; font-weight:900; color:#3b82f6; letter-spacing:0.06em; margin-bottom:6px;">REDEEM CODE</h2>
+        <p style="font-size:0.78rem; color:#6b7280; margin-bottom:20px;">Enter your code to claim rewards</p>
+        <input id="redeem-code-input" type="text" placeholder="Enter code e.g. ABCDE-FGHIJ"
+          style="width:100%; background:#1f2937; border:1px solid rgba(99,130,200,0.25); border-radius:10px; color:#f3f4f6; font-family:'Orbitron',sans-serif; font-size:1rem; font-weight:700; letter-spacing:0.1em; padding:13px 16px; outline:none; text-align:center; text-transform:uppercase; margin-bottom:16px;">
+        <div id="redeem-result" style="display:none; margin-bottom:14px; padding:12px; border-radius:10px; font-size:0.84rem; font-weight:700;"></div>
+        <div style="display:flex; gap:10px;">
+          <button onclick="closeRedeemModal()" style="flex:1; padding:12px; background:transparent; border:1px solid rgba(99,130,200,0.25); border-radius:10px; color:#9ca3af; font-family:'Outfit',sans-serif; font-weight:700; cursor:pointer; font-size:0.88rem;">Cancel</button>
+          <button id="redeem-submit-btn" onclick="submitRedeemCode()" style="flex:2; padding:12px; background:#2563eb; border:none; border-radius:10px; color:#fff; font-family:'Outfit',sans-serif; font-weight:800; cursor:pointer; font-size:0.88rem; letter-spacing:0.03em;">CLAIM REWARDS</button>
+        </div>
+      </div>
+    </div>
+
 </body>
 
 </html>
