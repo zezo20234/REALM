@@ -18787,39 +18787,20 @@ Respond with ONLY the chat message text — no JSON, no labels, no quotes, just 
     <div id="music-track-label">♪ Track 1</div>
 
     <!-- ═══════════════════════════════════════════
-         MUSIC SYSTEM — FIREBASE SYNCED
-         All users hear the same track at the same
-         position in real-time via /music_sync node.
+         MUSIC SYSTEM — LOCAL ONLY
+         Each user plays tracks independently.
+         No Firebase sync — no position resets.
     ═══════════════════════════════════════════ -->
-    <script type="module">
-    // Re-import Firebase so this classic IIFE-style block can reach the db.
-    // (The main module script above already loaded it; we just grab the same
-    //  app instance via getApp so we don't double-initialise.)
-    import { getApp }        from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-    import { getDatabase, ref, onValue, set, serverTimestamp }
-                             from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
-
+    <script>
+    // Simple local music player — no Firebase dependency.
     (function() {
-        const TRACKS      = ['1.mp3', '2.mp3', '3.mp3', '4.mp3', '5.mp3']; // must match server-stored filenames
-        const TRACK_NAMES = ['Track 1', 'Track 2', 'Track 3'];
-
-        // How far (seconds) we allow the local position to drift before we
-        // snap-seek to correct it.
-        const SYNC_TOLERANCE  = 1.5;
-        // How often (ms) we push the current state to Firebase (admin cadence).
-        const PUSH_INTERVAL   = 5000;
-        // How often (ms) a non-admin listener re-checks drift.
-        const CHECK_INTERVAL  = 3000;
+        const TRACKS      = ['1.mp3', '2.mp3', '3.mp3', '4.mp3', '5.mp3'];
+        const TRACK_NAMES = ['Track 1', 'Track 2', 'Track 3', 'Track 4', 'Track 5'];
 
         let audio       = null;
         let isMuted     = false;
         let started     = false;
-        let isAdmin     = false;   // first user to write the sync node becomes admin
-        let pushTimer   = null;
-        let checkTimer  = null;
-
-        // The latest state received from Firebase
-        let syncState   = null;   // { trackIndex, startedAt, positionAtWrite }
+        let currentIdx  = 0;
 
         try { isMuted = localStorage.getItem('realm_music_muted') === 'true'; } catch(e) {}
 
@@ -18847,7 +18828,7 @@ Respond with ONLY the chat message text — no JSON, no labels, no quotes, just 
         function showTrackLabel(idx) {
             const label = document.getElementById('music-track-label');
             if (!label) return;
-            label.textContent = '♪ ' + TRACK_NAMES[idx];
+            label.textContent = '♪ ' + (TRACK_NAMES[idx] || ('Track ' + (idx + 1)));
             label.style.display = 'block';
             label.style.opacity = '1';
             clearTimeout(label._hideTimer);
@@ -18857,74 +18838,14 @@ Respond with ONLY the chat message text — no JSON, no labels, no quotes, just 
             }, 3000);
         }
 
-        /* ── compute expected playback position from a sync snapshot ── */
-        function expectedPosition(state) {
-            // state.positionAtWrite  = audio.currentTime at the moment of the write
-            // state.clientTimestamp  = Date.now() at the moment of the write (written by admin)
-            const elapsed = (Date.now() - state.clientTimestamp) / 1000;
-            return state.positionAtWrite + elapsed;
-        }
-
-        /* ── apply a Firebase sync state to local audio ───────── */
-        function applyState(state) {
-            if (!audio) return;
-            const targetTrack = state.trackIndex;
-
-            // Need to switch track?
-            if (audio.src !== location.origin + '/' + TRACKS[targetTrack] &&
-                !audio.src.endsWith(TRACKS[targetTrack])) {
-                fadeTo(0, 400, () => {
-                    audio.src = TRACKS[targetTrack];
-                    audio.load();
-                    const targetPos = expectedPosition(state);
-                    audio.addEventListener('canplay', function seek() {
-                        audio.removeEventListener('canplay', seek);
-                        audio.currentTime = Math.min(targetPos, audio.duration || 0);
-                        audio.play().then(() => {
-                            if (!isMuted) fadeTo(0.35, 600);
-                            showTrackLabel(targetTrack);
-                        }).catch(e => console.warn('[Music] play blocked:', e));
-                    });
-                });
-                return;
-            }
-
-            // Same track — check drift
-            const targetPos = expectedPosition(state);
-            const drift     = Math.abs(audio.currentTime - targetPos);
-            if (drift > SYNC_TOLERANCE) {
-                console.log(`[Music] Syncing drift ${drift.toFixed(2)}s → seeking to ${targetPos.toFixed(2)}s`);
-                audio.currentTime = Math.min(targetPos, audio.duration || targetPos);
-            }
-            if (audio.paused && !isMuted) {
-                audio.play().catch(() => {});
-            }
-        }
-
-        /* ── write current state to Firebase (admin only) ──────── */
-        function pushStateToFirebase() {
-            if (!audio || !isAdmin) return;
-            const db    = getDatabase(getApp());
-            const state = {
-                trackIndex      : TRACKS.indexOf(audio.src.split('/').pop()),
-                positionAtWrite : audio.currentTime,
-                clientTimestamp : Date.now(),   // wall-clock written by admin
-                updatedAt       : serverTimestamp()
-            };
-            set(ref(db, 'music_sync'), state).catch(e => console.warn('[Music] push error', e));
-        }
-
-        /* ── track ended: admin advances, writes new state ──────── */
+        /* ── advance to next track when current one ends ──────── */
         function onTrackEnded() {
-            if (!isAdmin) return;
-            const db       = getDatabase(getApp());
-            const nextIdx  = (TRACKS.indexOf(audio.src.split('/').pop()) + 1) % TRACKS.length;
-            audio.src      = TRACKS[nextIdx];
+            currentIdx = (currentIdx + 1) % TRACKS.length;
+            audio.src = TRACKS[currentIdx];
             audio.load();
             audio.play().then(() => {
                 if (!isMuted) fadeTo(0.35, 600);
-                showTrackLabel(nextIdx);
-                pushStateToFirebase();
+                showTrackLabel(currentIdx);
             }).catch(() => {});
         }
 
@@ -18933,56 +18854,29 @@ Respond with ONLY the chat message text — no JSON, no labels, no quotes, just 
             if (started) return;
             started = true;
 
-            const db        = getDatabase(getApp());
-            const syncRef   = ref(db, 'music_sync');
-
             // Show toggle button
             const btn = document.getElementById('music-toggle');
             if (btn) btn.style.display = 'inline';
             updateToggleBtn();
 
-            // Create the audio element (don't play yet)
+            // Pick a random starting track
+            currentIdx    = Math.floor(Math.random() * TRACKS.length);
+
             audio         = new Audio();
             audio.volume  = isMuted ? 0 : 0.35;
             audio.loop    = false;
+            audio.src     = TRACKS[currentIdx];
+            audio.load();
             audio.addEventListener('ended', onTrackEnded);
             audio.addEventListener('error', () => {
-                console.warn('[Music] load error, skipping');
-                if (isAdmin) onTrackEnded();
+                console.warn('[Music] load error, skipping track');
+                onTrackEnded();
             });
 
-            // Listen for sync state changes in real-time
-            onValue(syncRef, (snap) => {
-                const data = snap.val();
-
-                if (!data) {
-                    // Nobody has written yet — this client becomes admin
-                    isAdmin = true;
-                    console.log('[Music] No sync state found — becoming admin');
-                    const startIdx = Math.floor(Math.random() * TRACKS.length);
-                    audio.src = TRACKS[startIdx];
-                    audio.load();
-                    audio.play().then(() => {
-                        if (!isMuted) audio.volume = 0.35;
-                        showTrackLabel(startIdx);
-                        pushStateToFirebase();
-                        pushTimer = setInterval(pushStateToFirebase, PUSH_INTERVAL);
-                    }).catch(e => console.warn('[Music] autoplay blocked (need user gesture first):', e));
-                    return;
-                }
-
-                syncState = data;
-
-                if (isAdmin) return; // admin drives, doesn't follow
-
-                // Follower: apply state
-                applyState(data);
-            });
-
-            // Followers: periodically re-check drift even without a Firebase event
-            checkTimer = setInterval(() => {
-                if (!isAdmin && syncState) applyState(syncState);
-            }, CHECK_INTERVAL);
+            audio.play().then(() => {
+                if (!isMuted) audio.volume = 0.35;
+                showTrackLabel(currentIdx);
+            }).catch(e => console.warn('[Music] autoplay blocked (need user gesture first):', e));
         };
 
         /* ── mute toggle ─────────────────────────────────────── */
