@@ -18763,7 +18763,7 @@ Respond with ONLY the chat message text — no JSON, no labels, no quotes, just 
     </script>
     <div
         style="position: fixed; top: 12px; left: 12px; z-index: 9999999999999; color: rgba(255, 255, 255, 0.4); font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
-        V:11.0
+        V:11.1
     </div>
 
     <!-- ═══════════════════════════════════════════
@@ -18788,25 +18788,48 @@ Respond with ONLY the chat message text — no JSON, no labels, no quotes, just 
     <div id="music-track-label">♪ Track 1</div>
 
     <!-- ═══════════════════════════════════════════
-         MUSIC SYSTEM — FIREBASE SYNCED
-         All users listen to the same track.
+         MUSIC SYSTEM — FIREBASE TIME-SYNCED
+         All users hear the same track at the same position.
          Firebase path: music/state → { trackIdx, startedAt }
-         Any client can advance the track; all others follow.
+         Clock skew corrected via .info/serverTimeOffset.
+         Seeks audio to elapsed position on canplay.
     ═══════════════════════════════════════════ -->
     <script>
-    // Firebase-synced music player — all users hear the same track.
+    // Firebase time-synced music player — same track, same position for all users.
     (function() {
         const TRACKS      = ['1.mp3', '2.mp3', '3.mp3', '4.mp3', '5.mp3'];
         const TRACK_NAMES = ['Track 1', 'Track 2', 'Track 3', 'Track 4', 'Track 5'];
-        const FB_PATH     = 'music/state'; // { trackIdx: N, startedAt: timestamp }
+        const FB_PATH     = 'music/state'; // { trackIdx: N, startedAt: ms-timestamp }
 
-        let audio        = null;
-        let isMuted      = false;
-        let started      = false;
-        let currentIdx   = 0;
-        let fbUnsub      = null; // Firebase listener unsubscribe
+        let audio         = null;
+        let isMuted       = false;
+        let started       = false;
+        let currentIdx    = 0;
+        let currentStart  = 0;   // server ms when current track started
+        let serverOffset  = 0;   // Date.now() + serverOffset ≈ server time
+        let offsetReady   = false;
 
         try { isMuted = localStorage.getItem('realm_music_muted') === 'true'; } catch(e) {}
+
+        /* ── server clock ────────────────────────────────────── */
+
+        // Returns best-guess server time in ms
+        function serverNow() { return Date.now() + serverOffset; }
+
+        // Fetch .info/serverTimeOffset once; retry until _realm ready
+        function fetchOffset() {
+            const realm = window._realm;
+            if (!realm) { setTimeout(fetchOffset, 600); return; }
+            const db    = realm.getDb();
+            const refFn = realm.getRef();
+            const onVal = realm.getOnValue();
+            if (!db || !refFn || !onVal) { setTimeout(fetchOffset, 600); return; }
+            // onValue fires immediately with cached value then updates
+            onVal(refFn(db, '.info/serverTimeOffset'), snap => {
+                serverOffset = snap.val() || 0;
+                offsetReady  = true;
+            });
+        }
 
         /* ── helpers ─────────────────────────────────────────── */
 
@@ -18842,18 +18865,46 @@ Respond with ONLY the chat message text — no JSON, no labels, no quotes, just 
             }, 3000);
         }
 
-        /* ── load & play a specific track index (called by Firebase listener) ── */
-        function applyTrack(idx) {
+        /* ── seek to the correct position once audio can play ── */
+        function seekToSync(startedAt) {
+            if (!audio || !startedAt) return;
+            const elapsedSec = (serverNow() - startedAt) / 1000;
+            if (elapsedSec > 0 && elapsedSec < (audio.duration || Infinity)) {
+                audio.currentTime = elapsedSec;
+            }
+        }
+
+        /* ── load & play a track, seeking to the synced position ── */
+        function applyTrack(idx, startedAt) {
             if (!audio) return;
-            if (idx === currentIdx && !audio.paused && audio.src && audio.src.endsWith(TRACKS[idx])) return; // already on this track
-            currentIdx = idx;
-            fadeTo(0, 300, () => {
+
+            // Already playing this exact track — just re-seek if needed (new joiner catching up)
+            const alreadyThis = (idx === currentIdx &&
+                                 audio.src && (audio.src.endsWith('/' + TRACKS[idx]) || audio.src === TRACKS[idx]) &&
+                                 !audio.paused);
+            if (alreadyThis) {
+                seekToSync(startedAt);
+                return;
+            }
+
+            currentIdx   = idx;
+            currentStart = startedAt || 0;
+
+            // Fade out before switching
+            fadeTo(0, 250, () => {
                 audio.src = TRACKS[currentIdx];
                 audio.load();
-                audio.play().then(() => {
-                    if (!isMuted) fadeTo(0.35, 600);
-                    showTrackLabel(currentIdx);
-                }).catch(e => console.warn('[Music] play blocked:', e));
+
+                // One-time canplay handler — seek to correct position before unmuting
+                const onCanPlay = () => {
+                    audio.removeEventListener('canplay', onCanPlay);
+                    seekToSync(currentStart);
+                    audio.play().then(() => {
+                        if (!isMuted) fadeTo(0.35, 500);
+                        showTrackLabel(currentIdx);
+                    }).catch(e => console.warn('[Music] play blocked:', e));
+                };
+                audio.addEventListener('canplay', onCanPlay);
             });
         }
 
@@ -18861,26 +18912,26 @@ Respond with ONLY the chat message text — no JSON, no labels, no quotes, just 
         function advanceTrackInFirebase() {
             const realm = window._realm;
             if (!realm) return;
-            const db      = realm.getDb();
-            const refFn   = realm.getRef();
-            const setFn   = realm.getSet();
-            const stFn    = realm.getServerTimestamp();
+            const db    = realm.getDb();
+            const refFn = realm.getRef();
+            const setFn = realm.getSet();
+            const stFn  = realm.getServerTimestamp();
             if (!db || !refFn || !setFn) return;
             const nextIdx = (currentIdx + 1) % TRACKS.length;
             setFn(refFn(db, FB_PATH), { trackIdx: nextIdx, startedAt: stFn() })
                 .catch(e => console.warn('[Music] Firebase write failed:', e));
-            // applyTrack will be called when the Firebase listener fires
+            // Firebase listener will fire → applyTrack called for all clients
         }
 
         /* ── subscribe to Firebase music/state ───────────────── */
         function subscribeFirebase() {
             const realm = window._realm;
             if (!realm) { setTimeout(subscribeFirebase, 800); return; }
-            const db      = realm.getDb();
-            const refFn   = realm.getRef();
-            const onVal   = realm.getOnValue();
-            const setFn   = realm.getSet();
-            const stFn    = realm.getServerTimestamp();
+            const db    = realm.getDb();
+            const refFn = realm.getRef();
+            const onVal = realm.getOnValue();
+            const setFn = realm.getSet();
+            const stFn  = realm.getServerTimestamp();
             if (!db || !refFn || !onVal) { setTimeout(subscribeFirebase, 800); return; }
 
             // Bootstrap: if no state exists yet, write track 0
@@ -18890,12 +18941,13 @@ Respond with ONLY the chat message text — no JSON, no labels, no quotes, just 
                 }
             }).catch(() => {});
 
-            // Real-time listener
-            fbUnsub = onVal(refFn(db, FB_PATH), snap => {
+            // Real-time listener — fires immediately on connect, then on every change
+            onVal(refFn(db, FB_PATH), snap => {
                 if (!snap.exists()) return;
-                const state = snap.val();
-                const idx   = typeof state.trackIdx === 'number' ? state.trackIdx : 0;
-                applyTrack(idx);
+                const state     = snap.val();
+                const idx       = typeof state.trackIdx === 'number' ? state.trackIdx : 0;
+                const startedAt = typeof state.startedAt === 'number' ? state.startedAt : 0;
+                applyTrack(idx, startedAt);
             });
         }
 
@@ -18912,14 +18964,15 @@ Respond with ONLY the chat message text — no JSON, no labels, no quotes, just 
             audio.volume = isMuted ? 0 : 0.35;
             audio.loop   = false;
 
-            // When a track ends, push the next track to Firebase → all clients follow
+            // When a track ends naturally, push next track to Firebase → all clients follow
             audio.addEventListener('ended', advanceTrackInFirebase);
             audio.addEventListener('error', () => {
                 console.warn('[Music] load error, advancing track');
                 advanceTrackInFirebase();
             });
 
-            // Connect to Firebase (retries until _realm is ready)
+            // Fetch clock offset first, then subscribe (offset used in seekToSync)
+            fetchOffset();
             subscribeFirebase();
         };
 
