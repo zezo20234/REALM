@@ -2538,6 +2538,87 @@
             }
         }
 
+        /* --- PACK PRICE SALE DISPLAY --- */
+        .pack-price-original {
+            text-decoration: line-through;
+            color: #6b7280;
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-right: 4px;
+        }
+        .pack-price-sale {
+            color: #34d399;
+            font-weight: 900;
+            font-size: 0.9rem;
+        }
+        .pack-price-normal {
+            color: var(--accent-green);
+            font-weight: 800;
+            font-size: 0.85rem;
+        }
+        .pack-sale-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #dc2626, #ef4444);
+            color: white;
+            font-size: 0.6rem;
+            font-weight: 900;
+            padding: 2px 6px;
+            border-radius: 999px;
+            letter-spacing: 0.04em;
+            margin-left: 4px;
+            vertical-align: middle;
+        }
+        .pack-sale-timer {
+            font-size: 0.65rem;
+            color: #fbbf24;
+            font-weight: 700;
+            margin-top: 2px;
+        }
+        /* Admin price pack checkbox items */
+        .admin-price-pack-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-glow);
+            border-radius: 7px;
+            padding: 6px 8px;
+            cursor: pointer;
+            transition: border-color 0.15s;
+            user-select: none;
+        }
+        .admin-price-pack-item.selected {
+            border-color: #10b981;
+            background: rgba(16,185,129,0.1);
+        }
+        .admin-price-pack-item .pack-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .admin-price-pack-item .pack-name {
+            font-size: 0.72rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            flex: 1;
+        }
+        .admin-price-pack-item .pack-cur-price {
+            font-size: 0.68rem;
+            color: #9ca3af;
+            font-weight: 700;
+        }
+        .admin-price-pack-item .pack-reset-btn {
+            background: rgba(239,68,68,0.15);
+            border: 1px solid rgba(239,68,68,0.3);
+            color: #fca5a5;
+            font-size: 0.6rem;
+            font-weight: 800;
+            padding: 2px 5px;
+            border-radius: 4px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
         /* --- ADMIN SYSTEM --- */
         #btn-admin-lock {
             position: fixed;
@@ -7840,6 +7921,58 @@
                 <div id="admin-pack-restock-list" style="display:flex;flex-direction:column;gap:6px;"></div>
             </div>
 
+            <div class="admin-panel-section" id="admin-price-section">
+                <h4>💰 PACK PRICE MANAGER</h4>
+                <p style="font-size:0.78rem;color:#94a3b8;margin-bottom:12px;">Change prices or add discounts on any pack. Players will see the original price crossed out with the new price and % off badge.</p>
+
+                <!-- Bulk actions -->
+                <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;">
+                    <button type="button" onclick="adminPriceSelectAll()" style="flex:1;min-width:80px;background:rgba(37,99,235,0.2);border:1px solid rgba(37,99,235,0.5);color:#93c5fd;font-size:0.75rem;font-weight:800;padding:7px 8px;border-radius:7px;cursor:pointer;">SELECT ALL</button>
+                    <button type="button" onclick="adminPriceDeselectAll()" style="flex:1;min-width:80px;background:rgba(71,85,105,0.2);border:1px solid rgba(71,85,105,0.5);color:#94a3b8;font-size:0.75rem;font-weight:800;padding:7px 8px;border-radius:7px;cursor:pointer;">DESELECT ALL</button>
+                    <button type="button" onclick="adminPriceResetAll()" style="flex:1;min-width:80px;background:rgba(239,68,68,0.2);border:1px solid rgba(239,68,68,0.5);color:#fca5a5;font-size:0.75rem;font-weight:800;padding:7px 8px;border-radius:7px;cursor:pointer;">RESET ALL</button>
+                </div>
+
+                <!-- Pack checkboxes -->
+                <div id="admin-price-pack-list" style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:12px;max-height:200px;overflow-y:auto;padding-right:2px;"></div>
+
+                <!-- Change mode -->
+                <div style="display:flex;gap:6px;margin-bottom:10px;">
+                    <button type="button" id="admin-price-mode-flat" onclick="adminPriceSetMode('flat')" style="flex:1;background:rgba(16,185,129,0.25);border:2px solid #10b981;color:#6ee7b7;font-size:0.75rem;font-weight:900;padding:8px;border-radius:8px;cursor:pointer;">SET PRICE</button>
+                    <button type="button" id="admin-price-mode-pct" onclick="adminPriceSetMode('pct')" style="flex:1;background:rgba(71,85,105,0.15);border:1px solid #374151;color:#94a3b8;font-size:0.75rem;font-weight:900;padding:8px;border-radius:8px;cursor:pointer;">% DISCOUNT</button>
+                </div>
+
+                <!-- Flat price input -->
+                <div id="admin-price-flat-row" style="display:flex;gap:6px;margin-bottom:8px;align-items:center;">
+                    <span style="font-size:0.75rem;color:#9ca3af;font-weight:800;white-space:nowrap;">NEW PRICE €</span>
+                    <input type="number" id="admin-price-flat-val" min="0" step="1" placeholder="e.g. 250"
+                        style="flex:1;background:var(--bg-surface);border:1px solid var(--border-glow);color:white;padding:9px 10px;border-radius:8px;font-size:0.9rem;font-weight:800;outline:none;">
+                </div>
+
+                <!-- Percent discount input -->
+                <div id="admin-price-pct-row" style="display:none;flex;gap:6px;margin-bottom:8px;align-items:center;">
+                    <span style="font-size:0.75rem;color:#9ca3af;font-weight:800;white-space:nowrap;">DISCOUNT %</span>
+                    <input type="number" id="admin-price-pct-val" min="1" max="99" step="1" placeholder="e.g. 25"
+                        style="flex:1;background:var(--bg-surface);border:1px solid var(--border-glow);color:white;padding:9px 10px;border-radius:8px;font-size:0.9rem;font-weight:800;outline:none;">
+                </div>
+
+                <!-- Duration -->
+                <div class="admin-row" style="margin-bottom:10px;">
+                    <select id="admin-price-duration" style="flex:1;">
+                        <option value="0">No expiry (permanent)</option>
+                        <option value="30">30 minutes</option>
+                        <option value="60">1 hour</option>
+                        <option value="180">3 hours</option>
+                        <option value="360">6 hours</option>
+                        <option value="720">12 hours</option>
+                        <option value="1440">24 hours</option>
+                        <option value="4320">3 days</option>
+                        <option value="10080">7 days</option>
+                    </select>
+                    <button type="button" class="btn-lvlup" onclick="adminApplyPriceChanges()" style="white-space:nowrap;background:var(--accent-green);">APPLY</button>
+                </div>
+                <div id="admin-price-status" style="font-size:0.75rem;text-align:center;color:#6b7280;min-height:18px;"></div>
+            </div>
+
             <div class="admin-panel-section">
                 <h4>⚗️ CUSTOM PACK FORGE</h4>
 
@@ -8243,6 +8376,8 @@
 
         // Manual card registry — 375 cards, 25 per tier; chances sum to 100% per tier.
         window.PACK_METADATA = PACK_METADATA;
+        // Load any saved price overrides before first render
+        if (typeof loadPackPriceOverrides === 'function') loadPackPriceOverrides();
 
         // Battle pass free pack: credits money, ensures stock, then auto-buys (net zero cost)
         window.grantBattlePassPack = async function(packKey) {
@@ -9638,6 +9773,7 @@
             document.getElementById('btn-admin-lock')?.addEventListener('click', () => {
                 if (isAdminUnlocked()) {
                     openModal('modal-admin-panel');
+                    adminBuildPricePackList();
                     if (globalAdminState.activeQuestion?.id) subscribeAdminReplies(globalAdminState.activeQuestion.id);
                 } else openModal('modal-admin-pin');
             });
@@ -9650,6 +9786,7 @@
                     closeModal('modal-admin-pin');
                     document.getElementById('admin-pin-input').value = '';
                     openModal('modal-admin-panel');
+                    adminBuildPricePackList();
                     showToast('Admin panel unlocked.', 'success');
                 } else {
                     showToast('Invalid code.', 'error');
@@ -11069,6 +11206,217 @@
             }
         }
 
+        // ── PACK PRICE MANAGER ────────────────────────────────────────────────
+        // Stores { [packKey]: { originalPrice, salePrice, expiresAt } }
+        // expiresAt = 0 means permanent
+        window._packPriceOverrides = {};
+
+        function loadPackPriceOverrides() {
+            try {
+                const raw = localStorage.getItem('realm_pack_price_overrides_v1');
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    const now = Date.now();
+                    // Remove expired entries
+                    Object.keys(parsed).forEach(k => {
+                        if (parsed[k].expiresAt && parsed[k].expiresAt > 0 && now > parsed[k].expiresAt) {
+                            delete parsed[k];
+                        }
+                    });
+                    window._packPriceOverrides = parsed;
+                    // Apply to PACK_METADATA
+                    Object.keys(parsed).forEach(k => {
+                        if (PACK_METADATA[k]) PACK_METADATA[k].price = parsed[k].salePrice;
+                    });
+                }
+            } catch(e) {}
+        }
+
+        function savePackPriceOverrides() {
+            try { localStorage.setItem('realm_pack_price_overrides_v1', JSON.stringify(window._packPriceOverrides)); } catch(e) {}
+        }
+
+        function getEffectivePrice(packKey) {
+            const ov = window._packPriceOverrides[packKey];
+            if (!ov) return null; // no override
+            if (ov.expiresAt && ov.expiresAt > 0 && Date.now() > ov.expiresAt) {
+                // Expired — clean up
+                PACK_METADATA[packKey].price = ov.originalPrice;
+                delete window._packPriceOverrides[packKey];
+                savePackPriceOverrides();
+                return null;
+            }
+            return ov;
+        }
+
+        function buildPackPriceDisplay(packKey) {
+            const ov = getEffectivePrice(packKey);
+            const meta = PACK_METADATA[packKey];
+            if (!ov) {
+                return `<div class="pack-price-normal">€${formatNum(meta.price)}</div>`;
+            }
+            const pct = Math.round((1 - ov.salePrice / ov.originalPrice) * 100);
+            let timerHtml = '';
+            if (ov.expiresAt && ov.expiresAt > 0) {
+                const msLeft = ov.expiresAt - Date.now();
+                const minsLeft = Math.max(0, Math.ceil(msLeft / 60000));
+                const h = Math.floor(minsLeft / 60), m = minsLeft % 60;
+                const timeStr = h > 0 ? `${h}h ${m}m` : `${m}m`;
+                timerHtml = `<div class="pack-sale-timer">⏳ Sale ends in ${timeStr}</div>`;
+            }
+            return `
+                <div style="margin-bottom:12px;">
+                    <span class="pack-price-original">€${formatNum(ov.originalPrice)}</span>
+                    <span class="pack-price-sale">€${formatNum(ov.salePrice)}</span>
+                    <span class="pack-sale-badge">-${pct}% OFF</span>
+                    ${timerHtml}
+                </div>`;
+        }
+
+        // Build the admin price pack list
+        function adminBuildPricePackList() {
+            const list = document.getElementById('admin-price-pack-list');
+            if (!list) return;
+            list.innerHTML = '';
+            PACK_TYPES.forEach(pKey => {
+                const meta = PACK_METADATA[pKey];
+                const ov = window._packPriceOverrides[pKey];
+                const isSelected = list.querySelectorAll('.selected').length; // placeholder
+                const curPriceLabel = ov ? `€${formatNum(ov.salePrice)} <span style="color:#34d399;font-size:0.6rem;">SALE</span>` : `€${formatNum(meta.price)}`;
+                // get color safely
+                let dotColor = meta.color || '#60a5fa';
+                if (dotColor.startsWith('var(')) dotColor = '#60a5fa';
+
+                const item = document.createElement('div');
+                item.className = 'admin-price-pack-item';
+                item.dataset.pack = pKey;
+                item.innerHTML = `
+                    <div class="pack-dot" style="background:${dotColor};"></div>
+                    <span class="pack-name">${pKey}</span>
+                    <span class="pack-cur-price">${curPriceLabel}</span>
+                    ${ov ? `<button class="pack-reset-btn" onclick="event.stopPropagation();adminResetPackPrice('${pKey}')">↺</button>` : ''}
+                `;
+                item.addEventListener('click', () => {
+                    item.classList.toggle('selected');
+                });
+                list.appendChild(item);
+            });
+        }
+
+        window.adminPriceSelectAll = function() {
+            document.querySelectorAll('#admin-price-pack-list .admin-price-pack-item').forEach(el => el.classList.add('selected'));
+        };
+        window.adminPriceDeselectAll = function() {
+            document.querySelectorAll('#admin-price-pack-list .admin-price-pack-item').forEach(el => el.classList.remove('selected'));
+        };
+
+        let _adminPriceMode = 'flat';
+        window.adminPriceSetMode = function(mode) {
+            _adminPriceMode = mode;
+            const flatBtn = document.getElementById('admin-price-mode-flat');
+            const pctBtn = document.getElementById('admin-price-mode-pct');
+            const flatRow = document.getElementById('admin-price-flat-row');
+            const pctRow = document.getElementById('admin-price-pct-row');
+            if (mode === 'flat') {
+                flatBtn.style.background = 'rgba(16,185,129,0.25)';
+                flatBtn.style.border = '2px solid #10b981';
+                flatBtn.style.color = '#6ee7b7';
+                pctBtn.style.background = 'rgba(71,85,105,0.15)';
+                pctBtn.style.border = '1px solid #374151';
+                pctBtn.style.color = '#94a3b8';
+                flatRow.style.display = 'flex';
+                pctRow.style.display = 'none';
+            } else {
+                pctBtn.style.background = 'rgba(245,158,11,0.25)';
+                pctBtn.style.border = '2px solid #f59e0b';
+                pctBtn.style.color = '#fde68a';
+                flatBtn.style.background = 'rgba(71,85,105,0.15)';
+                flatBtn.style.border = '1px solid #374151';
+                flatBtn.style.color = '#94a3b8';
+                pctRow.style.display = 'flex';
+                flatRow.style.display = 'none';
+            }
+        };
+
+        window.adminApplyPriceChanges = function() {
+            const selected = [...document.querySelectorAll('#admin-price-pack-list .admin-price-pack-item.selected')].map(el => el.dataset.pack);
+            const statusEl = document.getElementById('admin-price-status');
+            if (selected.length === 0) { statusEl.textContent = 'No packs selected.'; statusEl.style.color = '#ef4444'; return; }
+
+            const durationMins = parseInt(document.getElementById('admin-price-duration').value) || 0;
+            const expiresAt = durationMins > 0 ? Date.now() + durationMins * 60 * 1000 : 0;
+
+            let changed = 0;
+            selected.forEach(pKey => {
+                const meta = PACK_METADATA[pKey];
+                const originalPrice = window._packPriceOverrides[pKey]?.originalPrice ?? meta.price;
+                let newPrice;
+
+                if (_adminPriceMode === 'flat') {
+                    const val = parseFloat(document.getElementById('admin-price-flat-val').value);
+                    if (isNaN(val) || val < 0) return;
+                    newPrice = Math.round(val);
+                } else {
+                    const pct = parseFloat(document.getElementById('admin-price-pct-val').value);
+                    if (isNaN(pct) || pct <= 0 || pct >= 100) return;
+                    newPrice = Math.round(originalPrice * (1 - pct / 100));
+                }
+
+                if (newPrice < 0) newPrice = 0;
+                window._packPriceOverrides[pKey] = { originalPrice, salePrice: newPrice, expiresAt };
+                PACK_METADATA[pKey].price = newPrice;
+                changed++;
+            });
+
+            savePackPriceOverrides();
+            renderPacksStoreDisplay();
+            adminBuildPricePackList();
+            adminPriceDeselectAll();
+
+            statusEl.style.color = '#34d399';
+            statusEl.textContent = `✓ Updated ${changed} pack${changed !== 1 ? 's' : ''}${durationMins > 0 ? ` for ${durationMins >= 1440 ? Math.round(durationMins/1440)+'d' : durationMins >= 60 ? Math.round(durationMins/60)+'h' : durationMins+'m'}` : ' permanently'}.`;
+            setTimeout(() => { statusEl.textContent = ''; }, 4000);
+        };
+
+        window.adminResetPackPrice = function(pKey) {
+            const ov = window._packPriceOverrides[pKey];
+            if (ov) {
+                PACK_METADATA[pKey].price = ov.originalPrice;
+                delete window._packPriceOverrides[pKey];
+                savePackPriceOverrides();
+                renderPacksStoreDisplay();
+                adminBuildPricePackList();
+            }
+        };
+
+        window.adminPriceResetAll = function() {
+            Object.keys(window._packPriceOverrides).forEach(pKey => {
+                if (PACK_METADATA[pKey]) PACK_METADATA[pKey].price = window._packPriceOverrides[pKey].originalPrice;
+            });
+            window._packPriceOverrides = {};
+            savePackPriceOverrides();
+            renderPacksStoreDisplay();
+            adminBuildPricePackList();
+            const statusEl = document.getElementById('admin-price-status');
+            if (statusEl) { statusEl.style.color = '#94a3b8'; statusEl.textContent = 'All prices reset to default.'; setTimeout(() => statusEl.textContent='', 3000); }
+        };
+
+        // Hook into admin panel open to populate list
+        document.addEventListener('DOMContentLoaded', () => {
+            // Refresh the list whenever the admin panel modal opens
+            const origAdminBtn = document.getElementById('admin-pin-submit');
+            if (origAdminBtn) {
+                origAdminBtn.addEventListener('click', () => setTimeout(adminBuildPricePackList, 300));
+            }
+        });
+
+        // Sale timer auto-refresh
+        setInterval(() => {
+            if (Object.keys(window._packPriceOverrides).length > 0) {
+                renderPacksStoreDisplay();
+            }
+        }, 60000);
+
         function renderPacksStoreDisplay() {
             const targetContainerGrid = document.getElementById('container-packs');
             targetContainerGrid.innerHTML = '';
@@ -11092,6 +11440,8 @@
                 const ultraDesc = ultraDescriptions[pKey] ? `<div style="font-size:0.7rem;color:#9ca3af;margin-bottom:6px;font-style:italic;">${ultraDescriptions[pKey]}</div>` : '';
                 const ultraBadge = isUltra ? `<div style="position:absolute;top:8px;right:8px;background:${currentMeta.color};color:#000;font-size:0.6rem;font-weight:900;padding:2px 7px;border-radius:999px;letter-spacing:0.05em;">${isUltra}</div>` : '';
 
+                const priceDisplayHtml = buildPackPriceDisplay(pKey);
+
                 const htmlPackNode = `
                     <div class="pack-box glass${isUltra ? ' tier-'+pKey : ''}" style="border-top: 4px solid ${currentMeta.color}; position:relative; overflow:hidden;">
                         ${ultraBadge}
@@ -11099,7 +11449,7 @@
                         <div class="pack-visual" style="--rarity-color: ${currentMeta.color};"></div>
                         <div style="font-weight:900; text-transform:uppercase; font-size:0.9rem; margin-bottom:4px;">${pKey} Pack</div>
                         ${ultraDesc}
-                        <div style="color:var(--accent-green); font-weight:800; font-size:0.85rem; margin-bottom:12px;">€${formatNum(currentMeta.price)}</div>
+                        ${priceDisplayHtml}
                         <div style="display:flex; flex-direction:column; gap:6px; width:100%;">
                             <button class="btn-lvlup" style="background:${currentMeta.color}; color:#000; width:100%; font-weight:900;" ${evaluationDisableActionState} onclick="purchasePackAsset('${pKey}')">BUY PACK</button>
                             <button class="btn-lvlup" style="background:var(--bg-surface); border:1px solid var(--border-glow); color:#fff; width:100%;" onclick="openPackDetailsProbabilityModal('${pKey}')">CHANCES</button>
