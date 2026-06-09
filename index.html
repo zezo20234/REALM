@@ -7949,27 +7949,24 @@
                 </div>
 
                 <!-- Percent discount input -->
-                <div id="admin-price-pct-row" style="display:none;flex;gap:6px;margin-bottom:8px;align-items:center;">
+                <div id="admin-price-pct-row" style="display:none;gap:6px;margin-bottom:8px;align-items:center;">
                     <span style="font-size:0.75rem;color:#9ca3af;font-weight:800;white-space:nowrap;">DISCOUNT %</span>
                     <input type="number" id="admin-price-pct-val" min="1" max="99" step="1" placeholder="e.g. 25"
                         style="flex:1;background:var(--bg-surface);border:1px solid var(--border-glow);color:white;padding:9px 10px;border-radius:8px;font-size:0.9rem;font-weight:800;outline:none;">
                 </div>
 
                 <!-- Duration -->
-                <div class="admin-row" style="margin-bottom:10px;">
-                    <select id="admin-price-duration" style="flex:1;">
-                        <option value="0">No expiry (permanent)</option>
-                        <option value="30">30 minutes</option>
-                        <option value="60">1 hour</option>
-                        <option value="180">3 hours</option>
-                        <option value="360">6 hours</option>
-                        <option value="720">12 hours</option>
-                        <option value="1440">24 hours</option>
-                        <option value="4320">3 days</option>
-                        <option value="10080">7 days</option>
-                    </select>
-                    <button type="button" class="btn-lvlup" onclick="adminApplyPriceChanges()" style="white-space:nowrap;background:var(--accent-green);">APPLY</button>
+                <div style="margin-bottom:10px;">
+                    <div style="display:flex;gap:6px;margin-bottom:8px;">
+                        <button type="button" id="admin-price-expiry-none" onclick="adminPriceSetExpiry('none')" style="flex:1;background:rgba(16,185,129,0.25);border:2px solid #10b981;color:#6ee7b7;font-size:0.72rem;font-weight:900;padding:7px 6px;border-radius:8px;cursor:pointer;">NO EXPIRY</button>
+                        <button type="button" id="admin-price-expiry-pick" onclick="adminPriceSetExpiry('pick')" style="flex:1;background:rgba(71,85,105,0.15);border:1px solid #374151;color:#94a3b8;font-size:0.72rem;font-weight:900;padding:7px 6px;border-radius:8px;cursor:pointer;">SET DATE & TIME</button>
+                    </div>
+                    <div id="admin-price-datetime-row" style="display:none;margin-bottom:6px;">
+                        <input type="datetime-local" id="admin-price-expiry-dt"
+                            style="width:100%;background:var(--bg-surface);border:1px solid var(--border-glow);color:white;padding:9px 10px;border-radius:8px;font-size:0.85rem;outline:none;color-scheme:dark;">
+                    </div>
                 </div>
+                <button type="button" class="btn-lvlup" onclick="adminApplyPriceChanges()" style="width:100%;background:var(--accent-green);margin-bottom:8px;">APPLY CHANGES</button>
                 <div id="admin-price-status" style="font-size:0.75rem;text-align:center;color:#6b7280;min-height:18px;"></div>
             </div>
 
@@ -8376,7 +8373,8 @@
 
         // Manual card registry — 375 cards, 25 per tier; chances sum to 100% per tier.
         window.PACK_METADATA = PACK_METADATA;
-        // Load any saved price overrides before first render
+        // Init override store and load any saved price overrides before first render
+        window._packPriceOverrides = {};
         if (typeof loadPackPriceOverrides === 'function') loadPackPriceOverrides();
 
         // Battle pass free pack: credits money, ensures stock, then auto-buys (net zero cost)
@@ -11209,7 +11207,7 @@
         // ── PACK PRICE MANAGER ────────────────────────────────────────────────
         // Stores { [packKey]: { originalPrice, salePrice, expiresAt } }
         // expiresAt = 0 means permanent
-        window._packPriceOverrides = {};
+        // (window._packPriceOverrides initialized earlier at PACK_METADATA setup)
 
         function loadPackPriceOverrides() {
             try {
@@ -11338,13 +11336,51 @@
             }
         };
 
+        let _adminPriceExpiryMode = 'none';
+        window.adminPriceSetExpiry = function(mode) {
+            _adminPriceExpiryMode = mode;
+            const noneBtn = document.getElementById('admin-price-expiry-none');
+            const pickBtn = document.getElementById('admin-price-expiry-pick');
+            const dtRow   = document.getElementById('admin-price-datetime-row');
+            if (mode === 'none') {
+                noneBtn.style.background = 'rgba(16,185,129,0.25)';
+                noneBtn.style.border = '2px solid #10b981';
+                noneBtn.style.color = '#6ee7b7';
+                pickBtn.style.background = 'rgba(71,85,105,0.15)';
+                pickBtn.style.border = '1px solid #374151';
+                pickBtn.style.color = '#94a3b8';
+                dtRow.style.display = 'none';
+            } else {
+                pickBtn.style.background = 'rgba(245,158,11,0.25)';
+                pickBtn.style.border = '2px solid #f59e0b';
+                pickBtn.style.color = '#fde68a';
+                noneBtn.style.background = 'rgba(71,85,105,0.15)';
+                noneBtn.style.border = '1px solid #374151';
+                noneBtn.style.color = '#94a3b8';
+                dtRow.style.display = 'block';
+                // Default the datetime input to 24h from now if empty
+                const dtInput = document.getElementById('admin-price-expiry-dt');
+                if (!dtInput.value) {
+                    const d = new Date(Date.now() + 24*60*60*1000);
+                    const local = new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,16);
+                    dtInput.value = local;
+                }
+            }
+        };
+
         window.adminApplyPriceChanges = function() {
             const selected = [...document.querySelectorAll('#admin-price-pack-list .admin-price-pack-item.selected')].map(el => el.dataset.pack);
             const statusEl = document.getElementById('admin-price-status');
             if (selected.length === 0) { statusEl.textContent = 'No packs selected.'; statusEl.style.color = '#ef4444'; return; }
 
-            const durationMins = parseInt(document.getElementById('admin-price-duration').value) || 0;
-            const expiresAt = durationMins > 0 ? Date.now() + durationMins * 60 * 1000 : 0;
+            let expiresAt = 0;
+            if (_adminPriceExpiryMode === 'pick') {
+                const dtVal = document.getElementById('admin-price-expiry-dt').value;
+                if (!dtVal) { statusEl.textContent = 'Please pick an expiry date & time.'; statusEl.style.color = '#ef4444'; return; }
+                const picked = new Date(dtVal).getTime();
+                if (isNaN(picked) || picked <= Date.now()) { statusEl.textContent = 'Expiry must be in the future.'; statusEl.style.color = '#ef4444'; return; }
+                expiresAt = picked;
+            }
 
             let changed = 0;
             selected.forEach(pKey => {
@@ -11373,9 +11409,13 @@
             adminBuildPricePackList();
             adminPriceDeselectAll();
 
+            let expiryLabel = 'permanently';
+            if (expiresAt > 0) {
+                expiryLabel = 'until ' + new Date(expiresAt).toLocaleString([], { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
+            }
             statusEl.style.color = '#34d399';
-            statusEl.textContent = `✓ Updated ${changed} pack${changed !== 1 ? 's' : ''}${durationMins > 0 ? ` for ${durationMins >= 1440 ? Math.round(durationMins/1440)+'d' : durationMins >= 60 ? Math.round(durationMins/60)+'h' : durationMins+'m'}` : ' permanently'}.`;
-            setTimeout(() => { statusEl.textContent = ''; }, 4000);
+            statusEl.textContent = `✓ Updated ${changed} pack${changed !== 1 ? 's' : ''} ${expiryLabel}.`;
+            setTimeout(() => { statusEl.textContent = ''; }, 5000);
         };
 
         window.adminResetPackPrice = function(pKey) {
@@ -11400,15 +11440,6 @@
             const statusEl = document.getElementById('admin-price-status');
             if (statusEl) { statusEl.style.color = '#94a3b8'; statusEl.textContent = 'All prices reset to default.'; setTimeout(() => statusEl.textContent='', 3000); }
         };
-
-        // Hook into admin panel open to populate list
-        document.addEventListener('DOMContentLoaded', () => {
-            // Refresh the list whenever the admin panel modal opens
-            const origAdminBtn = document.getElementById('admin-pin-submit');
-            if (origAdminBtn) {
-                origAdminBtn.addEventListener('click', () => setTimeout(adminBuildPricePackList, 300));
-            }
-        });
 
         // Sale timer auto-refresh
         setInterval(() => {
