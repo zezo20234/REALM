@@ -18901,10 +18901,11 @@ Respond with ONLY the chat message text — no JSON, no labels, no quotes, just 
     <script>
     // ── DAILY PLAYTIME TRACKER ─────────────────────────────────────────────
     (function() {
-        const STORE_KEY   = 'realm_playtime_v1'; // { date: 'YYYY-MM-DD', seconds: N }
-        let sessionStart  = null;   // Date.now() when session began
-        let tickTimer     = null;
+        const STORE_KEY  = 'realm_playtime_v1'; // { date: 'YYYY-MM-DD', seconds: N }
+        let sessionStart = null;  // Date.now() when current session began
+        let tickTimer    = null;
 
+        // Returns today's date string in local time: "YYYY-MM-DD"
         function todayStr() {
             const d = new Date();
             return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -18915,6 +18916,7 @@ Respond with ONLY the chat message text — no JSON, no labels, no quotes, just 
                 const raw = localStorage.getItem(STORE_KEY);
                 if (raw) {
                     const rec = JSON.parse(raw);
+                    // Only use if it's still the same calendar day
                     if (rec.date === todayStr()) return rec;
                 }
             } catch(e) {}
@@ -18940,11 +18942,14 @@ Respond with ONLY the chat message text — no JSON, no labels, no quotes, just 
             el.textContent = formatPlaytime(rec.seconds + sessionSecs);
         }
 
+        // Save elapsed time since sessionStart into localStorage, then reset sessionStart
         function flushSession() {
             if (!sessionStart) return;
-            const rec = loadRecord();
-            rec.seconds += Math.floor((Date.now() - sessionStart) / 1000);
-            rec.date = todayStr(); // in case midnight rolled over mid-session
+            const elapsed = Math.floor((Date.now() - sessionStart) / 1000);
+            if (elapsed <= 0) return;
+            const rec = loadRecord(); // loadRecord already resets to 0 if day changed
+            rec.seconds += elapsed;
+            rec.date = todayStr();
             saveRecord(rec);
             sessionStart = Date.now(); // reset so next flush doesn't double-count
         }
@@ -18953,27 +18958,48 @@ Respond with ONLY the chat message text — no JSON, no labels, no quotes, just 
             if (sessionStart) return; // already running
             sessionStart = Date.now();
             updateBadge();
-            // Update badge every 60 seconds; flush accumulated seconds every 5 min
+            // Update display every second so the counter feels live
             tickTimer = setInterval(() => {
+                // Handle midnight: if the day rolled over, flush the old day's seconds first
+                const rec = loadRecord();
+                if (rec.seconds === 0 && sessionStart) {
+                    // Day changed — reset session start to midnight boundary
+                    sessionStart = Date.now();
+                }
                 updateBadge();
-            }, 60000);
-            setInterval(flushSession, 5 * 60 * 1000);
+            }, 1000);
+            // Flush to localStorage every 30 seconds so progress isn't lost on crash
+            setInterval(flushSession, 30000);
         }
 
-        // Flush when tab loses focus or closes
+        // Pause counting when tab is hidden, resume when visible again
         document.addEventListener('visibilitychange', () => {
-            if (document.hidden) flushSession();
+            if (document.hidden) {
+                flushSession(); // save progress
+            } else {
+                // Tab became visible — resume from now (gap while hidden not counted)
+                if (sessionStart) sessionStart = Date.now();
+            }
         });
+
+        // Save on close/refresh
         window.addEventListener('beforeunload', flushSession);
 
-        // Start tracking when the user enters the realm (presence activates)
+        // Start tracking as soon as the user is logged in (presence activates)
         const _origActivate = window._activatePresence;
         window._activatePresence = function() {
             if (_origActivate) _origActivate();
             startTracking();
         };
 
-        // Also update badge immediately on DOMContentLoaded (shows stored time)
+        // Fallback: also hook into initializeUserEnvironmentCore completing
+        const _origInitEnv2 = window.initializeUserEnvironmentCore;
+        window.initializeUserEnvironmentCore = function() {
+            if (_origInitEnv2) _origInitEnv2.call(this);
+            setTimeout(startTracking, 500);
+        };
+
+        // Show stored time immediately on page load (before login)
         document.addEventListener('DOMContentLoaded', updateBadge);
     })();
     </script>
