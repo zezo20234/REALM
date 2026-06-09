@@ -18903,7 +18903,10 @@ Respond with ONLY the chat message text — no JSON, no labels, no quotes, just 
     (function() {
         const STORE_KEY  = 'realm_playtime_v1'; // { date: 'YYYY-MM-DD', seconds: N }
         let sessionStart = null;  // Date.now() when current session began
+        let lastKnownDate = null; // track date changes for midnight rollover
         let tickTimer    = null;
+        let flushTimer   = null;
+        let started      = false;
 
         // Returns today's date string in local time: "YYYY-MM-DD"
         function todayStr() {
@@ -18930,8 +18933,10 @@ Respond with ONLY the chat message text — no JSON, no labels, no quotes, just 
         function formatPlaytime(totalSeconds) {
             const h = Math.floor(totalSeconds / 3600);
             const m = Math.floor((totalSeconds % 3600) / 60);
+            const s = totalSeconds % 60;
             if (h > 0) return `⏱ Today: ${h}h ${m}m`;
-            return `⏱ Today: ${m}m`;
+            if (m > 0) return `⏱ Today: ${m}m ${s}s`;
+            return `⏱ Today: ${s}s`;
         }
 
         function updateBadge() {
@@ -18947,7 +18952,7 @@ Respond with ONLY the chat message text — no JSON, no labels, no quotes, just 
             if (!sessionStart) return;
             const elapsed = Math.floor((Date.now() - sessionStart) / 1000);
             if (elapsed <= 0) return;
-            const rec = loadRecord(); // loadRecord already resets to 0 if day changed
+            const rec = loadRecord(); // loadRecord resets to 0 if day changed
             rec.seconds += elapsed;
             rec.date = todayStr();
             saveRecord(rec);
@@ -18955,44 +18960,45 @@ Respond with ONLY the chat message text — no JSON, no labels, no quotes, just 
         }
 
         function startTracking() {
-            if (sessionStart) return; // already running
+            if (started) return; // already running
+            started = true;
             sessionStart = Date.now();
+            lastKnownDate = todayStr();
             updateBadge();
+
             // Update display every second so the counter feels live
             tickTimer = setInterval(() => {
-                // Handle midnight: if the day rolled over, flush the old day's seconds first
-                const rec = loadRecord();
-                if (rec.seconds === 0 && sessionStart) {
-                    // Day changed — reset session start to midnight boundary
-                    sessionStart = Date.now();
+                const currentDate = todayStr();
+                // Handle midnight rollover: flush old day's time, reset for new day
+                if (currentDate !== lastKnownDate) {
+                    flushSession();
+                    lastKnownDate = currentDate;
                 }
                 updateBadge();
             }, 1000);
+
             // Flush to localStorage every 30 seconds so progress isn't lost on crash
-            setInterval(flushSession, 30000);
+            flushTimer = setInterval(flushSession, 30000);
         }
 
         // Pause counting when tab is hidden, resume when visible again
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) {
-                flushSession(); // save progress
+                flushSession(); // save progress, gap while hidden not counted
             } else {
-                // Tab became visible — resume from now (gap while hidden not counted)
+                // Tab became visible — resume from now
                 if (sessionStart) sessionStart = Date.now();
+                updateBadge();
             }
         });
 
         // Save on close/refresh
         window.addEventListener('beforeunload', flushSession);
 
-        // Start immediately — no hooks needed, just start counting when page loads
-        document.addEventListener('DOMContentLoaded', () => {
-            updateBadge();
-            startTracking();
-        });
-        // Fallback if DOMContentLoaded already fired
-        if (document.readyState !== 'loading') {
-            updateBadge();
+        // Start as soon as DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', startTracking);
+        } else {
             startTracking();
         }
     })();
