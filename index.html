@@ -15859,6 +15859,7 @@
             getUpdate: () => update,
             getSet: () => set,
             getGet: () => get,
+            getOnValue: () => onValue,
             getServerTimestamp: () => serverTimestamp,
             getUserData: () => userDataRecord,
             getActiveUser: () => activeUserSession,
@@ -18787,20 +18788,23 @@ Respond with ONLY the chat message text — no JSON, no labels, no quotes, just 
     <div id="music-track-label">♪ Track 1</div>
 
     <!-- ═══════════════════════════════════════════
-         MUSIC SYSTEM — LOCAL ONLY
-         Each user plays tracks independently.
-         No Firebase sync — no position resets.
+         MUSIC SYSTEM — FIREBASE SYNCED
+         All users listen to the same track.
+         Firebase path: music/state → { trackIdx, startedAt }
+         Any client can advance the track; all others follow.
     ═══════════════════════════════════════════ -->
     <script>
-    // Simple local music player — no Firebase dependency.
+    // Firebase-synced music player — all users hear the same track.
     (function() {
         const TRACKS      = ['1.mp3', '2.mp3', '3.mp3', '4.mp3', '5.mp3'];
         const TRACK_NAMES = ['Track 1', 'Track 2', 'Track 3', 'Track 4', 'Track 5'];
+        const FB_PATH     = 'music/state'; // { trackIdx: N, startedAt: timestamp }
 
-        let audio       = null;
-        let isMuted     = false;
-        let started     = false;
-        let currentIdx  = 0;
+        let audio        = null;
+        let isMuted      = false;
+        let started      = false;
+        let currentIdx   = 0;
+        let fbUnsub      = null; // Firebase listener unsubscribe
 
         try { isMuted = localStorage.getItem('realm_music_muted') === 'true'; } catch(e) {}
 
@@ -18838,15 +18842,61 @@ Respond with ONLY the chat message text — no JSON, no labels, no quotes, just 
             }, 3000);
         }
 
-        /* ── advance to next track when current one ends ──────── */
-        function onTrackEnded() {
-            currentIdx = (currentIdx + 1) % TRACKS.length;
-            audio.src = TRACKS[currentIdx];
-            audio.load();
-            audio.play().then(() => {
-                if (!isMuted) fadeTo(0.35, 600);
-                showTrackLabel(currentIdx);
+        /* ── load & play a specific track index (called by Firebase listener) ── */
+        function applyTrack(idx) {
+            if (!audio) return;
+            if (idx === currentIdx && !audio.paused && audio.src && audio.src.endsWith(TRACKS[idx])) return; // already on this track
+            currentIdx = idx;
+            fadeTo(0, 300, () => {
+                audio.src = TRACKS[currentIdx];
+                audio.load();
+                audio.play().then(() => {
+                    if (!isMuted) fadeTo(0.35, 600);
+                    showTrackLabel(currentIdx);
+                }).catch(e => console.warn('[Music] play blocked:', e));
+            });
+        }
+
+        /* ── write next track to Firebase so ALL clients advance ── */
+        function advanceTrackInFirebase() {
+            const realm = window._realm;
+            if (!realm) return;
+            const db      = realm.getDb();
+            const refFn   = realm.getRef();
+            const setFn   = realm.getSet();
+            const stFn    = realm.getServerTimestamp();
+            if (!db || !refFn || !setFn) return;
+            const nextIdx = (currentIdx + 1) % TRACKS.length;
+            setFn(refFn(db, FB_PATH), { trackIdx: nextIdx, startedAt: stFn() })
+                .catch(e => console.warn('[Music] Firebase write failed:', e));
+            // applyTrack will be called when the Firebase listener fires
+        }
+
+        /* ── subscribe to Firebase music/state ───────────────── */
+        function subscribeFirebase() {
+            const realm = window._realm;
+            if (!realm) { setTimeout(subscribeFirebase, 800); return; }
+            const db      = realm.getDb();
+            const refFn   = realm.getRef();
+            const onVal   = realm.getOnValue();
+            const setFn   = realm.getSet();
+            const stFn    = realm.getServerTimestamp();
+            if (!db || !refFn || !onVal) { setTimeout(subscribeFirebase, 800); return; }
+
+            // Bootstrap: if no state exists yet, write track 0
+            realm.getGet()(refFn(db, FB_PATH)).then(snap => {
+                if (!snap.exists()) {
+                    setFn(refFn(db, FB_PATH), { trackIdx: 0, startedAt: stFn() }).catch(() => {});
+                }
             }).catch(() => {});
+
+            // Real-time listener
+            fbUnsub = onVal(refFn(db, FB_PATH), snap => {
+                if (!snap.exists()) return;
+                const state = snap.val();
+                const idx   = typeof state.trackIdx === 'number' ? state.trackIdx : 0;
+                applyTrack(idx);
+            });
         }
 
         /* ── start ───────────────────────────────────────────── */
@@ -18854,29 +18904,23 @@ Respond with ONLY the chat message text — no JSON, no labels, no quotes, just 
             if (started) return;
             started = true;
 
-            // Show toggle button
             const btn = document.getElementById('music-toggle');
             if (btn) btn.style.display = 'inline';
             updateToggleBtn();
 
-            // Pick a random starting track
-            currentIdx    = Math.floor(Math.random() * TRACKS.length);
+            audio        = new Audio();
+            audio.volume = isMuted ? 0 : 0.35;
+            audio.loop   = false;
 
-            audio         = new Audio();
-            audio.volume  = isMuted ? 0 : 0.35;
-            audio.loop    = false;
-            audio.src     = TRACKS[currentIdx];
-            audio.load();
-            audio.addEventListener('ended', onTrackEnded);
+            // When a track ends, push the next track to Firebase → all clients follow
+            audio.addEventListener('ended', advanceTrackInFirebase);
             audio.addEventListener('error', () => {
-                console.warn('[Music] load error, skipping track');
-                onTrackEnded();
+                console.warn('[Music] load error, advancing track');
+                advanceTrackInFirebase();
             });
 
-            audio.play().then(() => {
-                if (!isMuted) audio.volume = 0.35;
-                showTrackLabel(currentIdx);
-            }).catch(e => console.warn('[Music] autoplay blocked (need user gesture first):', e));
+            // Connect to Firebase (retries until _realm is ready)
+            subscribeFirebase();
         };
 
         /* ── mute toggle ─────────────────────────────────────── */
