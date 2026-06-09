@@ -9879,6 +9879,16 @@
             });
         }
 
+        window.clearAllStock = async function clearAllStock() {
+            if (!confirm('Are you sure? This will set ALL pack stock to 0.')) return;
+            const snap = await get(ref(db, 'system/packs'));
+            const packs = snap.val() || { stockAllocations: {} };
+            const zeroed = {};
+            PACK_TYPES.forEach(k => { zeroed[k] = 0; });
+            await update(ref(db, 'system/packs'), { stockAllocations: zeroed, lastRestockTime: packs.lastRestockTime || Date.now() });
+            showToast('All pack stock cleared.', 'success');
+        };
+
         window.adminRestockPacks = async function adminRestockPacks(packKey, qty = 10) {
             const snap = await get(ref(db, 'system/packs'));
             const packs = snap.val() || { stockAllocations: {} };
