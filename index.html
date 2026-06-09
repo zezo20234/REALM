@@ -6933,7 +6933,7 @@
                             <span class="username-txt" id="hud-username">Loading...</span>
                             <button id="music-toggle" onclick="toggleMusic()" title="Toggle Music" style="display:none;background:none;border:none;cursor:pointer;font-size:1rem;padding:0;line-height:1;opacity:0.75;transition:opacity 0.2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.75">🔇</button>
                         </div>
-                        <span class="title-chip" id="hud-title">Rookie</span>
+                        <span class="title-chip" id="hud-title" onclick="openTitleInventory()" style="cursor:pointer;" title="Tap to change title">Rookie</span>
                         <span class="streak-badge" id="hud-streak">🔥 Daily Streak: 0 days</span>
                         <span class="playtime-badge" id="hud-playtime">⏱ Today: 0m</span>
                     </div>
@@ -7833,7 +7833,7 @@
                     custom amount, or restock all at once.</p>
                 <div style="display:flex;gap:8px;margin-bottom:10px;">
                     <button class="admin-restock-btn" style="background:var(--accent-green);color:white;flex:1;"
-                        onclick="triggerManualRestock()">RESTOCK ALL</button>
+                        onclick="adminRestockPacks('all')">RESTOCK ALL (MIN)</button>
                     <button class="admin-restock-btn" style="background:var(--accent-red);color:white;flex:1;"
                         onclick="clearAllStock()">CLEAR STOCK</button>
                 </div>
@@ -9834,7 +9834,7 @@
 
             const overlay = document.createElement('div');
             overlay.id = 'admin-restock-prompt-modal';
-            overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:9000;display:flex;align-items:center;justify-content:center;padding:16px;';
+            overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:2147483647;display:flex;align-items:center;justify-content:center;padding:16px;';
 
             overlay.innerHTML = `
                 <div style="background:#111827;border:1px solid rgba(255,255,255,0.12);border-radius:14px;padding:24px;max-width:320px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.6);">
@@ -9879,20 +9879,20 @@
             });
         }
 
-        async function adminRestockPacks(packKey, qty = 10) {
+        window.adminRestockPacks = async function adminRestockPacks(packKey, qty = 10) {
             const snap = await get(ref(db, 'system/packs'));
             const packs = snap.val() || { stockAllocations: {} };
             const stock = { ...(packs.stockAllocations || {}) };
             if (packKey === 'all') {
                 PACK_TYPES.forEach(k => {
                     const cfg = RESTOCK_CONFIG[k];
-                    stock[k] = Math.floor(Math.random() * (cfg.max - cfg.min + 1)) + cfg.min;
+                    stock[k] = (stock[k] || 0) + cfg.min;
                 });
             } else {
                 stock[packKey] = (stock[packKey] || 0) + qty;
             }
             await update(ref(db, 'system/packs'), { stockAllocations: stock, lastRestockTime: packs.lastRestockTime || Date.now() });
-            showToast(packKey === 'all' ? 'All packs restocked.' : `${packKey} +${qty} stock added.`, 'success');
+            showToast(packKey === 'all' ? 'All packs restocked with minimum stock.' : `${packKey} +${qty} stock added.`, 'success');
         }
 
         function subscribeAdminReplies(questionId) {
@@ -18757,13 +18757,90 @@ Respond with ONLY the chat message text — no JSON, no labels, no quotes, just 
         // END REDEEM CODE SYSTEM
         // =========================================================
 
+
+        // =========================================================
+        // TITLE INVENTORY MODAL
+        // =========================================================
+        window.openTitleInventory = function() {
+            const modal = document.getElementById('title-inventory-modal');
+            if (!modal) return;
+
+            const available = (typeof getAllAvailableTitles === 'function') ? getAllAvailableTitles() : [];
+            const locked    = (typeof getLockedBPTitles === 'function')    ? getLockedBPTitles()    : [];
+            const equippedId  = (typeof getEquippedTitle === 'function')   ? getEquippedTitle()     : null;
+            const displayTitle = (typeof getDisplayTitle === 'function')   ? getDisplayTitle()      : 'Rookie';
+
+            // Active title banner
+            const activeEl = document.getElementById('title-inv-active-name');
+            if (activeEl) activeEl.textContent = displayTitle;
+
+            // Build unlocked grid
+            const unlockedGrid = document.getElementById('title-inv-unlocked-grid');
+            if (unlockedGrid) {
+                let activeId = equippedId;
+                if (!activeId || !available.find(t => t.id === activeId)) {
+                    if (typeof LEVEL_TITLE_LADDER !== 'undefined' && typeof userDataRecord !== 'undefined') {
+                        const lvlMatch = LEVEL_TITLE_LADDER.slice().reverse().find(e => (userDataRecord.level || 1) >= e.level);
+                        activeId = lvlMatch ? 'lvl_' + lvlMatch.level : 'lvl_1';
+                    }
+                }
+                let html = '';
+                for (const t of available) {
+                    const isActive = t.id === activeId;
+                    const border  = isActive ? 'border:2px solid #3b82f6;background:rgba(37,99,235,0.2);color:#bfdbfe;font-weight:800;' : 'border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:#d1d5db;font-weight:600;';
+                    html += `<button style="padding:8px 14px;border-radius:999px;${border}font-size:0.82rem;cursor:pointer;" onclick="window._equipTitleFromModal('${t.id}')">${t.emoji ? t.emoji + ' ' : ''}${t.name}</button>`;
+                }
+                if (!html) html = '<span style="color:#4b5563;font-size:0.8rem;">No titles unlocked yet.</span>';
+                unlockedGrid.innerHTML = html;
+            }
+
+            // Build locked grid
+            const lockedGrid    = document.getElementById('title-inv-locked-grid');
+            const lockedSection = document.getElementById('title-inv-locked-section');
+            if (lockedGrid && lockedSection) {
+                if (locked.length > 0) {
+                    lockedGrid.innerHTML = locked.map(t =>
+                        `<button style="padding:8px 14px;border-radius:999px;border:1px solid rgba(255,255,255,0.06);background:rgba(0,0,0,0.2);color:#374151;font-size:0.82rem;cursor:not-allowed;" disabled title="Unlock at BP Tier ${t.tier}">&#128274; ${t.name}</button>`
+                    ).join('');
+                    lockedSection.style.display = 'block';
+                } else {
+                    lockedSection.style.display = 'none';
+                }
+            }
+
+            modal.style.display = 'flex';
+        };
+
+        window._equipTitleFromModal = async function(titleId) {
+            if (typeof window.equipTitle === 'function') {
+                await window.equipTitle(titleId);
+                // Refresh modal after equip
+                const dt = (typeof getDisplayTitle === 'function') ? getDisplayTitle() : '';
+                const el = document.getElementById('title-inv-active-name');
+                if (el && dt) el.textContent = dt;
+                window.openTitleInventory(); // re-render grid to update highlights
+            }
+        };
+
+        window.closeTitleInventory = function() {
+            const modal = document.getElementById('title-inventory-modal');
+            if (modal) modal.style.display = 'none';
+        };
+
+        (function() {
+            const m = document.getElementById('title-inventory-modal');
+            if (m) m.addEventListener('click', e => { if (e.target === m) window.closeTitleInventory(); });
+        })();
+        // =========================================================
+        // END TITLE INVENTORY MODAL
+        // =========================================================
         // =========================================================
         // END SHADOWBOT
         // =========================================================
     </script>
     <div
         style="position: fixed; top: 12px; left: 12px; z-index: 9999999999999; color: rgba(255, 255, 255, 0.4); font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
-        V:11.1
+        V:11.0
     </div>
 
     <!-- ═══════════════════════════════════════════
@@ -18784,6 +18861,32 @@ Respond with ONLY the chat message text — no JSON, no labels, no quotes, just 
       </div>
     </div>
 
+
+    <!-- TITLE INVENTORY MODAL -->
+    <div id="title-inventory-modal" style="display:none; position:fixed; inset:0; background:rgba(5,8,16,0.88); z-index:2147483647; align-items:flex-end; justify-content:center; backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);">
+      <div style="background:#111827; border:1px solid rgba(99,130,200,0.2); border-radius:20px 20px 0 0; padding:24px 20px 36px; width:100%; max-width:480px; max-height:80vh; overflow-y:auto; box-shadow:0 -20px 60px rgba(0,0,0,0.5);">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;">
+          <div>
+            <div style="font-family:'Orbitron',sans-serif; font-size:0.85rem; font-weight:900; color:#3b82f6; letter-spacing:0.08em;">&#127885; TITLE INVENTORY</div>
+            <div style="font-size:0.72rem; color:#6b7280; margin-top:3px;">Tap a title to equip it</div>
+          </div>
+          <button onclick="closeTitleInventory()" style="background:rgba(255,255,255,0.07); border:none; border-radius:50%; width:32px; height:32px; color:#9ca3af; font-size:1.1rem; cursor:pointer; display:flex; align-items:center; justify-content:center;">&#10005;</button>
+        </div>
+        <div style="background:rgba(37,99,235,0.1); border:1px solid rgba(37,99,235,0.25); border-radius:12px; padding:12px 16px; margin-bottom:18px; display:flex; align-items:center; gap:10px;">
+          <span style="font-size:1.3rem;">&#10024;</span>
+          <div>
+            <div style="font-size:0.68rem; color:#6b7280; font-weight:700; letter-spacing:0.06em;">CURRENTLY EQUIPPED</div>
+            <div id="title-inv-active-name" style="font-weight:800; font-size:0.95rem; color:#bfdbfe;">-</div>
+          </div>
+        </div>
+        <div style="font-size:0.68rem; color:#9ca3af; font-weight:800; letter-spacing:0.08em; margin-bottom:10px;">UNLOCKED</div>
+        <div id="title-inv-unlocked-grid" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px;"></div>
+        <div id="title-inv-locked-section" style="display:none;">
+          <div style="font-size:0.68rem; color:#4b5563; font-weight:800; letter-spacing:0.08em; margin-bottom:10px;">LOCKED &#8212; EARN VIA BATTLE PASS</div>
+          <div id="title-inv-locked-grid" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
+        </div>
+      </div>
+    </div>
 
     <div id="music-track-label">♪ Track 1</div>
 
