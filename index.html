@@ -18985,22 +18985,16 @@ Respond with ONLY the chat message text — no JSON, no labels, no quotes, just 
         // Save on close/refresh
         window.addEventListener('beforeunload', flushSession);
 
-        // Start tracking as soon as the user is logged in (presence activates)
-        const _origActivate = window._activatePresence;
-        window._activatePresence = function() {
-            if (_origActivate) _origActivate();
+        // Start immediately — no hooks needed, just start counting when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            updateBadge();
             startTracking();
-        };
-
-        // Fallback: also hook into initializeUserEnvironmentCore completing
-        const _origInitEnv2 = window.initializeUserEnvironmentCore;
-        window.initializeUserEnvironmentCore = function() {
-            if (_origInitEnv2) _origInitEnv2.call(this);
-            setTimeout(startTracking, 500);
-        };
-
-        // Show stored time immediately on page load (before login)
-        document.addEventListener('DOMContentLoaded', updateBadge);
+        });
+        // Fallback if DOMContentLoaded already fired
+        if (document.readyState !== 'loading') {
+            updateBadge();
+            startTracking();
+        }
     })();
     </script>
 
