@@ -739,6 +739,138 @@
             display: block;
         }
 
+        /* === RANK BANNER CARDS === */
+        .rank-banner-card {
+            position: relative;
+            width: 100%;
+            height: 110px;
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.18s ease, box-shadow 0.18s ease;
+            border: 2px solid transparent;
+        }
+        .rank-banner-card:active { transform: scale(0.97); }
+        .rank-banner-card.equipped {
+            border-color: rgba(255,255,255,0.5);
+            box-shadow: 0 0 20px rgba(255,255,255,0.15);
+        }
+        .rank-banner-card .rbc-bg {
+            position: absolute;
+            inset: 0;
+        }
+        .rank-banner-card .rbc-img {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -58%);
+            width: 70px;
+            height: 70px;
+            object-fit: contain;
+            filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5));
+        }
+        .rank-banner-card .rbc-label {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 6px 12px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-align: center;
+        }
+        .rank-banner-card .rbc-equipped-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.4);
+            border-radius: 999px;
+            font-size: 0.6rem;
+            font-weight: 900;
+            padding: 2px 8px;
+            letter-spacing: 0.06em;
+            color: #fff;
+        }
+        /* Bronze */
+        .rbc-bronze .rbc-bg { background: radial-gradient(ellipse at 50% 40%, #a0522d 0%, #6b3a1f 40%, #1a0a05 100%); }
+        .rbc-bronze .rbc-label { background: linear-gradient(to top, rgba(100,40,10,0.95), transparent); color: #e8a87c; text-shadow: 0 0 8px rgba(205,127,50,0.6); }
+        /* Silver */
+        .rbc-silver .rbc-bg { background: radial-gradient(ellipse at 50% 40%, #b0b8c0 0%, #6b7280 40%, #0d0f12 100%); }
+        .rbc-silver .rbc-label { background: linear-gradient(to top, rgba(20,22,26,0.95), transparent); color: #d1d5db; text-shadow: 0 0 8px rgba(192,192,192,0.5); }
+        /* Gold */
+        .rbc-gold .rbc-bg { background: radial-gradient(ellipse at 50% 40%, #d4a017 0%, #8b6914 40%, #1a1000 100%); }
+        .rbc-gold .rbc-label { background: linear-gradient(to top, rgba(30,18,0,0.95), transparent); color: #fde68a; text-shadow: 0 0 10px rgba(255,215,0,0.7); }
+        /* Platinum */
+        .rbc-platinum .rbc-bg { background: radial-gradient(ellipse at 50% 40%, #c8d8e8 0%, #7a92a8 40%, #050c12 100%); }
+        .rbc-platinum .rbc-label { background: linear-gradient(to top, rgba(4,10,18,0.95), transparent); color: #e2f0fb; text-shadow: 0 0 8px rgba(200,216,232,0.5); }
+        /* Diamond */
+        .rbc-diamond .rbc-bg { background: radial-gradient(ellipse at 50% 40%, #00e5ff 0%, #007a8a 40%, #000d12 100%); }
+        .rbc-diamond .rbc-label { background: linear-gradient(to top, rgba(0,12,18,0.95), transparent); color: #7df9ff; text-shadow: 0 0 12px rgba(125,249,255,0.8); }
+        /* Champion */
+        .rbc-champion .rbc-bg { background: radial-gradient(ellipse at 50% 40%, #f59e0b 0%, #92400e 40%, #150800 100%); }
+        .rbc-champion .rbc-label { background: linear-gradient(to top, rgba(20,8,0,0.95), transparent); color: #fcd34d; text-shadow: 0 0 10px rgba(245,158,11,0.7); }
+        /* Grand Champion */
+        .rbc-grandchamp .rbc-bg { background: radial-gradient(ellipse at 50% 40%, #a855f7 0%, #5b21b6 40%, #0d0018 100%); }
+        .rbc-grandchamp .rbc-label { background: linear-gradient(to top, rgba(10,0,22,0.95), transparent); color: #d8b4fe; text-shadow: 0 0 12px rgba(168,85,247,0.8); }
+        /* SSL */
+        .rbc-ssl .rbc-bg { background: radial-gradient(ellipse at 50% 40%, #ff1493 0%, #8b005a 40%, #120008 100%); }
+        .rbc-ssl .rbc-label { background: linear-gradient(to top, rgba(18,0,8,0.95), transparent); color: #f9a8d4; text-shadow: 0 0 14px rgba(255,20,147,0.9); }
+
+        /* === PROFILE BANNERS === */
+        .profile-banner-wrap {
+            width: 100%;
+            margin: 8px auto 0 auto;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid rgba(148,163,184,0.18);
+            box-shadow: 0 0 16px rgba(0,0,0,0.35);
+            max-width: 420px;
+            aspect-ratio: 3 / 1;
+            background: rgba(17,24,39,0.6);
+        }
+
+        .profile-banner-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .profile-rank-banner {
+            background: rgba(9,13,22,0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px 10px;
+            gap: 10px;
+        }
+
+        .profile-rank-banner img {
+            width: 52px;
+            height: 52px;
+            object-fit: contain;
+        }
+
+        .rank-entry .rank-banner-img {
+            width: 100%;
+            height: 44px;
+            object-fit: cover;
+            border-radius: 6px;
+            margin-top: 6px;
+            border: 1px solid rgba(148,163,184,0.15);
+        }
+
+        .rank-entry .rank-banner-rank-img {
+            width: 34px;
+            height: 34px;
+            object-fit: contain;
+            margin-left: 4px;
+            vertical-align: middle;
+        }
+
         .card-item.custom-neon {
             box-shadow: 0 0 18px var(--custom-glow, var(--rarity-color));
         }
@@ -7097,6 +7229,39 @@
                 <div class="grid-container" id="container-collection"></div>
             </section>
 
+            <!-- INVENTORY SECTION: Title changer + Rank Banners -->
+            <section id="view-inventory" class="view-panel">
+                <h2 class="section-title">🎒 Inventory</h2>
+                <p class="section-desc">Manage your titles and rank banners</p>
+
+                <!-- TITLE CHANGER -->
+                <div style="background:var(--bg-panel);border:1px solid var(--border-glow);border-radius:14px;padding:16px;margin-bottom:18px;">
+                    <div style="font-size:0.7rem;font-weight:900;letter-spacing:0.08em;color:#93c5fd;margin-bottom:12px;">🏅 TITLE</div>
+                    <div style="font-size:0.82rem;color:#9ca3af;margin-bottom:10px;">Equipped: <span id="inv-equipped-title" style="color:#f3f4f6;font-weight:800;">Rookie</span></div>
+                    <div id="inv-title-grid" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+                    <div id="inv-title-locked" style="margin-top:10px;display:none;">
+                        <div style="font-size:0.68rem;font-weight:800;color:#4b5563;letter-spacing:0.05em;margin-bottom:6px;">LOCKED TITLES</div>
+                        <div id="inv-title-locked-grid" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+                    </div>
+                </div>
+
+                <!-- RANK BANNERS -->
+                <div style="background:var(--bg-panel);border:1px solid var(--border-glow);border-radius:14px;padding:16px;">
+                    <div style="font-size:0.7rem;font-weight:900;letter-spacing:0.08em;color:#93c5fd;margin-bottom:4px;">🎌 RANK BANNERS</div>
+                    <div style="font-size:0.72rem;color:#6b7280;margin-bottom:14px;">Unlock banners by reaching each rank. Tap to equip — shown on your profile and in rankings.</div>
+                    <div id="inv-banner-equipped-preview" style="display:none;margin-bottom:14px;">
+                        <div style="font-size:0.68rem;font-weight:800;color:#9ca3af;margin-bottom:6px;">CURRENTLY EQUIPPED</div>
+                        <div id="inv-banner-preview-card" style="border-radius:10px;overflow:hidden;border:2px solid rgba(255,255,255,0.15);"></div>
+                        <button onclick="clearEquippedBanner()" style="width:100%;margin-top:8px;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.3);color:#fca5a5;border-radius:8px;padding:8px;font-size:0.78rem;font-weight:800;cursor:pointer;">Remove Banner</button>
+                    </div>
+                    <div id="inv-banner-grid" style="display:flex;flex-direction:column;gap:12px;"></div>
+                    <div id="inv-banner-locked" style="display:none;margin-top:14px;">
+                        <div style="font-size:0.68rem;font-weight:800;color:#4b5563;letter-spacing:0.05em;margin-bottom:8px;">LOCKED — WIN MORE CLASHES TO UNLOCK</div>
+                        <div id="inv-banner-locked-grid" style="display:flex;flex-direction:column;gap:10px;opacity:0.35;pointer-events:none;"></div>
+                    </div>
+                </div>
+            </section>
+
             <section id="view-steal" class="view-panel">
                 <h2 class="section-title">Online Targets</h2>
                 <p class="section-desc">Infiltrate active online users to steal unlocked relics</p>
@@ -7574,6 +7739,7 @@
                         <span id="prof-clash-rank-badge"></span>
                     </div>
                     <div id="prof-title" class="title-chip" style="margin:6px auto 10px auto;">Rookie</div>
+                    <div id="prof-banner-wrap" style="display:none; margin:4px auto 12px auto; max-width:320px;"></div>
                     <p id="prof-email" style="font-size:0.85rem; color:#9ca3af; margin-bottom:24px;">---</p>
 
                     <!-- Title Chooser -->
@@ -7633,8 +7799,9 @@
         <nav id="nav-tabs">
             <span id="nav-indicator"></span>
             <div class="nav-tab active" data-target="packs"><span class="nav-icon">📦</span><span>Packs</span></div>
-            <div class="nav-tab" data-target="cards"><span class="nav-icon">🃏</span><span>Deck</span></div>
             <div class="nav-tab" data-target="steal"><span class="nav-icon">🥷</span><span>Steal</span></div>
+            <div class="nav-tab" data-target="cards"><span class="nav-icon">🃏</span><span>Deck</span></div>
+            <div class="nav-tab" data-target="inventory"><span class="nav-icon">🎒</span><span>Inventory</span></div>
             <div class="nav-tab" data-target="trade"><span class="nav-icon">🔄</span><span>Trade</span></div>
             <div class="nav-tab" data-target="battlepass"><span class="nav-icon">🎟</span><span>Pass</span></div>
             <div class="nav-tab" data-target="book"><span class="nav-icon">📖</span><span>Archive</span></div>
@@ -11210,28 +11377,65 @@
         // (window._packPriceOverrides initialized earlier at PACK_METADATA setup)
 
         function loadPackPriceOverrides() {
-            try {
-                const raw = localStorage.getItem('realm_pack_price_overrides_v1');
-                if (raw) {
-                    const parsed = JSON.parse(raw);
-                    const now = Date.now();
-                    // Remove expired entries
-                    Object.keys(parsed).forEach(k => {
-                        if (parsed[k].expiresAt && parsed[k].expiresAt > 0 && now > parsed[k].expiresAt) {
-                            delete parsed[k];
-                        }
-                    });
-                    window._packPriceOverrides = parsed;
-                    // Apply to PACK_METADATA
-                    Object.keys(parsed).forEach(k => {
-                        if (PACK_METADATA[k]) PACK_METADATA[k].price = parsed[k].salePrice;
-                    });
-                }
-            } catch(e) {}
+            // Now loads from Firebase — subscribePackPricesFirebase() handles live updates.
+            // This function is kept as a no-op stub so existing call at init doesn't error.
         }
 
         function savePackPriceOverrides() {
-            try { localStorage.setItem('realm_pack_price_overrides_v1', JSON.stringify(window._packPriceOverrides)); } catch(e) {}
+            // Write price overrides to Firebase so ALL clients see the change.
+            const db = window._realm?.getDb();
+            const refFn = window._realm?.getRef();
+            const setFn = window._realm?.getSet();
+            if (!db || !refFn || !setFn) {
+                // Firebase not ready yet — try again shortly
+                setTimeout(savePackPriceOverrides._pending || (() => {}), 500);
+                return;
+            }
+            setFn(refFn(db, 'system/packPrices'), window._packPriceOverrides || {})
+                .catch(e => console.warn('[PackPrices] Firebase write failed:', e));
+        }
+
+        // Subscribe to Firebase pack price updates — fires for ALL clients whenever admin changes prices
+        function subscribePackPricesFirebase() {
+            const realm = window._realm;
+            if (!realm?.getDb()) { setTimeout(subscribePackPricesFirebase, 800); return; }
+            const db    = realm.getDb();
+            const refFn = realm.getRef();
+            const onVal = realm.getOnValue();
+            if (!db || !refFn || !onVal) { setTimeout(subscribePackPricesFirebase, 800); return; }
+
+            onVal(refFn(db, 'system/packPrices'), snap => {
+                const data = snap.exists() ? snap.val() : {};
+                const now = Date.now();
+                window._packPriceOverrides = {};
+
+                // Restore PACK_METADATA to base prices first
+                Object.keys(PACK_METADATA).forEach(k => {
+                    // We need base prices — store them on first load
+                    if (!PACK_METADATA[k]._basePrice) PACK_METADATA[k]._basePrice = PACK_METADATA[k].price;
+                    PACK_METADATA[k].price = PACK_METADATA[k]._basePrice;
+                });
+
+                // Apply valid (non-expired) overrides
+                Object.keys(data).forEach(k => {
+                    if (!PACK_METADATA[k]) return;
+                    const ov = data[k];
+                    if (ov.expiresAt && ov.expiresAt > 0 && now > ov.expiresAt) return; // expired
+                    window._packPriceOverrides[k] = ov;
+                    PACK_METADATA[k].price = ov.salePrice;
+                });
+
+                renderPacksStoreDisplay();
+                if (document.getElementById('admin-price-pack-list')?.children.length) adminBuildPricePackList();
+            });
+        }
+
+        // Start Firebase subscription once realm is ready
+        if (window._realm?.getDb()) {
+            subscribePackPricesFirebase();
+        } else {
+            document.addEventListener('realmReady', subscribePackPricesFirebase, { once: true });
+            setTimeout(subscribePackPricesFirebase, 1500);
         }
 
         function getEffectivePrice(packKey) {
@@ -13921,7 +14125,9 @@
                     title: getLevelTitle(userProf.level || 1),
                     money: parseFloat(userProf.money || 0),
                     level: parseInt(userProf.level || 1),
-                    collectionCount: Object.keys(discoveredNodes).length
+                    collectionCount: Object.keys(discoveredNodes).length,
+                    equippedBanner: userProf.equippedBanner || null,
+                    clashRankImg: (() => { const pts = userProf.clashRankPoints||0; if(!pts) return null; const r = getClashRankFromPoints(pts); return r.rank.img; })()
                 });
             }
 
@@ -13941,11 +14147,12 @@
 
                 const entryHtmlNode = `
                     <div class="rank-entry">
+                        ${rankItem.equippedBanner ? `<div style="width:100%;aspect-ratio:3/1;border-radius:8px;overflow:hidden;margin-bottom:8px;border:1px solid rgba(148,163,184,0.12);">${rankItem.equippedBanner.type === 'rank' ? `<div class="profile-rank-banner"><img src="${escapeAttribute(rankItem.equippedBanner.img)}" alt="rank banner" onerror="this.parentNode.style.display='none'"><span style="font-size:0.8rem;font-weight:800;color:#f3f4f6;letter-spacing:0.05em;">${escapeAttribute(rankItem.equippedBanner.label||'')}</span></div>` : `<img src="${escapeAttribute(rankItem.equippedBanner.url)}" alt="banner" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.parentNode.style.display='none'">`}</div>` : ''}
                         <div style="display:flex; align-items:center; gap:12px;">
                             <div class="rank-num">#${indexValue + 1}</div>
                             <div class="profile-badge ${rankItem.prestige > 0 ? 'prestige-avatar' : ''}" style="background:${rankItem.avatarBgColor}; width:28px; height:28px; font-size:0.75rem;">${rankItem.profilePhotoUrl ? `<img src="${escapeAttribute(rankItem.profilePhotoUrl)}" alt="">` : rankItem.avatarLetters}</div>
                             <div>
-                                <div style="font-weight:700; font-size:0.9rem;">${rankItem.username}${rankItem.prestige > 0 ? '<span class="star-badge">★</span>' : ''}</div>
+                                <div style="font-weight:700; font-size:0.9rem;">${rankItem.username}${rankItem.prestige > 0 ? '<span class="star-badge">★</span>' : ''}${rankItem.clashRankImg ? `<img src="${escapeAttribute(rankItem.clashRankImg)}" alt="rank" class="rank-banner-rank-img" onerror="this.style.display='none'">` : ''}</div>
                                 <div class="title-chip">${rankItem.title}${rankItem.prestige > 0 ? ` · P${rankItem.prestige}` : ''}</div>
                             </div>
                         </div>
@@ -14080,6 +14287,7 @@
             const totalCardCount = Object.values(GAME_REGISTRY).reduce((s, arr) => s + arr.length, 0);
             document.getElementById('prof-stat-discovery').innerText = `${uniqueDiscoveredCount} / ${totalCardCount}`;
             renderProfileClashRankBadge();
+            if (typeof renderProfileBannerPreview === 'function') renderProfileBannerPreview();
 
             const prestigePanel = document.getElementById('prestige-profile-panel');
             if (!prestigePanel) return;
@@ -19227,6 +19435,164 @@ Respond with ONLY the chat message text — no JSON, no labels, no quotes, just 
         // =========================================================
         // =========================================================
         // END SHADOWBOT
+        // =========================================================
+
+        // =========================================================
+        // INVENTORY VIEW — TITLES + RANK BANNERS
+        // =========================================================
+
+        const RANK_BANNER_DEFS = [
+            { id: 'bronze',     name: 'BRONZE',        css: 'rbc-bronze',    img: 'BRONZE.png',         minPts: 0  },
+            { id: 'silver',     name: 'SILVER',        css: 'rbc-silver',    img: 'SILVER.png',         minPts: 4  },
+            { id: 'gold',       name: 'GOLD',          css: 'rbc-gold',      img: 'GOLD.png',           minPts: 8  },
+            { id: 'platinum',   name: 'PLATINUM',      css: 'rbc-platinum',  img: 'PLATINUM.png',       minPts: 12 },
+            { id: 'diamond',    name: 'DIAMOND',       css: 'rbc-diamond',   img: 'DIAMOND.png',        minPts: 16 },
+            { id: 'champion',   name: 'CHAMPION',      css: 'rbc-champion',  img: 'CHAMPION.png',       minPts: 20 },
+            { id: 'grandchamp', name: 'GRAND CHAMPION',css: 'rbc-grandchamp',img: 'GRAND_CHAMPION.png', minPts: 24 },
+            { id: 'ssl',        name: 'SSL',           css: 'rbc-ssl',       img: 'SSL.png',            minPts: 28 },
+        ];
+
+        function buildRankBannerCard(def, isEquipped, isLocked) {
+            return `
+                <div class="rank-banner-card ${def.css}${isEquipped ? ' equipped' : ''}" onclick="${isLocked ? '' : `equipBanner({type:'rank',id:'${def.id}',img:'${def.img}',label:'${def.name}'})`}">
+                    <div class="rbc-bg"></div>
+                    <img class="rbc-img" src="${def.img}" alt="${def.name}" onerror="this.style.display='none'">
+                    <div class="rbc-label">${def.name}</div>
+                    ${isEquipped ? '<div class="rbc-equipped-badge">EQUIPPED</div>' : ''}
+                </div>`;
+        }
+
+        function renderInventoryView() {
+            const pts = userDataRecord.clashRankPoints || 0;
+            const equippedBanner = userDataRecord.equippedBanner;
+
+            // ── TITLE SECTION ──
+            const equippedTitleEl = document.getElementById('inv-equipped-title');
+            if (equippedTitleEl) equippedTitleEl.textContent = (typeof getDisplayTitle === 'function') ? getDisplayTitle() : 'Rookie';
+
+            const titleGrid = document.getElementById('inv-title-grid');
+            const lockedSection = document.getElementById('inv-title-locked');
+            const lockedGrid = document.getElementById('inv-title-locked-grid');
+            if (titleGrid) {
+                const available = (typeof getAllAvailableTitles === 'function') ? getAllAvailableTitles() : [];
+                const equippedId = (typeof getEquippedTitle === 'function') ? getEquippedTitle() : null;
+                titleGrid.innerHTML = available.map(t => {
+                    const isActive = t.id === equippedId || (!equippedId && t.id === 'lvl_1');
+                    return `<button onclick="window._equipTitleFromInventory('${t.id}')" style="padding:8px 14px;border-radius:999px;border:${isActive ? '2px solid #3b82f6;background:rgba(37,99,235,0.2);color:#bfdbfe;font-weight:800;' : '1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:#d1d5db;font-weight:600;'}font-size:0.82rem;cursor:pointer;">${t.emoji ? t.emoji + ' ' : ''}${t.name}</button>`;
+                }).join('') || '<span style="font-size:0.8rem;color:#4b5563;">No titles unlocked yet.</span>';
+            }
+            if (lockedSection && lockedGrid) {
+                const locked = (typeof getLockedBPTitles === 'function') ? getLockedBPTitles() : [];
+                if (locked.length) {
+                    lockedGrid.innerHTML = locked.map(t => `<button disabled style="padding:8px 14px;border-radius:999px;border:1px solid rgba(255,255,255,0.06);background:rgba(0,0,0,0.2);color:#374151;font-size:0.82rem;cursor:not-allowed;">🔒 ${t.name}</button>`).join('');
+                    lockedSection.style.display = 'block';
+                } else {
+                    lockedSection.style.display = 'none';
+                }
+            }
+
+            // ── BANNER SECTION ──
+            // Equipped preview
+            const previewWrap = document.getElementById('inv-banner-equipped-preview');
+            const previewCard = document.getElementById('inv-banner-preview-card');
+            if (equippedBanner && equippedBanner.type === 'rank') {
+                const def = RANK_BANNER_DEFS.find(d => d.id === equippedBanner.id);
+                if (def && previewCard) {
+                    previewCard.innerHTML = buildRankBannerCard(def, true, false);
+                    if (previewWrap) previewWrap.style.display = 'block';
+                }
+            } else {
+                if (previewWrap) previewWrap.style.display = 'none';
+            }
+
+            // Unlocked banners grid
+            const bannerGrid = document.getElementById('inv-banner-grid');
+            const bannerLocked = document.getElementById('inv-banner-locked');
+            const bannerLockedGrid = document.getElementById('inv-banner-locked-grid');
+            if (bannerGrid) {
+                const unlocked = RANK_BANNER_DEFS.filter(d => pts >= d.minPts);
+                const locked   = RANK_BANNER_DEFS.filter(d => pts < d.minPts);
+                bannerGrid.innerHTML = unlocked.length
+                    ? unlocked.map(d => buildRankBannerCard(d, equippedBanner?.id === d.id, false)).join('')
+                    : '<div style="font-size:0.8rem;color:#4b5563;padding:8px 0;">Win clashes to unlock rank banners. Reach Bronze rank to start.</div>';
+                if (bannerLocked && bannerLockedGrid) {
+                    if (locked.length) {
+                        bannerLockedGrid.innerHTML = locked.map(d => buildRankBannerCard(d, false, true)).join('');
+                        bannerLocked.style.display = 'block';
+                    } else {
+                        bannerLocked.style.display = 'none';
+                    }
+                }
+            }
+
+            // Also sync profile banner preview if it exists
+            renderProfileBannerPreview();
+        }
+
+        window._equipTitleFromInventory = async function(titleId) {
+            if (typeof window.equipTitle === 'function') {
+                await window.equipTitle(titleId);
+                const el = document.getElementById('inv-equipped-title');
+                if (el && typeof getDisplayTitle === 'function') el.textContent = getDisplayTitle();
+                renderInventoryView();
+            }
+        };
+
+        // Hook into nav tab switching to render inventory view on open
+        document.addEventListener('DOMContentLoaded', () => {
+            const origNav = window._navTabSwitchHook;
+            document.getElementById('nav-tabs')?.addEventListener('click', e => {
+                const tab = e.target.closest('.nav-tab');
+                if (tab?.dataset.target === 'inventory') {
+                    setTimeout(renderInventoryView, 50);
+                }
+            });
+        });
+
+        // =========================================================
+        // END INVENTORY VIEW
+        // =========================================================
+
+        function renderProfileBannerPreview() {
+            const banner = userDataRecord.equippedBanner;
+            const wrap   = document.getElementById('prof-banner-wrap');
+            if (!wrap) return;
+
+            if (banner?.type === 'rank' && banner.img) {
+                const def = RANK_BANNER_DEFS?.find(d => d.id === banner.id);
+                if (def) {
+                    wrap.style.display = 'block';
+                    wrap.innerHTML = `<div class="rank-banner-card ${def.css} equipped" style="pointer-events:none;"><div class="rbc-bg"></div><img class="rbc-img" src="${def.img}" alt="${def.name}" onerror="this.style.display='none'"><div class="rbc-label">${def.name}</div></div>`;
+                }
+            } else {
+                wrap.style.display = 'none';
+                wrap.innerHTML = '';
+            }
+        }
+
+        async function equipBanner(bannerObj) {
+            if (!activeUserSession?.uid) return;
+            try {
+                await update(ref(db, `users/${activeUserSession.uid}`), { equippedBanner: bannerObj });
+                userDataRecord.equippedBanner = bannerObj;
+                renderProfileBannerPreview();
+                showToast('Banner equipped!', 'success');
+            } catch(e) { showToast('Failed to equip banner.', 'error'); }
+        }
+
+        window.clearEquippedBanner = async function() {
+            if (!activeUserSession?.uid) return;
+            try {
+                await update(ref(db, `users/${activeUserSession.uid}`), { equippedBanner: null });
+                delete userDataRecord.equippedBanner;
+                renderProfileBannerPreview();
+                renderInventoryView();
+                showToast('Banner removed.', 'success');
+            } catch(e) {}
+        };
+
+        // =========================================================
+        // END BANNER SYSTEM
         // =========================================================
     </script>
     <div
