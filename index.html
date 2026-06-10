@@ -28,6 +28,19 @@
             --primary-glow: rgba(37, 99, 235, 0.4);
             --accent-green: #10b981;
             --accent-red: #ef4444;
+
+            /* Battle Pass season theme — updated dynamically by JS */
+            --bp-color:      #ef4444;
+            --bp-color-dark: #dc2626;
+            --bp-color-deep: #b91c1c;
+            --bp-color-50:   rgba(220,38,38,0.5);
+            --bp-color-30:   rgba(220,38,38,0.3);
+            --bp-color-20:   rgba(220,38,38,0.2);
+            --bp-color-15:   rgba(220,38,38,0.15);
+            --bp-color-12:   rgba(220,38,38,0.12);
+            --bp-color-08:   rgba(220,38,38,0.08);
+            --bp-color-05:   rgba(220,38,38,0.05);
+            --bp-color-70:   rgba(239,68,68,0.7);
             --gold: #f59e0b;
 
             /* Pack tier themes (15 tiers) */
@@ -1293,9 +1306,9 @@
             position: absolute;
             inset: 0;
             background:
-                radial-gradient(ellipse 80% 60% at 20% 50%, rgba(220,38,38,0.22) 0%, transparent 65%),
-                radial-gradient(ellipse 50% 80% at 90% 20%, rgba(255,68,68,0.12) 0%, transparent 60%),
-                radial-gradient(ellipse 60% 40% at 60% 100%, rgba(180,20,20,0.18) 0%, transparent 55%),
+                radial-gradient(ellipse 80% 60% at 20% 50%, var(--bp-color-20) 0%, transparent 65%),
+                radial-gradient(ellipse 50% 80% at 90% 20%, var(--bp-color-12) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 40% at 60% 100%, var(--bp-color-15) 0%, transparent 55%),
                 linear-gradient(160deg, #0f0d14 0%, #12080e 40%, #0a0c12 100%);
         }
         .bp-hero-scanlines {
@@ -1318,13 +1331,13 @@
         }
         .bp-orb-1 {
             width: 160px; height: 160px;
-            background: rgba(220,38,38,0.18);
+            background: var(--bp-color-15);
             top: -40px; left: -30px;
             animation: bpOrbDrift 8s ease-in-out infinite;
         }
         .bp-orb-2 {
             width: 120px; height: 120px;
-            background: rgba(255,80,60,0.12);
+            background: var(--bp-color-12);
             bottom: -20px; right: 30px;
             animation: bpOrbDrift 11s ease-in-out infinite reverse;
         }
@@ -1353,9 +1366,9 @@
             font-size: 0.65rem;
             font-weight: 700;
             letter-spacing: 0.18em;
-            color: #ef4444;
-            background: rgba(220,38,38,0.12);
-            border: 1px solid rgba(220,38,38,0.3);
+            color: var(--bp-color);
+            background: var(--bp-color-12);
+            border: 1px solid var(--ls-border, var(--bp-color-30));
             display: inline-block;
             padding: 3px 8px;
             border-radius: 3px;
@@ -1367,11 +1380,11 @@
             font-weight: 900;
             line-height: 1.0;
             letter-spacing: 0.04em;
-            background: linear-gradient(135deg, #fff 30%, #ef4444 70%, #ff6b6b 100%);
+            background: linear-gradient(135deg, #fff 30%, var(--bp-color) 70%, var(--bp-color) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            filter: drop-shadow(0 0 20px rgba(220,38,38,0.4));
+            filter: drop-shadow(0 0 20px var(--bp-color-20));
             margin-bottom: 6px;
         }
         .bp-hero-subtitle {
@@ -1399,8 +1412,8 @@
         }
         .bp-credits-icon {
             font-size: 1.2rem;
-            color: #ef4444;
-            filter: drop-shadow(0 0 6px rgba(239,68,68,0.6));
+            color: var(--bp-color);
+            filter: drop-shadow(0 0 6px var(--bp-color-50));
         }
         .bp-credits-label {
             font-size: 0.6rem;
@@ -1417,7 +1430,7 @@
         .bp-buy-btn {
             position: relative;
             overflow: hidden;
-            background: linear-gradient(135deg, #b91c1c 0%, #dc2626 45%, #ef4444 100%);
+            background: linear-gradient(135deg, var(--bp-color-deep) 0%, var(--bp-color-dark) 45%, var(--bp-color) 100%);
             color: #fff;
             border: none;
             border-radius: 10px;
@@ -1428,12 +1441,12 @@
             align-items: center;
             justify-content: center;
             min-width: 100px;
-            box-shadow: 0 4px 20px rgba(220,38,38,0.45), inset 0 1px 0 rgba(255,255,255,0.15);
+            box-shadow: 0 4px 20px var(--bp-color-50), inset 0 1px 0 rgba(255,255,255,0.15);
             transition: transform 0.15s, box-shadow 0.15s;
         }
         .bp-buy-btn:not([disabled]):active {
             transform: scale(0.96);
-            box-shadow: 0 2px 10px rgba(220,38,38,0.4);
+            box-shadow: 0 2px 10px var(--bp-color-50);
         }
         .bp-buy-btn[disabled] {
             background: linear-gradient(135deg, #166534, #16a34a);
@@ -1463,8 +1476,8 @@
             opacity: 0.88;
         }
         .bp-refresh-btn {
-            background: rgba(220,38,38,0.08);
-            border: 1px solid rgba(220,38,38,0.2);
+            background: var(--bp-color-08);
+            border: 1px solid var(--bp-color-20);
             color: rgba(255,255,255,0.4);
             width: 30px;
             height: 30px;
@@ -1477,15 +1490,15 @@
             transition: all 0.2s;
         }
         .bp-refresh-btn:hover {
-            color: #ef4444;
-            border-color: rgba(220,38,38,0.5);
-            background: rgba(220,38,38,0.15);
+            color: var(--bp-color);
+            border-color: var(--bp-color-50);
+            background: var(--bp-color-15);
         }
 
         /* ── PROGRESS CARD ── */
         .bp-progress-card {
             background: linear-gradient(145deg, rgba(17,24,39,0.95), rgba(12,14,22,0.98));
-            border: 1px solid rgba(220,38,38,0.2);
+            border: 1px solid var(--bp-color-20);
             border-radius: 14px;
             padding: 16px;
             margin-bottom: 16px;
@@ -1498,7 +1511,7 @@
             position: absolute;
             top: 0; left: 0; right: 0;
             height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(220,38,38,0.6), transparent);
+            background: linear-gradient(90deg, transparent, var(--bp-color-50), transparent);
         }
         .bp-progress-header {
             display: flex;
@@ -1510,8 +1523,8 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            background: rgba(220,38,38,0.12);
-            border: 1px solid rgba(220,38,38,0.35);
+            background: var(--bp-color-12);
+            border: 1px solid var(--bp-color-30);
             border-radius: 10px;
             padding: 8px 16px;
             min-width: 70px;
@@ -1520,7 +1533,7 @@
             font-size: 0.58rem;
             font-weight: 900;
             letter-spacing: 0.18em;
-            color: rgba(239,68,68,0.7);
+            color: var(--bp-color-70);
             text-transform: uppercase;
         }
         .bp-tier-badge-num {
@@ -1528,8 +1541,8 @@
             font-size: 1.8rem;
             font-weight: 900;
             line-height: 1.1;
-            color: #ef4444;
-            text-shadow: 0 0 16px rgba(239,68,68,0.5);
+            color: var(--bp-color);
+            text-shadow: 0 0 16px var(--bp-color-50);
         }
         .bp-xpb-info {
             display: flex;
@@ -1562,7 +1575,7 @@
         .bp-progress-fill {
             height: 100%;
             width: 0%;
-            background: linear-gradient(90deg, #7f1d1d, #dc2626, #ff4444, #ff6b6b);
+            background: linear-gradient(90deg, var(--bp-color-deep), var(--bp-color-dark), var(--bp-color), var(--bp-color));
             border-radius: 5px;
             transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
             animation: bpProgressPulse 2s ease-in-out infinite;
@@ -1675,21 +1688,21 @@
             bottom: -100%;
             left: 0; right: 0;
             background: linear-gradient(170deg, #111827 0%, #0d1117 100%);
-            border-top: 1px solid rgba(220,38,38,0.25);
+            border-top: 1px solid var(--bp-color-30);
             border-radius: 22px 22px 0 0;
             padding: 8px 20px 32px;
             z-index: 9999;
             transition: bottom 0.35s cubic-bezier(0.34, 1.2, 0.64, 1);
             max-height: 70vh;
             overflow-y: auto;
-            box-shadow: 0 -20px 60px rgba(0,0,0,0.7), 0 -1px 0 rgba(220,38,38,0.15);
+            box-shadow: 0 -20px 60px rgba(0,0,0,0.7), 0 -1px 0 var(--bp-color-15);
         }
         .bp-rewards-sheet::before {
             content: '';
             position: absolute;
             top: 0; left: 0; right: 0;
             height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(220,38,38,0.5), transparent);
+            background: linear-gradient(90deg, transparent, var(--bp-color-50), transparent);
         }
         .bp-sheet-handle {
             width: 36px;
@@ -1708,7 +1721,7 @@
             font-size: 0.6rem;
             font-weight: 900;
             letter-spacing: 0.18em;
-            color: rgba(239,68,68,0.7);
+            color: var(--bp-color-70);
             text-transform: uppercase;
             margin-bottom: 4px;
         }
@@ -1734,9 +1747,9 @@
             transition: all 0.15s;
         }
         .bp-sheet-close:hover {
-            background: rgba(220,38,38,0.15);
-            border-color: rgba(220,38,38,0.3);
-            color: #ef4444;
+            background: var(--bp-color-15);
+            border-color: var(--bp-color-30);
+            color: var(--bp-color);
         }
         .bp-sheet-content {
             display: flex;
@@ -1754,8 +1767,8 @@
             animation: bpFadeSlideIn 0.3s ease forwards;
         }
         .bp-reward-row.milestone {
-            border-color: rgba(220,38,38,0.25);
-            background: rgba(220,38,38,0.05);
+            border-color: var(--bp-color-30);
+            background: var(--bp-color-05);
         }
         .bp-reward-icon {
             width: 44px;
@@ -1770,7 +1783,7 @@
         .bp-reward-icon.money { background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.2); }
         .bp-reward-icon.xp { background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.2); }
         .bp-reward-icon.pack { background: rgba(168,85,247,0.12); border: 1px solid rgba(168,85,247,0.2); }
-        .bp-reward-icon.credits { background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.2); }
+        .bp-reward-icon.credits { background: var(--bp-color-12); border: 1px solid var(--bp-color-20); }
         .bp-reward-icon.title { background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.3); }
 
         /* Title chooser in profile */
@@ -1821,7 +1834,7 @@
             line-height: 1.5;
         }
         .bp-lock-buy-btn {
-            background: linear-gradient(135deg, #b91c1c, #ef4444);
+            background: linear-gradient(135deg, var(--bp-color-deep), var(--bp-color));
             color: #fff;
             border: none;
             padding: 12px 28px;
@@ -1831,12 +1844,12 @@
             cursor: pointer;
             font-family: 'Orbitron', sans-serif;
             letter-spacing: 0.05em;
-            box-shadow: 0 4px 16px rgba(220,38,38,0.35);
+            box-shadow: 0 4px 16px var(--bp-color-30);
         }
 
         /* ── BP refresh btn override ── */
         #bp-refresh-btn:hover {
-            background: rgba(220,38,38,0.15) !important;
+            background: var(--bp-color-15) !important;
         }
 
         /* --- PACK SYSTEM --- */
@@ -5653,11 +5666,11 @@
     <div id="loading-screen" style="position:fixed; inset:0; background:#050810; z-index:9999999; display:flex; flex-direction:column; align-items:center; justify-content:center;">
         <canvas id="loading-particles" style="position:absolute; inset:0; width:100%; height:100%;"></canvas>
         <div style="position:relative; z-index:10; text-align:center; display:flex; flex-direction:column; align-items:center;">
-            <h1 style="font-family:'Orbitron',sans-serif; font-size:4rem; font-weight:900; color:#dc2626; text-shadow:0 0 40px #ff4444, 0 0 80px #dc2626; margin:0 0 20px 0; letter-spacing:8px;">REALM</h1>
+            <h1 id="loading-realm-title" style="font-family:'Orbitron',sans-serif; font-size:4rem; font-weight:900; color:#dc2626; text-shadow:0 0 40px #ff4444, 0 0 80px #dc2626; margin:0 0 20px 0; letter-spacing:8px;">REALM</h1>
             <div id="season-badge" style="font-family:'Orbitron',sans-serif; font-size:1.2rem; font-weight:700; color:#ff4444; margin-bottom:8px; letter-spacing:2px;">SEASON 1</div>
             <div id="season-countdown" style="font-family:'Orbitron',sans-serif; font-size:0.9rem; color:#888; margin-bottom:30px; letter-spacing:1px;">Loading season data...</div>
             <div style="width:300px; height:6px; background:#1f2937; border-radius:3px; overflow:hidden; margin-bottom:12px;">
-                <div id="loading-progress" style="height:100%; width:0%; background:linear-gradient(90deg,#dc2626,#ff4444); transition:width 0.3s ease; box-shadow:0 0 20px #dc2626;"></div>
+                <div id="loading-progress" style="height:100%; width:0%; background:linear-gradient(90deg,#dc2626,#ff4444); transition:width 0.3s ease; box-shadow:0 0 20px #dc2626;" data-season-styled="true"></div>
             </div>
             <div id="loading-status" style="font-family:'Orbitron',sans-serif; font-size:0.85rem; color:#6b7280; letter-spacing:1px;">Connecting to servers...</div>
             <button id="enter-btn" onclick="enterRealm()">⚡ ENTER REALM</button>
@@ -5676,7 +5689,7 @@
             display: none;
             margin-top: 32px;
             padding: 16px 48px;
-            background: linear-gradient(135deg, #dc2626, #ff4444);
+            background: var(--ls-grad, linear-gradient(135deg, #dc2626, #ff4444));
             border: none;
             border-radius: 14px;
             color: #fff;
@@ -5685,7 +5698,7 @@
             font-weight: 900;
             letter-spacing: 0.15em;
             cursor: pointer;
-            box-shadow: 0 0 40px rgba(220,38,38,0.5), 0 0 80px rgba(220,38,38,0.2);
+            box-shadow: var(--ls-shadow, 0 0 40px rgba(220,38,38,0.5), 0 0 80px rgba(220,38,38,0.2));
             animation: enterPulse 1.5s ease-in-out infinite;
             position: relative;
             overflow: hidden;
@@ -5700,8 +5713,8 @@
             animation: enterShine 2.5s ease-in-out infinite;
         }
         @keyframes enterPulse {
-            0%, 100% { transform: scale(1); box-shadow: 0 0 40px rgba(220,38,38,0.5), 0 0 80px rgba(220,38,38,0.2); }
-            50% { transform: scale(1.04); box-shadow: 0 0 60px rgba(220,38,38,0.8), 0 0 120px rgba(220,38,38,0.3); }
+            0%, 100% { transform: scale(1); box-shadow: var(--ls-shadow, 0 0 40px rgba(220,38,38,0.5), 0 0 80px rgba(220,38,38,0.2)); }
+            50% { transform: scale(1.04); box-shadow: var(--ls-shadow-lg, 0 0 60px rgba(220,38,38,0.8), 0 0 120px rgba(220,38,38,0.3)); }
         }
         @keyframes enterShine {
             0% { left: -60%; }
@@ -5726,7 +5739,7 @@
             padding: 5px 10px;
             font-size: 0.65rem;
             font-family: 'Orbitron', sans-serif;
-            color: #ef4444;
+            color: var(--ls-color, #ef4444);
             letter-spacing: 0.05em;
             z-index: 8000;
             display: none;
@@ -5754,9 +5767,9 @@
             // Season calculation
             const EPOCH = new Date('2026-06-04T00:00:00Z').getTime();
             const daysSince = Math.floor((Date.now() - EPOCH) / 86400000);
-            const pos = ((daysSince % 70) + 70) % 70;
-            const seasonIdx = Math.floor(pos / 14);
-            const daysLeft = 14 - (pos % 14);
+            const pos = ((daysSince % 50) + 50) % 50;
+            const seasonIdx = Math.floor(pos / 10);
+            const daysLeft = 10 - (pos % 10);
             const seasonName = ['SEASON 1','SEASON 2','SEASON 3','SEASON 4','SEASON 5'][seasonIdx];
             const seasonColors = ['#ef4444','#3b82f6','#22c55e','#a855f7','#ef4444'];
             const seasonColor = seasonColors[seasonIdx] || '#ef4444';
@@ -5765,22 +5778,102 @@
             seasonBadge.style.color = seasonColor;
 
             // Season end — may be overridden by admin in Firebase
-            let _seasonEndMs = EPOCH + (seasonIdx + 1) * 14 * 86400000;
+            let _seasonEndMs = EPOCH + (seasonIdx + 1) * 10 * 86400000;
 
             // Try to read Firebase override (once Firebase is ready)
+            // Season color palettes for the loading screen
+            const LS_SEASON_COLORS = {
+                primary:  ['#dc2626','#1d4ed8','#15803d','#7e22ce','#dc2626'],
+                bright:   ['#ff4444','#3b82f6','#22c55e','#a855f7','#ff4444'],
+                rgba50:   ['rgba(220,38,38,0.5)','rgba(29,78,216,0.5)','rgba(21,128,61,0.5)','rgba(126,34,206,0.5)','rgba(220,38,38,0.5)'],
+                rgba20:   ['rgba(220,38,38,0.2)','rgba(29,78,216,0.2)','rgba(21,128,61,0.2)','rgba(126,34,206,0.2)','rgba(220,38,38,0.2)'],
+                rgba80:   ['rgba(220,38,38,0.8)','rgba(29,78,216,0.8)','rgba(21,128,61,0.8)','rgba(126,34,206,0.8)','rgba(220,38,38,0.8)'],
+                rgba30:   ['rgba(220,38,38,0.3)','rgba(29,78,216,0.3)','rgba(21,128,61,0.3)','rgba(126,34,206,0.3)','rgba(220,38,38,0.3)'],
+                particle: ['rgba(220,38,38,','rgba(29,78,216,','rgba(21,128,61,','rgba(126,34,206,','rgba(220,38,38,'],
+            };
+
+            function _applyLoadingScreenColor(idx) {
+                const i = (idx >= 0 && idx < 5) ? idx : 0;
+                const p = LS_SEASON_COLORS.primary[i];
+                const b = LS_SEASON_COLORS.bright[i];
+                const r50 = LS_SEASON_COLORS.rgba50[i];
+                const r20 = LS_SEASON_COLORS.rgba20[i];
+                const r80 = LS_SEASON_COLORS.rgba80[i];
+                const r30 = LS_SEASON_COLORS.rgba30[i];
+
+                // REALM title
+                const title = document.getElementById('loading-realm-title');
+                if (title) { title.style.color = p; title.style.textShadow = `0 0 40px ${b}, 0 0 80px ${p}`; }
+
+                // Season badge color
+                if (seasonBadge) seasonBadge.style.color = b;
+
+                // Progress bar
+                if (loadingProgress) {
+                    loadingProgress.style.background = `linear-gradient(90deg,${p},${b})`;
+                    loadingProgress.style.boxShadow  = `0 0 20px ${p}`;
+                }
+
+                // CSS custom props on :root for enter-btn and music label (used via var())
+                document.documentElement.style.setProperty('--ls-grad',      `linear-gradient(135deg,${p},${b})`);
+                document.documentElement.style.setProperty('--ls-shadow',    `0 0 40px ${r50}, 0 0 80px ${r20}`);
+                document.documentElement.style.setProperty('--ls-shadow-lg', `0 0 60px ${r80}, 0 0 120px ${r30}`);
+                document.documentElement.style.setProperty('--ls-border',    `${r30}`);
+                document.documentElement.style.setProperty('--ls-color',     b);
+
+                // Store particle color for the canvas draw loop
+                window._lsParticleBase = LS_SEASON_COLORS.particle[i];
+
+                // READY status text
+                if (loadingStatus) {
+                    loadingStatus.style.color      = b;
+                    loadingStatus.style.textShadow = `0 0 12px ${r80}`;
+                }
+            }
+
             function _tryLoadSeasonEnd() {
                 if (!window._realm?.getDb()) { setTimeout(_tryLoadSeasonEnd, 800); return; }
                 const _db = window._realm.getDb();
                 const _ref = window._realm.getRef();
                 const _get = window._realm.getGet();
+                const _onVal = window._realm.getOnValue ? window._realm.getOnValue() : null;
                 _get(_ref(_db, 'system/season')).then(snap => {
                     const d = snap.val();
+                    // Apply season color from Firebase-authoritative currentSeason
+                    if (typeof d?.currentSeason === 'number') {
+                        _applyLoadingScreenColor(d.currentSeason);
+                        seasonBadge.textContent = ['SEASON 1','SEASON 2','SEASON 3','SEASON 4','SEASON 5'][d.currentSeason] || seasonBadge.textContent;
+                    }
                     if (d?.seasonEndTime) {
-                        _seasonEndMs = d.seasonEndTime;
-                        window._realmSeasonEndMs = d.seasonEndTime;
-                        updateCountdown(); // Refresh countdown immediately with Firebase data
+                        if (d.seasonEndTime > Date.now()) {
+                            _seasonEndMs = d.seasonEndTime;
+                            window._realmSeasonEndMs = d.seasonEndTime;
+                        } else {
+                            window._realmSeasonEndMs = null;
+                        }
+                        updateCountdown();
                     }
                 }).catch(() => {});
+                // Live listener: season changes update loading screen colors too
+                if (_onVal) {
+                    _onVal(_ref(_db, 'system/season'), snap => {
+                        if (!snap.exists()) return;
+                        const d = snap.val();
+                        if (typeof d.currentSeason === 'number') {
+                            _applyLoadingScreenColor(d.currentSeason);
+                            seasonBadge.textContent = ['SEASON 1','SEASON 2','SEASON 3','SEASON 4','SEASON 5'][d.currentSeason] || seasonBadge.textContent;
+                        }
+                        if (d?.seasonEndTime) {
+                            if (d.seasonEndTime > Date.now()) {
+                                _seasonEndMs = d.seasonEndTime;
+                                window._realmSeasonEndMs = d.seasonEndTime;
+                            } else {
+                                window._realmSeasonEndMs = null;
+                            }
+                            updateCountdown();
+                        }
+                    });
+                }
             }
             _tryLoadSeasonEnd();
 
@@ -5832,7 +5925,7 @@
                 draw() {
                     ctx.beginPath();
                     ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                    ctx.fillStyle = `rgba(220, 38, 38, ${this.opacity})`;
+                    ctx.fillStyle = `${window._lsParticleBase || 'rgba(220, 38, 38, '}${this.opacity})`;
                     ctx.fill();
                 }
             }
@@ -5937,8 +6030,8 @@
                     } else {
                         loadingProgress.style.width = '100%';
                         loadingStatus.textContent = '✦ READY ✦';
-                        loadingStatus.style.color = '#ef4444';
-                        loadingStatus.style.textShadow = '0 0 12px rgba(220,38,38,0.8)';
+                        loadingStatus.style.color = getComputedStyle(document.documentElement).getPropertyValue('--ls-color').trim() || '#ef4444';
+                        loadingStatus.style.textShadow = `0 0 12px ${getComputedStyle(document.documentElement).getPropertyValue('--ls-shadow').trim() || 'rgba(220,38,38,0.8)'}`;
                         const enterBtn = document.getElementById('enter-btn');
                         if (enterBtn) {
                             setTimeout(() => enterBtn.classList.add('show'), 350);
@@ -5979,14 +6072,72 @@
         const TOTAL_TIERS = 100;
         const EPOCH = new Date('2026-06-04T00:00:00Z').getTime();
         const daysSince = Math.floor((Date.now() - EPOCH) / 86400000);
-        const pos = ((daysSince % 70) + 70) % 70;
-        const seasonIdx = Math.floor(pos / 14);
-        const seasonName = ['SEASON 1','SEASON 2','SEASON 3','SEASON 4','SEASON 5'][seasonIdx];
+        const pos = ((daysSince % 50) + 50) % 50;
+        const SEASON_NAMES  = ['SEASON 1','SEASON 2','SEASON 3','SEASON 4','SEASON 5'];
         const SEASON_COLORS = ['#ef4444','#3b82f6','#22c55e','#a855f7','#ef4444'];
-        const currentSeasonColor = SEASON_COLORS[seasonIdx] || '#ef4444';
+        // Live season state — updated from Firebase so the season number is always authoritative
+        let seasonIdx        = Math.floor(pos / 10);  // overwritten once Firebase loads
+        let seasonName       = SEASON_NAMES[seasonIdx];
+        let currentSeasonColor = SEASON_COLORS[seasonIdx] || '#ef4444';
+        // Apply initial season CSS vars immediately (before Firebase loads)
+        // _setBPCSSVars is defined just below, called after DOMContentLoaded
+        document.addEventListener('DOMContentLoaded', () => { if (typeof _setBPCSSVars === 'function') _setBPCSSVars(seasonIdx); });
+
+        // Pre-computed rgba variants for each season color (indices match SEASON_COLORS)
+        const SEASON_COLOR_VARIANTS = [
+            // Season 1 — red
+            { dark:'#dc2626', deep:'#b91c1c', r50:'rgba(220,38,38,0.5)', r30:'rgba(220,38,38,0.3)', r20:'rgba(220,38,38,0.2)', r15:'rgba(220,38,38,0.15)', r12:'rgba(220,38,38,0.12)', r08:'rgba(220,38,38,0.08)', r05:'rgba(220,38,38,0.05)', r70:'rgba(239,68,68,0.7)' },
+            // Season 2 — blue
+            { dark:'#1d4ed8', deep:'#1e3a8a', r50:'rgba(29,78,216,0.5)', r30:'rgba(29,78,216,0.3)', r20:'rgba(29,78,216,0.2)', r15:'rgba(29,78,216,0.15)', r12:'rgba(29,78,216,0.12)', r08:'rgba(29,78,216,0.08)', r05:'rgba(29,78,216,0.05)', r70:'rgba(59,130,246,0.7)' },
+            // Season 3 — green
+            { dark:'#15803d', deep:'#14532d', r50:'rgba(21,128,61,0.5)', r30:'rgba(21,128,61,0.3)', r20:'rgba(21,128,61,0.2)', r15:'rgba(21,128,61,0.15)', r12:'rgba(21,128,61,0.12)', r08:'rgba(21,128,61,0.08)', r05:'rgba(21,128,61,0.05)', r70:'rgba(34,197,94,0.7)' },
+            // Season 4 — purple
+            { dark:'#7e22ce', deep:'#581c87', r50:'rgba(126,34,206,0.5)', r30:'rgba(126,34,206,0.3)', r20:'rgba(126,34,206,0.2)', r15:'rgba(126,34,206,0.15)', r12:'rgba(126,34,206,0.12)', r08:'rgba(126,34,206,0.08)', r05:'rgba(126,34,206,0.05)', r70:'rgba(168,85,247,0.7)' },
+            // Season 5 — red (same as 1)
+            { dark:'#dc2626', deep:'#b91c1c', r50:'rgba(220,38,38,0.5)', r30:'rgba(220,38,38,0.3)', r20:'rgba(220,38,38,0.2)', r15:'rgba(220,38,38,0.15)', r12:'rgba(220,38,38,0.12)', r08:'rgba(220,38,38,0.08)', r05:'rgba(220,38,38,0.05)', r70:'rgba(239,68,68,0.7)' },
+        ];
+
+        function _setBPCSSVars(idx) {
+            const i = (idx >= 0 && idx < SEASON_COLOR_VARIANTS.length) ? idx : 0;
+            const v = SEASON_COLOR_VARIANTS[i];
+            const c = SEASON_COLORS[i] || '#ef4444';
+            const root = document.documentElement;
+            root.style.setProperty('--bp-color',      c);
+            root.style.setProperty('--bp-color-dark',  v.dark);
+            root.style.setProperty('--bp-color-deep',  v.deep);
+            root.style.setProperty('--bp-color-50',    v.r50);
+            root.style.setProperty('--bp-color-30',    v.r30);
+            root.style.setProperty('--bp-color-20',    v.r20);
+            root.style.setProperty('--bp-color-15',    v.r15);
+            root.style.setProperty('--bp-color-12',    v.r12);
+            root.style.setProperty('--bp-color-08',    v.r08);
+            root.style.setProperty('--bp-color-05',    v.r05);
+            root.style.setProperty('--bp-color-70',    v.r70);
+        }
+
+        function _applyLiveSeasonIdx(idx) {
+            seasonIdx          = idx;
+            seasonName         = SEASON_NAMES[idx] || ('SEASON ' + (idx + 1));
+            currentSeasonColor = SEASON_COLORS[idx] || '#ef4444';
+            // Apply all BP CSS custom properties for this season
+            _setBPCSSVars(idx);
+            // Update all season label elements immediately
+            const siEl = document.getElementById('bp-season-info');
+            if (siEl) {
+                siEl.textContent    = seasonName;
+                siEl.style.color    = currentSeasonColor;
+                siEl.style.borderColor = currentSeasonColor;
+                siEl.style.background  = currentSeasonColor + '22';
+            }
+            const cdEl = document.getElementById('bp-season-countdown');
+            if (cdEl) cdEl.style.color = currentSeasonColor;
+        }
 
         // BP season end — reads from Firebase so admin override works
         let _bpSeasonEndMs = null;
+
+        // Guard so we only trigger the season advance once per session
+        let _seasonAdvanceTriggered = false;
 
         function _startBPCountdown() {
             const el = document.getElementById('bp-season-countdown');
@@ -5994,9 +6145,22 @@
             el.style.color = currentSeasonColor;
 
             function tick() {
-                if (!_bpSeasonEndMs) { el.textContent = '-- : -- : --'; return; }
-                const diff = _bpSeasonEndMs - Date.now();
-                if (diff <= 0) { el.textContent = 'ENDING SOON'; return; }
+                // Prefer the global (set by admin save OR Firebase onValue listener) over the local cache
+                const _endMs = window._realmSeasonEndMs || _bpSeasonEndMs;
+                if (!_endMs) { el.textContent = '-- : -- : --'; return; }
+                // Keep local var in sync so other code paths stay consistent
+                if (window._realmSeasonEndMs && window._realmSeasonEndMs !== _bpSeasonEndMs) {
+                    _bpSeasonEndMs = window._realmSeasonEndMs;
+                }
+                const diff = _endMs - Date.now();
+                if (diff <= 0) {
+                    el.textContent = 'ENDING SOON';
+                    if (!_seasonAdvanceTriggered) {
+                        _seasonAdvanceTriggered = true;
+                        _advanceSeasonInFirebase();
+                    }
+                    return;
+                }
                 const d = Math.floor(diff / 86400000);
                 const h = Math.floor((diff % 86400000) / 3600000);
                 const m = Math.floor((diff % 3600000) / 60000);
@@ -6005,6 +6169,38 @@
             }
             tick();
             setInterval(tick, 1000);
+        }
+
+        // Called when season timer hits zero — writes the next season to Firebase
+        // so ALL connected clients advance simultaneously
+        function _advanceSeasonInFirebase() {
+            const realm = window._realm;
+            if (!realm || !realm.getDb()) {
+                setTimeout(() => { _seasonAdvanceTriggered = false; }, 2000);
+                return;
+            }
+            const _db  = realm.getDb();
+            const _ref = realm.getRef();
+            const _upd = realm.getUpdate();
+            const _get = realm.getGet();
+            if (!_db || !_ref || !_upd || !_get) return;
+
+            _get(_ref(_db, 'system/season')).then(snap => {
+                const d = snap.val() || {};
+                const curSeason = typeof d.currentSeason === 'number' ? d.currentSeason : seasonIdx;
+                const nextSeason = (curSeason + 1) % 5;
+                const nextEndMs  = Date.now() + (10 * 24 * 60 * 60 * 1000);
+                return _upd(_ref(_db, 'system/season'), {
+                    currentSeason:   nextSeason,
+                    seasonEndTime:   nextEndMs,
+                    seasonStartedAt: Date.now()
+                });
+            }).then(() => {
+                console.log('[Season] Advanced to next season in Firebase');
+            }).catch(err => {
+                console.warn('[Season] Failed to advance season:', err);
+                _seasonAdvanceTriggered = false;
+            });
         }
 
         // Initialize battle pass system
@@ -6024,19 +6220,93 @@
                         const d = snap.val();
                         const _bpEPOCH = new Date('2026-06-04T00:00:00Z').getTime();
                         const _bpDays = Math.floor((Date.now() - _bpEPOCH) / 86400000);
-                        const _bpPos = ((_bpDays % 70) + 70) % 70;
-                        const _bpSIdx = Math.floor(_bpPos / 14);
-                        // Use Firebase seasonEndTime if set by admin, otherwise calculate
-                        _bpSeasonEndMs = (d?.seasonEndTime) || (_bpEPOCH + (_bpSIdx + 1) * 14 * 86400000);
+                        const _bpPos = ((_bpDays % 50) + 50) % 50;
+                        const _bpSIdx = Math.floor(_bpPos / 10);
+                        const _calcEnd = _bpEPOCH + (_bpSIdx + 1) * 10 * 86400000;
+                        // Apply Firebase-authoritative season number if present
+                        if (typeof d?.currentSeason === 'number') {
+                            _applyLiveSeasonIdx(d.currentSeason);
+                        }
+                        // Only use Firebase end time if it's still in the future
+                        if (d?.seasonEndTime && d.seasonEndTime > Date.now()) {
+                            _bpSeasonEndMs = d.seasonEndTime;
+                            window._realmSeasonEndMs = d.seasonEndTime;
+                        } else {
+                            _bpSeasonEndMs = _calcEnd;
+                            window._realmSeasonEndMs = null;
+                        }
                         refreshBattlePassUI();
                     }).catch(() => {
                         const _bpEPOCH = new Date('2026-06-04T00:00:00Z').getTime();
                         const _bpDays = Math.floor((Date.now() - _bpEPOCH) / 86400000);
-                        const _bpPos = ((_bpDays % 70) + 70) % 70;
-                        const _bpSIdx = Math.floor(_bpPos / 14);
-                        _bpSeasonEndMs = _bpEPOCH + (_bpSIdx + 1) * 14 * 86400000;
+                        const _bpPos = ((_bpDays % 50) + 50) % 50;
+                        const _bpSIdx = Math.floor(_bpPos / 10);
+                        _bpSeasonEndMs = _bpEPOCH + (_bpSIdx + 1) * 10 * 86400000;
                         refreshBattlePassUI();
                     });
+
+                    // ── Live listener: auto-update countdown + handle season advance ──
+                    const _onVal = window._realm.getOnValue();
+                    // Track the last seen season so we know when it actually changes
+                    let _lastSeenSeason = null;
+                    if (_onVal) {
+                        _onVal(_ref(_db, 'system/season'), snap => {
+                            if (!snap.exists()) return;
+                            const d = snap.val();
+
+                            // ── Season number changed → new season started ──
+                            if (typeof d.currentSeason === 'number') {
+                                if (_lastSeenSeason !== null && _lastSeenSeason !== d.currentSeason) {
+                                    // New season! Reset advance guard so countdown works again
+                                    _seasonAdvanceTriggered = false;
+                                    // Update all live season vars + UI labels
+                                    _applyLiveSeasonIdx(d.currentSeason);
+
+                                    // Reset current user's BP progress for new season
+                                    const activeUser = window._realm?.getActiveUser ? window._realm.getActiveUser() : null;
+                                    const uid = activeUser?.uid;
+                                    if (uid) {
+                                        const _upd2 = window._realm.getUpdate();
+                                        const userData = window._realm?.getUserData ? window._realm.getUserData() : null;
+                                        if (_upd2) {
+                                            _upd2(_ref(_db, `users/${uid}/battlePass`), {
+                                                xpb: 0,
+                                                tier: 1,
+                                                currentSeason: d.currentSeason,
+                                                lastLoginDay: null,
+                                                owned: false   // BP expires each season
+                                            }).catch(() => {});
+                                        }
+                                        if (userData?.battlePass) {
+                                            userData.battlePass.xpb   = 0;
+                                            userData.battlePass.tier  = 1;
+                                            userData.battlePass.owned = false;
+                                            userData.battlePass.currentSeason = d.currentSeason;
+                                        }
+                                    }
+                                    refreshBattlePassUI();
+                                    if (typeof showToast === 'function') showToast(`⚔️ ${SNAMES[d.currentSeason] || 'New Season'} has begun!`, 'success');
+                                }
+                                _lastSeenSeason = d.currentSeason;
+                            }
+
+                            // ── Season end time updated ──
+                            if (d?.seasonEndTime) {
+                                if (d.seasonEndTime > Date.now()) {
+                                    _bpSeasonEndMs = d.seasonEndTime;
+                                    window._realmSeasonEndMs = d.seasonEndTime;
+                                } else {
+                                    // Expired override — use calculated default
+                                    const _bpEPOCH2 = new Date('2026-06-04T00:00:00Z').getTime();
+                                    const _bpDays2 = Math.floor((Date.now() - _bpEPOCH2) / 86400000);
+                                    const _bpPos2 = ((_bpDays2 % 50) + 50) % 50;
+                                    const _bpSIdx2 = Math.floor(_bpPos2 / 10);
+                                    _bpSeasonEndMs = _bpEPOCH2 + (_bpSIdx2 + 1) * 10 * 86400000;
+                                    window._realmSeasonEndMs = null;
+                                }
+                            }
+                        });
+                    }
                     // tier track will be rendered by renderBattlePassUI
                 }
             }, 500);
@@ -6087,13 +6357,13 @@
 
             console.log('Rendering battle pass UI:', bp);
 
-            // Update season info
+            // Update season info (seasonName / currentSeasonColor are live-updated from Firebase)
             const seasonInfo = document.getElementById('bp-season-info');
             if (seasonInfo) {
-                seasonInfo.textContent = seasonName;
-                seasonInfo.style.color = currentSeasonColor;
+                seasonInfo.textContent    = seasonName;
+                seasonInfo.style.color    = currentSeasonColor;
                 seasonInfo.style.borderColor = currentSeasonColor;
-                seasonInfo.style.background = currentSeasonColor + '22';
+                seasonInfo.style.background  = currentSeasonColor + '22';
             }
             
             // Update credits display
@@ -6109,7 +6379,7 @@
                     buyBtn.disabled = true;
                 } else {
                     buyBtn.textContent = `BUY PASS (500 ⬡)`;
-                    buyBtn.style.background = 'linear-gradient(135deg, #dc2626, #ff4444)';
+                    buyBtn.style.background = `linear-gradient(135deg, ${currentSeasonColor}cc, ${currentSeasonColor})`;
                     buyBtn.disabled = credits < 500;
                 }
             }
@@ -6537,7 +6807,7 @@
             }
         };
 
-        window.adminResetSeasonTo14Days = async function() {
+        window.adminResetSeasonTo10Days = async function() {
             const db = window._realm?.getDb();
             const ref = window._realm?.getRef();
             const update = window._realm?.getUpdate();
@@ -6546,7 +6816,7 @@
             statusEl.textContent = 'Resetting...'; statusEl.style.color = '#9ca3af';
 
             try {
-                const newEndTime = Date.now() + (14 * 24 * 60 * 60 * 1000);
+                const newEndTime = Date.now() + (10 * 24 * 60 * 60 * 1000);
                 await update(ref(db, 'system/season'), {
                     seasonEndTime: newEndTime,
                     overriddenAt: Date.now()
@@ -6558,7 +6828,7 @@
                 const dt = new Date(newEndTime);
                 const local = new Date(dt.getTime() - dt.getTimezoneOffset() * 60000).toISOString().slice(0,16);
                 document.getElementById('admin-season-end-input').value = local;
-                statusEl.textContent = '✓ Season reset to 14 days from now!';
+                statusEl.textContent = '✓ Season reset to 10 days from now!';
                 statusEl.style.color = '#10b981';
             } catch(err) {
                 statusEl.textContent = `✗ Error: ${err.message}`;
@@ -6613,18 +6883,13 @@
 
                 console.log('Purchasing battle pass...');
 
-                // Compute current season index (must match the season reset logic)
-                const _epoch = new Date('2026-06-04T00:00:00Z').getTime();
-                const _daysSince = Math.floor((Date.now() - _epoch) / 86400000);
-                const _pos = ((_daysSince % 70) + 70) % 70;
-                const _seasonIdx = Math.floor(_pos / 14);
-
+                // Use the live seasonIdx (Firebase-authoritative, set by _applyLiveSeasonIdx)
                 await update(ref(db, `users/${activeUser.uid}`), {
                     credits: credits - 500,
                     'battlePass/owned': true,
                     'battlePass/xpb': userData.battlePass?.xpb ?? 0,
                     'battlePass/tier': userData.battlePass?.tier ?? 1,
-                    'battlePass/currentSeason': _seasonIdx,
+                    'battlePass/currentSeason': seasonIdx,
                     'battlePass/lastLoginDay': userData.battlePass?.lastLoginDay ?? null,
                 });
 
@@ -7124,7 +7389,7 @@
                                 <div class="bp-season-label" id="bp-season-info">SEASON 1</div>
                                 <h1 class="bp-hero-title">BATTLE<br>PASS</h1>
                                 <div class="bp-hero-subtitle">100 TIERS OF REWARDS</div>
-                                <div id="bp-season-countdown" style="font-size:0.72rem;color:#ff6666;font-family:'Orbitron',sans-serif;margin-top:6px;letter-spacing:1px;">-- : -- : --</div>
+                                <div id="bp-season-countdown" style="font-size:0.72rem;color:var(--bp-color);font-family:'Orbitron',sans-serif;margin-top:6px;letter-spacing:1px;">-- : -- : --</div>
                             </div>
                             <div class="bp-hero-right">
                                 <div class="bp-credits-pill">
@@ -7229,7 +7494,7 @@
                         <div style="background:rgba(220,38,38,0.07);border:1px solid rgba(220,38,38,0.2);border-radius:12px;padding:16px;">
                             <div style="font-weight:700;font-size:0.85rem;color:#f3f4f6;margin-bottom:4px;">&#128197; Season End Date</div>
                             <div style="font-size:0.72rem;color:#6b7280;margin-bottom:12px;">Current end: <span id="admin-current-end">—</span></div>
-                            <button onclick="adminResetSeasonTo14Days()" style="width:100%;background:linear-gradient(135deg,#0891b2,#0e7490);border:none;color:white;border-radius:8px;padding:10px;font-weight:700;font-size:0.85rem;cursor:pointer;margin-bottom:8px;">&#8635; RESET TO 14 DAYS FROM NOW</button>
+                            <button onclick="adminResetSeasonTo10Days()" style="width:100%;background:linear-gradient(135deg,#0891b2,#0e7490);border:none;color:white;border-radius:8px;padding:10px;font-weight:700;font-size:0.85rem;cursor:pointer;margin-bottom:8px;">&#8635; RESET TO 10 DAYS FROM NOW</button>
                             <input id="admin-season-end-input" type="datetime-local" style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:10px 12px;color:white;font-size:0.85rem;outline:none;margin-bottom:10px;color-scheme:dark;">
                             <button onclick="adminSetSeasonEnd()" style="width:100%;background:linear-gradient(135deg,#d97706,#92400e);border:none;color:white;border-radius:8px;padding:10px;font-weight:700;font-size:0.85rem;cursor:pointer;">SET CUSTOM END DATE</button>
                             <div id="admin-season-status" style="font-size:0.75rem;text-align:center;margin-top:8px;color:#6b7280;"></div>
@@ -10407,36 +10672,50 @@
                 }
                 
                 // Initialize battle pass data structure
-                const EPOCH = new Date('2026-06-04T00:00:00Z').getTime();
-                const daysSince = Math.floor((Date.now() - EPOCH) / 86400000);
-                const pos = ((daysSince % 70) + 70) % 70;
-                const seasonIdx = Math.floor(pos / 14);
-                
-                // Season metadata in system/season is managed exclusively by the admin panel.
-                // User logins never write to system/season.
-                
-                if (!userDataRecord.battlePass) {
-                    userDataRecord.battlePass = {
-                        owned: false,
-                        xpb: 0,
-                        tier: 1,
-                        lastLoginDay: null,
-                        currentSeason: seasonIdx
-                    };
-                    update(ref(db, `users/${activeUserSession.uid}/battlePass`), userDataRecord.battlePass).catch(() => {});
-                } else {
-                    // Check for season reset — preserve owned, only reset progress
-                    if (userDataRecord.battlePass.currentSeason !== seasonIdx) {
+                // Season index comes from Firebase system/season.currentSeason (authoritative)
+                // falling back to EPOCH math only if not yet set
+                const _bpEpoch2   = new Date('2026-06-04T00:00:00Z').getTime();
+                const _bpDays2    = Math.floor((Date.now() - _bpEpoch2) / 86400000);
+                const _bpPos2     = ((_bpDays2 % 50) + 50) % 50;
+                const _bpCalcIdx  = Math.floor(_bpPos2 / 10);
+
+                // Fetch the authoritative season number from Firebase before checking user record
+                get(ref(db, 'system/season')).then(sysSnap => {
+                    const sysSeason = sysSnap.val();
+                    const authSeasonIdx = typeof sysSeason?.currentSeason === 'number'
+                        ? sysSeason.currentSeason
+                        : _bpCalcIdx;
+
+                    if (!userDataRecord.battlePass) {
                         userDataRecord.battlePass = {
-                            owned: userDataRecord.battlePass.owned || false,
+                            owned: false,
                             xpb: 0,
                             tier: 1,
                             lastLoginDay: null,
-                            currentSeason: seasonIdx
+                            currentSeason: authSeasonIdx
+                        };
+                        update(ref(db, `users/${activeUserSession.uid}/battlePass`), userDataRecord.battlePass).catch(() => {});
+                    } else if (userDataRecord.battlePass.currentSeason !== authSeasonIdx) {
+                        // Season changed — reset progress, keep owned status
+                        userDataRecord.battlePass = {
+                            owned: false,   // BP expires each season
+                            xpb: 0,
+                            tier: 1,
+                            lastLoginDay: null,
+                            currentSeason: authSeasonIdx
                         };
                         update(ref(db, `users/${activeUserSession.uid}/battlePass`), userDataRecord.battlePass).catch(() => {});
                     }
-                }
+                }).catch(() => {
+                    // Firebase read failed — fall back to EPOCH math
+                    if (!userDataRecord.battlePass) {
+                        userDataRecord.battlePass = { owned: false, xpb: 0, tier: 1, lastLoginDay: null, currentSeason: _bpCalcIdx };
+                        update(ref(db, `users/${activeUserSession.uid}/battlePass`), userDataRecord.battlePass).catch(() => {});
+                    } else if (userDataRecord.battlePass.currentSeason !== _bpCalcIdx) {
+                        userDataRecord.battlePass = { owned: false, xpb: 0, tier: 1, lastLoginDay: null, currentSeason: _bpCalcIdx }; // BP expires each season
+                        update(ref(db, `users/${activeUserSession.uid}/battlePass`), userDataRecord.battlePass).catch(() => {});
+                    }
+                });
                 
                 if (!userDataRecord.tutorial || typeof userDataRecord.tutorial !== 'object') {
                     // Ensure tutorial exists for strict, account-based progression and protection.
@@ -16277,43 +16556,7 @@
             for (const id in _stolenTimers) delete _stolenTimers[id];
         });
 
-        // =========================================================
-        // AUTO DISCORD REMINDER — fires every 3.5 hours
-        // Sends "COME AND PLAY!" 3 times in a row to the webhook
-        // =========================================================
-        (function startDiscordReminder() {
-            const WEBHOOK_URL = 'https://discord.com/api/webhooks/1512789629097742437/UIFgw2ihKLr5pel4QbYrOSImigLLF1GJ9x0EytDHjS-oonw5CbsXUOYsU7i0AHz689RW';
-            const INTERVAL_MS = 3.5 * 60 * 60 * 1000; // 3.5 hours
-            const MESSAGE = 'COME AND PLAY!';
-            const TIMES = 3;
-            const DELAY_BETWEEN_MS = 1500; // 1.5 seconds between each message
 
-            async function sendMessage() {
-                try {
-                    await fetch(WEBHOOK_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ content: MESSAGE })
-                    });
-                } catch (e) {
-                    console.warn('[Discord Reminder] Failed to send:', e);
-                }
-            }
-
-            async function sendBurst() {
-                for (let i = 0; i < TIMES; i++) {
-                    await sendMessage();
-                    if (i < TIMES - 1) {
-                        await new Promise(res => setTimeout(res, DELAY_BETWEEN_MS));
-                    }
-                }
-                console.log('[Discord Reminder] Sent burst of', TIMES, 'messages.');
-            }
-
-            // Fire immediately on load, then every 3.5 hours
-            sendBurst();
-            setInterval(sendBurst, INTERVAL_MS);
-        })();
 
         // Expose Firebase functions for non-module scripts
         window._realm = {
@@ -19303,7 +19546,7 @@ Respond with ONLY the chat message text — no JSON, no labels, no quotes, just 
     </script>
     <div
         style="position: fixed; top: 12px; left: 12px; z-index: 9999999999999; color: rgba(255, 255, 255, 0.4); font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
-        V:11.1
+        V:11.2
     </div>
 
     <!-- ═══════════════════════════════════════════
