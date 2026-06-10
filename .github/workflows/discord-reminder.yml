@@ -2,15 +2,14 @@ name: Discord Reminder
 
 on:
   schedule:
-    - cron: '*/59 * * * *'
-  workflow_dispatch:
+    - cron: '*/45 * * * *'
 
 jobs:
-  send-reminder:
+  ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Send COME AND PLAY!
+      - name: Send to Discord
         run: |
-          curl -s -X POST "${{ secrets.DISCORD_WEBHOOK_URL }}" \
+          curl -X POST "https://discord.com/api/webhooks/1512789629097742437/UIFgw2ihKLr5pel4QbYrOSImigLLF1GJ9x0EytDHjS-oonw5CbsXUOYsU7i0AHz689RW" \
             -H "Content-Type: application/json" \
-            -d '{"content": "PLAY!"}'
+            -d '{"content": "PLAY!!!"}'
