@@ -14058,7 +14058,16 @@
                 if (lastClaimed >= globalCycle.cycleId) {
                     // Already claimed — show countdown to next cycle
                     const msLeft = globalCycle.nextRewardAt - Date.now();
-                    rankHudShowTimer(Math.max(0, msLeft));
+                    if (msLeft <= 0) {
+                        // Next cycle window has also passed — advance to a fresh cycle
+                        if (!cycleAdvanceInFlight) {
+                            cycleAdvanceInFlight = true;
+                            advanceCycleFromClaimed();
+                        }
+                        rankHudShowTimer(0);
+                    } else {
+                        rankHudShowTimer(msLeft);
+                    }
                 } else {
                     rankHudShowClaim();
                 }
@@ -14122,6 +14131,20 @@
                     rewardReady:  true
                 };
             }).catch(e => console.warn('[RankCycle] advanceCycle error', e));
+        }
+
+        // ── Advance to a NEW cycle (when current cycle is claimed & timer expired) ──
+        function advanceCycleFromClaimed() {
+            runTransaction(ref(db, CYCLE_REF_PATH), current => {
+                if (!current) return;
+                // Only proceed if nextRewardAt is in the past
+                if ((current.nextRewardAt || 0) > Date.now()) return; // not yet
+                return {
+                    cycleId:      (current.cycleId || 1) + 1,
+                    nextRewardAt: Date.now() + RANK_REWARD_INTERVAL_MS,
+                    rewardReady:  true
+                };
+            }).catch(e => console.warn('[RankCycle] advanceCycleFromClaimed error', e));
         }
 
         // ── Claim handler ─────────────────────────────────────────────
