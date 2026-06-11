@@ -5662,6 +5662,272 @@
 
 <body>
 
+    <!-- ══════════════════════════════════════════════════════════
+         WORLD CUP 2026 INTRO OVERLAY
+         Plays once on load, then fades out revealing normal app.
+         ══════════════════════════════════════════════════════════ -->
+    <div id="wc-intro" style="position:fixed;inset:0;z-index:99999999;overflow:hidden;background:#020a04;">
+
+        <!-- Pitch grid lines (CSS) -->
+        <canvas id="wc-canvas" style="position:absolute;inset:0;width:100%;height:100%;"></canvas>
+
+        <!-- Grass texture overlay -->
+        <div id="wc-grass" style="position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(0,0,0,0.06) 0px,rgba(0,0,0,0.06) 1px,transparent 1px,transparent 28px),repeating-linear-gradient(90deg,rgba(255,255,255,0.015) 0px,rgba(255,255,255,0.015) 1px,transparent 1px,transparent 28px);opacity:0;transition:opacity 1s;"></div>
+
+        <!-- Vignette -->
+        <div style="position:absolute;inset:0;background:radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.75) 100%);pointer-events:none;z-index:2;"></div>
+
+        <!-- Main content -->
+        <div id="wc-content" style="position:relative;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:20px;text-align:center;opacity:0;">
+
+            <!-- Trophy icon -->
+            <div id="wc-trophy" style="font-size:5rem;margin-bottom:12px;filter:drop-shadow(0 0 30px rgba(255,215,0,0.8));transform:scale(0) rotate(-20deg);transition:transform 0.7s cubic-bezier(0.34,1.56,0.64,1);">🏆</div>
+
+            <!-- FIFA badge -->
+            <div id="wc-badge" style="font-family:'Orbitron',sans-serif;font-size:0.7rem;letter-spacing:0.3em;color:#c9a227;text-transform:uppercase;margin-bottom:8px;opacity:0;transform:translateY(10px);transition:all 0.5s ease;">FIFA WORLD CUP</div>
+
+            <!-- Year -->
+            <div id="wc-year" style="font-family:'Orbitron',sans-serif;font-size:clamp(4rem,18vw,8rem);font-weight:900;line-height:1;color:#fff;letter-spacing:-2px;opacity:0;transform:translateY(30px);transition:all 0.6s cubic-bezier(0.23,1,0.32,1);text-shadow:0 0 60px rgba(200,160,0,0.6),0 0 120px rgba(200,120,0,0.3);">2026</div>
+
+            <!-- Host cities -->
+            <div id="wc-hosts" style="font-family:'Outfit',sans-serif;font-size:0.85rem;font-weight:600;letter-spacing:0.18em;color:rgba(255,255,255,0.55);margin-top:10px;opacity:0;transition:opacity 0.5s ease;text-transform:uppercase;">USA · CANADA · MEXICO</div>
+
+            <!-- Animated divider -->
+            <div id="wc-line" style="width:0;height:2px;background:linear-gradient(90deg,transparent,#c9a227,#fff,#c9a227,transparent);margin:20px auto;border-radius:1px;transition:width 0.8s cubic-bezier(0.23,1,0.32,1);box-shadow:0 0 12px rgba(201,162,39,0.7);"></div>
+
+            <!-- Tagline -->
+            <div id="wc-tag" style="font-family:'Orbitron',sans-serif;font-size:clamp(0.9rem,3.5vw,1.3rem);font-weight:700;letter-spacing:0.12em;color:#c9a227;opacity:0;transform:translateY(8px);transition:all 0.5s ease;text-shadow:0 0 20px rgba(201,162,39,0.5);">THE BEAUTIFUL GAME AWAITS</div>
+
+            <!-- Skip button -->
+            <button id="wc-skip" onclick="skipWCIntro()" style="margin-top:36px;padding:10px 28px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);border-radius:999px;color:rgba(255,255,255,0.5);font-family:'Outfit',sans-serif;font-size:0.78rem;font-weight:600;letter-spacing:0.06em;cursor:pointer;opacity:0;transition:all 0.3s ease;backdrop-filter:blur(8px);">SKIP INTRO</button>
+        </div>
+
+        <!-- Bottom flag strip -->
+        <div id="wc-flags" style="position:absolute;bottom:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#c8102e,#ffffff,#002868,#009b3a,#fedf00,#ff0000,#ffffff,#c8102e);opacity:0;transition:opacity 0.8s;z-index:20;"></div>
+    </div>
+
+    <style>
+        /* Confetti pieces (JS-created) */
+        .wc-confetti {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 1px;
+            animation: wcConfettiFall linear forwards;
+            pointer-events: none;
+        }
+        @keyframes wcConfettiFall {
+            0%   { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+        }
+        #wc-year { animation-timing-function: cubic-bezier(0.23,1,0.32,1); }
+        #wc-intro.wc-exit {
+            opacity: 0;
+            transition: opacity 0.8s ease;
+            pointer-events: none;
+        }
+        #wc-skip:hover {
+            background: rgba(255,255,255,0.15) !important;
+            color: rgba(255,255,255,0.9) !important;
+            border-color: rgba(255,255,255,0.4) !important;
+        }
+    </style>
+
+    <script>
+    (function() {
+        /* ── Canvas: animated football pitch lights + ball arc ── */
+        const canvas = document.getElementById('wc-canvas');
+        const ctx    = canvas.getContext('2d');
+        let W, H, animId;
+        let particles = [];
+        let ball = null;
+        let t = 0;
+
+        function resize() {
+            W = canvas.width  = canvas.offsetWidth;
+            H = canvas.height = canvas.offsetHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        /* Pitch colour swells */
+        function drawPitch() {
+            const base = `hsl(${130 + Math.sin(t * 0.4) * 8}, ${60 + Math.sin(t*0.3)*8}%, ${7 + Math.sin(t*0.5)*3}%)`;
+            ctx.fillStyle = base;
+            ctx.fillRect(0, 0, W, H);
+
+            /* Alternating stripes */
+            for (let i = 0; i < 8; i++) {
+                ctx.fillStyle = i % 2 === 0 ? 'rgba(255,255,255,0.012)' : 'rgba(0,0,0,0.08)';
+                ctx.fillRect(0, i * H / 8, W, H / 8);
+            }
+
+            /* Centre circle glow */
+            const grd = ctx.createRadialGradient(W/2, H/2, 0, W/2, H/2, Math.min(W,H)*0.38);
+            grd.addColorStop(0, 'rgba(201,162,39,0.06)');
+            grd.addColorStop(1, 'transparent');
+            ctx.fillStyle = grd;
+            ctx.fillRect(0, 0, W, H);
+        }
+
+        /* Stars / spotlights */
+        function initParticles() {
+            particles = [];
+            for (let i = 0; i < 60; i++) {
+                particles.push({
+                    x: Math.random() * W,
+                    y: Math.random() * H,
+                    r: Math.random() * 1.5 + 0.3,
+                    a: Math.random(),
+                    speed: Math.random() * 0.015 + 0.005,
+                    phase: Math.random() * Math.PI * 2,
+                });
+            }
+        }
+        initParticles();
+
+        /* Football arc */
+        function initBall() {
+            ball = { phase: 0, done: false };
+        }
+        initBall();
+
+        function drawParticles() {
+            particles.forEach(p => {
+                p.a = 0.2 + 0.8 * (0.5 + 0.5 * Math.sin(t * p.speed * 60 + p.phase));
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255,215,80,${p.a * 0.6})`;
+                ctx.fill();
+            });
+        }
+
+        function drawBall() {
+            if (!ball || ball.done) return;
+            ball.phase += 0.018;
+            if (ball.phase > 1) { ball.done = true; return; }
+            const bx = W * 0.1 + ball.phase * W * 0.8;
+            // Parabolic arc + spin wobble
+            const by = H * 0.75 - Math.sin(ball.phase * Math.PI) * H * 0.45 + Math.sin(ball.phase * Math.PI * 4) * 6;
+            const scale = 0.6 + Math.sin(ball.phase * Math.PI) * 0.5;
+            ctx.save();
+            ctx.translate(bx, by);
+            ctx.scale(scale, scale);
+            ctx.font = `${28 * scale}px serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            // Rotation
+            ctx.rotate(ball.phase * Math.PI * 6);
+            ctx.fillText('⚽', 0, 0);
+            ctx.restore();
+
+            /* Trail */
+            ctx.beginPath();
+            ctx.moveTo(bx - 30, by + 8);
+            ctx.lineTo(bx - 6, by + 2);
+            ctx.strokeStyle = `rgba(255,255,255,${0.12 * (1 - ball.phase)})`;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+
+        function loop() {
+            t += 0.016;
+            ctx.clearRect(0, 0, W, H);
+            drawPitch();
+            drawParticles();
+            drawBall();
+            animId = requestAnimationFrame(loop);
+        }
+        loop();
+
+        /* ── Confetti burst ── */
+        function spawnConfetti() {
+            const colors = ['#c9a227','#ffffff','#c8102e','#002868','#009b3a','#fedf00','#ff6b35'];
+            for (let i = 0; i < 60; i++) {
+                const el = document.createElement('div');
+                el.className = 'wc-confetti';
+                el.style.left = (Math.random() * 100) + '%';
+                el.style.top  = '-10px';
+                el.style.background = colors[Math.floor(Math.random() * colors.length)];
+                el.style.width  = (Math.random() * 8 + 4) + 'px';
+                el.style.height = (Math.random() * 4 + 3) + 'px';
+                el.style.animationDuration = (Math.random() * 2.5 + 1.5) + 's';
+                el.style.animationDelay    = (Math.random() * 0.8) + 's';
+                document.getElementById('wc-intro').appendChild(el);
+                setTimeout(() => el.remove(), 5000);
+            }
+        }
+
+        /* ── Sequenced reveal ── */
+        function seq(fn, delay) { setTimeout(fn, delay); }
+
+        // Phase 1: grass + content fade in
+        seq(() => {
+            document.getElementById('wc-grass').style.opacity = '1';
+            document.getElementById('wc-content').style.opacity = '1';
+        }, 200);
+
+        // Phase 2: trophy
+        seq(() => {
+            document.getElementById('wc-trophy').style.transform = 'scale(1) rotate(0deg)';
+        }, 500);
+
+        // Phase 3: badge
+        seq(() => {
+            const b = document.getElementById('wc-badge');
+            b.style.opacity = '1';
+            b.style.transform = 'translateY(0)';
+        }, 900);
+
+        // Phase 4: year slams in
+        seq(() => {
+            const y = document.getElementById('wc-year');
+            y.style.opacity = '1';
+            y.style.transform = 'translateY(0)';
+            spawnConfetti();
+        }, 1200);
+
+        // Phase 5: hosts
+        seq(() => {
+            document.getElementById('wc-hosts').style.opacity = '1';
+        }, 1700);
+
+        // Phase 6: line expands
+        seq(() => {
+            document.getElementById('wc-line').style.width = '200px';
+        }, 2000);
+
+        // Phase 7: tagline
+        seq(() => {
+            const tg = document.getElementById('wc-tag');
+            tg.style.opacity = '1';
+            tg.style.transform = 'translateY(0)';
+        }, 2400);
+
+        // Phase 8: skip button
+        seq(() => {
+            document.getElementById('wc-skip').style.opacity = '1';
+            document.getElementById('wc-flags').style.opacity = '1';
+        }, 2900);
+
+        // Auto-dismiss after 5.5 s
+        seq(dismissWC, 5500);
+
+        function dismissWC() {
+            const intro = document.getElementById('wc-intro');
+            if (!intro || intro.dataset.gone) return;
+            intro.dataset.gone = '1';
+            cancelAnimationFrame(animId);
+            intro.classList.add('wc-exit');
+            setTimeout(() => {
+                intro.style.display = 'none';
+            }, 900);
+        }
+
+        window.skipWCIntro = dismissWC;
+    })();
+    </script>
+
     <!-- LOADING SCREEN -->
     <div id="loading-screen" style="position:fixed; inset:0; background:#050810; z-index:9999999; display:flex; flex-direction:column; align-items:center; justify-content:center;">
         <canvas id="loading-particles" style="position:absolute; inset:0; width:100%; height:100%;"></canvas>
@@ -9812,6 +10078,26 @@
         function getPrestigeCount(userObj = userDataRecord) {
             return parseInt(userObj?.prestige || 0, 10);
         }
+        // Returns visible title for ANY user profile object (leaderboards, clash cards, etc.)
+        function getDisplayTitleForUser(userProf) {
+            const equipped = userProf?.equippedTitle || null;
+            if (equipped) {
+                if (equipped.startsWith('wc_')) {
+                    const code = equipped.replace('wc_', '');
+                    const WC_NAMES = {USA:'USA',MEX:'Mexico',CAN:'Canada',BRA:'Brazil',ARG:'Argentina',ENG:'England',FRA:'France',GER:'Germany',ESP:'Spain',POR:'Portugal',ITA:'Italy',NED:'Netherlands',BEL:'Belgium',CRO:'Croatia',SEN:'Senegal',MAR:'Morocco',EGY:'Egypt',JPN:'Japan',KOR:'South Korea',AUS:'Australia',SAU:'Saudi Arabia',TUR:'Turkey',SUI:'Switzerland',DEN:'Denmark'};
+                    const WC_FLAGS = {USA:'🇺🇸',MEX:'🇲🇽',CAN:'🇨🇦',BRA:'🇧🇷',ARG:'🇦🇷',ENG:'🏴',FRA:'🇫🇷',GER:'🇩🇪',ESP:'🇪🇸',POR:'🇵🇹',ITA:'🇮🇹',NED:'🇳🇱',BEL:'🇧🇪',CRO:'🇭🇷',SEN:'🇸🇳',MAR:'🇲🇦',EGY:'🇪🇬',JPN:'🇯🇵',KOR:'🇰🇷',AUS:'🇦🇺',SAU:'🇸🇦',TUR:'🇹🇷',SUI:'🇨🇭',DEN:'🇩🇰'};
+                    return (WC_FLAGS[code]||'⚽') + ' ' + (WC_NAMES[code]||code).toUpperCase() + ' SUPPORTER';
+                }
+                if (typeof SEASON2_BP_TITLES !== 'undefined') {
+                    const bp = SEASON2_BP_TITLES.find(t => t.id === equipped);
+                    if (bp) return bp.name;
+                }
+                if (equipped.startsWith('lvl_')) {
+                    return getLevelTitle(parseInt(equipped.replace('lvl_','')));
+                }
+            }
+            return getLevelTitle(userProf?.level || 1);
+        }
 
         function isPrestigeUser(userObj = userDataRecord) {
             return getPrestigeCount(userObj) > 0;
@@ -9949,6 +10235,8 @@
             targetPanel.classList.add('active');
             targetPanel.classList.add('view-enter');
             setTimeout(() => targetPanel.classList.remove('view-enter'), 400);
+
+            try { sessionStorage.setItem('realm_last_view', target); } catch(e) {}
 
             updateNavIndicator();
             if (target === 'book') buildArchiveBookUI();
@@ -14509,7 +14797,7 @@
                 const u = users[uid];
                 const pts = u.clashRankPoints || 0;
                 if (!u.username) continue;
-                rows.push({ username: u.username, pts, avatarBgColor: u.avatarBgColor || 'var(--primary)', avatarLetters: u.avatarLetters || u.username.slice(0, 2).toUpperCase(), prestige: getPrestigeCount(u) });
+                rows.push({ username: u.username, pts, avatarBgColor: u.avatarBgColor || 'var(--primary)', avatarLetters: u.avatarLetters || u.username.slice(0, 2).toUpperCase(), prestige: getPrestigeCount(u), title: getDisplayTitleForUser(u) });
             }
             rows.sort((a, b) => b.pts - a.pts);
 
@@ -14526,7 +14814,10 @@
                 div.innerHTML = `
                     <span class="cr-num">#${i + 1}</span>
                     <div class="profile-badge ${row.prestige > 0 ? 'prestige-avatar' : ''}" style="background:${row.avatarBgColor};width:28px;height:28px;font-size:0.75rem;">${row.avatarLetters}</div>
-                    <span class="cr-name">${row.username}</span>
+                    <div style="display:flex;flex-direction:column;flex:1;min-width:0;">
+                        <span class="cr-name">${row.username}${row.prestige > 0 ? '<span class=\"star-badge\">\u2605</span>' : ''}</span>
+                        <span class="title-chip" style="margin-top:2px;width:fit-content;">${row.title}</span>
+                    </div>
                     ${buildClashRankBadgeHTML(row.pts)}
                     <span class="cr-pts">${row.pts} wins</span>
                 `;
@@ -14569,7 +14860,7 @@
                     avatarLetters: getAvatarLetters(userProf),
                     profilePhotoUrl: getProfileLogoSource(userProf),
                     prestige: getPrestigeCount(userProf),
-                    title: getLevelTitle(userProf.level || 1),
+                    title: getDisplayTitleForUser(userProf),
                     money: parseFloat(userProf.money || 0),
                     level: parseInt(userProf.level || 1),
                     collectionCount: Object.keys(discoveredNodes).length
@@ -14660,6 +14951,14 @@
             const update = window._realm?.getUpdate();
             const activeUser = window._realm?.getActiveUser();
             if (!db || !ref || !update || !activeUser) return;
+            // WC LOCK: block changing title while WC is active and player has a WC supporter title
+            const hasWcTitle = !!(userDataRecord?.equippedTitle?.startsWith?.('wc_'));
+            const wcEnd = new Date('2026-06-18T00:00:00Z').getTime();
+            const wcActive = Date.now() < wcEnd;
+            if (wcActive && hasWcTitle && !titleId.startsWith('wc_')) {
+                if (typeof showToast === 'function') showToast('\u{1F512} Your SUPPORTER title is locked until the World Cup ends!', 'error');
+                return;
+            }
 
             try {
                 await update(ref(db, `users/${activeUser.uid}`), { equippedTitle: titleId });
@@ -19791,6 +20090,15 @@ Respond with ONLY the chat message text — no JSON, no labels, no quotes, just 
             const activeEl = document.getElementById('title-inv-active-name');
             if (activeEl) activeEl.textContent = displayTitle;
 
+            // WC lock notice
+            const wcLockEl = document.getElementById('title-inv-wc-lock');
+            const hasWcTitle = !!(userDataRecord?.equippedTitle?.startsWith?.('wc_'));
+            const wcEnd = new Date('2026-06-18T00:00:00Z').getTime();
+            const wcIsActive = Date.now() < wcEnd;
+            if (wcLockEl) {
+                wcLockEl.style.display = (wcIsActive && hasWcTitle) ? 'block' : 'none';
+            }
+
             // Build unlocked grid
             const unlockedGrid = document.getElementById('title-inv-unlocked-grid');
             if (unlockedGrid) {
@@ -19829,6 +20137,13 @@ Respond with ONLY the chat message text — no JSON, no labels, no quotes, just 
         };
 
         window._equipTitleFromModal = async function(titleId) {
+            // WC lock check before passing to equipTitle
+            const hasWcTitle = !!(userDataRecord?.equippedTitle?.startsWith?.('wc_'));
+            const wcEnd = new Date('2026-06-18T00:00:00Z').getTime();
+            if (Date.now() < wcEnd && hasWcTitle && !titleId.startsWith('wc_')) {
+                if (typeof showToast === 'function') showToast('\u{1F512} Your SUPPORTER title is locked until the World Cup ends!', 'error');
+                return;
+            }
             if (typeof window.equipTitle === 'function') {
                 await window.equipTitle(titleId);
                 // Refresh modal after equip
@@ -19854,10 +20169,484 @@ Respond with ONLY the chat message text — no JSON, no labels, no quotes, just 
         // =========================================================
         // END SHADOWBOT
         // =========================================================
+        // =========================================================
+        // WORLD CUP 2026
+        // Runs inside the module — has access to db, ref, get, update,
+        // onValue, runTransaction, push, activeUserSession, userDataRecord
+        // =========================================================
+        (function initWorldCup() {
+            const WC_END = new Date('2026-06-18T00:00:00Z').getTime();
+            const SBOT_UID = 'shadowbot_uid_v1';
+            const MAX_PER = 9999;
+
+            const COUNTRIES = [
+                {code:'USA',name:'USA',flag:'🇺🇸'},
+                {code:'MEX',name:'Mexico',flag:'🇲🇽'},
+                {code:'CAN',name:'Canada',flag:'🇨🇦'},
+                {code:'BRA',name:'Brazil',flag:'🇧🇷'},
+                {code:'ARG',name:'Argentina',flag:'🇦🇷'},
+                {code:'ENG',name:'England',flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿'},
+                {code:'FRA',name:'France',flag:'🇫🇷'},
+                {code:'GER',name:'Germany',flag:'🇩🇪'},
+                {code:'ESP',name:'Spain',flag:'🇪🇸'},
+                {code:'POR',name:'Portugal',flag:'🇵🇹'},
+                {code:'ITA',name:'Italy',flag:'🇮🇹'},
+                {code:'NED',name:'Netherlands',flag:'🇳🇱'},
+                {code:'BEL',name:'Belgium',flag:'🇧🇪'},
+                {code:'CRO',name:'Croatia',flag:'🇭🇷'},
+                {code:'SEN',name:'Senegal',flag:'🇸🇳'},
+                {code:'MAR',name:'Morocco',flag:'🇲🇦'},
+                {code:'EGY',name:'Egypt',flag:'🇪🇬'},
+                {code:'JPN',name:'Japan',flag:'🇯🇵'},
+                {code:'KOR',name:'South Korea',flag:'🇰🇷'},
+                {code:'AUS',name:'Australia',flag:'🇦🇺'},
+                {code:'SAU',name:'Saudi Arabia',flag:'🇸🇦'},
+                {code:'TUR',name:'Turkey',flag:'🇹🇷'},
+                {code:'SUI',name:'Switzerland',flag:'🇨🇭'},
+                {code:'DEN',name:'Denmark',flag:'🇩🇰'},
+            ];
+
+            const getC = code => COUNTRIES.find(c => c.code === code);
+            const isEnded = () => Date.now() >= WC_END;
+            function fmtMs(ms) {
+                const t = Math.max(0, Math.floor(ms/1000));
+                const d = Math.floor(t/86400), h = Math.floor((t%86400)/3600),
+                      m = Math.floor((t%3600)/60), s = t%60;
+                return d > 0 ? `${d}d ${h}h ${m}m` : `${h}h ${m}m ${s}s`;
+            }
+
+            let myCountry = null;
+            let countryData = {};
+            let panelTimer = null;
+
+            // ── CSS ──────────────────────────────────────────────────
+            const wcStyle = document.createElement('style');
+            wcStyle.textContent = `
+            #wc-pick-mask{position:fixed;inset:0;background:rgba(2,6,14,0.93);backdrop-filter:blur(14px);z-index:2147483647;display:flex;align-items:center;justify-content:center;padding:16px;}
+            #wc-pick-body{background:linear-gradient(145deg,#0a1628,#111827);border:1.5px solid rgba(255,215,0,.4);border-radius:20px;width:100%;max-width:460px;max-height:88dvh;overflow-y:auto;padding:22px 16px;box-shadow:0 0 60px rgba(255,215,0,.2);}
+            .wc-hd{text-align:center;margin-bottom:16px;}
+            .wc-hd-ico{font-size:2.8rem;}
+            .wc-hd-ttl{font-family:'Orbitron',sans-serif;font-size:1.05rem;font-weight:900;color:#ffd700;letter-spacing:.06em;text-shadow:0 0 20px rgba(255,215,0,.5);}
+            .wc-hd-sub{font-size:.76rem;color:#9ca3af;margin-top:3px;}
+            .wc-info-bar{background:rgba(255,215,0,.08);border:1px solid rgba(255,215,0,.2);border-radius:9px;padding:8px 12px;text-align:center;margin-bottom:14px;font-size:.76rem;color:#fde68a;font-weight:700;}
+            .wc-pick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:14px;}
+            .wc-pbtn{background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.1);border-radius:9px;padding:8px 4px;cursor:pointer;text-align:center;color:#f3f4f6;font-size:.7rem;font-weight:700;transition:all .15s;}
+            .wc-pbtn:hover,.wc-pbtn:active{border-color:#ffd700;background:rgba(255,215,0,.13);}
+            .wc-pflag{font-size:1.4rem;display:block;margin-bottom:2px;}
+            .wc-pick-note{font-size:.66rem;color:#6b7280;text-align:center;line-height:1.6;}
+            #wc-hud{display:inline-flex;align-items:center;gap:4px;background:rgba(255,215,0,.12);border:1px solid rgba(255,215,0,.3);border-radius:999px;padding:3px 8px;font-size:.66rem;font-weight:800;color:#fde68a;cursor:pointer;margin-left:6px;}
+            #view-worldcup{padding-bottom:20px;}
+            .wcp-hd{text-align:center;padding:16px 0 12px;}
+            .wcp-ttl{font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:900;color:#ffd700;}
+            .wcp-sub{font-size:.74rem;color:#9ca3af;margin-top:3px;}
+            .wcp-cd{background:rgba(255,215,0,.08);border:1px solid rgba(255,215,0,.2);border-radius:9px;padding:8px 12px;text-align:center;font-size:.78rem;color:#fde68a;font-weight:700;margin-bottom:12px;}
+            .wcp-mc{background:linear-gradient(135deg,rgba(255,215,0,.12),rgba(255,215,0,.03));border:1.5px solid rgba(255,215,0,.38);border-radius:13px;padding:13px;text-align:center;margin-bottom:12px;}
+            .wcp-mf{font-size:2.4rem;}
+            .wcp-mn{font-family:'Orbitron',sans-serif;font-size:.86rem;font-weight:900;color:#ffd700;margin-top:4px;}
+            .wcp-mt{display:inline-block;margin-top:6px;background:rgba(255,215,0,.16);border:1px solid rgba(255,215,0,.4);border-radius:999px;padding:2px 11px;font-size:.68rem;font-weight:800;color:#fde68a;}
+            .wcp-mp{margin-top:6px;font-size:.76rem;color:#9ca3af;}.wcp-mp span{color:#fde68a;font-weight:800;}
+            .wcp-lb{font-size:.68rem;font-weight:800;letter-spacing:.08em;color:#9ca3af;margin-bottom:8px;text-align:center;}
+            .wcp-row{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:9px;padding:8px 11px;margin-bottom:5px;}
+            .wcp-row.gold{border-color:rgba(255,215,0,.4);background:rgba(255,215,0,.06);}
+            .wcp-rk{font-size:.76rem;font-weight:900;color:#9ca3af;width:20px;text-align:center;}
+            .wcp-fl{font-size:1.35rem;}
+            .wcp-cn{flex:1;font-size:.84rem;font-weight:700;color:#f3f4f6;}
+            .wcp-uc{font-size:.63rem;color:#6b7280;}
+            .wcp-pt{font-size:.78rem;font-weight:800;color:#fde68a;}
+            .wcp-wb{background:linear-gradient(135deg,rgba(255,215,0,.18),rgba(255,215,0,.04));border:2px solid #ffd700;border-radius:13px;padding:16px;text-align:center;margin-bottom:14px;box-shadow:0 0 36px rgba(255,215,0,.18);}
+            .wcp-wt{font-family:'Orbitron',sans-serif;font-size:.95rem;font-weight:900;color:#ffd700;margin-bottom:5px;}
+            .wcp-wpz{font-size:.8rem;color:#e5e7eb;margin-top:6px;}
+            .wcp-cbtn{background:linear-gradient(135deg,#b8860b,#ffd700);color:#000;border:none;border-radius:9px;padding:10px 24px;font-weight:900;font-size:.85rem;cursor:pointer;font-family:'Orbitron',sans-serif;letter-spacing:.05em;margin-top:9px;box-shadow:0 4px 18px rgba(255,215,0,.3);}
+            .wcp-cbtn:disabled{opacity:.5;cursor:not-allowed;}
+            .wcp-end{font-size:.74rem;color:#6b7280;text-align:center;margin-top:12px;}
+            `;
+            document.head.appendChild(wcStyle);
+
+            // ── Picker ───────────────────────────────────────────────
+            function showPicker() {
+                if (document.getElementById('wc-pick-mask')) return;
+                const grid = COUNTRIES.map(c =>
+                    `<button class="wc-pbtn" onclick="window.__wcPick('${c.code}')"><span class="wc-pflag">${c.flag}</span>${c.name}</button>`
+                ).join('');
+                const div = document.createElement('div');
+                div.id = 'wc-pick-mask';
+                div.innerHTML = `<div id="wc-pick-body">
+                    <div class="wc-hd">
+                        <div class="wc-hd-ico">🏆</div>
+                        <div class="wc-hd-ttl">FIFA WORLD CUP 2026</div>
+                        <div class="wc-hd-sub">Pick your country — fight for their glory!</div>
+                    </div>
+                    <div class="wc-info-bar">⏳ Event ends 18 Jun 2026 midnight UTC</div>
+                    <div class="wc-pick-grid">${grid}</div>
+                    <div class="wc-pick-note">
+                        Each clash win (attack or defend) earns your country <strong style="color:#fde68a">+1 point</strong>.<br>
+                        Winning country players share <strong style="color:#fde68a">€10,000,000 + 2000 XP</strong>!<br>
+                        Max 2 players per country. ShadowBot holds slot 1.
+                    </div>
+                </div>`;
+                document.body.appendChild(div);
+            }
+
+            window.__wcPick = async function(code) {
+                const c = getC(code);
+                if (!c) return;
+                const uid = activeUserSession?.uid;
+                if (!uid) return;
+
+                // Check capacity
+                const snap = await get(ref(db, `world_cup_2026/countries/${code}/users`));
+                const existing = snap.val() || {};
+                const realUsers = Object.keys(existing).filter(u => u !== SBOT_UID);
+                if (realUsers.length >= MAX_PER && !realUsers.includes(uid)) {
+                    showToast(`${c.flag} ${c.name} is full! Pick another.`, 'error');
+                    return;
+                }
+
+                myCountry = code;
+                
+
+                const titleId = `wc_${code}`;
+                const batch = {};
+                batch[`world_cup_2026/users/${uid}`] = {country:code, username:userDataRecord.username||'Operative', joinedAt:Date.now()};
+                batch[`world_cup_2026/countries/${code}/users/${uid}`] = 0;
+                batch[`users/${uid}/unlockedTitles/${titleId}`] = Date.now();
+                batch[`users/${uid}/equippedTitle`] = titleId;
+                await update(ref(db, '/'), batch);
+
+                if (!userDataRecord.unlockedTitles) userDataRecord.unlockedTitles = {};
+                userDataRecord.unlockedTitles[titleId] = Date.now();
+                userDataRecord.equippedTitle = titleId;
+
+                const mask = document.getElementById('wc-pick-mask');
+                if (mask) mask.remove();
+
+                showToast(`${c.flag} You now support ${c.name}! Title unlocked. ⚽`, 'success');
+                if (typeof renderHUDDisplayElements === 'function') renderHUDDisplayElements();
+                if (typeof renderProfileDisplayData === 'function') renderProfileDisplayData();
+                if (typeof renderTitleChooser === 'function') renderTitleChooser();
+                updateBadge();
+            };
+
+            // ── HUD badge ────────────────────────────────────────────
+            function updateBadge() {
+                let el = document.getElementById('wc-hud');
+                const c = getC(myCountry);
+                const txt = c ? `${c.flag} ${c.name}` : '⚽ WC26';
+                if (!el) {
+                    el = document.createElement('span');
+                    el.id = 'wc-hud';
+                    el.title = 'World Cup 2026';
+                    el.onclick = () => { if (typeof switchRealmView === 'function') switchRealmView('worldcup'); };
+                    const um = document.querySelector('.user-meta');
+                    if (um) um.appendChild(el);
+                }
+                el.textContent = txt;
+            }
+
+            // ── Nav tab + panel ──────────────────────────────────────
+            function injectNav() {
+                if (document.querySelector('[data-target="worldcup"]')) return;
+                const nav = document.getElementById('nav-tabs');
+                if (!nav) return;
+                const tab = document.createElement('div');
+                tab.className = 'nav-tab';
+                tab.dataset.target = 'worldcup';
+                tab.innerHTML = `<span class="nav-icon">⚽</span><span>WC</span>`;
+                tab.onclick = () => { if (typeof switchRealmView === 'function') switchRealmView('worldcup'); };
+                nav.appendChild(tab);
+
+                const mc = document.getElementById('main-content');
+                if (mc && !document.getElementById('view-worldcup')) {
+                    const sec = document.createElement('section');
+                    sec.id = 'view-worldcup';
+                    sec.className = 'view-panel';
+                    mc.appendChild(sec);
+                }
+
+                const origSwitch = window.switchRealmView;
+                window.switchRealmView = function(t) {
+                    origSwitch.apply(this, arguments);
+                    if (t === 'worldcup') {
+                        renderPanel();
+                        setTimeout(renderPanel, 800);
+                        try { sessionStorage.setItem('realm_last_view', 'worldcup'); } catch(e) {}
+                    }
+                };
+            }
+
+            // ── Panel ────────────────────────────────────────────────
+            function renderPanel() {
+                const panel = document.getElementById('view-worldcup');
+                if (!panel) return;
+
+                if (panelTimer) { clearInterval(panelTimer); panelTimer = null; }
+
+                const ended = isEnded();
+                const sorted = COUNTRIES
+                    .map(c => ({...c, pts: countryData[c.code]?.points||0,
+                                 uc: Object.keys(countryData[c.code]?.users||{}).filter(u=>u!==SBOT_UID).length}))
+                    .sort((a,b) => b.pts - a.pts);
+                const myC = getC(myCountry);
+                const myPts = countryData[myCountry]?.users?.[activeUserSession?.uid] || 0;
+                const winner = ended && sorted[0]?.pts > 0 ? sorted[0] : null;
+                const maxPts = Math.max(1, sorted[0]?.pts || 1);
+                const myRank = myC ? sorted.findIndex(c => c.code === myC.code) + 1 : null;
+
+                // Medal helpers
+                const medal = i => i===0 ? '🥇' : i===1 ? '🥈' : i===2 ? '🥉' : null;
+                const rankColor = i => i===0 ? '#ffd700' : i===1 ? '#c0c0c0' : i===2 ? '#cd7f32' : '#9ca3af';
+
+                let html = `<div class="wcp-hd"><div style="font-size:2.6rem">🏆</div>
+                    <div class="wcp-ttl">FIFA WORLD CUP 2026</div>
+                    <div class="wcp-sub">Win clashes to score points for your country</div></div>
+                <div class="wcp-cd">${ended ? '🏁 EVENT ENDED' : `⏳ Ends in: ${fmtMs(WC_END-Date.now())}`}</div>`;
+
+                if (ended && winner) {
+                    html += `<div class="wcp-wb">
+                        <div class="wcp-wt">🥇 CHAMPION: ${winner.flag} ${winner.name}</div>
+                        <div style="font-size:2rem">${winner.flag}</div>
+                        <div class="wcp-wpz">Winners receive <strong style="color:#ffd700">€10,000,000 + 2000 XP</strong></div>
+                        ${myC?.code===winner.code ? `<button class="wcp-cbtn" id="wcp-claim" onclick="window.__wcClaim()">🏆 CLAIM PRIZE</button>` : ''}
+                    </div>`;
+                }
+
+                if (myC) {
+                    const myRankMedal = myRank <= 3 ? medal(myRank-1) : `#${myRank}`;
+                    html += `<div class="wcp-mc">
+                        <div class="wcp-mf">${myC.flag}</div>
+                        <div class="wcp-mn">${myC.name}</div>
+                        <div class="wcp-mt">${myC.flag} ${myC.name.toUpperCase()} SUPPORTER</div>
+                        <div style="display:flex;justify-content:center;gap:18px;margin-top:8px;flex-wrap:wrap;">
+                            <div style="font-size:.74rem;color:#9ca3af;">Your pts: <span style="color:#fde68a;font-weight:800;">${myPts}</span></div>
+                            <div style="font-size:.74rem;color:#9ca3af;">Country rank: <span style="color:#fde68a;font-weight:800;">${myRankMedal}</span></div>
+                            <div style="font-size:.74rem;color:#9ca3af;">Country pts: <span style="color:#fde68a;font-weight:800;">${sorted.find(c=>c.code===myC.code)?.pts||0}</span></div>
+                        </div>
+                        ${!ended ? '<div style="font-size:.66rem;color:#6b7280;margin-top:6px;">🔒 Title locked until event ends</div>' : ''}
+                    </div>`;
+                } else if (!ended) {
+                    html += `<div style="text-align:center;margin-bottom:12px;">
+                        <button onclick="window.__wcShowPicker()" style="background:linear-gradient(135deg,#b8860b,#ffd700);color:#000;border:none;border-radius:9px;padding:10px 22px;font-weight:900;font-size:.85rem;cursor:pointer;">⚽ Pick Your Country</button>
+                    </div>`;
+                }
+
+                // Country Rankings Table
+                html += `<div class="wcp-lb" style="margin-top:4px;">🌍 COUNTRY RANKINGS</div>
+                <div style="background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.07);border-radius:12px;overflow:hidden;margin-bottom:8px;">
+                    <div style="display:grid;grid-template-columns:32px 28px 1fr 120px 56px;gap:0;padding:6px 10px;border-bottom:1px solid rgba(255,255,255,.08);font-size:.62rem;font-weight:800;letter-spacing:.07em;color:#6b7280;text-transform:uppercase;">
+                        <span>#</span><span></span><span>Country</span><span style="text-align:center;">Points</span><span style="text-align:right;">Players</span>
+                    </div>`;
+
+                sorted.forEach((c,i) => {
+                    const isMe = myC && c.code === myC.code;
+                    const m = medal(i);
+                    const barPct = maxPts > 0 ? Math.max(2, Math.round((c.pts/maxPts)*100)) : 2;
+                    const barColor = i===0 ? '#ffd700' : i===1 ? '#c0c0c0' : i===2 ? '#cd7f32' : isMe ? '#3b82f6' : '#374151';
+                    const rowBg = isMe ? 'background:rgba(59,130,246,0.1);border-left:3px solid #3b82f6;' : i===0&&c.pts>0 ? 'background:rgba(255,215,0,0.05);border-left:3px solid #ffd700;' : 'border-left:3px solid transparent;';
+                    html += `<div style="display:grid;grid-template-columns:32px 28px 1fr 120px 56px;gap:0;align-items:center;padding:7px 10px;border-bottom:1px solid rgba(255,255,255,.04);${rowBg}">
+                        <span style="font-size:.75rem;font-weight:900;color:${rankColor(i)};">${m || ('#'+(i+1))}</span>
+                        <span style="font-size:1.2rem;">${c.flag}</span>
+                        <span style="font-size:.8rem;font-weight:${isMe?'900':'700'};color:${isMe?'#93c5fd':'#e5e7eb'};">${c.name}${isMe?' <span style="font-size:.58rem;background:rgba(59,130,246,.25);border-radius:4px;padding:1px 4px;color:#93c5fd;">YOU</span>':''}</span>
+                        <div style="padding:0 8px;">
+                            <div style="background:rgba(255,255,255,.06);border-radius:99px;height:6px;overflow:hidden;">
+                                <div style="background:${barColor};height:100%;width:${barPct}%;border-radius:99px;transition:width .4s;"></div>
+                            </div>
+                            <div style="text-align:center;font-size:.65rem;font-weight:800;color:#fde68a;margin-top:2px;">${c.pts}</div>
+                        </div>
+                        <span style="font-size:.7rem;font-weight:700;color:#9ca3af;text-align:right;">${c.uc}/2</span>
+                    </div>`;
+                });
+
+                html += `</div>`;
+                if (ended) html += `<div class="wcp-end">🏁 World Cup 2026 event has ended. Results are final.</div>`;
+
+                panel.innerHTML = html;
+                if (!ended) {
+                    panelTimer = setInterval(() => {
+                        const el = panel.querySelector('.wcp-cd');
+                        if (el) {
+                            const ms = WC_END - Date.now();
+                            el.textContent = ms > 0 ? `⏳ Ends in: ${fmtMs(ms)}` : '🏁 EVENT ENDED';
+                            if (ms <= 0) { clearInterval(panelTimer); tryPrizes(); renderPanel(); }
+                        }
+                    }, 1000);
+                }
+            }
+
+            window.__wcShowPicker = function() { showPicker(); };
+
+            // Reset WC pick — clears Firebase + localStorage so user can pick again
+            window.__wcReset = async function() {
+                const uid = activeUserSession?.uid;
+                if (!uid) return;
+                try {
+                    const batch = {};
+                    batch[`world_cup_2026/users/${uid}`] = null;
+                    if (myCountry) {
+                        batch[`world_cup_2026/countries/${myCountry}/users/${uid}`] = null;
+                    }
+                    // Remove equipped WC title
+                    if (userDataRecord?.equippedTitle?.startsWith?.('wc_')) {
+                        batch[`users/${uid}/equippedTitle`] = null;
+                        userDataRecord.equippedTitle = null;
+                    }
+                    // Remove unlocked WC titles for all countries
+                    const unlocked = userDataRecord?.unlockedTitles || {};
+                    for (const key of Object.keys(unlocked)) {
+                        if (key.startsWith('wc_')) {
+                            batch[`users/${uid}/unlockedTitles/${key}`] = null;
+                            delete unlocked[key];
+                        }
+                    }
+                    await update(ref(db, '/'), batch);
+                    myCountry = null;
+                    
+                    if (typeof renderHUDDisplayElements === 'function') renderHUDDisplayElements();
+                    if (typeof renderProfileDisplayData === 'function') renderProfileDisplayData();
+                    showToast('⚽ Country reset! Pick a new one.', 'success');
+                    setTimeout(showPicker, 400);
+                } catch(e) {
+                    showToast('Reset failed: ' + e.message, 'error');
+                }
+            };
+
+            // ── Award country point ──────────────────────────────────
+            async function awardPt(uid, code) {
+                if (isEnded() || !code) return;
+                try {
+                    await runTransaction(ref(db, `world_cup_2026/countries/${code}`), cur => {
+                        const d = cur || {points:0, users:{}};
+                        d.points = (d.points||0) + 1;
+                        if (!d.users) d.users = {};
+                        d.users[uid] = (d.users[uid]||0) + 1;
+                        return d;
+                    });
+                } catch(e) { console.warn('[WC] awardPt:', e); }
+            }
+
+            // ── Patch awardClashRankPoint ────────────────────────────
+            const _origRank = window.awardClashRankPoint;
+            if (typeof _origRank === 'function') {
+                window.awardClashRankPoint = async function() {
+                    await _origRank.apply(this, arguments);
+                    const uid = activeUserSession?.uid;
+                    if (uid && myCountry && !isEnded()) awardPt(uid, myCountry);
+                };
+            }
+
+            // ── Patch getAllAvailableTitles ───────────────────────────
+            const _origTitles = window.getAllAvailableTitles;
+            if (typeof _origTitles === 'function') {
+                window.getAllAvailableTitles = function() {
+                    const base = _origTitles.apply(this, arguments);
+                    const unlocked = userDataRecord?.unlockedTitles || {};
+                    const wct = COUNTRIES
+                        .filter(c => !!unlocked[`wc_${c.code}`])
+                        .map(c => ({id:`wc_${c.code}`, name:`${c.name.toUpperCase()} SUPPORTER`, emoji:c.flag, source:'⚽ World Cup 2026'}));
+                    return [...base, ...wct];
+                };
+            }
+
+            // ── Prize distribution ───────────────────────────────────
+            async function tryPrizes() {
+                try {
+                    const f = await get(ref(db, 'world_cup_2026/prizesDistributed'));
+                    if (f.val()) return;
+                    let winner = null, max = -1;
+                    for (const [code,data] of Object.entries(countryData)) {
+                        if (code.startsWith('_')) continue;
+                        if ((data.points||0) > max) { max = data.points||0; winner = code; }
+                    }
+                    if (!winner) return;
+                    const winUsers = Object.keys(countryData[winner]?.users||{}).filter(u=>u!==SBOT_UID);
+                    const batch = {'world_cup_2026/prizesDistributed':true, 'world_cup_2026/winner':winner};
+                    for (const uid of winUsers) {
+                        const us = await get(ref(db, `users/${uid}`));
+                        const u = us.val();
+                        if (!u) continue;
+                        batch[`users/${uid}/money`] = (parseFloat(u.money)||0) + 10000000;
+                        batch[`users/${uid}/xp`]    = (parseFloat(u.xp)||0) + 2000;
+                    }
+                    await update(ref(db, '/'), batch);
+                } catch(e) { console.warn('[WC] tryPrizes:', e); }
+            }
+
+            window.__wcClaim = async function() {
+                const uid = activeUserSession?.uid;
+                if (!uid) return;
+                try {
+                    const cs = await get(ref(db, `world_cup_2026/claimed/${uid}`));
+                    if (cs.val()) { showToast('Already claimed!','info'); return; }
+                    const ws = await get(ref(db, 'world_cup_2026/winner'));
+                    if (ws.val() !== myCountry) { showToast("Your country didn't win.",'error'); return; }
+                    const us = await get(ref(db, `users/${uid}`));
+                    const u = us.val(); if (!u) return;
+                    await update(ref(db, '/'), {
+                        [`users/${uid}/money`]: (parseFloat(u.money)||0)+10000000,
+                        [`users/${uid}/xp`]:    (parseFloat(u.xp)||0)+2000,
+                        [`world_cup_2026/claimed/${uid}`]: Date.now()
+                    });
+                    const btn = document.getElementById('wcp-claim');
+                    if (btn) { btn.disabled=true; btn.textContent='✅ Claimed!'; }
+                    showToast('🏆 €10,000,000 + 2000 XP claimed!','success');
+                    if (typeof renderHUDDisplayElements==='function') renderHUDDisplayElements();
+                } catch(e) { showToast('Claim failed, try again.','error'); }
+            };
+
+            // initBot removed
+
+            // ── Live data subscription ───────────────────────────────
+            onValue(ref(db, 'world_cup_2026/countries'), snap => {
+                countryData = snap.val() || {};
+                updateBadge();
+                renderPanel(); // always update panel with fresh data
+            });
+
+            // ── Main init ────────────────────────────────────────────
+            function wcInit() {
+                injectNav();
+                renderPanel(); // immediate render — COUNTRIES array always available
+                updateBadge();
+
+                const uid = activeUserSession?.uid;
+                if (!uid) return;
+
+                // Restore last view instantly if WC was active
+                try {
+                    if (sessionStorage.getItem('realm_last_view') === 'worldcup') {
+                        if (typeof switchRealmView === 'function') switchRealmView('worldcup');
+                    }
+                } catch(e) {}
+
+                get(ref(db, `world_cup_2026/users/${uid}`)).then(snap => {
+                    const d = snap.val();
+                    if (d?.country) {
+                        myCountry = d.country;
+                        updateBadge();
+                        renderPanel();
+                        if (isEnded()) tryPrizes().catch(()=>{});
+                    } else {
+                        setTimeout(showPicker, 800);
+                    }
+                }).catch(() => setTimeout(showPicker, 800));
+            }
+
+            function waitAndInit() {
+                if (activeUserSession?.uid && userDataRecord?.username) {
+                    wcInit();
+
+                } else {
+                    setTimeout(waitAndInit, 500);
+                }
+            }
+            waitAndInit();
+
+            setInterval(() => { if (isEnded()) tryPrizes().catch(()=>{}); }, 60000);
+
+        })(); // end initWorldCup
     </script>
     <div
         style="position: fixed; top: 12px; left: 12px; z-index: 9999999999999; color: rgba(255, 255, 255, 0.4); font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
-        V:11.2
+        V:11.4
     </div>
 
     <!-- ═══════════════════════════════════════════
@@ -19896,6 +20685,7 @@ Respond with ONLY the chat message text — no JSON, no labels, no quotes, just 
             <div id="title-inv-active-name" style="font-weight:800; font-size:0.95rem; color:#bfdbfe;">-</div>
           </div>
         </div>
+        <div id="title-inv-wc-lock" style="display:none;background:rgba(234,179,8,0.12);border:1px solid rgba(234,179,8,0.35);border-radius:9px;padding:8px 12px;text-align:center;font-size:.72rem;font-weight:700;color:#fde68a;margin-bottom:12px;">🔒 Your <strong>SUPPORTER</strong> title is locked during the World Cup event. Title will unlock after the event ends.</div>
         <div style="font-size:0.68rem; color:#9ca3af; font-weight:800; letter-spacing:0.08em; margin-bottom:10px;">UNLOCKED</div>
         <div id="title-inv-unlocked-grid" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px;"></div>
         <div id="title-inv-locked-section" style="display:none;">
@@ -20220,6 +21010,7 @@ Respond with ONLY the chat message text — no JSON, no labels, no quotes, just 
         }
     })();
     </script>
+
 
 </body>
 
