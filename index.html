@@ -14510,7 +14510,7 @@
         }
 
         // Award a clash rank point when user wins a clash (attacker or defender)
-        async function awardClashRankPoint() {
+        window.awardClashRankPoint = async function awardClashRankPoint() {
             if (!activeUserSession?.uid) return;
             const uid = activeUserSession.uid;
             const prevPts = userDataRecord.clashRankPoints || 0;
@@ -14531,7 +14531,7 @@
 
             renderHudClashRankBadge();
             renderProfileClashRankBadge();
-        }
+        };
 
         // Penalise a steal loss: -1 division (= -1 clashRankPoints, min 0)
         async function loseStealDivision() {
