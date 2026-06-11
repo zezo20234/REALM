@@ -14233,6 +14233,7 @@
                             showToast(winMsg, 'success');
                             trackQuestProgress('win_clashes', 1);
                             awardClashRankPoint();
+                            if (window.__wcAwardPt && window.__wcGetMyCountry && activeUserSession?.uid) { window.__wcAwardPt(activeUserSession.uid, window.__wcGetMyCountry()); }
                             // Award XPB for battle win
                             if (window.awardXPB) window.awardXPB(75, 'Battle Win');
                         }
@@ -14510,7 +14511,7 @@
         }
 
         // Award a clash rank point when user wins a clash (attacker or defender)
-        window.awardClashRankPoint = async function awardClashRankPoint() {
+        async function awardClashRankPoint() {
             if (!activeUserSession?.uid) return;
             const uid = activeUserSession.uid;
             const prevPts = userDataRecord.clashRankPoints || 0;
@@ -14531,7 +14532,7 @@
 
             renderHudClashRankBadge();
             renderProfileClashRankBadge();
-        };
+        }
 
         // Penalise a steal loss: -1 division (= -1 clashRankPoints, min 0)
         async function loseStealDivision() {
@@ -20215,7 +20216,7 @@ Respond with ONLY the chat message text — no JSON, no labels, no quotes, just 
                 return d > 0 ? `${d}d ${h}h ${m}m` : `${h}h ${m}m ${s}s`;
             }
 
-            let myCountry = null;
+            let myCountry = null; window.__wcGetMyCountry = () => myCountry;
             let countryData = {};
             let panelTimer = null;
 
@@ -20510,7 +20511,7 @@ Respond with ONLY the chat message text — no JSON, no labels, no quotes, just 
             };
 
             // ── Award country point ──────────────────────────────────
-            async function awardPt(uid, code) {
+            window.__wcAwardPt = async function awardPt(uid, code) {
                 if (isEnded() || !code) return;
                 try {
                     await runTransaction(ref(db, `world_cup_2026/countries/${code}`), cur => {
@@ -20521,17 +20522,9 @@ Respond with ONLY the chat message text — no JSON, no labels, no quotes, just 
                         return d;
                     });
                 } catch(e) { console.warn('[WC] awardPt:', e); }
-            }
+            };
 
-            // ── Patch awardClashRankPoint ────────────────────────────
-            const _origRank = window.awardClashRankPoint;
-            if (typeof _origRank === 'function') {
-                window.awardClashRankPoint = async function() {
-                    await _origRank.apply(this, arguments);
-                    const uid = activeUserSession?.uid;
-                    if (uid && myCountry && !isEnded()) awardPt(uid, myCountry);
-                };
-            }
+            // Country point is awarded directly at the win site (awardClashRankPoint call)
 
             // ── Patch getAllAvailableTitles ───────────────────────────
             const _origTitles = window.getAllAvailableTitles;
@@ -20646,7 +20639,7 @@ Respond with ONLY the chat message text — no JSON, no labels, no quotes, just 
     </script>
     <div
         style="position: fixed; top: 12px; left: 12px; z-index: 9999999999999; color: rgba(255, 255, 255, 0.4); font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
-        V:11.4
+        V:11.5
     </div>
 
     <!-- ═══════════════════════════════════════════
