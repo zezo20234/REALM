@@ -8854,6 +8854,21 @@
                 </div>
             </div>
 
+            <div class="admin-panel-section">
+                <h4>DALLAL BOT CONTROL</h4>
+                <p style="font-size:0.78rem;color:#94a3b8;margin-bottom:10px;">Activate or deactivate the Dallal shadow bot globally.</p>
+                <div id="admin-bot-status" style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+                    <div id="admin-bot-indicator" style="width:10px;height:10px;border-radius:50%;background:#6b7280;box-shadow:none;transition:all 0.3s;"></div>
+                    <span id="admin-bot-status-text" style="font-size:0.78rem;font-weight:700;color:#6b7280;">Loading...</span>
+                </div>
+                <div style="display:flex;gap:8px;">
+                    <button class="admin-restock-btn" style="background:var(--accent-green);color:white;flex:1;"
+                        id="admin-enable-bot">⚡ ACTIVATE BOT</button>
+                    <button class="admin-restock-btn" style="background:var(--accent-red);color:white;flex:1;"
+                        id="admin-disable-bot">🛑 DEACTIVATE BOT</button>
+                </div>
+            </div>
+
             <div class="admin-panel-section" style="border:none;">
                 <h4>ASK PLAYERS</h4>
                 <input type="text" id="admin-question-text" placeholder="Question for all users..."
@@ -10700,6 +10715,15 @@
                 showToast('Stealing disabled for all players.', 'info');
             });
 
+            document.getElementById('admin-enable-bot')?.addEventListener('click', async () => {
+                await update(ref(db, 'system/adminState'), { botEnabled: true });
+                showToast('🤖 Dallal Bot activated.', 'success');
+            });
+            document.getElementById('admin-disable-bot')?.addEventListener('click', async () => {
+                await update(ref(db, 'system/adminState'), { botEnabled: false });
+                showToast('🛑 Dallal Bot deactivated.', 'info');
+            });
+
             document.getElementById('admin-send-broadcast')?.addEventListener('click', async () => {
                 const text = document.getElementById('admin-broadcast-text').value.trim();
                 if (!text) return showToast('Enter a message.', 'error');
@@ -10907,6 +10931,12 @@
             onValue(ref(db, 'system/adminState'), snapshot => {
                 globalAdminState = snapshot.val() || {};
                 updateGlobalAdminHud();
+                // Update bot status indicator
+                const botOn = globalAdminState.botEnabled !== false;
+                const ind = document.getElementById('admin-bot-indicator');
+                const txt = document.getElementById('admin-bot-status-text');
+                if (ind) { ind.style.background = botOn ? '#10b981' : '#6b7280'; ind.style.boxShadow = botOn ? '0 0 8px rgba(16,185,129,0.7)' : 'none'; }
+                if (txt) { txt.textContent = botOn ? 'Bot is ACTIVE' : 'Bot is INACTIVE'; txt.style.color = botOn ? '#10b981' : '#6b7280'; }
                 if (isAdminUnlocked() && globalAdminState.activeQuestion?.id) {
                     const panelOpen = document.getElementById('modal-admin-panel').classList.contains('is-open');
                     if (panelOpen) subscribeAdminReplies(globalAdminState.activeQuestion.id);
@@ -14233,7 +14263,6 @@
                             showToast(winMsg, 'success');
                             trackQuestProgress('win_clashes', 1);
                             awardClashRankPoint();
-                            if (window.__wcAwardPt && window.__wcGetMyCountry && activeUserSession?.uid) { window.__wcAwardPt(activeUserSession.uid, window.__wcGetMyCountry()); }
                             // Award XPB for battle win
                             if (window.awardXPB) window.awardXPB(75, 'Battle Win');
                         }
@@ -17607,6 +17636,7 @@
 
         async function shadowbotTick() {
             if (!shadowbotState.initialized) return;
+            if (globalAdminState && globalAdminState.botEnabled === false) return; // admin deactivated
             try {
                 shadowbotState.brain.tickCount++;
                 const botData = shadowbotState.data || {};
@@ -20216,7 +20246,7 @@ Respond with ONLY the chat message text — no JSON, no labels, no quotes, just 
                 return d > 0 ? `${d}d ${h}h ${m}m` : `${h}h ${m}m ${s}s`;
             }
 
-            let myCountry = null; window.__wcGetMyCountry = () => myCountry;
+            let myCountry = null;
             let countryData = {};
             let panelTimer = null;
 
@@ -20511,7 +20541,7 @@ Respond with ONLY the chat message text — no JSON, no labels, no quotes, just 
             };
 
             // ── Award country point ──────────────────────────────────
-            window.__wcAwardPt = async function awardPt(uid, code) {
+            async function awardPt(uid, code) {
                 if (isEnded() || !code) return;
                 try {
                     await runTransaction(ref(db, `world_cup_2026/countries/${code}`), cur => {
@@ -20522,9 +20552,17 @@ Respond with ONLY the chat message text — no JSON, no labels, no quotes, just 
                         return d;
                     });
                 } catch(e) { console.warn('[WC] awardPt:', e); }
-            };
+            }
 
-            // Country point is awarded directly at the win site (awardClashRankPoint call)
+            // ── Patch awardClashRankPoint ────────────────────────────
+            const _origRank = window.awardClashRankPoint;
+            if (typeof _origRank === 'function') {
+                window.awardClashRankPoint = async function() {
+                    await _origRank.apply(this, arguments);
+                    const uid = activeUserSession?.uid;
+                    if (uid && myCountry && !isEnded()) awardPt(uid, myCountry);
+                };
+            }
 
             // ── Patch getAllAvailableTitles ───────────────────────────
             const _origTitles = window.getAllAvailableTitles;
@@ -20639,7 +20677,7 @@ Respond with ONLY the chat message text — no JSON, no labels, no quotes, just 
     </script>
     <div
         style="position: fixed; top: 12px; left: 12px; z-index: 9999999999999; color: rgba(255, 255, 255, 0.4); font-family: monospace; font-size: 12px; font-weight: bold; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
-        V:11.5
+        V:11.4
     </div>
 
     <!-- ═══════════════════════════════════════════
