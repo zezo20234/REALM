@@ -6069,7 +6069,12 @@
         
         // Battle pass constants
         const XPB_PER_TIER = 2000;
-        const TOTAL_TIERS = 100;
+        const BASE_TIERS = 100;
+        let TOTAL_TIERS = 100;
+        // Extra tiers (admin-configurable, beyond BASE_TIERS)
+        let EXTRA_TIERS_COUNT = 0;
+        let extraTierRewards = {}; // { [tierNumber]: { rewardKind/type, ...reward } }
+        const ALL_PACK_NAMES = ['Bronze','Silver','Gold','Platinum','Diamond','Mythic','Exotic','Divine','Celestial','Galactic','Universal','Secret','Void','Omega','Abyssal','Titan','Sovereign'];
         const EPOCH = new Date('2026-06-04T00:00:00Z').getTime();
         const daysSince = Math.floor((Date.now() - EPOCH) / 86400000);
         const pos = ((daysSince % 50) + 50) % 50;
@@ -6203,6 +6208,44 @@
             });
         }
 
+        // ── EXTRA BATTLE PASS TIERS (admin-configurable, beyond BASE_TIERS) ──
+        function _applyExtraTiersConfig(d) {
+            d = d || {};
+            const count = Math.max(0, Math.min(900, parseInt(d.count) || 0));
+            EXTRA_TIERS_COUNT = count;
+            TOTAL_TIERS = BASE_TIERS + EXTRA_TIERS_COUNT;
+            extraTierRewards = {};
+            const custom = d.custom || {};
+            Object.keys(custom).forEach(k => {
+                const tierNum = parseInt(k);
+                if (tierNum > BASE_TIERS && tierNum <= TOTAL_TIERS) {
+                    extraTierRewards[tierNum] = custom[k];
+                }
+            });
+        }
+
+        function loadExtraTiersConfig() {
+            const db = window._realm?.getDb();
+            const ref = window._realm?.getRef();
+            const get = window._realm?.getGet();
+            const onVal = window._realm?.getOnValue ? window._realm.getOnValue() : null;
+            if (!db || !ref) return;
+            if (get) {
+                get(ref(db, 'system/battlePass/extraTiers')).then(snap => {
+                    _applyExtraTiersConfig(snap.val());
+                    refreshBattlePassUI();
+                    if (typeof renderAdminExtraTiersList === 'function') renderAdminExtraTiersList();
+                }).catch(() => {});
+            }
+            if (onVal) {
+                onVal(ref(db, 'system/battlePass/extraTiers'), snap => {
+                    _applyExtraTiersConfig(snap.val());
+                    refreshBattlePassUI();
+                    if (typeof renderAdminExtraTiersList === 'function') renderAdminExtraTiersList();
+                });
+            }
+        }
+
         // Initialize battle pass system
         function initBattlePassSystem() {
             console.log('Initializing battle pass system...');
@@ -6213,6 +6256,7 @@
                 if (window._realm && window._realm.getDb()) {
                     clearInterval(checkFirebase);
                     console.log('Firebase ready, initializing battle pass...');
+                    loadExtraTiersConfig();
                     const _db = window._realm.getDb();
                     const _ref = window._realm.getRef();
                     const _get = window._realm.getGet();
@@ -6529,7 +6573,45 @@
             return SEASON2_BP_TITLES.find(t => t.tier === tier) || null;
         }
 
+        // Auto-generate a reward for an extra tier (>BASE_TIERS) that never exceeds
+        // the season's tier-100 max reward, but varies per tier so it isn't repetitive
+        function getAutoExtraTierReward(tier) {
+            const maxReward = getTierRewards(BASE_TIERS); // milestone reward at tier 100
+            // Deterministic pseudo-random factor (0.5 - 1.0), unique per tier
+            const seed = (tier * 2654435761) % 1000;
+            const factor = 0.5 + (seed / 1000) * 0.5;
+            const isMilestone = tier % 10 === 0;
+
+            if (isMilestone) {
+                return {
+                    type: 'milestone',
+                    coins: Math.max(1, Math.round(maxReward.coins * factor)),
+                    xp: Math.max(1, Math.round(maxReward.xp * factor)),
+                    pack: maxReward.pack,
+                    credits: 0,
+                    s1Title: null,
+                };
+            } else {
+                const posInGroup = (tier - 1) % 10;
+                const cycle = posInGroup % 3;
+                if (cycle === 0) {
+                    return { type: 'normal', rewardKind: 'xp', xp: Math.max(1, Math.round(maxReward.xp * factor * 0.5)) };
+                } else if (cycle === 1) {
+                    return { type: 'normal', rewardKind: 'money', coins: Math.max(1, Math.round(maxReward.coins * factor * 0.5)) };
+                } else {
+                    return { type: 'normal', rewardKind: 'pack', pack: maxReward.pack };
+                }
+            }
+        }
+
         function getTierRewards(tier) {
+            // Extra tiers beyond BASE_TIERS — admin custom override or auto-generated
+            if (tier > BASE_TIERS) {
+                const custom = extraTierRewards[tier];
+                if (custom) return custom;
+                return getAutoExtraTierReward(tier);
+            }
+
             const isMilestone = tier % 10 === 0;
             // Only Season 2 (seasonIdx === 1) gets title rewards at tiers 20/40/60/80/100
             const s2Title = (seasonIdx === 1 && isMilestone) ? getSeason2BPTitle(tier) : null;
@@ -6669,6 +6751,7 @@
             if (input === BP_ADMIN_CODE) {
                 document.getElementById('bp-admin-lock').style.display = 'none';
                 document.getElementById('bp-admin-panel').style.display = 'block';
+                renderAdminExtraTiersList();
                 // Show current season end
                 const db = window._realm?.getDb();
                 const ref = window._realm?.getRef();
@@ -6692,6 +6775,185 @@
                 document.getElementById('bp-admin-code-error').style.display = 'block';
                 document.getElementById('bp-admin-code-input').value = '';
                 document.getElementById('bp-admin-code-input').focus();
+            }
+        };
+
+        // ── EXTRA TIERS ADMIN UI ──
+        let _extraTierEditing = null;
+
+        function renderAdminExtraTiersList() {
+            const listEl = document.getElementById('admin-extra-tiers-list');
+            const countInput = document.getElementById('admin-extra-tiers-count');
+            if (!listEl) return;
+            if (countInput && document.activeElement !== countInput) {
+                countInput.value = EXTRA_TIERS_COUNT;
+            }
+            listEl.innerHTML = '';
+            if (EXTRA_TIERS_COUNT <= 0) {
+                listEl.innerHTML = '<div style="font-size:0.78rem;color:#6b7280;text-align:center;padding:8px;">No extra tiers added.</div>';
+                return;
+            }
+            for (let t = BASE_TIERS + 1; t <= BASE_TIERS + EXTRA_TIERS_COUNT; t++) {
+                const reward = getTierRewards(t);
+                const isCustom = !!extraTierRewards[t];
+                let label = '';
+                if (reward.type === 'milestone') {
+                    label = `${reward.coins}💰 / ${reward.xp}XP / ${reward.pack} pack`;
+                } else if (reward.rewardKind === 'xp') {
+                    label = `${reward.xp} XP`;
+                } else if (reward.rewardKind === 'money') {
+                    label = `${reward.coins} 💰`;
+                } else {
+                    label = `${reward.pack} pack`;
+                }
+                const row = document.createElement('div');
+                row.style.cssText = 'display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:8px 10px;cursor:pointer;font-size:0.78rem;';
+                row.innerHTML = `<span style="color:#f3f4f6;font-weight:700;">Tier ${t}${isCustom ? ' &#9998;' : ''}</span><span style="color:#9ca3af;">${label}</span>`;
+                row.onclick = () => editExtraTierReward(t);
+                listEl.appendChild(row);
+            }
+        }
+
+        window.adminSetExtraTiersCount = async function() {
+            const input = document.getElementById('admin-extra-tiers-count');
+            const statusEl = document.getElementById('admin-extra-tiers-status');
+            let count = parseInt(input.value);
+            if (isNaN(count) || count < 0) count = 0;
+            if (count > 900) count = 900;
+            input.value = count;
+
+            const db = window._realm?.getDb();
+            const ref = window._realm?.getRef();
+            const upd = window._realm?.getUpdate();
+            const get = window._realm?.getGet();
+            if (!db || !ref || !upd || !get) {
+                if (statusEl) { statusEl.textContent = 'Firebase not ready'; statusEl.style.color = '#ef4444'; }
+                return;
+            }
+
+            try {
+                // Prune custom rewards for tiers no longer in range
+                const snap = await get(ref(db, 'system/battlePass/extraTiers/custom'));
+                const custom = snap.val() || {};
+                Object.keys(custom).forEach(k => {
+                    if (parseInt(k) > BASE_TIERS + count) delete custom[k];
+                });
+                await upd(ref(db, 'system/battlePass/extraTiers'), { count, custom });
+                _applyExtraTiersConfig({ count, custom });
+                renderAdminExtraTiersList();
+                refreshBattlePassUI();
+                document.getElementById('admin-extra-tiers-edit').style.display = 'none';
+                if (statusEl) { statusEl.textContent = `Saved — ${count} extra tier(s) (Tiers up to ${BASE_TIERS + count})`; statusEl.style.color = '#22c55e'; }
+            } catch (err) {
+                if (statusEl) { statusEl.textContent = 'Failed to save: ' + err.message; statusEl.style.color = '#ef4444'; }
+            }
+        };
+
+        window.editExtraTierReward = function(tier) {
+            _extraTierEditing = tier;
+            document.getElementById('admin-extra-edit-tier').textContent = tier;
+
+            const packSelect = document.getElementById('admin-extra-edit-pack');
+            packSelect.innerHTML = ALL_PACK_NAMES.map(p => `<option value="${p}">${p}</option>`).join('');
+
+            const reward = getTierRewards(tier);
+            const kindSelect = document.getElementById('admin-extra-edit-kind');
+            const amountInput = document.getElementById('admin-extra-edit-amount');
+
+            let kind, amount = '', pack = ALL_PACK_NAMES[0];
+            if (reward.type === 'milestone') {
+                kind = 'money'; amount = reward.coins; pack = reward.pack;
+            } else {
+                kind = reward.rewardKind;
+                if (kind === 'xp') amount = reward.xp;
+                else if (kind === 'money') amount = reward.coins;
+                else pack = reward.pack;
+            }
+            kindSelect.value = kind;
+            amountInput.value = amount;
+            packSelect.value = pack;
+            adminToggleExtraTierFields();
+            document.getElementById('admin-extra-tiers-edit').style.display = 'block';
+        };
+
+        window.adminToggleExtraTierFields = function() {
+            const kind = document.getElementById('admin-extra-edit-kind').value;
+            document.getElementById('admin-extra-edit-amount').style.display = (kind === 'pack') ? 'none' : 'block';
+            document.getElementById('admin-extra-edit-pack').style.display = (kind === 'pack') ? 'block' : 'none';
+        };
+
+        window.saveExtraTierReward = async function() {
+            const tier = _extraTierEditing;
+            const statusEl = document.getElementById('admin-extra-tiers-status');
+            if (!tier) return;
+
+            const kind = document.getElementById('admin-extra-edit-kind').value;
+            const amount = parseInt(document.getElementById('admin-extra-edit-amount').value) || 1;
+            const pack = document.getElementById('admin-extra-edit-pack').value;
+            const isMilestone = tier % 10 === 0;
+
+            // Cap against tier 100's max reward so extra tiers never exceed it
+            const maxReward = getTierRewards(BASE_TIERS);
+            let reward;
+            if (isMilestone) {
+                reward = {
+                    type: 'milestone',
+                    coins: kind === 'money' ? Math.min(amount, maxReward.coins) : Math.round(maxReward.coins * 0.5),
+                    xp: kind === 'xp' ? Math.min(amount, maxReward.xp) : Math.round(maxReward.xp * 0.5),
+                    pack: kind === 'pack' ? pack : maxReward.pack,
+                    credits: 0,
+                    s1Title: null,
+                };
+            } else {
+                if (kind === 'xp') {
+                    reward = { type: 'normal', rewardKind: 'xp', xp: Math.min(amount, maxReward.xp) };
+                } else if (kind === 'money') {
+                    reward = { type: 'normal', rewardKind: 'money', coins: Math.min(amount, maxReward.coins) };
+                } else {
+                    reward = { type: 'normal', rewardKind: 'pack', pack };
+                }
+            }
+
+            const db = window._realm?.getDb();
+            const ref = window._realm?.getRef();
+            const upd = window._realm?.getUpdate();
+            if (!db || !ref || !upd) {
+                if (statusEl) { statusEl.textContent = 'Firebase not ready'; statusEl.style.color = '#ef4444'; }
+                return;
+            }
+            try {
+                await upd(ref(db, `system/battlePass/extraTiers/custom`), { [tier]: reward });
+                extraTierRewards[tier] = reward;
+                renderAdminExtraTiersList();
+                refreshBattlePassUI();
+                if (statusEl) { statusEl.textContent = `Tier ${tier} reward saved`; statusEl.style.color = '#22c55e'; }
+            } catch (err) {
+                if (statusEl) { statusEl.textContent = 'Failed to save: ' + err.message; statusEl.style.color = '#ef4444'; }
+            }
+        };
+
+        window.resetExtraTierReward = async function() {
+            const tier = _extraTierEditing;
+            const statusEl = document.getElementById('admin-extra-tiers-status');
+            if (!tier) return;
+
+            const db = window._realm?.getDb();
+            const ref = window._realm?.getRef();
+            const remove = window._realm?.getRemove ? window._realm.getRemove() : null;
+            try {
+                if (db && ref && remove) {
+                    await remove(ref(db, `system/battlePass/extraTiers/custom/${tier}`));
+                } else if (db && ref) {
+                    const upd = window._realm.getUpdate();
+                    await upd(ref(db, `system/battlePass/extraTiers/custom`), { [tier]: null });
+                }
+                delete extraTierRewards[tier];
+                renderAdminExtraTiersList();
+                refreshBattlePassUI();
+                document.getElementById('admin-extra-tiers-edit').style.display = 'none';
+                if (statusEl) { statusEl.textContent = `Tier ${tier} reset to auto`; statusEl.style.color = '#22c55e'; }
+            } catch (err) {
+                if (statusEl) { statusEl.textContent = 'Failed to reset: ' + err.message; statusEl.style.color = '#ef4444'; }
             }
         };
 
@@ -7498,6 +7760,32 @@
                             <input id="admin-season-end-input" type="datetime-local" style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:10px 12px;color:white;font-size:0.85rem;outline:none;margin-bottom:10px;color-scheme:dark;">
                             <button onclick="adminSetSeasonEnd()" style="width:100%;background:linear-gradient(135deg,#d97706,#92400e);border:none;color:white;border-radius:8px;padding:10px;font-weight:700;font-size:0.85rem;cursor:pointer;">SET CUSTOM END DATE</button>
                             <div id="admin-season-status" style="font-size:0.75rem;text-align:center;margin-top:8px;color:#6b7280;"></div>
+                        </div>
+
+                        <!-- EXTRA BATTLE PASS TIERS -->
+                        <div style="background:rgba(220,38,38,0.07);border:1px solid rgba(220,38,38,0.2);border-radius:12px;padding:16px;margin-top:14px;">
+                            <div style="font-weight:700;font-size:0.85rem;color:#f3f4f6;margin-bottom:4px;">&#9889; Extra Tiers (beyond Tier 100)</div>
+                            <div style="font-size:0.72rem;color:#6b7280;margin-bottom:12px;">Auto-generated rewards never exceed Tier 100's max reward. Click any tier below to customize it.</div>
+                            <div style="display:flex;gap:8px;margin-bottom:10px;">
+                                <input id="admin-extra-tiers-count" type="number" min="0" max="900" placeholder="Number of extra tiers..." style="flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:10px 12px;color:white;font-size:0.85rem;outline:none;">
+                                <button onclick="adminSetExtraTiersCount()" style="background:linear-gradient(135deg,#dc2626,#991b1b);border:none;color:white;border-radius:8px;padding:10px 14px;font-weight:700;font-size:0.85rem;cursor:pointer;white-space:nowrap;">SET</button>
+                            </div>
+                            <div id="admin-extra-tiers-list" style="display:flex;flex-direction:column;gap:6px;max-height:240px;overflow-y:auto;"></div>
+                            <div id="admin-extra-tiers-edit" style="display:none;margin-top:12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:12px;">
+                                <div style="font-weight:700;font-size:0.8rem;color:#f3f4f6;margin-bottom:8px;">Edit Tier <span id="admin-extra-edit-tier"></span></div>
+                                <select id="admin-extra-edit-kind" onchange="adminToggleExtraTierFields()" style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:10px 12px;color:white;font-size:0.85rem;outline:none;margin-bottom:8px;">
+                                    <option value="xp">XP Reward</option>
+                                    <option value="money">Money Reward</option>
+                                    <option value="pack">Pack Reward</option>
+                                </select>
+                                <input id="admin-extra-edit-amount" type="number" min="1" placeholder="Amount..." style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:10px 12px;color:white;font-size:0.85rem;outline:none;margin-bottom:8px;">
+                                <select id="admin-extra-edit-pack" style="display:none;width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:10px 12px;color:white;font-size:0.85rem;outline:none;margin-bottom:8px;"></select>
+                                <div style="display:flex;gap:8px;">
+                                    <button onclick="saveExtraTierReward()" style="flex:1;background:linear-gradient(135deg,#16a34a,#15803d);border:none;color:white;border-radius:8px;padding:10px;font-weight:700;font-size:0.85rem;cursor:pointer;">SAVE</button>
+                                    <button onclick="resetExtraTierReward()" style="flex:1;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);color:#9ca3af;border-radius:8px;padding:10px;font-weight:700;font-size:0.85rem;cursor:pointer;">RESET TO AUTO</button>
+                                </div>
+                            </div>
+                            <div id="admin-extra-tiers-status" style="font-size:0.75rem;text-align:center;margin-top:8px;color:#6b7280;"></div>
                         </div>
                     </div>
                 </div>
