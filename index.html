@@ -1,1 +1,314 @@
-FINISHED
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏆 The Tri-Velocity Cup 🏆</title>
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --card-bg: #161b22;
+            --accent-color: #58a6ff;
+            --text-color: #c9d1d9;
+            --text-glow: #388bfd;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            color: #fff;
+            text-shadow: 0 0 10px var(--text-glow);
+            margin-bottom: 5px;
+            text-align: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 900px;
+        }
+        .section {
+            background-color: var(--card-bg);
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+        h2 {
+            margin-top: 0;
+            border-bottom: 2px solid #30363d;
+            padding-bottom: 8px;
+            color: var(--accent-color);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #30363d;
+            padding: 12px;
+            text-align: center;
+        }
+        th {
+            background-color: #21262d;
+            color: #fff;
+        }
+        tr:nth-child(even) {
+            background-color: #1f242c;
+        }
+        .score-input {
+            width: 50px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            color: #fff;
+            text-align: center;
+            padding: 5px;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .btn {
+            background-color: #238636;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn:hover {
+            background-color: #2ea043;
+        }
+        .badge {
+            background-color: #388bfd;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .ot-checkbox {
+            margin-left: 10px;
+            cursor: pointer;
+        }
+        .flex-center {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🏆 THE TRI-VELOCITY CUP 🏆</h1>
+    <p style="text-align:center; color: #8b949e; margin-bottom: 30px;">Live Rocket League Tracker • July 8</p>
+
+    <div class="section">
+        <h2>📊 Live Leaderboard</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Player</th>
+                    <th>Points</th>
+                    <th>Goal Diff (GD)</th>
+                </tr>
+            </thead>
+            <tbody id="leaderboard-body">
+                </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>🎮 Phase 1: League Stage (15 Matches)</h2>
+        <div style="overflow-x:auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>M#</th>
+                        <th>Matchup</th>
+                        <th>PS5</th>
+                        <th>Laptop</th>
+                        <th>Score</th>
+                        <th>OT?</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="matches-body">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>⚡ Phase 2: The Playoffs</h2>
+        <p>After Match 15, 1st place goes straight to the Finals. 2nd & 3rd play the Semi-Final.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Stage</th>
+                    <th>Matchup</th>
+                    <th>Score / Winner</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Semi-Final</strong></td>
+                    <td>2nd Place vs 3rd Place</td>
+                    <td><input type="text" id="semi-winner" class="score-input" style="width:120px;" placeholder="Winner name"></td>
+                </tr>
+                <tr>
+                    <td><strong>Grand Final</strong></td>
+                    <td>1st Place vs Semi Winner (Best of 3)</td>
+                    <td><input type="text" id="cup-champion" class="score-input" style="width:120px;" placeholder="Champion!"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    // 🔴 PASTE YOUR FIREBASE CONFIG OBJECT HERE 🔴
+    const firebaseConfig = {
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+        projectId: "YOUR_PROJECT_ID",
+        storageBucket: "YOUR_PROJECT_ID.appspot.com",
+        messagingSenderId: "YOUR_SENDER_ID",
+        appId: "YOUR_APP_ID"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // 15 Match Rotation Array
+    const scheduleData = [
+        { id: 1, p1: "Zezo", p2: "Asser", ps5: "Zezo", laptop: "Asser" },
+        { id: 2, p1: "Asser", p2: "Lilly", ps5: "Asser", laptop: "Lilly" },
+        { id: 3, p1: "Lilly", p2: "Zezo", ps5: "Lilly", laptop: "Zezo" },
+        { id: 4, p1: "Asser", p2: "Zezo", ps5: "Asser", laptop: "Zezo" },
+        { id: 5, p1: "Lilly", p2: "Asser", ps5: "Lilly", laptop: "Asser" },
+        { id: 6, p1: "Zezo", p2: "Lilly", ps5: "Zezo", laptop: "Lilly" },
+        { id: 7, p1: "Zezo", p2: "Asser", ps5: "Zezo", laptop: "Asser" },
+        { id: 8, p1: "Asser", p2: "Lilly", ps5: "Asser", laptop: "Lilly" },
+        { id: 9, p1: "Lilly", p2: "Zezo", ps5: "Lilly", laptop: "Zezo" },
+        { id: 10, p1: "Asser", p2: "Zezo", ps5: "Asser", laptop: "Zezo" },
+        { id: 11, p1: "Lilly", p2: "Asser", ps5: "Lilly", laptop: "Asser" },
+        { id: 12, p1: "Zezo", p2: "Lilly", ps5: "Zezo", laptop: "Lilly" },
+        { id: 13, p1: "Zezo", p2: "Asser", ps5: "Zezo", laptop: "Asser" },
+        { id: 14, p1: "Asser", p2: "Lilly", ps5: "Asser", laptop: "Lilly" },
+        { id: 15, p1: "Lilly", p2: "Zezo", ps5: "Lilly", laptop: "Zezo" }
+    ];
+
+    // Listen to live database changes
+    onSnapshot(doc(db, "tournaments", "tri-velocity-cup"), (docSnap) => {
+        let data = docSnap.exists() ? docSnap.data() : { scores: {} };
+        renderPage(data.scores || {});
+    });
+
+    // Save a match score to Firebase
+    window.saveMatch = async function(matchId) {
+        const p1Score = parseInt(document.getElementById(`m${matchId}-p1`).value) || 0;
+        const p2Score = parseInt(document.getElementById(`m${matchId}-p2`).value) || 0;
+        const isOT = document.getElementById(`m${matchId}-ot`).checked;
+
+        // Fetch current tournament data first to avoid overwriting other matches
+        let scoresUpdate = {};
+        try {
+            const res = await setDoc(doc(db, "tournaments", "tri-velocity-cup"), {
+                scores: {
+                    [`match_${matchId}`]: { p1Score, p2Score, isOT, completed: true }
+                }
+            }, { merge: true });
+        } catch (e) {
+            console.error("Error saving match: ", e);
+        }
+    };
+
+    function renderPage(scores) {
+        const matchesBody = document.getElementById("matches-body");
+        matchesBody.innerHTML = "";
+
+        // Reset player stats for fresh calculation
+        let players = {
+            "Zezo": { name: "Zezo", points: 0, gd: 0 },
+            "Asser": { name: "Asser", points: 0, gd: 0 },
+            "Lilly": { name: "Lilly (+Bot)", points: 0, gd: 0 }
+        };
+
+        scheduleData.forEach(match => {
+            const matchKey = `match_${match.id}`;
+            const matchSavedData = scores[matchKey] || { p1Score: 0, p2Score: 0, isOT: false, completed: false };
+
+            // Calculate points and stats if match is completed
+            if (matchSavedData.completed) {
+                const s1 = matchSavedData.p1Score;
+                const s2 = matchSavedData.p2Score;
+                const ot = matchSavedData.isOT;
+
+                // Goal Difference
+                players[match.p1].gd += (s1 - s2);
+                players[match.p2].gd += (s2 - s1);
+
+                // Points distribution
+                if (s1 > s2) {
+                    players[match.p1].points += ot ? 2 : 3;
+                } else if (s2 > s1) {
+                    players[match.p2].points += ot ? 2 : 3;
+                }
+            }
+
+            // Build HTML row
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${match.id}</td>
+                <td><strong>${match.p1}</strong> vs <strong>${match.p2}</strong></td>
+                <td><span class="badge" style="background-color:#e11d48">${match.ps5}</span></td>
+                <td><span class="badge" style="background-color:#2563eb">${match.laptop}</span></td>
+                <td>
+                    <div class="flex-center">
+                        <input type="number" id="m${match.id}-p1" class="score-input" value="${matchSavedData.p1Score}">
+                        :
+                        <input type="number" id="m${match.id}-p2" class="score-input" value="${matchSavedData.p2Score}">
+                    </div>
+                </td>
+                <td><input type="checkbox" id="m${match.id}-ot" class="ot-checkbox" ${matchSavedData.isOT ? 'checked' : ''}></td>
+                <td><button class="btn" onclick="saveMatch(${match.id})">Save</button></td>
+            `;
+            matchesBody.appendChild(tr);
+        });
+
+        // Sort Leaderboard: Points first, then Goal Difference (GD)
+        let sortedPlayers = Object.values(players).sort((a, b) => {
+            if (b.points !== a.points) return b.points - a.points;
+            return b.gd - a.gd;
+        });
+
+        const leaderboardBody = document.getElementById("leaderboard-body");
+        leaderboardBody.innerHTML = "";
+        sortedPlayers.forEach((player, index) => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td><strong>${index + 1}</strong></td>
+                <td>${player.name}</td>
+                <td><strong>${player.points}</strong></td>
+                <td style="color: ${player.gd >= 0 ? '#2ea043' : '#f85149'}">${player.gd > 0 ? '+' + player.gd : player.gd}</td>
+            `;
+            leaderboardBody.appendChild(tr);
+        });
+    }
+</script>
+</body>
+</html>
