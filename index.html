@@ -82,11 +82,19 @@
             display: flex; justify-content: space-between; align-items: center; max-width: 500px; margin: 12px auto;
         }
 
-        .live-team {
-            font-size: 18px; font-weight: bold; width: 35%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        .team-wrapper {
+            width: 35%; display: flex; flex-direction: column;
         }
-        #view-p1-name { text-align: right; }
-        #view-p2-name { text-align: left; }
+        #p1-wrapper { align-items: flex-end; text-align: right; }
+        #p2-wrapper { align-items: flex-start; text-align: left; }
+
+        .live-team {
+            font-size: 18px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;
+        }
+        
+        .platform-label {
+            font-size: 11px; color: #8b949e; text-transform: uppercase; font-weight: bold; margin-top: 2px; letter-spacing: 0.5px;
+        }
 
         .live-number {
             font-size: 38px; font-weight: 800; color: #fff; font-family: monospace; background: #21262d; padding: 4px 16px; border-radius: 8px; border: 1px solid #30363d; min-width: 60px;
@@ -122,7 +130,10 @@
         .admin-header { text-align: center; width: 100%; margin-bottom: 15px; }
         .admin-panel-row { display: flex; width: 100%; max-width: 800px; justify-content: space-around; align-items: center; flex-grow: 1; }
         .admin-controller-box { text-align: center; background: #161b22; padding: 20px 10px; border-radius: 16px; border: 1px solid #30363d; width: 32%; }
-        .huge-score { font-size: 64px; font-weight: 900; margin: 15px 0; font-family: monospace; color: #fff; }
+        
+        .player-info { margin-bottom: 10px; }
+        
+        .huge-score { font-size: 64px; font-weight: 900; margin: 10px 0 15px 0; font-family: monospace; color: #fff; }
         .score-controls { display: flex; justify-content: center; gap: 10px; }
         
         .circle-btn { width: 55px; height: 55px; border-radius: 50%; border: none; font-size: 26px; font-weight: bold; cursor: pointer; color: white; display: inline-flex; align-items: center; justify-content: center; }
@@ -140,8 +151,11 @@
             #fullscreen-admin { justify-content: flex-start; padding: calc(20px + env(safe-area-inset-top)) 15px calc(20px + env(safe-area-inset-bottom)) 15px; }
             .admin-panel-row { flex-direction: column; gap: 15px; width: 100%; }
             .admin-controller-box { width: 100%; display: flex; flex-direction: row; align-items: center; justify-content: space-between; padding: 15px 20px; }
-            .huge-score { margin: 0; font-size: 52px; }
-            .admin-controller-box h3 { font-size: 20px; text-align: left; flex: 1; }
+            
+            .player-info { flex: 1; text-align: left; margin: 0; }
+            .player-info h3 { font-size: 20px; margin: 0; }
+            
+            .huge-score { margin: 0 15px; font-size: 52px; }
             .score-controls { gap: 8px; }
             .circle-btn { width: 50px; height: 50px; font-size: 24px; }
             .huge-clock { margin: 10px 0; font-size: 48px; }
@@ -161,11 +175,21 @@
         <div class="section live-ticker">
             <div class="live-badge">🔴 LIVE SCOREBOARD</div>
             <div class="live-score-display">
-                <div class="live-team" id="view-p1-name">Loading...</div>
+                <!-- Player 1 (PS5) -->
+                <div class="team-wrapper" id="p1-wrapper">
+                    <div class="live-team" id="view-p1-name">Loading...</div>
+                    <div class="platform-label">🎮 PS5</div>
+                </div>
+                
                 <div class="live-number" id="view-p1-score">0</div>
                 <div style="font-size: 18px; color: #8b949e; font-weight: bold;">VS</div>
                 <div class="live-number" id="view-p2-score">0</div>
-                <div class="live-team" id="view-p2-name">Loading...</div>
+                
+                <!-- Player 2 (Laptop) -->
+                <div class="team-wrapper" id="p2-wrapper">
+                    <div class="live-team" id="view-p2-name">Loading...</div>
+                    <div class="platform-label">💻 Laptop</div>
+                </div>
             </div>
             <div class="live-timer" id="view-clock">5:00</div>
             <div style="margin-top: 12px;">
@@ -232,8 +256,12 @@
     </div>
 
     <div class="admin-panel-row">
+        <!-- P1 Admin Box (PS5) -->
         <div class="admin-controller-box">
-            <h3 id="admin-p1-name">Player 1</h3>
+            <div class="player-info">
+                <h3 id="admin-p1-name" style="margin: 0; font-size: 20px;">Player 1</h3>
+                <div class="platform-label">🎮 PS5</div>
+            </div>
             <div class="huge-score" id="admin-p1-score">0</div>
             <div class="score-controls">
                 <button class="circle-btn btn-minus" onclick="modLiveScore('p1', -1)">-</button>
@@ -246,8 +274,12 @@
             <button class="btn btn-huge" id="clock-trigger-btn" onclick="toggleAdminClock()" style="background-color:#388bfd; min-width: 160px;">⏯️ START / PAUSE</button>
         </div>
 
+        <!-- P2 Admin Box (Laptop) -->
         <div class="admin-controller-box">
-            <h3 id="admin-p2-name">Player 2</h3>
+            <div class="player-info">
+                <h3 id="admin-p2-name" style="margin: 0; font-size: 20px;">Player 2</h3>
+                <div class="platform-label">💻 Laptop</div>
+            </div>
             <div class="huge-score" id="admin-p2-score">0</div>
             <div class="score-controls">
                 <button class="circle-btn btn-minus" onclick="modLiveScore('p2', -1)">-</button>
@@ -309,7 +341,6 @@
         adminState.secondsLeft = live.secondsLeft !== undefined ? live.secondsLeft : 300;
         adminState.isOT = live.isOT || false;
 
-        // Resolve names (Fallback for matches started before dynamic names update)
         adminState.p1Name = live.p1Name;
         adminState.p2Name = live.p2Name;
         if(!adminState.p1Name) {
@@ -318,7 +349,6 @@
             adminState.p2Name = fallbackFix ? fallbackFix.p2 : "Player 2";
         }
 
-        // Live Tracker UI Update
         document.getElementById("view-p1-name").innerText = adminState.p1Name;
         document.getElementById("view-p2-name").innerText = adminState.p2Name;
         document.getElementById("view-p1-score").innerText = adminState.p1Score;
@@ -335,7 +365,6 @@
             formatClockUI(adminState.secondsLeft, "view-clock");
         }
 
-        // Referee Dashboard UI Update
         let displayMatchId = globalActiveMatchId > 100 ? `F${globalActiveMatchId-100}` : globalActiveMatchId;
         document.getElementById("admin-match-title").innerText = `Match #${displayMatchId}: ${adminState.p1Name} vs ${adminState.p2Name}`;
         document.getElementById("admin-p1-name").innerText = adminState.p1Name;
@@ -472,7 +501,6 @@
     }
 
     function renderDashboards(historyLogs, friendliesActive) {
-        // 1. Calculate Phase 1 Leaderboard
         let statistics = {
             "Zezo": { name: "Zezo", points: 0, gd: 0 },
             "Asser": { name: "Asser", points: 0, gd: 0 },
@@ -503,7 +531,6 @@
             lbElement.innerHTML += `<tr><td><strong>${pos+1}</strong></td><td>${p.name}</td><td><strong>${p.points}</strong></td><td style="color:${p.gd>=0?'#2ea043':'#f85149'}">${p.gd>0?'+'+p.gd:p.gd}</td></tr>`;
         });
 
-        // 2. Render Phase 2: Playoffs
         let rank1 = sortedBoard[0].name.replace(" (+Bot)", "");
         let rank2 = sortedBoard[1].name.replace(" (+Bot)", "");
         let rank3 = sortedBoard[2].name.replace(" (+Bot)", "");
@@ -521,7 +548,6 @@
         p2Container.innerHTML += createMatchRow(16, rank2, rank3, log16, "16 (Semi)", "playoff-row");
         p2Container.innerHTML += createMatchRow(17, rank1, p2_17, log17, "17 (FINAL)", "playoff-row");
 
-        // 3. Render Friendlies
         const fContent = document.getElementById("friendlies-content");
         if (friendliesActive) {
             let fHtml = `<div class="table-scroll"><table><thead><tr><th>M#</th><th>Matchup</th><th>Logged Score</th><th>Status</th></tr></thead><tbody>`;
