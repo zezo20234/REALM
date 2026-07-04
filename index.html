@@ -15,7 +15,6 @@
             --green: #238636;
         }
         
-        /* Mobile-first touch enhancements */
         * {
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
@@ -63,9 +62,9 @@
             font-size: 18px;
         }
 
-        /* 📌 STICKY PINNED LIVE SCOREBOARD CONTAINER */
+        /* 📌 STICKY PINNED LIVE SCOREBOARD */
         .pinned-wrapper {
-            position: -webkit-sticky; /* iOS Support */
+            position: -webkit-sticky; 
             position: sticky;
             top: 10px;
             z-index: 999;
@@ -137,9 +136,9 @@
             color: #8b949e;
             font-family: monospace;
             font-weight: bold;
+            height: 24px;
         }
 
-        /* Responsive Table adjustments for smaller Apple touchscreens */
         .table-scroll {
             width: 100%;
             overflow-x: auto;
@@ -156,7 +155,7 @@
 
         th, td {
             border: 1px solid #30363d;
-            padding: 14px 10px; /* Larger padding for tap accuracy */
+            padding: 14px 10px; 
             text-align: center;
             font-size: 14px;
         }
@@ -170,10 +169,7 @@
             background-color: #1f242c;
         }
 
-        /* Prevent iOS Zoom on Input Focus */
-        input, select, button {
-            font-size: 16px !important; 
-        }
+        input, select, button { font-size: 16px !important; }
 
         .btn {
             background-color: var(--green);
@@ -183,7 +179,7 @@
             border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
-            min-height: 44px; /* Apple minimum touch size rule */
+            min-height: 44px; 
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -195,7 +191,7 @@
             color: white;
         }
 
-        /* 🚨 FULLSCREEN REFEREE CONTROLLER (iOS SUPPORTED) 🚨 */
+        /* 🚨 FULLSCREEN REFEREE CONTROLLER 🚨 */
         #fullscreen-admin {
             display: none;
             position: fixed;
@@ -210,11 +206,13 @@
             justify-content: space-between;
             padding: calc(40px + env(safe-area-inset-top)) 20px calc(20px + env(safe-area-inset-bottom)) 20px;
             box-sizing: border-box;
+            overflow-y: auto;
         }
 
         .admin-header {
             text-align: center;
             width: 100%;
+            margin-bottom: 15px;
         }
 
         .admin-panel-row {
@@ -243,6 +241,12 @@
             color: #fff;
         }
 
+        .score-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
         .circle-btn {
             width: 55px;
             height: 55px;
@@ -251,7 +255,6 @@
             font-size: 26px;
             font-weight: bold;
             cursor: pointer;
-            margin: 5px;
             color: white;
             display: inline-flex;
             align-items: center;
@@ -274,6 +277,7 @@
             flex-direction: column;
             gap: 12px;
             max-width: 400px;
+            margin-top: 20px;
         }
 
         .btn-huge {
@@ -298,21 +302,43 @@
             animation: pulse 1s infinite;
         }
 
-        /* Quick Layout adjustments for vertical iPhone orientations */
+        /* 📱 FIXED Mobile Layout for Referee Controller */
         @media (max-width: 600px) {
+            #fullscreen-admin {
+                justify-content: flex-start;
+                padding: calc(20px + env(safe-area-inset-top)) 15px calc(20px + env(safe-area-inset-bottom)) 15px;
+            }
             .admin-panel-row {
                 flex-direction: column;
-                gap: 20px;
+                gap: 15px;
+                width: 100%;
             }
             .admin-controller-box {
-                width: 90%;
+                width: 100%;
                 display: flex;
+                flex-direction: row;
                 align-items: center;
-                justify-content: space-around;
-                padding: 10px 20px;
+                justify-content: space-between; /* Keeps buttons strictly inside the box */
+                padding: 15px 20px;
             }
-            .huge-score { margin: 0; font-size: 48px; }
-            .huge-clock { margin-top: 10px; font-size: 46px; }
+            .huge-score { 
+                margin: 0; 
+                font-size: 52px; 
+            }
+            .admin-controller-box h3 { 
+                font-size: 20px; 
+                text-align: left; 
+                flex: 1; /* Pushes score and buttons to the right */
+            }
+            .score-controls { 
+                gap: 8px; 
+            }
+            .circle-btn { 
+                width: 50px; 
+                height: 50px; 
+                font-size: 24px; 
+            }
+            .huge-clock { margin: 10px 0; font-size: 48px; }
             .live-team { font-size: 15px; }
             .live-number { font-size: 30px; }
         }
@@ -324,6 +350,7 @@
     <h1>🏆 THE TRI-VELOCITY CUP 🏆</h1>
     <p style="text-align:center; color: #8b949e; margin: 0 0 20px 0; font-size: 13px;">Live Match Central</p>
 
+    <!-- 📌 PINNED LIVE TRACKER -->
     <div class="pinned-wrapper">
         <div class="section live-ticker">
             <div class="live-badge">🔴 LIVE SCOREBOARD</div>
@@ -334,6 +361,7 @@
                 <div class="live-number" id="view-p2-score">0</div>
                 <div class="live-team" id="view-p2-name">Loading...</div>
             </div>
+            <!-- Match not started logic applies to this element -->
             <div class="live-timer" id="view-clock">5:00</div>
             <div style="margin-top: 12px;">
                 <button class="btn btn-secondary" style="padding: 8px 16px; min-height: 38px;" onclick="requestAdminAccess()">🔒 Unlock Referee Controller</button>
@@ -341,6 +369,7 @@
         </div>
     </div>
 
+    <!-- LEADERBOARD SECTION -->
     <div class="section">
         <h2>📊 Live Leaderboard Standings</h2>
         <div class="table-scroll">
@@ -354,11 +383,12 @@
                     </tr>
                 </thead>
                 <tbody id="leaderboard-body">
-                    </tbody>
+                </tbody>
             </table>
         </div>
     </div>
 
+    <!-- FIXTURES GRID -->
     <div class="section">
         <h2>🎮 Phase 1: Tournament Bracket (15 Matches)</h2>
         <div class="table-scroll">
@@ -372,12 +402,13 @@
                     </tr>
                 </thead>
                 <tbody id="matches-body">
-                    </tbody>
+                </tbody>
             </table>
         </div>
     </div>
 </div>
 
+<!-- FULLSCREEN PANEL DISPLAY LAYER -->
 <div id="fullscreen-admin">
     <div class="admin-header">
         <span class="live-badge" style="background-color: var(--accent-color);">🛠️ REFEREE DASHBOARD ACTIVE</span>
@@ -388,26 +419,29 @@
     </div>
 
     <div class="admin-panel-row">
+        <!-- Team 1 Control Block -->
         <div class="admin-controller-box">
-            <h3 id="admin-p1-name" style="margin:0; font-size:18px;">Player 1</h3>
+            <h3 id="admin-p1-name">Player 1</h3>
             <div class="huge-score" id="admin-p1-score">0</div>
-            <div>
-                <button class="circle-btn btn-plus" onclick="modLiveScore('p1', 1)">+</button>
+            <div class="score-controls">
                 <button class="circle-btn btn-minus" onclick="modLiveScore('p1', -1)">-</button>
+                <button class="circle-btn btn-plus" onclick="modLiveScore('p1', 1)">+</button>
             </div>
         </div>
 
+        <!-- Clock Controller Display -->
         <div style="text-align: center;">
             <div class="huge-clock" id="admin-clock">5:00</div>
             <button class="btn btn-huge" id="clock-trigger-btn" onclick="toggleAdminClock()" style="background-color:#388bfd; min-width: 160px;">⏯️ START / PAUSE</button>
         </div>
 
+        <!-- Team 2 Control Block -->
         <div class="admin-controller-box">
-            <h3 id="admin-p2-name" style="margin:0; font-size:18px;">Player 2</h3>
+            <h3 id="admin-p2-name">Player 2</h3>
             <div class="huge-score" id="admin-p2-score">0</div>
-            <div>
-                <button class="circle-btn btn-plus" onclick="modLiveScore('p2', 1)">+</button>
+            <div class="score-controls">
                 <button class="circle-btn btn-minus" onclick="modLiveScore('p2', -1)">-</button>
+                <button class="circle-btn btn-plus" onclick="modLiveScore('p2', 1)">+</button>
             </div>
         </div>
     </div>
@@ -418,11 +452,11 @@
     </div>
 </div>
 
+<!-- FIREBASE INTEGRATION LAYER -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    // Your secure connected database configuration
     const firebaseConfig = {
         apiKey: "AIzaSyAjeXycCBhYoAU-0iiC4LbSTylKrrThN8Y",
         authDomain: "sharplabubu.firebaseapp.com",
@@ -449,7 +483,6 @@
     let globalActiveMatchId = 1;
     let adminState = { p1Score: 0, p2Score: 0, secondsLeft: 300, isRunning: false, isOT: false };
 
-    // Real-Time Database Reader Engine
     onSnapshot(doc(db, "tournaments", "tri-velocity-cup"), (snapshot) => {
         let database = snapshot.exists() ? snapshot.data() : { scores: {}, liveMatch: {} };
         let live = database.liveMatch || {};
@@ -461,12 +494,26 @@
         adminState.isOT = live.isOT || false;
 
         let currentFixture = scheduleData.find(m => m.id === globalActiveMatchId);
+        
+        // Update Live Scoreboard
         document.getElementById("view-p1-name").innerText = currentFixture.p1;
         document.getElementById("view-p2-name").innerText = currentFixture.p2;
         document.getElementById("view-p1-score").innerText = adminState.p1Score;
         document.getElementById("view-p2-score").innerText = adminState.p2Score;
-        formatClockUI(adminState.secondsLeft, "view-clock");
+        
+        // Check if Match has NOT started yet (Timer is untouched at 5:00 and stopped)
+        let viewClockEl = document.getElementById("view-clock");
+        if (adminState.secondsLeft === 300 && !live.isRunning && adminState.p1Score === 0 && adminState.p2Score === 0 && !adminState.isOT) {
+            viewClockEl.innerText = "Match Not Started";
+            viewClockEl.style.color = "#8b949e";
+            viewClockEl.style.fontSize = "16px";
+        } else {
+            viewClockEl.style.color = "#fff";
+            viewClockEl.style.fontSize = "20px";
+            formatClockUI(adminState.secondsLeft, "view-clock");
+        }
 
+        // Update Referee Dashboard
         document.getElementById("admin-match-title").innerText = `Match #${globalActiveMatchId}: ${currentFixture.p1} vs ${currentFixture.p2}`;
         document.getElementById("admin-p1-name").innerText = currentFixture.p1;
         document.getElementById("admin-p2-name").innerText = currentFixture.p2;
@@ -511,6 +558,38 @@
             }, { merge: true });
             document.getElementById("main-layout").style.display = "none";
             document.getElementById("fullscreen-admin").style.display = "flex";
+        } else if (codeInput !== null) {
+            alert("Incorrect Password!");
+        }
+    };
+
+    // 🔒 THE NEW RESET BUTTON FUNCTION
+    window.resetMatchStatus = async function(matchId) {
+        let codeInput = prompt(`Enter Referee Passcode to RESET Match #${matchId}:`);
+        if (codeInput === "2013") {
+            let confirmWipe = confirm("⚠️ Are you sure? This will delete the logged score and reset the match to completely unplayed.");
+            if (!confirmWipe) return;
+
+            // Delete the score from the leaderboard database
+            await setDoc(doc(db, "tournaments", "tri-velocity-cup"), {
+                scores: {
+                    [`match_${matchId}`]: {
+                        p1Score: 0,
+                        p2Score: 0,
+                        isOT: false,
+                        completed: false
+                    }
+                }
+            }, { merge: true });
+
+            // If it's the active live match, reset the tracker too
+            if (globalActiveMatchId == matchId) {
+                await setDoc(doc(db, "tournaments", "tri-velocity-cup"), {
+                    liveMatch: { p1Score: 0, p2Score: 0, secondsLeft: 300, isRunning: false, isOT: false }
+                }, { merge: true });
+            }
+            
+            alert(`Match #${matchId} has been successfully reset!`);
         } else if (codeInput !== null) {
             alert("Incorrect Password!");
         }
@@ -602,7 +681,6 @@
                 let actualP1 = log.p1Score;
                 let actualP2 = log.p2Score;
                 
-                // Lilly's automatic +5 handicap balance adjustment calculation 
                 if (fixture.p1 === "Lilly") actualP1 += 5;
                 if (fixture.p2 === "Lilly") actualP2 += 5;
 
@@ -616,15 +694,18 @@
                 }
             }
 
+            // HTML for Reset vs Boot Match depending on completed status
+            let actionsHtml = log.completed 
+                ? `<span style="color:#8b949e">✅ Logged</span><br>
+                   <button class="btn btn-secondary" style="margin-top: 6px; padding:6px 12px; font-size:12px; min-height:30px;" onclick="resetMatchStatus(${fixture.id})">🔄 Reset</button>` 
+                : `<button class="btn btn-secondary" style="padding:4px 10px; font-size:12px; min-height:32px;" onclick="launchSelectedMatch(${fixture.id})">🚀 Boot Match</button>`;
+
             let tr = document.createElement("tr");
             tr.innerHTML = `
                 <td>${fixture.id}</td>
                 <td><strong>${fixture.p1}</strong> vs <strong>${fixture.p2}</strong></td>
                 <td>${log.completed ? `${log.p1Score} : ${log.p2Score} ${log.isOT ? '(OT)' : ''}` : '--'}</td>
-                <td>
-                    ${log.completed ? '<span style="color:#8b949e">✅ Logged</span>' : 
-                    `<button class="btn btn-secondary" style="padding:4px 10px; font-size:12px; min-height:32px;" onclick="launchSelectedMatch(${fixture.id})">🚀 Boot Match</button>`}
-                </td>
+                <td>${actionsHtml}</td>
             `;
             matchesContainer.appendChild(tr);
         });
