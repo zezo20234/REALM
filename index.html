@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>🏆 The Tri-Velocity Cup 🏆</title>
     <style>
         :root {
@@ -14,135 +14,188 @@
             --live-red: #f85149;
             --green: #238636;
         }
+        
+        /* Mobile-first touch enhancements */
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
-            padding: 20px;
+            padding: 10px;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
+
         h1 {
             color: #fff;
             text-shadow: 0 0 10px var(--text-glow);
-            margin-bottom: 5px;
+            margin: 15px 0 5px 0;
             text-align: center;
+            font-size: 24px;
         }
+
         .container {
             width: 100%;
             max-width: 900px;
+            padding-bottom: 30px;
         }
+
         .section {
             background-color: var(--card-bg);
             border: 1px solid #30363d;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 25px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
         }
+
         h2 {
             margin-top: 0;
             border-bottom: 2px solid #30363d;
             padding-bottom: 8px;
             color: var(--accent-color);
+            font-size: 18px;
         }
-        /* PUBLIC LIVE SCOREBOARD OVERLAY */
+
+        /* 📌 STICKY PINNED LIVE SCOREBOARD CONTAINER */
+        .pinned-wrapper {
+            position: -webkit-sticky; /* iOS Support */
+            position: sticky;
+            top: 10px;
+            z-index: 999;
+            margin-bottom: 25px;
+            filter: drop-shadow(0 8px 16px rgba(0,0,0,0.6));
+        }
+
         .live-ticker {
             background: linear-gradient(135deg, #1f242c 0%, #0d1117 100%);
             border: 2px solid var(--accent-color);
-            border-radius: 12px;
-            padding: 20px;
+            border-radius: 14px;
+            padding: 16px;
             text-align: center;
-            box-shadow: 0 0 15px rgba(56, 139, 253, 0.3);
         }
+
         .live-badge {
             background-color: var(--live-red);
             color: white;
-            padding: 4px 10px;
+            padding: 4px 12px;
             border-radius: 20px;
             font-weight: bold;
-            font-size: 14px;
+            font-size: 12px;
             letter-spacing: 1px;
             display: inline-flex;
             align-items: center;
             gap: 6px;
             animation: pulse 1.5s infinite;
         }
+
         @keyframes pulse {
             0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.6; transform: scale(0.95); }
+            50% { opacity: 0.6; transform: scale(0.96); }
             100% { opacity: 1; transform: scale(1); }
         }
+
         .live-score-display {
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
-            gap: 40px;
-            margin: 15px 0;
+            max-width: 500px;
+            margin: 12px auto;
         }
+
         .live-team {
-            font-size: 24px;
+            font-size: 18px;
             font-weight: bold;
-            width: 150px;
+            width: 35%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
+        #view-p1-name { text-align: right; }
+        #view-p2-name { text-align: left; }
+
         .live-number {
-            font-size: 54px;
+            font-size: 38px;
             font-weight: 800;
             color: #fff;
             font-family: monospace;
             background: #21262d;
-            padding: 5px 25px;
+            padding: 4px 16px;
             border-radius: 8px;
             border: 1px solid #30363d;
+            min-width: 60px;
         }
+
         .live-timer {
-            font-size: 22px;
+            font-size: 20px;
             color: #8b949e;
             font-family: monospace;
             font-weight: bold;
         }
+
+        /* Responsive Table adjustments for smaller Apple touchscreens */
+        .table-scroll {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch; 
+            border-radius: 8px;
+            border: 1px solid #30363d;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
+            min-width: 500px; 
         }
+
         th, td {
             border: 1px solid #30363d;
-            padding: 12px;
+            padding: 14px 10px; /* Larger padding for tap accuracy */
             text-align: center;
+            font-size: 14px;
         }
+
         th {
             background-color: #21262d;
             color: #fff;
         }
+
         tr:nth-child(even) {
             background-color: #1f242c;
         }
+
+        /* Prevent iOS Zoom on Input Focus */
+        input, select, button {
+            font-size: 16px !important; 
+        }
+
         .btn {
             background-color: var(--green);
             color: white;
             border: none;
-            padding: 10px 18px;
-            border-radius: 6px;
+            padding: 12px 20px;
+            border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
-            font-size: 14px;
+            min-height: 44px; /* Apple minimum touch size rule */
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
-        .btn:hover {
-            background-color: #2ea043;
-        }
+
         .btn-secondary {
             background-color: #21262d;
             border: 1px solid #30363d;
             color: white;
         }
-        .btn-secondary:hover {
-            background-color: #30363d;
-        }
 
-        /* FULLSCREEN REFEREE PANEL BACKGROUND */
+        /* 🚨 FULLSCREEN REFEREE CONTROLLER (iOS SUPPORTED) 🚨 */
         #fullscreen-admin {
             display: none;
             position: fixed;
@@ -151,17 +204,19 @@
             width: 100vw;
             height: 100vh;
             background-color: #070a0e;
-            z-index: 99999;
+            z-index: 999999;
             flex-direction: column;
             align-items: center;
             justify-content: space-between;
-            padding: 40px 20px;
+            padding: calc(40px + env(safe-area-inset-top)) 20px calc(20px + env(safe-area-inset-bottom)) 20px;
             box-sizing: border-box;
         }
+
         .admin-header {
             text-align: center;
             width: 100%;
         }
+
         .admin-panel-row {
             display: flex;
             width: 100%;
@@ -170,64 +225,96 @@
             align-items: center;
             flex-grow: 1;
         }
+
         .admin-controller-box {
             text-align: center;
             background: #161b22;
-            padding: 30px;
+            padding: 20px 10px;
             border-radius: 16px;
             border: 1px solid #30363d;
-            width: 40%;
+            width: 32%;
         }
+
         .huge-score {
-            font-size: 90px;
+            font-size: 64px;
             font-weight: 900;
-            margin: 20px 0;
+            margin: 15px 0;
             font-family: monospace;
             color: #fff;
         }
+
         .circle-btn {
-            width: 70px;
-            height: 70px;
+            width: 55px;
+            height: 55px;
             border-radius: 50%;
             border: none;
-            font-size: 32px;
+            font-size: 26px;
             font-weight: bold;
             cursor: pointer;
-            margin: 0 10px;
+            margin: 5px;
             color: white;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
         .btn-plus { background-color: #238636; }
         .btn-minus { background-color: #f85149; }
+
         .huge-clock {
-            font-size: 50px;
+            font-size: 42px;
             font-family: monospace;
             font-weight: bold;
             color: var(--accent-color);
-            margin-bottom: 10px;
+            margin-bottom: 15px;
         }
+
         .admin-footer {
             width: 100%;
             display: flex;
-            justify-content: center;
-            gap: 20px;
+            flex-direction: column;
+            gap: 12px;
+            max-width: 400px;
         }
+
         .btn-huge {
-            padding: 20px 40px;
-            font-size: 20px;
-            border-radius: 10px;
+            width: 100%;
+            padding: 16px;
+            font-size: 18px;
+            border-radius: 12px;
         }
+
         .ot-toggle {
             background-color: #6f42c1;
             color: white;
-            padding: 10px 20px;
-            border-radius: 6px;
+            padding: 10px 16px;
+            border-radius: 8px;
             font-weight: bold;
             cursor: pointer;
             border: none;
+            margin-top: 10px;
         }
         .ot-active {
             background-color: #f9826c;
             animation: pulse 1s infinite;
+        }
+
+        /* Quick Layout adjustments for vertical iPhone orientations */
+        @media (max-width: 600px) {
+            .admin-panel-row {
+                flex-direction: column;
+                gap: 20px;
+            }
+            .admin-controller-box {
+                width: 90%;
+                display: flex;
+                align-items: center;
+                justify-content: space-around;
+                padding: 10px 20px;
+            }
+            .huge-score { margin: 0; font-size: 48px; }
+            .huge-clock { margin-top: 10px; font-size: 46px; }
+            .live-team { font-size: 15px; }
+            .live-number { font-size: 30px; }
         }
     </style>
 </head>
@@ -235,42 +322,46 @@
 
 <div class="container" id="main-layout">
     <h1>🏆 THE TRI-VELOCITY CUP 🏆</h1>
-    <p style="text-align:center; color: #8b949e; margin-bottom: 25px;">Live Match Hub</p>
+    <p style="text-align:center; color: #8b949e; margin: 0 0 20px 0; font-size: 13px;">Live Match Central</p>
 
-    <div class="section live-ticker">
-        <div class="live-badge">🔴 LIVE SCOREBOARD</div>
-        <div class="live-score-display">
-            <div class="live-team" id="view-p1-name">Loading...</div>
-            <div class="live-number" id="view-p1-score">0</div>
-            <div style="font-size: 24px; color: #8b949e;">VS</div>
-            <div class="live-number" id="view-p2-score">0</div>
-            <div class="live-team" id="view-p2-name">Loading...</div>
-        </div>
-        <div class="live-timer" id="view-clock">5:00</div>
-        <div style="margin-top: 15px;">
-            <button class="btn btn-secondary" onclick="requestAdminAccess()">🔒 Unlock Referee Controller</button>
+    <div class="pinned-wrapper">
+        <div class="section live-ticker">
+            <div class="live-badge">🔴 LIVE SCOREBOARD</div>
+            <div class="live-score-display">
+                <div class="live-team" id="view-p1-name">Loading...</div>
+                <div class="live-number" id="view-p1-score">0</div>
+                <div style="font-size: 18px; color: #8b949e; font-weight: bold;">VS</div>
+                <div class="live-number" id="view-p2-score">0</div>
+                <div class="live-team" id="view-p2-name">Loading...</div>
+            </div>
+            <div class="live-timer" id="view-clock">5:00</div>
+            <div style="margin-top: 12px;">
+                <button class="btn btn-secondary" style="padding: 8px 16px; min-height: 38px;" onclick="requestAdminAccess()">🔒 Unlock Referee Controller</button>
+            </div>
         </div>
     </div>
 
     <div class="section">
         <h2>📊 Live Leaderboard Standings</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Rank</th>
-                    <th>Player</th>
-                    <th>Points</th>
-                    <th>Goal Diff (GD)</th>
-                </tr>
-            </thead>
-            <tbody id="leaderboard-body">
-                </tbody>
-        </table>
+        <div class="table-scroll">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Player</th>
+                        <th>Points</th>
+                        <th>Goal Diff (GD)</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboard-body">
+                    </tbody>
+            </table>
+        </div>
     </div>
 
     <div class="section">
         <h2>🎮 Phase 1: Tournament Bracket (15 Matches)</h2>
-        <div style="overflow-x:auto;">
+        <div class="table-scroll">
             <table>
                 <thead>
                     <tr>
@@ -289,8 +380,8 @@
 
 <div id="fullscreen-admin">
     <div class="admin-header">
-        <span class="live-badge" style="background-color: var(--accent-color);">🛠️ REFEREE CONTROLLER ACTIVE</span>
-        <h2 id="admin-match-title" style="color:#fff; margin-top:10px; border:none;">Match: Loading...</h2>
+        <span class="live-badge" style="background-color: var(--accent-color);">🛠️ REFEREE DASHBOARD ACTIVE</span>
+        <h2 id="admin-match-title" style="color:#fff; margin-top:10px; border:none; font-size: 20px;">Match: Loading...</h2>
         <div>
             <button id="admin-ot-btn" class="ot-toggle" onclick="toggleAdminOT()">Toggle Overtime (OT: OFF)</button>
         </div>
@@ -298,28 +389,32 @@
 
     <div class="admin-panel-row">
         <div class="admin-controller-box">
-            <h3 id="admin-p1-name" style="margin:0; font-size:24px;">Player 1</h3>
+            <h3 id="admin-p1-name" style="margin:0; font-size:18px;">Player 1</h3>
             <div class="huge-score" id="admin-p1-score">0</div>
-            <button class="circle-btn btn-plus" onclick="modLiveScore('p1', 1)">+</button>
-            <button class="circle-btn btn-minus" onclick="modLiveScore('p1', -1)">-</button>
+            <div>
+                <button class="circle-btn btn-plus" onclick="modLiveScore('p1', 1)">+</button>
+                <button class="circle-btn btn-minus" onclick="modLiveScore('p1', -1)">-</button>
+            </div>
         </div>
 
         <div style="text-align: center;">
             <div class="huge-clock" id="admin-clock">5:00</div>
-            <button class="btn btn-huge" id="clock-trigger-btn" onclick="toggleAdminClock()" style="background-color:#388bfd;">⏯️ START / PAUSE</button>
+            <button class="btn btn-huge" id="clock-trigger-btn" onclick="toggleAdminClock()" style="background-color:#388bfd; min-width: 160px;">⏯️ START / PAUSE</button>
         </div>
 
         <div class="admin-controller-box">
-            <h3 id="admin-p2-name" style="margin:0; font-size:24px;">Player 2</h3>
+            <h3 id="admin-p2-name" style="margin:0; font-size:18px;">Player 2</h3>
             <div class="huge-score" id="admin-p2-score">0</div>
-            <button class="circle-btn btn-plus" onclick="modLiveScore('p2', 1)">+</button>
-            <button class="circle-btn btn-minus" onclick="modLiveScore('p2', -1)">-</button>
+            <div>
+                <button class="circle-btn btn-plus" onclick="modLiveScore('p2', 1)">+</button>
+                <button class="circle-btn btn-minus" onclick="modLiveScore('p2', -1)">-</button>
+            </div>
         </div>
     </div>
 
     <div class="admin-footer">
-        <button class="btn btn-secondary btn-huge" onclick="exitAdminPanelWithoutSaving()">❌ Cancel / Exit</button>
         <button class="btn btn-huge" onclick="commitAndSaveActiveMatch()" style="background-color: var(--green);">💾 Finish & Save Match</button>
+        <button class="btn btn-secondary btn-huge" onclick="exitAdminPanelWithoutSaving()">❌ Cancel / Exit Panel</button>
     </div>
 </div>
 
@@ -327,17 +422,17 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    // 🔴 PASTE YOUR EXACT FIREBASE CREDENTIAL CONFIGURATION BOX INSIDE HERE:
+    // Your secure connected database configuration
     const firebaseConfig = {
-  apiKey: "AIzaSyAjeXycCBhYoAU-0iiC4LbSTylKrrThN8Y",
-  authDomain: "sharplabubu.firebaseapp.com",
-  databaseURL: "https://sharplabubu-default-rtdb.firebaseio.com",
-  projectId: "sharplabubu",
-  storageBucket: "sharplabubu.firebasestorage.app",
-  messagingSenderId: "596148393481",
-  appId: "1:596148393481:web:4f822d86c44a13bd810ad8",
-  measurementId: "G-4M25R3BF08"
-};
+        apiKey: "AIzaSyAjeXycCBhYoAU-0iiC4LbSTylKrrThN8Y",
+        authDomain: "sharplabubu.firebaseapp.com",
+        databaseURL: "https://sharplabubu-default-rtdb.firebaseio.com",
+        projectId: "sharplabubu",
+        storageBucket: "sharplabubu.firebasestorage.app",
+        messagingSenderId: "596148393481",
+        appId: "1:596148393481:web:4f822d86c44a13bd810ad8",
+        measurementId: "G-4M25R3BF08"
+    };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
@@ -354,7 +449,7 @@
     let globalActiveMatchId = 1;
     let adminState = { p1Score: 0, p2Score: 0, secondsLeft: 300, isRunning: false, isOT: false };
 
-    // Real-Time Database Reader
+    // Real-Time Database Reader Engine
     onSnapshot(doc(db, "tournaments", "tri-velocity-cup"), (snapshot) => {
         let database = snapshot.exists() ? snapshot.data() : { scores: {}, liveMatch: {} };
         let live = database.liveMatch || {};
@@ -405,6 +500,7 @@
     window.exitAdminPanelWithoutSaving = function() {
         document.getElementById("fullscreen-admin").style.display = "none";
         document.getElementById("main-layout").style.display = "block";
+        window.scrollTo(0, 0);
     };
 
     window.launchSelectedMatch = async function(matchId) {
@@ -506,7 +602,7 @@
                 let actualP1 = log.p1Score;
                 let actualP2 = log.p2Score;
                 
-                // 📊 THE LILLY EQUATION OVERLAY (+5 ADVANTAGE HANDICAP SYSTEM)
+                // Lilly's automatic +5 handicap balance adjustment calculation 
                 if (fixture.p1 === "Lilly") actualP1 += 5;
                 if (fixture.p2 === "Lilly") actualP2 += 5;
 
@@ -527,7 +623,7 @@
                 <td>${log.completed ? `${log.p1Score} : ${log.p2Score} ${log.isOT ? '(OT)' : ''}` : '--'}</td>
                 <td>
                     ${log.completed ? '<span style="color:#8b949e">✅ Logged</span>' : 
-                    `<button class="btn btn-secondary" style="padding:4px 10px; font-size:12px;" onclick="launchSelectedMatch(${fixture.id})">🚀 Boot Match</button>`}
+                    `<button class="btn btn-secondary" style="padding:4px 10px; font-size:12px; min-height:32px;" onclick="launchSelectedMatch(${fixture.id})">🚀 Boot Match</button>`}
                 </td>
             `;
             matchesContainer.appendChild(tr);
