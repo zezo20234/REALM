@@ -11,6 +11,8 @@
             --accent-color: #58a6ff;
             --text-color: #c9d1d9;
             --text-glow: #388bfd;
+            --live-red: #f85149;
+            --green: #238636;
         }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -46,6 +48,61 @@
             padding-bottom: 8px;
             color: var(--accent-color);
         }
+        /* PUBLIC LIVE SCOREBOARD OVERLAY */
+        .live-ticker {
+            background: linear-gradient(135deg, #1f242c 0%, #0d1117 100%);
+            border: 2px solid var(--accent-color);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 0 15px rgba(56, 139, 253, 0.3);
+        }
+        .live-badge {
+            background-color: var(--live-red);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+            letter-spacing: 1px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(0.95); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        .live-score-display {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 40px;
+            margin: 15px 0;
+        }
+        .live-team {
+            font-size: 24px;
+            font-weight: bold;
+            width: 150px;
+        }
+        .live-number {
+            font-size: 54px;
+            font-weight: 800;
+            color: #fff;
+            font-family: monospace;
+            background: #21262d;
+            padding: 5px 25px;
+            border-radius: 8px;
+            border: 1px solid #30363d;
+        }
+        .live-timer {
+            font-size: 22px;
+            color: #8b949e;
+            font-family: monospace;
+            font-weight: bold;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -63,56 +120,140 @@
         tr:nth-child(even) {
             background-color: #1f242c;
         }
-        .score-input {
-            width: 50px;
-            background: #0d1117;
-            border: 1px solid #30363d;
-            color: #fff;
-            text-align: center;
-            padding: 5px;
-            border-radius: 4px;
-            font-size: 16px;
-        }
         .btn {
-            background-color: #238636;
+            background-color: var(--green);
             color: white;
             border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
+            padding: 10px 18px;
+            border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
+            font-size: 14px;
         }
         .btn:hover {
             background-color: #2ea043;
         }
-        .badge {
-            background-color: #388bfd;
+        .btn-secondary {
+            background-color: #21262d;
+            border: 1px solid #30363d;
             color: white;
-            padding: 3px 8px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: bold;
         }
-        .ot-checkbox {
-            margin-left: 10px;
-            cursor: pointer;
+        .btn-secondary:hover {
+            background-color: #30363d;
         }
-        .flex-center {
-            display: flex;
+
+        /* FULLSCREEN REFEREE PANEL BACKGROUND */
+        #fullscreen-admin {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #070a0e;
+            z-index: 99999;
+            flex-direction: column;
             align-items: center;
+            justify-content: space-between;
+            padding: 40px 20px;
+            box-sizing: border-box;
+        }
+        .admin-header {
+            text-align: center;
+            width: 100%;
+        }
+        .admin-panel-row {
+            display: flex;
+            width: 100%;
+            max-width: 800px;
+            justify-content: space-around;
+            align-items: center;
+            flex-grow: 1;
+        }
+        .admin-controller-box {
+            text-align: center;
+            background: #161b22;
+            padding: 30px;
+            border-radius: 16px;
+            border: 1px solid #30363d;
+            width: 40%;
+        }
+        .huge-score {
+            font-size: 90px;
+            font-weight: 900;
+            margin: 20px 0;
+            font-family: monospace;
+            color: #fff;
+        }
+        .circle-btn {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: none;
+            font-size: 32px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 0 10px;
+            color: white;
+        }
+        .btn-plus { background-color: #238636; }
+        .btn-minus { background-color: #f85149; }
+        .huge-clock {
+            font-size: 50px;
+            font-family: monospace;
+            font-weight: bold;
+            color: var(--accent-color);
+            margin-bottom: 10px;
+        }
+        .admin-footer {
+            width: 100%;
+            display: flex;
             justify-content: center;
-            gap: 10px;
+            gap: 20px;
+        }
+        .btn-huge {
+            padding: 20px 40px;
+            font-size: 20px;
+            border-radius: 10px;
+        }
+        .ot-toggle {
+            background-color: #6f42c1;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+        }
+        .ot-active {
+            background-color: #f9826c;
+            animation: pulse 1s infinite;
         }
     </style>
 </head>
 <body>
 
-<div class="container">
+<div class="container" id="main-layout">
     <h1>🏆 THE TRI-VELOCITY CUP 🏆</h1>
-    <p style="text-align:center; color: #8b949e; margin-bottom: 30px;">Live Rocket League Tracker • July 8</p>
+    <p style="text-align:center; color: #8b949e; margin-bottom: 25px;">Live Match Hub</p>
+
+    <div class="section live-ticker">
+        <div class="live-badge">🔴 LIVE SCOREBOARD</div>
+        <div class="live-score-display">
+            <div class="live-team" id="view-p1-name">Loading...</div>
+            <div class="live-number" id="view-p1-score">0</div>
+            <div style="font-size: 24px; color: #8b949e;">VS</div>
+            <div class="live-number" id="view-p2-score">0</div>
+            <div class="live-team" id="view-p2-name">Loading...</div>
+        </div>
+        <div class="live-timer" id="view-clock">5:00</div>
+        <div style="margin-top: 15px;">
+            <button class="btn btn-secondary" onclick="requestAdminAccess()">🔒 Unlock Referee Controller</button>
+        </div>
+    </div>
 
     <div class="section">
-        <h2>📊 Live Leaderboard</h2>
+        <h2>📊 Live Leaderboard Standings</h2>
         <table>
             <thead>
                 <tr>
@@ -128,18 +269,15 @@
     </div>
 
     <div class="section">
-        <h2>🎮 Phase 1: League Stage (15 Matches)</h2>
+        <h2>🎮 Phase 1: Tournament Bracket (15 Matches)</h2>
         <div style="overflow-x:auto;">
             <table>
                 <thead>
                     <tr>
                         <th>M#</th>
                         <th>Matchup</th>
-                        <th>PS5</th>
-                        <th>Laptop</th>
-                        <th>Score</th>
-                        <th>OT?</th>
-                        <th>Action</th>
+                        <th>Logged Score</th>
+                        <th>Status</th>
                     </tr>
                 </thead>
                 <tbody id="matches-body">
@@ -147,31 +285,41 @@
             </table>
         </div>
     </div>
+</div>
 
-    <div class="section">
-        <h2>⚡ Phase 2: The Playoffs</h2>
-        <p>After Match 15, 1st place goes straight to the Finals. 2nd & 3rd play the Semi-Final.</p>
-        <table>
-            <thead>
-                <tr>
-                    <th>Stage</th>
-                    <th>Matchup</th>
-                    <th>Score / Winner</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><strong>Semi-Final</strong></td>
-                    <td>2nd Place vs 3rd Place</td>
-                    <td><input type="text" id="semi-winner" class="score-input" style="width:120px;" placeholder="Winner name"></td>
-                </tr>
-                <tr>
-                    <td><strong>Grand Final</strong></td>
-                    <td>1st Place vs Semi Winner (Best of 3)</td>
-                    <td><input type="text" id="cup-champion" class="score-input" style="width:120px;" placeholder="Champion!"></td>
-                </tr>
-            </tbody>
-        </table>
+<div id="fullscreen-admin">
+    <div class="admin-header">
+        <span class="live-badge" style="background-color: var(--accent-color);">🛠️ REFEREE CONTROLLER ACTIVE</span>
+        <h2 id="admin-match-title" style="color:#fff; margin-top:10px; border:none;">Match: Loading...</h2>
+        <div>
+            <button id="admin-ot-btn" class="ot-toggle" onclick="toggleAdminOT()">Toggle Overtime (OT: OFF)</button>
+        </div>
+    </div>
+
+    <div class="admin-panel-row">
+        <div class="admin-controller-box">
+            <h3 id="admin-p1-name" style="margin:0; font-size:24px;">Player 1</h3>
+            <div class="huge-score" id="admin-p1-score">0</div>
+            <button class="circle-btn btn-plus" onclick="modLiveScore('p1', 1)">+</button>
+            <button class="circle-btn btn-minus" onclick="modLiveScore('p1', -1)">-</button>
+        </div>
+
+        <div style="text-align: center;">
+            <div class="huge-clock" id="admin-clock">5:00</div>
+            <button class="btn btn-huge" id="clock-trigger-btn" onclick="toggleAdminClock()" style="background-color:#388bfd;">⏯️ START / PAUSE</button>
+        </div>
+
+        <div class="admin-controller-box">
+            <h3 id="admin-p2-name" style="margin:0; font-size:24px;">Player 2</h3>
+            <div class="huge-score" id="admin-p2-score">0</div>
+            <button class="circle-btn btn-plus" onclick="modLiveScore('p2', 1)">+</button>
+            <button class="circle-btn btn-minus" onclick="modLiveScore('p2', -1)">-</button>
+        </div>
+    </div>
+
+    <div class="admin-footer">
+        <button class="btn btn-secondary btn-huge" onclick="exitAdminPanelWithoutSaving()">❌ Cancel / Exit</button>
+        <button class="btn btn-huge" onclick="commitAndSaveActiveMatch()" style="background-color: var(--green);">💾 Finish & Save Match</button>
     </div>
 </div>
 
@@ -179,7 +327,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    // 🔴 PASTE YOUR FIREBASE CONFIG OBJECT HERE 🔴
+    // 🔴 PASTE YOUR EXACT FIREBASE CREDENTIAL CONFIGURATION BOX INSIDE HERE:
     const firebaseConfig = {
   apiKey: "AIzaSyAjeXycCBhYoAU-0iiC4LbSTylKrrThN8Y",
   authDomain: "sharplabubu.firebaseapp.com",
@@ -191,124 +339,205 @@
   measurementId: "G-4M25R3BF08"
 };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // 15 Match Rotation Array
     const scheduleData = [
-        { id: 1, p1: "Zezo", p2: "Asser", ps5: "Zezo", laptop: "Asser" },
-        { id: 2, p1: "Asser", p2: "Lilly", ps5: "Asser", laptop: "Lilly" },
-        { id: 3, p1: "Lilly", p2: "Zezo", ps5: "Lilly", laptop: "Zezo" },
-        { id: 4, p1: "Asser", p2: "Zezo", ps5: "Asser", laptop: "Zezo" },
-        { id: 5, p1: "Lilly", p2: "Asser", ps5: "Lilly", laptop: "Asser" },
-        { id: 6, p1: "Zezo", p2: "Lilly", ps5: "Zezo", laptop: "Lilly" },
-        { id: 7, p1: "Zezo", p2: "Asser", ps5: "Zezo", laptop: "Asser" },
-        { id: 8, p1: "Asser", p2: "Lilly", ps5: "Asser", laptop: "Lilly" },
-        { id: 9, p1: "Lilly", p2: "Zezo", ps5: "Lilly", laptop: "Zezo" },
-        { id: 10, p1: "Asser", p2: "Zezo", ps5: "Asser", laptop: "Zezo" },
-        { id: 11, p1: "Lilly", p2: "Asser", ps5: "Lilly", laptop: "Asser" },
-        { id: 12, p1: "Zezo", p2: "Lilly", ps5: "Zezo", laptop: "Lilly" },
-        { id: 13, p1: "Zezo", p2: "Asser", ps5: "Zezo", laptop: "Asser" },
-        { id: 14, p1: "Asser", p2: "Lilly", ps5: "Asser", laptop: "Lilly" },
-        { id: 15, p1: "Lilly", p2: "Zezo", ps5: "Lilly", laptop: "Zezo" }
+        { id: 1, p1: "Zezo", p2: "Asser" }, { id: 2, p1: "Asser", p2: "Lilly" }, { id: 3, p1: "Lilly", p2: "Zezo" },
+        { id: 4, p1: "Asser", p2: "Zezo" }, { id: 5, p1: "Lilly", p2: "Asser" }, { id: 6, p1: "Zezo", p2: "Lilly" },
+        { id: 7, p1: "Zezo", p2: "Asser" }, { id: 8, p1: "Asser", p2: "Lilly" }, { id: 9, p1: "Lilly", p2: "Zezo" },
+        { id: 10, p1: "Asser", p2: "Zezo" }, { id: 11, p1: "Lilly", p2: "Asser" }, { id: 12, p1: "Zezo", p2: "Lilly" },
+        { id: 13, p1: "Zezo", p2: "Asser" }, { id: 14, p1: "Asser", p2: "Lilly" }, { id: 15, p1: "Lilly", p2: "Zezo" }
     ];
 
-    // Listen to live database changes
-    onSnapshot(doc(db, "tournaments", "tri-velocity-cup"), (docSnap) => {
-        let data = docSnap.exists() ? docSnap.data() : { scores: {} };
-        renderPage(data.scores || {});
+    let clockInterval = null;
+    let globalActiveMatchId = 1;
+    let adminState = { p1Score: 0, p2Score: 0, secondsLeft: 300, isRunning: false, isOT: false };
+
+    // Real-Time Database Reader
+    onSnapshot(doc(db, "tournaments", "tri-velocity-cup"), (snapshot) => {
+        let database = snapshot.exists() ? snapshot.data() : { scores: {}, liveMatch: {} };
+        let live = database.liveMatch || {};
+        
+        globalActiveMatchId = live.matchId || 1;
+        adminState.p1Score = live.p1Score || 0;
+        adminState.p2Score = live.p2Score || 0;
+        adminState.secondsLeft = live.secondsLeft !== undefined ? live.secondsLeft : 300;
+        adminState.isOT = live.isOT || false;
+
+        let currentFixture = scheduleData.find(m => m.id === globalActiveMatchId);
+        document.getElementById("view-p1-name").innerText = currentFixture.p1;
+        document.getElementById("view-p2-name").innerText = currentFixture.p2;
+        document.getElementById("view-p1-score").innerText = adminState.p1Score;
+        document.getElementById("view-p2-score").innerText = adminState.p2Score;
+        formatClockUI(adminState.secondsLeft, "view-clock");
+
+        document.getElementById("admin-match-title").innerText = `Match #${globalActiveMatchId}: ${currentFixture.p1} vs ${currentFixture.p2}`;
+        document.getElementById("admin-p1-name").innerText = currentFixture.p1;
+        document.getElementById("admin-p2-name").innerText = currentFixture.p2;
+        document.getElementById("admin-p1-score").innerText = adminState.p1Score;
+        document.getElementById("admin-p2-score").innerText = adminState.p2Score;
+        formatClockUI(adminState.secondsLeft, "admin-clock");
+        
+        let otBtn = document.getElementById("admin-ot-btn");
+        if(adminState.isOT) {
+            otBtn.innerText = "Toggle Overtime (OT: ACTIVE)";
+            otBtn.classList.add("ot-active");
+        } else {
+            otBtn.innerText = "Toggle Overtime (OT: OFF)";
+            otBtn.classList.remove("ot-active");
+        }
+
+        runLocalTimerTick(live.isRunning);
+        renderLeaderboardAndBrackets(database.scores || {});
     });
 
-    // Save a match score to Firebase
-    window.saveMatch = async function(matchId) {
-        const p1Score = parseInt(document.getElementById(`m${matchId}-p1`).value) || 0;
-        const p2Score = parseInt(document.getElementById(`m${matchId}-p2`).value) || 0;
-        const isOT = document.getElementById(`m${matchId}-ot`).checked;
-
-        // Fetch current tournament data first to avoid overwriting other matches
-        let scoresUpdate = {};
-        try {
-            const res = await setDoc(doc(db, "tournaments", "tri-velocity-cup"), {
-                scores: {
-                    [`match_${matchId}`]: { p1Score, p2Score, isOT, completed: true }
-                }
-            }, { merge: true });
-        } catch (e) {
-            console.error("Error saving match: ", e);
+    window.requestAdminAccess = function() {
+        let codeInput = prompt("Enter Referee Passcode:");
+        if (codeInput === "2013") {
+            document.getElementById("main-layout").style.display = "none";
+            document.getElementById("fullscreen-admin").style.display = "flex";
+        } else if (codeInput !== null) {
+            alert("Incorrect Password!");
         }
     };
 
-    function renderPage(scores) {
-        const matchesBody = document.getElementById("matches-body");
-        matchesBody.innerHTML = "";
+    window.exitAdminPanelWithoutSaving = function() {
+        document.getElementById("fullscreen-admin").style.display = "none";
+        document.getElementById("main-layout").style.display = "block";
+    };
 
-        // Reset player stats for fresh calculation
-        let players = {
+    window.launchSelectedMatch = async function(matchId) {
+        let codeInput = prompt("Enter Referee Passcode to start Match #" + matchId + ":");
+        if (codeInput === "2013") {
+            await setDoc(doc(db, "tournaments", "tri-velocity-cup"), {
+                liveMatch: { matchId: parseInt(matchId), p1Score: 0, p2Score: 0, secondsLeft: 300, isRunning: false, isOT: false }
+            }, { merge: true });
+            document.getElementById("main-layout").style.display = "none";
+            document.getElementById("fullscreen-admin").style.display = "flex";
+        } else if (codeInput !== null) {
+            alert("Incorrect Password!");
+        }
+    };
+
+    window.modLiveScore = async function(targetPlayer, offset) {
+        let property = targetPlayer === 'p1' ? 'p1Score' : 'p2Score';
+        let adjustedVal = Math.max(0, adminState[property] + offset);
+        await setDoc(doc(db, "tournaments", "tri-velocity-cup"), {
+            liveMatch: { [property]: adjustedVal }
+        }, { merge: true });
+    };
+
+    window.toggleAdminOT = async function() {
+        await setDoc(doc(db, "tournaments", "tri-velocity-cup"), {
+            liveMatch: { isOT: !adminState.isOT }
+        }, { merge: true });
+    };
+
+    window.toggleAdminClock = async function() {
+        await setDoc(doc(db, "tournaments", "tri-velocity-cup"), {
+            liveMatch: { isRunning: !adminState.isRunning }
+        }, { merge: true });
+    };
+
+    function runLocalTimerTick(active) {
+        adminState.isRunning = active;
+        clearInterval(clockInterval);
+        if (active) {
+            clockInterval = setInterval(() => {
+                adminState.secondsLeft--;
+                if (adminState.secondsLeft <= 0) {
+                    adminState.secondsLeft = 0;
+                    adminState.isRunning = false;
+                    clearInterval(clockInterval);
+                }
+                formatClockUI(adminState.secondsLeft, "admin-clock");
+                formatClockUI(adminState.secondsLeft, "view-clock");
+
+                if (adminState.secondsLeft % 3 === 0 || adminState.secondsLeft === 0) {
+                    setDoc(doc(db, "tournaments", "tri-velocity-cup"), {
+                        liveMatch: { secondsLeft: adminState.secondsLeft, isRunning: adminState.isRunning }
+                    }, { merge: true });
+                }
+            }, 1000);
+        }
+    }
+
+    function formatClockUI(tickCount, domElementId) {
+        let m = Math.floor(tickCount / 60);
+        let s = tickCount % 60;
+        document.getElementById(domElementId).innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+    }
+
+    window.commitAndSaveActiveMatch = async function() {
+        let verification = confirm("Save final score to permanent leaderboard status?");
+        if (!verification) return;
+
+        await setDoc(doc(db, "tournaments", "tri-velocity-cup"), {
+            scores: {
+                [`match_${globalActiveMatchId}`]: {
+                    p1Score: adminState.p1Score,
+                    p2Score: adminState.p2Score,
+                    isOT: adminState.isOT,
+                    completed: true
+                }
+            },
+            liveMatch: { isRunning: false }
+        }, { merge: true });
+
+        exitAdminPanelWithoutSaving();
+    };
+
+    function renderLeaderboardAndBrackets(historyLogs) {
+        const matchesContainer = document.getElementById("matches-body");
+        matchesContainer.innerHTML = "";
+
+        let statistics = {
             "Zezo": { name: "Zezo", points: 0, gd: 0 },
             "Asser": { name: "Asser", points: 0, gd: 0 },
             "Lilly": { name: "Lilly (+Bot)", points: 0, gd: 0 }
         };
 
-        scheduleData.forEach(match => {
-            const matchKey = `match_${match.id}`;
-            const matchSavedData = scores[matchKey] || { p1Score: 0, p2Score: 0, isOT: false, completed: false };
+        scheduleData.forEach(fixture => {
+            let loggedKey = `match_${fixture.id}`;
+            let log = historyLogs[loggedKey] || { p1Score: 0, p2Score: 0, isOT: false, completed: false };
 
-            // Calculate points and stats if match is completed
-            if (matchSavedData.completed) {
-                const s1 = matchSavedData.p1Score;
-                const s2 = matchSavedData.p2Score;
-                const ot = matchSavedData.isOT;
+            if (log.completed) {
+                let actualP1 = log.p1Score;
+                let actualP2 = log.p2Score;
+                
+                // 📊 THE LILLY EQUATION OVERLAY (+5 ADVANTAGE HANDICAP SYSTEM)
+                if (fixture.p1 === "Lilly") actualP1 += 5;
+                if (fixture.p2 === "Lilly") actualP2 += 5;
 
-                // Goal Difference
-                players[match.p1].gd += (s1 - s2);
-                players[match.p2].gd += (s2 - s1);
+                statistics[fixture.p1].gd += (actualP1 - actualP2);
+                statistics[fixture.p2].gd += (actualP2 - actualP1);
 
-                // Points distribution
-                if (s1 > s2) {
-                    players[match.p1].points += ot ? 2 : 3;
-                } else if (s2 > s1) {
-                    players[match.p2].points += ot ? 2 : 3;
+                if (actualP1 > actualP2) {
+                    statistics[fixture.p1].points += log.isOT ? 2 : 3;
+                } else if (actualP2 > actualP1) {
+                    statistics[fixture.p2].points += log.isOT ? 2 : 3;
                 }
             }
 
-            // Build HTML row
-            const tr = document.createElement("tr");
+            let tr = document.createElement("tr");
             tr.innerHTML = `
-                <td>${match.id}</td>
-                <td><strong>${match.p1}</strong> vs <strong>${match.p2}</strong></td>
-                <td><span class="badge" style="background-color:#e11d48">${match.ps5}</span></td>
-                <td><span class="badge" style="background-color:#2563eb">${match.laptop}</span></td>
+                <td>${fixture.id}</td>
+                <td><strong>${fixture.p1}</strong> vs <strong>${fixture.p2}</strong></td>
+                <td>${log.completed ? `${log.p1Score} : ${log.p2Score} ${log.isOT ? '(OT)' : ''}` : '--'}</td>
                 <td>
-                    <div class="flex-center">
-                        <input type="number" id="m${match.id}-p1" class="score-input" value="${matchSavedData.p1Score}">
-                        :
-                        <input type="number" id="m${match.id}-p2" class="score-input" value="${matchSavedData.p2Score}">
-                    </div>
+                    ${log.completed ? '<span style="color:#8b949e">✅ Logged</span>' : 
+                    `<button class="btn btn-secondary" style="padding:4px 10px; font-size:12px;" onclick="launchSelectedMatch(${fixture.id})">🚀 Boot Match</button>`}
                 </td>
-                <td><input type="checkbox" id="m${match.id}-ot" class="ot-checkbox" ${matchSavedData.isOT ? 'checked' : ''}></td>
-                <td><button class="btn" onclick="saveMatch(${match.id})">Save</button></td>
             `;
-            matchesBody.appendChild(tr);
+            matchesContainer.appendChild(tr);
         });
 
-        // Sort Leaderboard: Points first, then Goal Difference (GD)
-        let sortedPlayers = Object.values(players).sort((a, b) => {
-            if (b.points !== a.points) return b.points - a.points;
-            return b.gd - a.gd;
-        });
-
-        const leaderboardBody = document.getElementById("leaderboard-body");
-        leaderboardBody.innerHTML = "";
-        sortedPlayers.forEach((player, index) => {
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-                <td><strong>${index + 1}</strong></td>
-                <td>${player.name}</td>
-                <td><strong>${player.points}</strong></td>
-                <td style="color: ${player.gd >= 0 ? '#2ea043' : '#f85149'}">${player.gd > 0 ? '+' + player.gd : player.gd}</td>
-            `;
-            leaderboardBody.appendChild(tr);
+        let sortedBoard = Object.values(statistics).sort((a, b) => (b.points !== a.points) ? b.points - a.points : b.gd - a.gd);
+        const lbElement = document.getElementById("leaderboard-body");
+        lbElement.innerHTML = "";
+        sortedBoard.forEach((p, pos) => {
+            lbElement.innerHTML += `<tr><td><strong>${pos+1}</strong></td><td>${p.name}</td><td><strong>${p.points}</strong></td><td style="color:${p.gd>=0?'#2ea043':'#f85149'}">${p.gd>0?'+'+p.gd:p.gd}</td></tr>`;
         });
     }
 </script>
