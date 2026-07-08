@@ -13,7 +13,7 @@
         
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; overflow-x: hidden; }
         h1 { color: #fff; text-shadow: 0 0 10px var(--text-glow); margin: 15px 0 5px 0; text-align: center; font-size: 24px; text-transform: uppercase; }
         .container { width: 100%; max-width: 900px; padding-bottom: 30px; }
         .section { background-color: var(--card-bg); border: 1px solid #30363d; border-radius: 12px; padding: 16px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
@@ -39,17 +39,14 @@
         th, td { border: 1px solid #30363d; padding: 14px 10px; text-align: center; font-size: 14px; }
         th { background-color: #21262d; color: #fff; }
         tr:nth-child(even) { background-color: #1f242c; }
-        .playoff-row { background-color: #1e1910 !important; }
 
         input, select, button { font-size: 16px !important; }
         .btn { background-color: var(--green); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; transition: 0.2s; }
-        .btn:hover { filter: brightness(1.1); }
         .btn-secondary { background-color: #21262d; border: 1px solid #30363d; color: white; }
         .btn-tv { background: linear-gradient(90deg, #6f42c1, #d29922); border: 2px solid #fff; box-shadow: 0 0 15px rgba(210, 153, 34, 0.4); margin-bottom: 20px; width: 100%; font-size: 18px; text-transform: uppercase; letter-spacing: 1px; }
-        .btn-action { padding: 4px 10px; font-size: 12px; min-height: 32px; }
 
         /* 🚨 REFEREE CONTROLLER */
-        #fullscreen-admin { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #070a0e; z-index: 999999; flex-direction: column; align-items: center; justify-content: space-between; padding: 40px 20px; box-sizing: border-box; overflow-y: auto; }
+        #fullscreen-admin { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #070a0e; z-index: 999999; flex-direction: column; align-items: center; justify-content: space-between; padding: 40px 20px; overflow-y: auto; }
         .admin-header { text-align: center; width: 100%; margin-bottom: 15px; }
         .admin-panel-row { display: flex; width: 100%; max-width: 800px; justify-content: space-around; align-items: center; flex-grow: 1; }
         .admin-controller-box { text-align: center; background: #161b22; padding: 20px 10px; border-radius: 16px; border: 1px solid #30363d; width: 32%; }
@@ -62,53 +59,79 @@
         .ot-active { background-color: #f9826c; animation: pulse 1s infinite; }
 
         /* 📊 STATS ENTRY MODAL */
-        #stats-input-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 9999998; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
-        .modal-box { background: var(--card-bg); border: 2px solid var(--accent-color); padding: 24px; border-radius: 16px; width: 100%; max-width: 480px; box-shadow: 0 10px 30px rgba(0,0,0,0.7); }
+        #stats-input-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 9999998; justify-content: center; align-items: center; padding: 20px; }
+        .modal-box { background: var(--card-bg); border: 2px solid var(--accent-color); padding: 24px; border-radius: 16px; width: 100%; max-width: 480px; }
         .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0; }
         .modal-field { display: flex; flex-direction: column; gap: 6px; }
         .modal-field label { font-size: 12px; color: #8b949e; font-weight: bold; text-transform: uppercase; }
         .modal-field input { padding: 10px; background: #21262d; border: 1px solid #30363d; color: white; border-radius: 8px; text-align: center; font-size: 16px; font-weight: bold; }
-        .modal-field input:focus { border-color: var(--accent-color); outline: none; }
 
         /* 📺 TV BROADCAST LOOP MODE (FOR RECEIVER) */
         #tv-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: linear-gradient(135deg, #050811 0%, #0d1527 100%); z-index: 9999999;
-            flex-direction: column; align-items: center; justify-content: center;
+            background: #000; z-index: 9999999; flex-direction: column; align-items: center; justify-content: center;
             color: white; font-family: -apple-system, sans-serif; overflow: hidden;
         }
+        
+        /* Ambient TV Background */
+        .tv-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, #161b22 0%, #050811 100%); z-index: -2; }
+        .tv-bg-pattern { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: radial-gradient(rgba(255,255,255,0.03) 2px, transparent 2px); background-size: 40px 40px; z-index: -1; }
+
         .tv-exit-btn { position: absolute; top: 20px; right: 20px; z-index: 100; font-size: 14px; padding: 8px 16px; opacity: 0.3; transition: 0.3s; }
         .tv-exit-btn:hover { opacity: 1; }
-        .tv-content-box { width: 100%; max-width: 900px; padding: 40px; text-align: center; animation: tvFadeIn 1s ease forwards; }
         
-        .tv-title { font-size: 32px; letter-spacing: 6px; color: var(--accent-color); font-weight: 900; text-transform: uppercase; margin-bottom: 10px; text-shadow: 0 0 15px rgba(88,166,255,0.4); }
-        .tv-subtitle { font-size: 16px; color: #8b949e; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 40px; }
-
-        /* Player Image Styles */
-        .tv-player-img { width: 180px; height: 180px; border-radius: 50%; object-fit: cover; border: 6px solid var(--accent-color); box-shadow: 0 0 30px rgba(88,166,255,0.4); margin-bottom: 15px; background-color: #21262d; }
-        .tv-scorer-img { width: 280px; height: 280px; border-color: var(--gold); box-shadow: 0 0 50px rgba(210,153,34,0.6); }
+        .tv-content-box { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
         
-        /* Standings TV Box */
-        .tv-standing-row { display: flex; justify-content: space-between; background: rgba(22,27,34,0.8); padding: 20px 30px; margin-bottom: 15px; border-radius: 12px; border: 1px solid #30363d; font-size: 28px; font-weight: bold; align-items: center; }
-        .tv-rank-1 { border-color: var(--gold); box-shadow: 0 0 20px rgba(210,153,34,0.2); }
+        .tv-title { font-size: 40px; letter-spacing: 8px; font-weight: 900; text-transform: uppercase; text-shadow: 0 0 20px rgba(255,255,255,0.5); z-index: 10; margin-bottom: 10px; animation: fadeDown 1s ease-out; }
+        .tv-subtitle { font-size: 18px; color: #8b949e; text-transform: uppercase; letter-spacing: 4px; z-index: 10; margin-bottom: 30px; }
 
-        /* Next Match TV Box */
-        .tv-vs-container { display: flex; justify-content: center; align-items: center; gap: 60px; }
-        .tv-vs-side { display: flex; flex-direction: column; align-items: center; width: 300px; }
-        .tv-vs-name { font-size: 36px; font-weight: 900; text-transform: uppercase; }
-        .tv-vs-badge { font-size: 48px; font-weight: 900; color: #8b949e; font-style: italic; }
+        /* NEW: Massive Cutout Images */
+        .tv-huge-cutout { height: 65vh; max-height: 600px; object-fit: contain; animation: slideUp 1s ease-out forwards; filter: drop-shadow(0 20px 30px rgba(0,0,0,0.8)); z-index: 5; margin-top: auto; }
+        .tv-split-cutout { height: 50vh; max-height: 450px; object-fit: contain; animation: slideUp 1s ease-out forwards; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.8)); z-index: 5; }
 
-        /* Last Match Stats Box */
-        .tv-stat-row { display: flex; justify-content: space-between; align-items: center; background: rgba(22,27,34,0.7); padding: 16px 28px; border-radius: 10px; border: 1px solid #30363d; font-size: 26px; font-weight: bold; margin-bottom: 12px; font-family: monospace; }
+        /* NEW: Cinematic Color Strips */
+        .tv-color-strip {
+            position: absolute; bottom: 15%; width: 120%; padding: 25px 0;
+            display: flex; justify-content: center; align-items: center; gap: 30px;
+            font-size: 50px; font-weight: 900; color: #000; text-transform: uppercase;
+            transform: skewY(-3deg) translateX(-100%);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.6); z-index: 8;
+            animation: slideInRight 0.8s cubic-bezier(0.1, 0.9, 0.2, 1) 0.5s forwards;
+        }
+        .tv-color-strip span { transform: skewY(3deg); } /* un-skew text */
+        
+        .tv-split-strip-left, .tv-split-strip-right {
+            position: absolute; bottom: 20%; width: 60%; padding: 15px 0;
+            font-size: 40px; font-weight: 900; color: #000; text-transform: uppercase;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6); z-index: 8; text-align: center;
+        }
+        .tv-split-strip-left { left: -5%; transform: skewX(-15deg) translateX(-100%); animation: slideInLeft 0.8s ease-out 0.4s forwards; }
+        .tv-split-strip-right { right: -5%; transform: skewX(15deg) translateX(100%); animation: slideInRight 0.8s ease-out 0.4s forwards; }
+        
+        .tv-split-strip-left span { display: block; transform: skewX(15deg); }
+        .tv-split-strip-right span { display: block; transform: skewX(-15deg); }
+
+        /* Layouts */
+        .tv-vs-container { display: flex; width: 100%; height: 100%; justify-content: center; align-items: flex-end; position: relative; padding-bottom: 50px; }
+        .tv-vs-side { display: flex; flex-direction: column; align-items: center; width: 45%; position: relative; }
+        .tv-vs-badge { position: absolute; bottom: 35%; left: 50%; transform: translateX(-50%); font-size: 80px; font-weight: 900; color: #fff; font-style: italic; text-shadow: 0 0 30px rgba(255,255,255,0.6); z-index: 20; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.8s both; }
+
+        /* Standings & Stats TV Box */
+        .tv-standing-row { display: flex; justify-content: space-between; background: rgba(22,27,34,0.8); padding: 20px 30px; margin-bottom: 15px; border-radius: 12px; border: 1px solid #30363d; font-size: 28px; font-weight: bold; align-items: center; width: 800px; animation: fadeUp 0.5s ease backwards; }
+        .tv-stat-row { display: flex; justify-content: space-between; align-items: center; background: rgba(22,27,34,0.7); padding: 16px 28px; border-radius: 10px; border: 1px solid #30363d; font-size: 26px; font-weight: bold; margin-bottom: 12px; font-family: monospace; width: 800px; }
         .tv-stat-label { color: #8b949e; font-size: 16px; text-transform: uppercase; letter-spacing: 2px; font-family: -apple-system, sans-serif; }
-        .tv-mvp-banner { background: linear-gradient(90deg, transparent, var(--gold), transparent); text-align: center; padding: 20px; font-size: 32px; font-weight: 900; color: #070a0e; text-transform: uppercase; border-radius: 8px; margin-top: 20px; box-shadow: 0 0 40px rgba(212,153,34,0.5); }
-        .tv-score-box { font-size: 64px; font-weight: 900; background: #0d1117; padding: 10px 30px; border-radius: 16px; border: 2px solid #30363d; box-shadow: 0 0 20px rgba(0,0,0,0.8); }
 
-        /* Top Scorer Box */
-        .tv-big-goals { font-size: 80px; font-weight: 900; color: #fff; text-shadow: 0 0 30px rgba(255,255,255,0.5); margin-top: -10px; }
-        .tv-goal-label { font-size: 24px; color: var(--gold); text-transform: uppercase; letter-spacing: 4px; font-weight: bold; }
-
-        @keyframes tvFadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        /* Animations */
+        @keyframes slideUp { from { opacity: 0; transform: translateY(100px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeDown { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideInRight { to { transform: skewY(-3deg) translateX(0); } }
+        @keyframes slideInLeft { to { transform: skewX(-15deg) translateX(0); } }
+        @keyframes slideInRight { to { transform: skewX(15deg) translateX(0); } } /* For split strip */
+        @keyframes popIn { 0% { opacity: 0; transform: translate(-50%, 50px) scale(0.5); } 100% { opacity: 1; transform: translate(-50%, 0) scale(1); } }
+        
+        /* Overrides for keyframes to fix name collisions */
+        @keyframes slideInStripCenter { to { transform: skewY(-3deg) translateX(-5%); } }
     </style>
 </head>
 <body>
@@ -119,6 +142,7 @@
     <h1>🏆 THE TRI-VELOCITY CUP 🏆</h1>
     <p style="text-align:center; color: #8b949e; margin: 0 0 20px 0; font-size: 13px;">Live Match Central</p>
 
+    <!-- 📌 PINNED LIVE TRACKER -->
     <div class="pinned-wrapper">
         <div class="section live-ticker">
             <div class="live-badge">🔴 LIVE SCOREBOARD</div>
@@ -142,6 +166,7 @@
         </div>
     </div>
 
+    <!-- LEADERBOARD SECTION -->
     <div class="section">
         <h2>📊 Live Leaderboard Standings</h2>
         <div class="table-scroll">
@@ -152,28 +177,23 @@
         </div>
     </div>
 
-    <div class="section" style="border-color: var(--gold);">
-        <h2 class="gold-text">🏅 Phase 2: Playoffs & Finals</h2>
-        <div class="table-scroll"><table><tbody id="phase2-body"></tbody></table></div>
-    </div>
-
     <div class="section">
         <h2>🎮 Phase 1: Group Stage (15 Matches)</h2>
         <div class="table-scroll"><table><tbody id="matches-body"></tbody></table></div>
     </div>
 </div>
 
+<!-- FULLSCREEN REFEREE CONTROLLER -->
 <div id="fullscreen-admin">
     <div class="admin-header">
-        <span class="live-badge" style="background-color: var(--accent-color);">🛠️ REFEREE DASHBOARD ACTIVE</span>
-        <h2 id="admin-match-title" style="color:#fff; margin-top:10px; border:none; font-size: 20px;">Match: Loading...</h2>
-        <div><button id="admin-ot-btn" class="ot-toggle" onclick="toggleAdminOT()">Toggle Overtime (OT: OFF)</button></div>
+        <span class="live-badge" style="background-color: var(--accent-color);">🛠️ REFEREE DASHBOARD</span>
+        <h2 id="admin-match-title" style="color:#fff; margin-top:10px; font-size: 20px;">Match: Loading...</h2>
+        <button id="admin-ot-btn" class="ot-toggle" onclick="toggleAdminOT()">Toggle Overtime (OT: OFF)</button>
     </div>
 
     <div class="admin-panel-row">
         <div class="admin-controller-box">
             <h3 id="admin-p1-name" style="margin: 0; font-size: 20px;">Player 1</h3>
-            <div class="platform-label">🎮 PS5</div>
             <div class="huge-score" id="admin-p1-score">0</div>
             <div class="score-controls">
                 <button class="circle-btn btn-minus" onclick="modLiveScore('p1', -1)">-</button>
@@ -182,11 +202,10 @@
         </div>
         <div style="text-align: center;">
             <div class="huge-clock" id="admin-clock">5:00</div>
-            <button class="btn" onclick="toggleAdminClock()" style="background-color:#388bfd; width: 160px; font-size: 18px;">⏯️ START/PAUSE</button>
+            <button class="btn" onclick="toggleAdminClock()" style="background-color:#388bfd;">⏯️ START/PAUSE</button>
         </div>
         <div class="admin-controller-box">
             <h3 id="admin-p2-name" style="margin: 0; font-size: 20px;">Player 2</h3>
-            <div class="platform-label">💻 Laptop</div>
             <div class="huge-score" id="admin-p2-score">0</div>
             <div class="score-controls">
                 <button class="circle-btn btn-minus" onclick="modLiveScore('p2', -1)">-</button>
@@ -196,40 +215,46 @@
     </div>
 
     <div style="display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 400px; margin-top: 30px;">
-        <button class="btn" onclick="triggerStatsEntry()" style="background-color: var(--green); padding: 16px; font-size: 18px;">💾 Finish Match & Enter Stats</button>
-        <button class="btn btn-secondary" onclick="exitAdminPanelWithoutSaving()" style="padding: 16px; font-size: 18px;">❌ Cancel / Exit Panel</button>
+        <button class="btn" onclick="triggerStatsEntry()" style="background-color: var(--green); padding: 16px;">💾 Finish Match & Enter Stats</button>
+        <button class="btn btn-secondary" onclick="exitAdminPanelWithoutSaving()">❌ Cancel / Exit Panel</button>
     </div>
 </div>
 
+<!-- STATS ENTRY MODAL -->
 <div id="stats-input-modal">
     <div class="modal-box">
         <h2 style="margin-top:0; font-size: 20px; text-align:center;">📊 Log Match Stats</h2>
-        <p style="font-size:12px; color:#8b949e; text-align:center; margin-top:-8px;">These will automatically push to the TV Receiver.</p>
         <div class="modal-grid">
-            <div class="modal-field"><label id="modal-p1-label-shots">P1 Shots</label><input type="number" id="input-p1-shots" value="0" min="0"></div>
-            <div class="modal-field"><label id="modal-p2-label-shots">P2 Shots</label><input type="number" id="input-p2-shots" value="0" min="0"></div>
-            <div class="modal-field"><label id="modal-p1-label-saves">P1 Saves</label><input type="number" id="input-p1-saves" value="0" min="0"></div>
-            <div class="modal-field"><label id="modal-p2-label-saves">P2 Saves</label><input type="number" id="input-p2-saves" value="0" min="0"></div>
+            <div class="modal-field"><label id="modal-p1-label-shots">P1 Shots</label><input type="number" id="input-p1-shots" value="0"></div>
+            <div class="modal-field"><label id="modal-p2-label-shots">P2 Shots</label><input type="number" id="input-p2-shots" value="0"></div>
+            <div class="modal-field"><label id="modal-p1-label-saves">P1 Saves</label><input type="number" id="input-p1-saves" value="0"></div>
+            <div class="modal-field"><label id="modal-p2-label-saves">P2 Saves</label><input type="number" id="input-p2-saves" value="0"></div>
         </div>
-        <div class="modal-field" style="margin-bottom: 24px;"><label>🏅 MVP Name</label><input type="text" id="input-mvp" placeholder="Enter player name"></div>
+        <div class="modal-field" style="margin-bottom: 24px;"><label>🏅 MVP Name</label><input type="text" id="input-mvp"></div>
         <div style="display:flex; flex-direction:column; gap:10px;">
-            <button class="btn" onclick="saveMatchToDatabase()" style="background-color: var(--accent-color); font-size:16px;">🚀 Save Server Data</button>
+            <button class="btn" onclick="saveMatchToDatabase()" style="background-color: var(--accent-color);">🚀 Save Server Data</button>
             <button class="btn btn-secondary" onclick="document.getElementById('stats-input-modal').style.display='none'">Back to Dashboard</button>
         </div>
     </div>
 </div>
 
+<!-- 📺 FULLSCREEN TV CHANNEL LOOP -->
 <div id="tv-overlay">
+    <div class="tv-bg"></div>
+    <div class="tv-bg-pattern"></div>
     <button class="btn btn-secondary tv-exit-btn" onclick="stopTVBroadcastMode()">Exit TV Mode</button>
+    
     <div id="tv-dynamic-content" class="tv-content-box">
-        </div>
+        <!-- JS Injects HTML Here -->
+    </div>
 </div>
 
+<!-- FIREBASE INTEGRATION LAYER -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    const firebaseConfig = { apiKey: "AIzaSyAjeXycCBhYoAU-0iiC4LbSTylKrrThN8Y", authDomain: "sharplabubu.firebaseapp.com", databaseURL: "https://sharplabubu-default-rtdb.firebaseio.com", projectId: "sharplabubu", storageBucket: "sharplabubu.firebasestorage.app", messagingSenderId: "596148393481", appId: "1:596148393481:web:4f822d86c44a13bd810ad8", measurementId: "G-4M25R3BF08" };
+    const firebaseConfig = { apiKey: "AIzaSyAjeXycCBhYoAU-0iiC4LbSTylKrrThN8Y", authDomain: "sharplabubu.firebaseapp.com", databaseURL: "https://sharplabubu-default-rtdb.firebaseio.com", projectId: "sharplabubu" };
     const app = initializeApp(firebaseConfig); const db = getFirestore(app);
 
     const phase1Schedule = [
@@ -243,17 +268,23 @@
     let clockInterval = null; let globalActiveMatchId = 1;
     let adminState = { p1Name: "P1", p2Name: "P2", p1Score: 0, p2Score: 0, secondsLeft: 300, isRunning: false, isOT: false };
     
-    // Global TV Storage Variables
     let tvDataState = { standings: [], topScorer: {name: "None", goals: 0}, lastMatch: null, nextMatch: null };
     let tvSlideIndex = 0; let tvLoopInterval = null;
     
     // File Mapping for Images
     const getImg = (name) => {
-        let cleanName = name.replace(" (+Bot)", "");
-        if(cleanName === "Zezo") return "Zezo.png";
-        if(cleanName === "Asser") return "Asser.png";
-        if(cleanName === "Lilly") return "Lilly.png";
-        return ""; // Fallback
+        if(name.includes("Zezo")) return "Zezo.png";
+        if(name.includes("Asser")) return "Asser.png";
+        if(name.includes("Lilly")) return "Lilly.png";
+        return ""; 
+    };
+
+    // Color Mapping for Strips
+    const getTeamColor = (name) => {
+        if(name.includes("Zezo")) return "#f85149"; // Red
+        if(name.includes("Asser")) return "#d29922"; // Yellow
+        if(name.includes("Lilly")) return "#ff69b4"; // Pink
+        return "#58a6ff"; // Default Blue
     };
 
     onSnapshot(doc(db, "tournaments", "tri-velocity-cup"), (snapshot) => {
@@ -270,224 +301,154 @@
         adminState.p1Name = live.p1Name || (fallbackFix ? fallbackFix.p1 : "Player 1");
         adminState.p2Name = live.p2Name || (fallbackFix ? fallbackFix.p2 : "Player 2");
 
-        // Update UI
         document.getElementById("view-p1-name").innerText = adminState.p1Name; document.getElementById("view-p2-name").innerText = adminState.p2Name;
         document.getElementById("view-p1-score").innerText = adminState.p1Score; document.getElementById("view-p2-score").innerText = adminState.p2Score;
         
         let vc = document.getElementById("view-clock");
         if (adminState.secondsLeft === 300 && !live.isRunning && adminState.p1Score === 0 && adminState.p2Score === 0 && !adminState.isOT) {
-            vc.innerText = "Match Not Started"; vc.style.color = "#8b949e"; vc.style.fontSize = "16px";
-        } else { vc.style.color = "#fff"; vc.style.fontSize = "20px"; formatClockUI(adminState.secondsLeft, "view-clock"); }
+            vc.innerText = "Match Not Started"; vc.style.color = "#8b949e";
+        } else { vc.style.color = "#fff"; formatClockUI(adminState.secondsLeft, "view-clock"); }
 
         document.getElementById("admin-match-title").innerText = `Match #${globalActiveMatchId}: ${adminState.p1Name} vs ${adminState.p2Name}`;
         document.getElementById("admin-p1-name").innerText = adminState.p1Name; document.getElementById("admin-p2-name").innerText = adminState.p2Name;
         document.getElementById("admin-p1-score").innerText = adminState.p1Score; document.getElementById("admin-p2-score").innerText = adminState.p2Score;
         formatClockUI(adminState.secondsLeft, "admin-clock");
         
-        let otBtn = document.getElementById("admin-ot-btn");
-        if(adminState.isOT) { otBtn.innerText = "Toggle Overtime (OT: ACTIVE)"; otBtn.classList.add("ot-active"); } 
-        else { otBtn.innerText = "Toggle Overtime (OT: OFF)"; otBtn.classList.remove("ot-active"); }
-
-        runLocalTimerTick(live.isRunning);
-        processData(scores); // Rebuilds data for both Website & TV
+        runLocalTimerTick(live.isRunning); processData(scores);
     });
 
     function processData(logs) {
         let stats = { "Zezo": { name: "Zezo", points: 0, gd: 0, goals: 0 }, "Asser": { name: "Asser", points: 0, gd: 0, goals: 0 }, "Lilly": { name: "Lilly (+Bot)", points: 0, gd: 0, goals: 0 } };
-        
         let lastCompletedId = -1; let nextIncompleteMatch = null;
         const p1Container = document.getElementById("matches-body"); p1Container.innerHTML = "";
 
         phase1Schedule.forEach(fix => {
             let log = logs[`match_${fix.id}`] || { completed: false };
-            let rowHtml = `<tr><td>${fix.id}</td><td><strong>${fix.p1}</strong> vs <strong>${fix.p2}</strong></td><td>${log.completed ? `${log.p1Score} : ${log.p2Score}` : '--'}</td><td>${log.completed ? '✅' : `<button class="btn btn-action" onclick="launchSelectedMatch(${fix.id}, '${fix.p1}', '${fix.p2}')">🚀 Boot</button>`}</td></tr>`;
-            p1Container.innerHTML += rowHtml;
+            p1Container.innerHTML += `<tr><td>${fix.id}</td><td><strong>${fix.p1}</strong> vs <strong>${fix.p2}</strong></td><td>${log.completed ? `${log.p1Score} : ${log.p2Score}` : '--'}</td><td>${log.completed ? '✅' : `<button class="btn" style="padding:4px 10px;font-size:12px;min-height:30px;" onclick="launchSelectedMatch(${fix.id}, '${fix.p1}', '${fix.p2}')">🚀 Boot</button>`}</td></tr>`;
 
             if (log.completed) {
                 lastCompletedId = Math.max(lastCompletedId, fix.id);
                 let aP1 = log.p1Score + (fix.p1 === "Lilly" ? 5 : 0);
                 let aP2 = log.p2Score + (fix.p2 === "Lilly" ? 5 : 0);
                 stats[fix.p1].gd += (aP1 - aP2); stats[fix.p2].gd += (aP2 - aP1);
-                stats[fix.p1].goals += aP1; stats[fix.p2].goals += aP2; // Tracking goals for Golden Boot
-                
-                if (aP1 > aP2) { stats[fix.p1].points += log.isOT ? 2 : 3; } 
-                else if (aP2 > aP1) { stats[fix.p2].points += log.isOT ? 2 : 3; }
-            } else if (!nextIncompleteMatch) {
-                nextIncompleteMatch = { id: fix.id, p1: fix.p1, p2: fix.p2 };
-            }
+                stats[fix.p1].goals += aP1; stats[fix.p2].goals += aP2; 
+                if (aP1 > aP2) { stats[fix.p1].points += log.isOT ? 2 : 3; } else if (aP2 > aP1) { stats[fix.p2].points += log.isOT ? 2 : 3; }
+            } else if (!nextIncompleteMatch) { nextIncompleteMatch = { id: fix.id, p1: fix.p1, p2: fix.p2 }; }
         });
 
-        // Sync to Global TV State
         tvDataState.standings = Object.values(stats).sort((a,b) => b.points !== a.points ? b.points - a.points : b.gd - a.gd);
         tvDataState.topScorer = Object.values(stats).sort((a,b) => b.goals - a.goals)[0];
-        
-        if (lastCompletedId > -1) {
-            let lastFix = phase1Schedule.find(m => m.id === lastCompletedId);
-            let log = logs[`match_${lastCompletedId}`];
-            tvDataState.lastMatch = { id: lastCompletedId, p1: lastFix.p1, p2: lastFix.p2, log: log };
-        } else { tvDataState.lastMatch = null; }
-        
+        if (lastCompletedId > -1) { let lastFix = phase1Schedule.find(m => m.id === lastCompletedId); tvDataState.lastMatch = { id: lastCompletedId, p1: lastFix.p1, p2: lastFix.p2, log: logs[`match_${lastCompletedId}`] }; } 
+        else { tvDataState.lastMatch = null; }
         tvDataState.nextMatch = nextIncompleteMatch;
 
-        // Render Website Tables
         const lbEl = document.getElementById("leaderboard-body"); lbEl.innerHTML = "";
         tvDataState.standings.forEach((p, pos) => { lbEl.innerHTML += `<tr><td><strong>${pos+1}</strong></td><td>${p.name}</td><td><strong>${p.points}</strong></td><td style="color:${p.gd>=0?'#2ea043':'#f85149'}">${p.gd>0?'+'+p.gd:p.gd}</td></tr>`; });
-
-        let rank1 = tvDataState.standings[0].name.replace(" (+Bot)", "");
-        let rank2 = tvDataState.standings[1].name.replace(" (+Bot)", "");
-        let rank3 = tvDataState.standings[2].name.replace(" (+Bot)", "");
-        
-        const p2Container = document.getElementById("phase2-body"); p2Container.innerHTML = "";
-        let log16 = logs['match_16'] || { completed: false };
-        let p2_17 = log16.completed ? (log16.p1Score > log16.p2Score ? rank2 : rank3) : "TBD";
-        let log17 = logs['match_17'] || { completed: false };
-        p2Container.innerHTML += `<tr><td>16</td><td>${rank2} vs ${rank3}</td><td>${log16.completed ? `${log16.p1Score}:${log16.p2Score}`:'--'}</td><td>${log16.completed ? '✅' : `<button class="btn btn-action" onclick="launchSelectedMatch(16, '${rank2}', '${rank3}')">🚀 Boot</button>`}</td></tr>`;
-        p2Container.innerHTML += `<tr><td>17</td><td>${rank1} vs ${p2_17}</td><td>${log17.completed ? `${log17.p1Score}:${log17.p2Score}`:'--'}</td><td>${log17.completed ? '✅' : `<button class="btn btn-action" onclick="launchSelectedMatch(17, '${rank1}', '${p2_17}')">🚀 Boot</button>`}</td></tr>`;
     }
 
-    // --- REFEREE / ADMIN CONTROLS ---
-    window.requestAdminAccess = function() {
-        let code = prompt("Referee Passcode:");
-        if(code === "2013") { document.getElementById("main-layout").style.display="none"; document.getElementById("fullscreen-admin").style.display="flex"; }
-    };
+    // Admin Panel Functions
+    window.requestAdminAccess = function() { if(prompt("Passcode:")==="2013"){ document.getElementById("main-layout").style.display="none"; document.getElementById("fullscreen-admin").style.display="flex"; } };
     window.exitAdminPanelWithoutSaving = function() { document.getElementById("fullscreen-admin").style.display="none"; document.getElementById("main-layout").style.display="block"; };
-    
-    window.launchSelectedMatch = async function(matchId, p1Name, p2Name) {
-        if(p1Name === "TBD" || p2Name === "TBD") return alert("Waiting on previous match!");
-        let code = prompt("Referee Passcode:");
-        if (code === "2013") {
-            await setDoc(doc(db, "tournaments", "tri-velocity-cup"), { liveMatch: { matchId: matchId, p1Name: p1Name, p2Name: p2Name, p1Score: 0, p2Score: 0, secondsLeft: 300, isRunning: false, isOT: false } }, { merge: true });
-            document.getElementById("main-layout").style.display = "none"; document.getElementById("fullscreen-admin").style.display = "flex";
-        }
-    };
-    
+    window.launchSelectedMatch = async function(id, p1, p2) { if(prompt("Passcode:")==="2013"){ await setDoc(doc(db, "tournaments", "tri-velocity-cup"), { liveMatch: { matchId: id, p1Name: p1, p2Name: p2, p1Score: 0, p2Score: 0, secondsLeft: 300, isRunning: false, isOT: false } }, { merge: true }); document.getElementById("main-layout").style.display="none"; document.getElementById("fullscreen-admin").style.display="flex"; } };
     window.modLiveScore = async (tp, off) => { let p = tp==='p1'?'p1Score':'p2Score'; await setDoc(doc(db, "tournaments", "tri-velocity-cup"), { liveMatch: { [p]: Math.max(0, adminState[p]+off) } }, { merge: true }); };
     window.toggleAdminOT = async () => await setDoc(doc(db, "tournaments", "tri-velocity-cup"), { liveMatch: { isOT: !adminState.isOT } }, { merge: true });
     window.toggleAdminClock = async () => await setDoc(doc(db, "tournaments", "tri-velocity-cup"), { liveMatch: { isRunning: !adminState.isRunning } }, { merge: true });
 
     function runLocalTimerTick(active) {
         adminState.isRunning = active; clearInterval(clockInterval);
-        if (active) {
-            clockInterval = setInterval(() => {
-                adminState.secondsLeft--;
-                if (adminState.secondsLeft <= 0) { adminState.secondsLeft = 0; adminState.isRunning = false; clearInterval(clockInterval); }
-                formatClockUI(adminState.secondsLeft, "admin-clock"); formatClockUI(adminState.secondsLeft, "view-clock");
-                if (adminState.secondsLeft % 4 === 0 || adminState.secondsLeft === 0) { setDoc(doc(db, "tournaments", "tri-velocity-cup"), { liveMatch: { secondsLeft: adminState.secondsLeft, isRunning: adminState.isRunning } }, { merge: true }); }
-            }, 1000);
-        }
+        if (active) { clockInterval = setInterval(() => { adminState.secondsLeft--; if (adminState.secondsLeft <= 0) { adminState.secondsLeft = 0; adminState.isRunning = false; clearInterval(clockInterval); } formatClockUI(adminState.secondsLeft, "admin-clock"); formatClockUI(adminState.secondsLeft, "view-clock"); if (adminState.secondsLeft % 4 === 0 || adminState.secondsLeft === 0) { setDoc(doc(db, "tournaments", "tri-velocity-cup"), { liveMatch: { secondsLeft: adminState.secondsLeft, isRunning: adminState.isRunning } }, { merge: true }); } }, 1000); }
     }
-    function formatClockUI(tickCount, id) { let m = Math.floor(tickCount/60); let s = tickCount%60; document.getElementById(id).innerText = `${m}:${s<10?'0':''}${s}`; }
+    function formatClockUI(t, id) { let m=Math.floor(t/60); let s=t%60; document.getElementById(id).innerText = `${m}:${s<10?'0':''}${s}`; }
 
-    // --- DATA SAVING (Stats go to server now) ---
     window.triggerStatsEntry = function() {
-        if (!confirm("Commit final score and enter detailed stats?")) return;
-        document.getElementById("modal-p1-label-shots").innerText = `${adminState.p1Name} Shots`;
-        document.getElementById("modal-p2-label-shots").innerText = `${adminState.p2Name} Shots`;
+        document.getElementById("modal-p1-label-shots").innerText = `${adminState.p1Name} Shots`; document.getElementById("modal-p2-label-shots").innerText = `${adminState.p2Name} Shots`;
         document.getElementById("input-mvp").value = adminState.p1Score > adminState.p2Score ? adminState.p1Name : adminState.p2Name;
-        document.getElementById("input-p1-shots").value="0"; document.getElementById("input-p2-shots").value="0";
-        document.getElementById("input-p1-saves").value="0"; document.getElementById("input-p2-saves").value="0";
         document.getElementById("stats-input-modal").style.display = "flex";
     };
 
     window.saveMatchToDatabase = async function() {
-        let p1Shots = parseInt(document.getElementById("input-p1-shots").value) || 0; let p2Shots = parseInt(document.getElementById("input-p2-shots").value) || 0;
-        let p1Saves = parseInt(document.getElementById("input-p1-saves").value) || 0; let p2Saves = parseInt(document.getElementById("input-p2-saves").value) || 0;
-        let mvpName = document.getElementById("input-mvp").value || "None";
-        
-        // Possession Calculation (Pressure formula)
-        let p1P = p1Shots + p2Saves; let p2P = p2Shots + p1Saves; let tot = p1P + p2P;
-        let p1Poss = tot > 0 ? Math.round((p1P/tot)*100) : 50; let p2Poss = 100 - p1Poss;
-
-        let matchPayload = { p1Score: adminState.p1Score, p2Score: adminState.p2Score, isOT: adminState.isOT, completed: true, p1Shots: p1Shots, p2Shots: p2Shots, p1Saves: p1Saves, p2Saves: p2Saves, p1Poss: p1Poss, p2Poss: p2Poss, mvp: mvpName };
-        
-        await setDoc(doc(db, "tournaments", "tri-velocity-cup"), { scores: { [`match_${globalActiveMatchId}`]: matchPayload }, liveMatch: { isRunning: false } }, { merge: true });
-        
-        document.getElementById("fullscreen-admin").style.display = "none";
-        document.getElementById("stats-input-modal").style.display = "none";
-        document.getElementById("main-layout").style.display = "block";
-        alert("Match Saved! The TV Receiver will update on its next cycle automatically.");
+        let p1Shots = parseInt(document.getElementById("input-p1-shots").value)||0; let p2Shots = parseInt(document.getElementById("input-p2-shots").value)||0;
+        let p1Saves = parseInt(document.getElementById("input-p1-saves").value)||0; let p2Saves = parseInt(document.getElementById("input-p2-saves").value)||0;
+        let p1Poss = (p1Shots+p2Saves) > 0 ? Math.round(((p1Shots+p2Saves)/(p1Shots+p2Saves+p2Shots+p1Saves))*100) : 50;
+        await setDoc(doc(db, "tournaments", "tri-velocity-cup"), { scores: { [`match_${globalActiveMatchId}`]: { p1Score: adminState.p1Score, p2Score: adminState.p2Score, isOT: adminState.isOT, completed: true, p1Shots: p1Shots, p2Shots: p2Shots, p1Saves: p1Saves, p2Saves: p2Saves, p1Poss: p1Poss, p2Poss: 100-p1Poss, mvp: document.getElementById("input-mvp").value||"None" } }, liveMatch: { isRunning: false } }, { merge: true });
+        document.getElementById("fullscreen-admin").style.display = "none"; document.getElementById("stats-input-modal").style.display = "none"; document.getElementById("main-layout").style.display = "block";
     };
 
-    // --- 📺 TV RECEIVER LOOP LOGIC ---
+    // 📺 TV RECEIVER MODE
     window.startTVBroadcastMode = function() {
-        document.getElementById("main-layout").style.display = "none";
-        document.getElementById("tv-overlay").style.display = "flex";
-        renderTVSlide(); // Draw first immediately
-        tvLoopInterval = setInterval(() => {
-            tvSlideIndex = (tvSlideIndex + 1) % 4; // Cycles through 0, 1, 2, 3
-            renderTVSlide();
-        }, 12000); // 12 seconds per slide
+        document.getElementById("main-layout").style.display = "none"; document.getElementById("tv-overlay").style.display = "flex";
+        renderTVSlide();
+        tvLoopInterval = setInterval(() => { tvSlideIndex = (tvSlideIndex + 1) % 4; renderTVSlide(); }, 12000); 
     };
 
-    window.stopTVBroadcastMode = function() {
-        clearInterval(tvLoopInterval);
-        document.getElementById("tv-overlay").style.display = "none";
-        document.getElementById("main-layout").style.display = "flex";
-    };
+    window.stopTVBroadcastMode = function() { clearInterval(tvLoopInterval); document.getElementById("tv-overlay").style.display = "none"; document.getElementById("main-layout").style.display = "flex"; };
 
     function renderTVSlide() {
-        const box = document.getElementById("tv-dynamic-content");
-        // Force reflow to restart CSS animation
-        box.classList.remove("tv-content-box"); void box.offsetWidth; box.classList.add("tv-content-box");
+        const box = document.getElementById("tv-dynamic-content"); box.innerHTML = "";
         let html = ``;
 
         if (tvSlideIndex === 0) {
-            // SLIDE 1: STANDINGS
-            html += `<div class="tv-title">Tournament Standings</div><div class="tv-subtitle">Live Phase 1 Rankings</div>`;
+            html += `<div style="display:flex; flex-direction:column; align-items:center; width:100%;"><div class="tv-title" style="color:var(--accent-color)">Tournament Standings</div><div class="tv-subtitle">Live Rankings</div>`;
             tvDataState.standings.forEach((p, i) => {
-                let isTop = i === 0 ? "tv-rank-1" : "";
-                html += `<div class="tv-standing-row ${isTop}">
-                    <span style="color:${i===0?'var(--gold)':'#fff'}">#${i+1}</span>
-                    <div style="display:flex; align-items:center; gap:15px;"><img src="${getImg(p.name)}" onerror="this.style.display='none'" style="width:40px;height:40px;border-radius:50%;object-fit:cover;"> ${p.name.replace(" (+Bot)", "")}</div>
-                    <span style="color:var(--accent-color);">${p.points} PTS</span>
+                let col = getTeamColor(p.name);
+                html += `<div class="tv-standing-row" style="animation-delay: ${i*0.2}s; border-left: 8px solid ${col};">
+                    <span>#${i+1}</span>
+                    <div style="display:flex; align-items:center; gap:15px; color:${col};">${p.name.replace(" (+Bot)", "")}</div>
+                    <span style="color:#fff;">${p.points} PTS</span>
                 </div>`;
             });
+            html += `</div>`;
         } 
         else if (tvSlideIndex === 1) {
-            // SLIDE 2: NEXT MATCH
             if (tvDataState.nextMatch) {
-                let m = tvDataState.nextMatch;
-                html += `<div class="tv-title">Next Fixture</div><div class="tv-subtitle">Match #${m.id}</div>
+                let m = tvDataState.nextMatch; let c1 = getTeamColor(m.p1); let c2 = getTeamColor(m.p2);
+                html += `
+                <div style="position:absolute; top:40px; width:100%; text-align:center;">
+                    <div class="tv-title">Next Fixture</div><div class="tv-subtitle">Match #${m.id}</div>
+                </div>
                 <div class="tv-vs-container">
                     <div class="tv-vs-side">
-                        <img class="tv-player-img" src="${getImg(m.p1)}" onerror="this.style.display='none'">
-                        <div class="tv-vs-name" style="color:var(--accent-color)">${m.p1}</div>
+                        <img class="tv-split-cutout" src="${getImg(m.p1)}" onerror="this.style.display='none'">
+                        <div class="tv-split-strip-left" style="background-color: ${c1};"><span>${m.p1}</span></div>
                     </div>
                     <div class="tv-vs-badge">VS</div>
                     <div class="tv-vs-side">
-                        <img class="tv-player-img" src="${getImg(m.p2)}" onerror="this.style.display='none'" style="border-color:#ff7b72; box-shadow: 0 0 30px rgba(255,123,114,0.4);">
-                        <div class="tv-vs-name" style="color:#ff7b72">${m.p2}</div>
+                        <img class="tv-split-cutout" src="${getImg(m.p2)}" onerror="this.style.display='none'">
+                        <div class="tv-split-strip-right" style="background-color: ${c2};"><span>${m.p2}</span></div>
                     </div>
                 </div>`;
-            } else { html += `<div class="tv-title">Group Stage Complete</div><div class="tv-subtitle">Preparing for Playoffs</div>`; }
+            } else { html += `<div class="tv-title">Group Stage Complete</div>`; }
         }
         else if (tvSlideIndex === 2) {
-            // SLIDE 3: LAST MATCH STATS
             if (tvDataState.lastMatch) {
                 let lm = tvDataState.lastMatch; let log = lm.log;
-                let p1Acc = log.p1Shots > 0 ? Math.round((log.p1Score / log.p1Shots) * 100) : 0;
-                let p2Acc = log.p2Shots > 0 ? Math.round((log.p2Score / log.p2Shots) * 100) : 0;
-                html += `<div class="tv-title">Post-Match Report</div><div class="tv-subtitle">Match #${lm.id} Final</div>
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
-                    <div class="tv-vs-name" style="color:var(--accent-color); width:30%; text-align:right;">${lm.p1}</div>
-                    <div style="display:flex; gap:20px; align-items:center;"><div class="tv-score-box">${log.p1Score}</div><div style="font-size:24px; color:#8b949e; font-weight:bold;">FT</div><div class="tv-score-box">${log.p2Score}</div></div>
-                    <div class="tv-vs-name" style="color:#ff7b72; width:30%; text-align:left;">${lm.p2}</div>
+                html += `<div style="display:flex; flex-direction:column; align-items:center; width:100%;">
+                <div class="tv-title">Match Result</div><div class="tv-subtitle">Final Stats: Match #${lm.id}</div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px; width: 800px;">
+                    <div style="color:${getTeamColor(lm.p1)}; font-size:40px; font-weight:900;">${lm.p1}</div>
+                    <div style="font-size:60px; font-weight:900;">${log.p1Score} - ${log.p2Score}</div>
+                    <div style="color:${getTeamColor(lm.p2)}; font-size:40px; font-weight:900;">${lm.p2}</div>
                 </div>
-                <div class="tv-stat-row"><span>${log.p1Shots || 0}</span><span class="tv-stat-label">Shots</span><span>${log.p2Shots || 0}</span></div>
-                <div class="tv-stat-row"><span>${p1Acc}%</span><span class="tv-stat-label">Accuracy</span><span>${p2Acc}%</span></div>
-                <div class="tv-stat-row"><span>${log.p1Saves || 0}</span><span class="tv-stat-label">Saves</span><span>${log.p2Saves || 0}</span></div>
-                <div class="tv-stat-row"><span>${log.p1Poss || 50}%</span><span class="tv-stat-label">Possession</span><span>${log.p2Poss || 50}%</span></div>
-                <div class="tv-mvp-banner">🏅 MVP: ${log.mvp || 'None'}</div>`;
-            } else { html += `<div class="tv-title">Awaiting Match Results</div><div class="tv-subtitle">Tournament Commencing Soon</div>`; }
+                <div class="tv-stat-row"><span>${log.p1Shots||0}</span><span class="tv-stat-label">Shots</span><span>${log.p2Shots||0}</span></div>
+                <div class="tv-stat-row"><span>${log.p1Saves||0}</span><span class="tv-stat-label">Saves</span><span>${log.p2Saves||0}</span></div>
+                <div class="tv-stat-row"><span>${log.p1Poss||50}%</span><span class="tv-stat-label">Possession</span><span>${log.p2Poss||50}%</span></div>
+                <div style="background:var(--gold); color:#000; padding:15px; width:800px; text-align:center; font-size:24px; font-weight:900; margin-top:20px; border-radius:8px; text-transform:uppercase;">🏅 MVP: ${log.mvp}</div>
+                </div>`;
+            } else { html += `<div class="tv-title">Awaiting Results</div>`; }
         }
         else if (tvSlideIndex === 3) {
-            // SLIDE 4: TOP SCORER
-            let ts = tvDataState.topScorer;
-            html += `<div class="tv-title" style="color:var(--gold);">Golden Boot Leader</div><div class="tv-subtitle">Tournament Top Scorer</div>
-            <img class="tv-player-img tv-scorer-img" src="${getImg(ts.name)}" onerror="this.style.display='none'">
-            <div class="tv-vs-name" style="font-size:48px; margin: 10px 0;">${ts.name.replace(" (+Bot)","")}</div>
-            <div class="tv-big-goals">${ts.goals}</div>
-            <div class="tv-goal-label">Goals Scored</div>`;
+            let ts = tvDataState.topScorer; let tsColor = getTeamColor(ts.name);
+            html += `
+            <div style="position:absolute; top:40px; width:100%; text-align:center;">
+                <div class="tv-title" style="color:var(--gold); text-shadow: 0 0 30px rgba(210,153,34,0.6);">GOLDEN BOOT</div>
+                <div class="tv-subtitle">Tournament Top Scorer</div>
+            </div>
+            <img class="tv-huge-cutout" src="${getImg(ts.name)}" onerror="this.style.display='none'">
+            <div class="tv-color-strip" style="background-color: ${tsColor}; animation: slideInStripCenter 0.8s cubic-bezier(0.1, 0.9, 0.2, 1) 0.5s forwards;">
+                <span>${ts.name.replace(" (+Bot)","")}</span>
+                <span style="opacity:0.3;">|</span>
+                <span>${ts.goals} GOALS</span>
+            </div>`;
         }
         box.innerHTML = html;
     }
