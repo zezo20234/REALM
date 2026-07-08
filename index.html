@@ -6,37 +6,17 @@
     <title>🏆 The Tri-Velocity Cup 🏆</title>
     <style>
         :root {
-            --bg-color: #0d1117;
-            --card-bg: #161b22;
-            --accent-color: #58a6ff;
-            --text-color: #c9d1d9;
-            --text-glow: #388bfd;
-            --live-red: #f85149;
-            --green: #238636;
-            --gold: #d29922;
+            --bg-color: #0d1117; --card-bg: #161b22; --accent-color: #58a6ff;
+            --text-color: #c9d1d9; --text-glow: #388bfd; --live-red: #f85149;
+            --green: #238636; --gold: #d29922;
         }
         
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 10px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        h1 { color: #fff; text-shadow: 0 0 10px var(--text-glow); margin: 15px 0 5px 0; text-align: center; font-size: 24px; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
+        h1 { color: #fff; text-shadow: 0 0 10px var(--text-glow); margin: 15px 0 5px 0; text-align: center; font-size: 24px; text-transform: uppercase; }
         .container { width: 100%; max-width: 900px; padding-bottom: 30px; }
-
-        .section {
-            background-color: var(--card-bg); border: 1px solid #30363d; border-radius: 12px;
-            padding: 16px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-        }
-
+        .section { background-color: var(--card-bg); border: 1px solid #30363d; border-radius: 12px; padding: 16px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
         h2 { margin-top: 0; border-bottom: 2px solid #30363d; padding-bottom: 8px; color: var(--accent-color); font-size: 18px; }
         .gold-text { color: var(--gold) !important; text-shadow: 0 0 8px rgba(210, 153, 34, 0.4); }
 
@@ -44,9 +24,7 @@
         .pinned-wrapper { position: -webkit-sticky; position: sticky; top: 10px; z-index: 999; margin-bottom: 25px; filter: drop-shadow(0 8px 16px rgba(0,0,0,0.6)); }
         .live-ticker { background: linear-gradient(135deg, #1f242c 0%, #0d1117 100%); border: 2px solid var(--accent-color); border-radius: 14px; padding: 16px; text-align: center; }
         .live-badge { background-color: var(--live-red); color: white; padding: 4px 12px; border-radius: 20px; font-weight: bold; font-size: 12px; letter-spacing: 1px; display: inline-flex; align-items: center; gap: 6px; animation: pulse 1.5s infinite; }
-
         @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(0.96); } 100% { opacity: 1; transform: scale(1); } }
-
         .live-score-display { display: flex; justify-content: space-between; align-items: center; max-width: 500px; margin: 12px auto; }
         .team-wrapper { width: 35%; display: flex; flex-direction: column; }
         #p1-wrapper { align-items: flex-end; text-align: right; }
@@ -56,7 +34,7 @@
         .live-number { font-size: 38px; font-weight: 800; color: #fff; font-family: monospace; background: #21262d; padding: 4px 16px; border-radius: 8px; border: 1px solid #30363d; min-width: 60px; }
         .live-timer { font-size: 20px; color: #8b949e; font-family: monospace; font-weight: bold; height: 24px; }
 
-        .table-scroll { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 8px; border: 1px solid #30363d; }
+        .table-scroll { width: 100%; overflow-x: auto; border-radius: 8px; border: 1px solid #30363d; }
         table { width: 100%; border-collapse: collapse; min-width: 500px; }
         th, td { border: 1px solid #30363d; padding: 14px 10px; text-align: center; font-size: 14px; }
         th { background-color: #21262d; color: #fff; }
@@ -64,41 +42,26 @@
         .playoff-row { background-color: #1e1910 !important; }
 
         input, select, button { font-size: 16px !important; }
-        .btn { background-color: var(--green); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; }
+        .btn { background-color: var(--green); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .btn:hover { filter: brightness(1.1); }
         .btn-secondary { background-color: #21262d; border: 1px solid #30363d; color: white; }
+        .btn-tv { background: linear-gradient(90deg, #6f42c1, #d29922); border: 2px solid #fff; box-shadow: 0 0 15px rgba(210, 153, 34, 0.4); margin-bottom: 20px; width: 100%; font-size: 18px; text-transform: uppercase; letter-spacing: 1px; }
         .btn-action { padding: 4px 10px; font-size: 12px; min-height: 32px; }
-        .btn-reset { margin-top: 6px; padding: 6px 12px; font-size: 12px; min-height: 30px; }
 
-        /* 🚨 FULLSCREEN REFEREE CONTROLLER 🚨 */
-        #fullscreen-admin { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #070a0e; z-index: 999999; flex-direction: column; align-items: center; justify-content: space-between; padding: calc(40px + env(safe-area-inset-top)) 20px calc(20px + env(safe-area-inset-bottom)) 20px; box-sizing: border-box; overflow-y: auto; }
+        /* 🚨 REFEREE CONTROLLER */
+        #fullscreen-admin { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #070a0e; z-index: 999999; flex-direction: column; align-items: center; justify-content: space-between; padding: 40px 20px; box-sizing: border-box; overflow-y: auto; }
         .admin-header { text-align: center; width: 100%; margin-bottom: 15px; }
         .admin-panel-row { display: flex; width: 100%; max-width: 800px; justify-content: space-around; align-items: center; flex-grow: 1; }
         .admin-controller-box { text-align: center; background: #161b22; padding: 20px 10px; border-radius: 16px; border: 1px solid #30363d; width: 32%; }
-        .player-info { margin-bottom: 10px; }
-        .huge-score { font-size: 64px; font-weight: 900; margin: 10px 0 15px 0; font-family: monospace; color: #fff; }
+        .huge-score { font-size: 64px; font-weight: 900; margin: 10px 0; font-family: monospace; color: #fff; }
         .score-controls { display: flex; justify-content: center; gap: 10px; }
-        .circle-btn { width: 55px; height: 55px; border-radius: 50%; border: none; font-size: 26px; font-weight: bold; cursor: pointer; color: white; display: inline-flex; align-items: center; justify-content: center; }
-        .btn-plus { background-color: #238636; }
-        .btn-minus { background-color: #f85149; }
+        .circle-btn { width: 55px; height: 55px; border-radius: 50%; border: none; font-size: 26px; font-weight: bold; cursor: pointer; color: white; }
+        .btn-plus { background-color: #238636; } .btn-minus { background-color: #f85149; }
         .huge-clock { font-size: 42px; font-family: monospace; font-weight: bold; color: var(--accent-color); margin-bottom: 15px; }
-        .admin-footer { width: 100%; display: flex; flex-direction: column; gap: 12px; max-width: 400px; margin-top: 20px; }
-        .btn-huge { width: 100%; padding: 16px; font-size: 18px; border-radius: 12px; }
         .ot-toggle { background-color: #6f42c1; color: white; padding: 10px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; border: none; margin-top: 10px; }
         .ot-active { background-color: #f9826c; animation: pulse 1s infinite; }
 
-        /* 📺 TV BROADCAST SHOW OVERLAY */
-        #broadcast-screen { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: linear-gradient(135deg, #050811 0%, #0d1527 100%); z-index: 9999999; flex-direction: column; align-items: center; justify-content: center; padding: 40px; box-sizing: border-box; color: white; font-family: -apple-system, sans-serif; overflow: hidden; }
-        .bc-title { font-size: 28px; letter-spacing: 6px; color: var(--accent-color); font-weight: 900; text-transform: uppercase; margin-bottom: 10px; animation: fadeInDown 0.8s ease forwards; text-shadow: 0 0 15px rgba(88, 166, 255, 0.4); }
-        .bc-subtitle { font-size: 14px; color: #8b949e; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 30px; animation: fadeInDown 0.8s ease forwards; }
-        .bc-teams { display: flex; align-items: center; justify-content: center; gap: 40px; margin-bottom: 40px; width: 100%; max-width: 800px; }
-        .bc-team-card { font-size: 32px; font-weight: 800; text-transform: uppercase; width: 35%; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .bc-score { font-size: 72px; font-weight: 900; background: #161b22; padding: 12px 32px; border-radius: 14px; border: 2px solid #30363d; animation: scaleIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; opacity: 0; box-shadow: 0 0 25px rgba(0,0,0,0.5); }
-        .bc-stats-container { width: 100%; max-width: 650px; display: flex; flex-direction: column; gap: 14px; margin-bottom: 40px; }
-        .bc-stat-row { display: flex; justify-content: space-between; align-items: center; background: rgba(22, 27, 34, 0.7); padding: 14px 24px; border-radius: 10px; border: 1px solid #30363d; font-size: 22px; font-weight: bold; opacity: 0; transform: translateY(20px); animation: fadeInUpNormal 0.5s ease forwards; font-family: monospace; }
-        .bc-stat-label { color: #8b949e; font-size: 14px; text-transform: uppercase; letter-spacing: 2px; font-family: -apple-system, sans-serif; }
-        .bc-mvp-banner { background: linear-gradient(90deg, transparent, var(--gold), transparent); width: 100%; max-width: 600px; text-align: center; padding: 16px; font-size: 26px; font-weight: 900; color: #070a0e; text-transform: uppercase; border-radius: 6px; box-shadow: 0 0 30px rgba(212, 153, 34, 0.5); opacity: 0; animation: scaleIn 0.6s ease forwards; }
-
-        /* 📊 STATS MANUAL INPUT DIALOG */
+        /* 📊 STATS ENTRY MODAL */
         #stats-input-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 9999998; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
         .modal-box { background: var(--card-bg); border: 2px solid var(--accent-color); padding: 24px; border-radius: 16px; width: 100%; max-width: 480px; box-shadow: 0 10px 30px rgba(0,0,0,0.7); }
         .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0; }
@@ -107,36 +70,55 @@
         .modal-field input { padding: 10px; background: #21262d; border: 1px solid #30363d; color: white; border-radius: 8px; text-align: center; font-size: 16px; font-weight: bold; }
         .modal-field input:focus { border-color: var(--accent-color); outline: none; }
 
-        /* 🎬 KEYFRAME ANIMATIONS */
-        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes scaleIn { from { opacity: 0; transform: scale(0.6); } to { opacity: 1; transform: scale(1); } }
-        @keyframes fadeInUpNormal { to { opacity: 1; transform: translateY(0); } }
-
-        @media (max-width: 600px) {
-            #fullscreen-admin { justify-content: flex-start; padding: calc(20px + env(safe-area-inset-top)) 15px calc(20px + env(safe-area-inset-bottom)) 15px; }
-            .admin-panel-row { flex-direction: column; gap: 15px; width: 100%; }
-            .admin-controller-box { width: 100%; display: flex; flex-direction: row; align-items: center; justify-content: space-between; padding: 15px 20px; }
-            .player-info { flex: 1; text-align: left; margin: 0; }
-            .player-info h3 { font-size: 20px; margin: 0; }
-            .huge-score { margin: 0 15px; font-size: 52px; }
-            .score-controls { gap: 8px; }
-            .circle-btn { width: 50px; height: 50px; font-size: 24px; }
-            .huge-clock { margin: 10px 0; font-size: 48px; }
-            .live-team { font-size: 15px; }
-            .live-number { font-size: 30px; }
-            .bc-score { font-size: 48px; padding: 8px 20px; }
-            .bc-team-card { font-size: 22px; }
-            .bc-stat-row { font-size: 18px; padding: 10px 16px; }
+        /* 📺 TV BROADCAST LOOP MODE (FOR RECEIVER) */
+        #tv-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(135deg, #050811 0%, #0d1527 100%); z-index: 9999999;
+            flex-direction: column; align-items: center; justify-content: center;
+            color: white; font-family: -apple-system, sans-serif; overflow: hidden;
         }
+        .tv-exit-btn { position: absolute; top: 20px; right: 20px; z-index: 100; font-size: 14px; padding: 8px 16px; opacity: 0.3; transition: 0.3s; }
+        .tv-exit-btn:hover { opacity: 1; }
+        .tv-content-box { width: 100%; max-width: 900px; padding: 40px; text-align: center; animation: tvFadeIn 1s ease forwards; }
+        
+        .tv-title { font-size: 32px; letter-spacing: 6px; color: var(--accent-color); font-weight: 900; text-transform: uppercase; margin-bottom: 10px; text-shadow: 0 0 15px rgba(88,166,255,0.4); }
+        .tv-subtitle { font-size: 16px; color: #8b949e; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 40px; }
+
+        /* Player Image Styles */
+        .tv-player-img { width: 180px; height: 180px; border-radius: 50%; object-fit: cover; border: 6px solid var(--accent-color); box-shadow: 0 0 30px rgba(88,166,255,0.4); margin-bottom: 15px; background-color: #21262d; }
+        .tv-scorer-img { width: 280px; height: 280px; border-color: var(--gold); box-shadow: 0 0 50px rgba(210,153,34,0.6); }
+        
+        /* Standings TV Box */
+        .tv-standing-row { display: flex; justify-content: space-between; background: rgba(22,27,34,0.8); padding: 20px 30px; margin-bottom: 15px; border-radius: 12px; border: 1px solid #30363d; font-size: 28px; font-weight: bold; align-items: center; }
+        .tv-rank-1 { border-color: var(--gold); box-shadow: 0 0 20px rgba(210,153,34,0.2); }
+
+        /* Next Match TV Box */
+        .tv-vs-container { display: flex; justify-content: center; align-items: center; gap: 60px; }
+        .tv-vs-side { display: flex; flex-direction: column; align-items: center; width: 300px; }
+        .tv-vs-name { font-size: 36px; font-weight: 900; text-transform: uppercase; }
+        .tv-vs-badge { font-size: 48px; font-weight: 900; color: #8b949e; font-style: italic; }
+
+        /* Last Match Stats Box */
+        .tv-stat-row { display: flex; justify-content: space-between; align-items: center; background: rgba(22,27,34,0.7); padding: 16px 28px; border-radius: 10px; border: 1px solid #30363d; font-size: 26px; font-weight: bold; margin-bottom: 12px; font-family: monospace; }
+        .tv-stat-label { color: #8b949e; font-size: 16px; text-transform: uppercase; letter-spacing: 2px; font-family: -apple-system, sans-serif; }
+        .tv-mvp-banner { background: linear-gradient(90deg, transparent, var(--gold), transparent); text-align: center; padding: 20px; font-size: 32px; font-weight: 900; color: #070a0e; text-transform: uppercase; border-radius: 8px; margin-top: 20px; box-shadow: 0 0 40px rgba(212,153,34,0.5); }
+        .tv-score-box { font-size: 64px; font-weight: 900; background: #0d1117; padding: 10px 30px; border-radius: 16px; border: 2px solid #30363d; box-shadow: 0 0 20px rgba(0,0,0,0.8); }
+
+        /* Top Scorer Box */
+        .tv-big-goals { font-size: 80px; font-weight: 900; color: #fff; text-shadow: 0 0 30px rgba(255,255,255,0.5); margin-top: -10px; }
+        .tv-goal-label { font-size: 24px; color: var(--gold); text-transform: uppercase; letter-spacing: 4px; font-weight: bold; }
+
+        @keyframes tvFadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
     </style>
 </head>
 <body>
 
 <div class="container" id="main-layout">
+    <button class="btn btn-tv" onclick="startTVBroadcastMode()">📺 Launch TV Receiver Broadcast</button>
+
     <h1>🏆 THE TRI-VELOCITY CUP 🏆</h1>
     <p style="text-align:center; color: #8b949e; margin: 0 0 20px 0; font-size: 13px;">Live Match Central</p>
 
-    <!-- 📌 PINNED LIVE TRACKER -->
     <div class="pinned-wrapper">
         <div class="section live-ticker">
             <div class="live-badge">🔴 LIVE SCOREBOARD</div>
@@ -160,10 +142,8 @@
         </div>
     </div>
 
-    <!-- LEADERBOARD SECTION -->
     <div class="section">
         <h2>📊 Live Leaderboard Standings</h2>
-        <p style="font-size:12px; color:#8b949e; margin-top:-5px;">Only Phase 1 matches apply to points.</p>
         <div class="table-scroll">
             <table>
                 <thead><tr><th>Rank</th><th>Player</th><th>Points</th><th>GD</th></tr></thead>
@@ -172,38 +152,17 @@
         </div>
     </div>
 
-    <!-- PHASE 2: PLAYOFFS -->
     <div class="section" style="border-color: var(--gold);">
         <h2 class="gold-text">🏅 Phase 2: Playoffs & Finals</h2>
-        <div class="table-scroll">
-            <table>
-                <thead><tr><th>M#</th><th>Matchup</th><th>Logged Score</th><th>Status</th></tr></thead>
-                <tbody id="phase2-body"></tbody>
-            </table>
-        </div>
+        <div class="table-scroll"><table><tbody id="phase2-body"></tbody></table></div>
     </div>
 
-    <!-- FIXTURES GRID -->
     <div class="section">
         <h2>🎮 Phase 1: Group Stage (15 Matches)</h2>
-        <div class="table-scroll">
-            <table>
-                <thead><tr><th>M#</th><th>Matchup</th><th>Logged Score</th><th>Status</th></tr></thead>
-                <tbody id="matches-body"></tbody>
-            </table>
-        </div>
-    </div>
-    
-    <!-- FRIENDLIES SECTION -->
-    <div class="section" id="friendlies-container" style="border-style: dashed;">
-        <h2>🤝 Friendlies (Exhibition)</h2>
-        <div id="friendlies-content" style="text-align:center;">
-            <button class="btn btn-secondary" onclick="activateFriendlies()">➕ Generate Friendlies (Passcode Req)</button>
-        </div>
+        <div class="table-scroll"><table><tbody id="matches-body"></tbody></table></div>
     </div>
 </div>
 
-<!-- FULLSCREEN REFEREE CONTROLLER -->
 <div id="fullscreen-admin">
     <div class="admin-header">
         <span class="live-badge" style="background-color: var(--accent-color);">🛠️ REFEREE DASHBOARD ACTIVE</span>
@@ -212,30 +171,22 @@
     </div>
 
     <div class="admin-panel-row">
-        <!-- P1 Admin Box (PS5) -->
         <div class="admin-controller-box">
-            <div class="player-info">
-                <h3 id="admin-p1-name" style="margin: 0; font-size: 20px;">Player 1</h3>
-                <div class="platform-label">🎮 PS5</div>
-            </div>
+            <h3 id="admin-p1-name" style="margin: 0; font-size: 20px;">Player 1</h3>
+            <div class="platform-label">🎮 PS5</div>
             <div class="huge-score" id="admin-p1-score">0</div>
             <div class="score-controls">
                 <button class="circle-btn btn-minus" onclick="modLiveScore('p1', -1)">-</button>
                 <button class="circle-btn btn-plus" onclick="modLiveScore('p1', 1)">+</button>
             </div>
         </div>
-
         <div style="text-align: center;">
             <div class="huge-clock" id="admin-clock">5:00</div>
-            <button class="btn btn-huge" id="clock-trigger-btn" onclick="toggleAdminClock()" style="background-color:#388bfd; min-width: 160px;">⏯️ START / PAUSE</button>
+            <button class="btn" onclick="toggleAdminClock()" style="background-color:#388bfd; width: 160px; font-size: 18px;">⏯️ START/PAUSE</button>
         </div>
-
-        <!-- P2 Admin Box (Laptop) -->
         <div class="admin-controller-box">
-            <div class="player-info">
-                <h3 id="admin-p2-name" style="margin: 0; font-size: 20px;">Player 2</h3>
-                <div class="platform-label">💻 Laptop</div>
-            </div>
+            <h3 id="admin-p2-name" style="margin: 0; font-size: 20px;">Player 2</h3>
+            <div class="platform-label">💻 Laptop</div>
             <div class="huge-score" id="admin-p2-score">0</div>
             <div class="score-controls">
                 <button class="circle-btn btn-minus" onclick="modLiveScore('p2', -1)">-</button>
@@ -244,90 +195,42 @@
         </div>
     </div>
 
-    <div class="admin-footer">
-        <button class="btn btn-huge" onclick="commitAndSaveActiveMatch()" style="background-color: var(--green);">💾 Finish & Enter Stats</button>
-        <button class="btn btn-secondary btn-huge" onclick="exitAdminPanelWithoutSaving()">❌ Cancel / Exit Panel</button>
+    <div style="display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 400px; margin-top: 30px;">
+        <button class="btn" onclick="triggerStatsEntry()" style="background-color: var(--green); padding: 16px; font-size: 18px;">💾 Finish Match & Enter Stats</button>
+        <button class="btn btn-secondary" onclick="exitAdminPanelWithoutSaving()" style="padding: 16px; font-size: 18px;">❌ Cancel / Exit Panel</button>
     </div>
 </div>
 
-<!-- STATS ENTRY MODAL FOR REFEREE -->
 <div id="stats-input-modal">
     <div class="modal-box">
-        <h2 style="margin-top:0; font-size: 20px; text-align:center;">📊 Match Stats Entry</h2>
-        <p style="font-size:12px; color:#8b949e; text-align:center; margin-top:-8px;">Possession % is auto-calculated based on Shots + Saves!</p>
-        
+        <h2 style="margin-top:0; font-size: 20px; text-align:center;">📊 Log Match Stats</h2>
+        <p style="font-size:12px; color:#8b949e; text-align:center; margin-top:-8px;">These will automatically push to the TV Receiver.</p>
         <div class="modal-grid">
-            <div class="modal-field">
-                <label id="modal-p1-label-shots">Player 1 Shots</label>
-                <input type="number" id="input-p1-shots" value="0" min="0">
-            </div>
-            <div class="modal-field">
-                <label id="modal-p2-label-shots">Player 2 Shots</label>
-                <input type="number" id="input-p2-shots" value="0" min="0">
-            </div>
-            <div class="modal-field">
-                <label id="modal-p1-label-saves">Player 1 Saves</label>
-                <input type="number" id="input-p1-saves" value="0" min="0">
-            </div>
-            <div class="modal-field">
-                <label id="modal-p2-label-saves">Player 2 Saves</label>
-                <input type="number" id="input-p2-saves" value="0" min="0">
-            </div>
+            <div class="modal-field"><label id="modal-p1-label-shots">P1 Shots</label><input type="number" id="input-p1-shots" value="0" min="0"></div>
+            <div class="modal-field"><label id="modal-p2-label-shots">P2 Shots</label><input type="number" id="input-p2-shots" value="0" min="0"></div>
+            <div class="modal-field"><label id="modal-p1-label-saves">P1 Saves</label><input type="number" id="input-p1-saves" value="0" min="0"></div>
+            <div class="modal-field"><label id="modal-p2-label-saves">P2 Saves</label><input type="number" id="input-p2-saves" value="0" min="0"></div>
         </div>
-
-        <div class="modal-field" style="margin-bottom: 24px; margin-top: 10px;">
-            <label>🏅 Match MVP Name</label>
-            <input type="text" id="input-mvp" placeholder="Enter player name">
-        </div>
-
+        <div class="modal-field" style="margin-bottom: 24px;"><label>🏅 MVP Name</label><input type="text" id="input-mvp" placeholder="Enter player name"></div>
         <div style="display:flex; flex-direction:column; gap:10px;">
-            <button class="btn btn-huge" onclick="window.launchBroadcastView()" style="background-color: var(--accent-color); font-size:16px;">🎬 Launch TV Broadcast Show</button>
-            <button class="btn btn-secondary" onclick="document.getElementById('stats-input-modal').style.display='none'" style="min-height:40px;">Back to Referee Panel</button>
+            <button class="btn" onclick="saveMatchToDatabase()" style="background-color: var(--accent-color); font-size:16px;">🚀 Save Server Data</button>
+            <button class="btn btn-secondary" onclick="document.getElementById('stats-input-modal').style.display='none'">Back to Dashboard</button>
         </div>
     </div>
 </div>
 
-<!-- FULLSCREEN TV CHANNEL BROADCAST VIEW -->
-<div id="broadcast-screen">
-    <button class="btn btn-secondary" style="position:absolute; top:20px; right:20px; min-height:36px; padding:6px 12px; font-size:12px; z-index:10;" onclick="window.closeBroadcastShow()">❌ Close Show</button>
-    
-    <div class="bc-title">Post-Match Report</div>
-    <div class="bc-subtitle" id="bc-match-tag">The Tri-Velocity Cup</div>
-
-    <div class="bc-teams">
-        <div class="bc-team-card" id="bc-p1-name" style="color: var(--accent-color);">Player 1</div>
-        <div class="bc-score" id="bc-p1-score">0</div>
-        <div style="font-size:24px; font-weight:800; color:#8b949e;">FINAL</div>
-        <div class="bc-score" id="bc-p2-score">0</div>
-        <div class="bc-team-card" id="bc-p2-name" style="color: #ff7b72;">Player 2</div>
-    </div>
-
-    <!-- Stats presentation rows wrapped here -->
-    <div class="bc-stats-container" id="bc-stats-rows"></div>
-
-    <div class="bc-mvp-banner" id="bc-mvp-banner">
-        🏅 MVP: <span id="bc-mvp-player">None</span>
-    </div>
+<div id="tv-overlay">
+    <button class="btn btn-secondary tv-exit-btn" onclick="stopTVBroadcastMode()">Exit TV Mode</button>
+    <div id="tv-dynamic-content" class="tv-content-box">
+        </div>
 </div>
 
-<!-- FIREBASE INTEGRATION LAYER -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyAjeXycCBhYoAU-0iiC4LbSTylKrrThN8Y",
-        authDomain: "sharplabubu.firebaseapp.com",
-        databaseURL: "https://sharplabubu-default-rtdb.firebaseio.com",
-        projectId: "sharplabubu",
-        storageBucket: "sharplabubu.firebasestorage.app",
-        messagingSenderId: "596148393481",
-        appId: "1:596148393481:web:4f822d86c44a13bd810ad8",
-        measurementId: "G-4M25R3BF08"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    const firebaseConfig = { apiKey: "AIzaSyAjeXycCBhYoAU-0iiC4LbSTylKrrThN8Y", authDomain: "sharplabubu.firebaseapp.com", databaseURL: "https://sharplabubu-default-rtdb.firebaseio.com", projectId: "sharplabubu", storageBucket: "sharplabubu.firebasestorage.app", messagingSenderId: "596148393481", appId: "1:596148393481:web:4f822d86c44a13bd810ad8", measurementId: "G-4M25R3BF08" };
+    const app = initializeApp(firebaseConfig); const db = getFirestore(app);
 
     const phase1Schedule = [
         { id: 1, p1: "Zezo", p2: "Asser" }, { id: 2, p1: "Asser", p2: "Lilly" }, { id: 3, p1: "Lilly", p2: "Zezo" },
@@ -336,291 +239,257 @@
         { id: 10, p1: "Asser", p2: "Zezo" }, { id: 11, p1: "Lilly", p2: "Asser" }, { id: 12, p1: "Zezo", p2: "Lilly" },
         { id: 13, p1: "Zezo", p2: "Asser" }, { id: 14, p1: "Asser", p2: "Lilly" }, { id: 15, p1: "Lilly", p2: "Zezo" }
     ];
-    
-    const friendliesSchedule = [
-        { id: 101, p1: "Zezo", p2: "Asser" }, { id: 102, p1: "Asser", p2: "Lilly" }, { id: 103, p1: "Lilly", p2: "Zezo" }
-    ];
 
-    let clockInterval = null;
-    let globalActiveMatchId = 1;
-    let adminState = { p1Name: "Player 1", p2Name: "Player 2", p1Score: 0, p2Score: 0, secondsLeft: 300, isRunning: false, isOT: false };
+    let clockInterval = null; let globalActiveMatchId = 1;
+    let adminState = { p1Name: "P1", p2Name: "P2", p1Score: 0, p2Score: 0, secondsLeft: 300, isRunning: false, isOT: false };
+    
+    // Global TV Storage Variables
+    let tvDataState = { standings: [], topScorer: {name: "None", goals: 0}, lastMatch: null, nextMatch: null };
+    let tvSlideIndex = 0; let tvLoopInterval = null;
+    
+    // File Mapping for Images
+    const getImg = (name) => {
+        let cleanName = name.replace(" (+Bot)", "");
+        if(cleanName === "Zezo") return "Zezo.png";
+        if(cleanName === "Asser") return "Asser.png";
+        if(cleanName === "Lilly") return "Lilly.png";
+        return ""; // Fallback
+    };
 
     onSnapshot(doc(db, "tournaments", "tri-velocity-cup"), (snapshot) => {
-        let database = snapshot.exists() ? snapshot.data() : { scores: {}, liveMatch: {}, settings: {} };
+        let database = snapshot.exists() ? snapshot.data() : { scores: {}, liveMatch: {} };
         let live = database.liveMatch || {};
-        let settings = database.settings || { friendliesActive: false };
         let scores = database.scores || {};
         
         globalActiveMatchId = live.matchId || 1;
-        adminState.p1Score = live.p1Score || 0;
-        adminState.p2Score = live.p2Score || 0;
+        adminState.p1Score = live.p1Score || 0; adminState.p2Score = live.p2Score || 0;
         adminState.secondsLeft = live.secondsLeft !== undefined ? live.secondsLeft : 300;
         adminState.isOT = live.isOT || false;
 
-        adminState.p1Name = live.p1Name;
-        adminState.p2Name = live.p2Name;
-        if(!adminState.p1Name) {
-            let fallbackFix = [...phase1Schedule, ...friendliesSchedule].find(m => m.id === globalActiveMatchId);
-            adminState.p1Name = fallbackFix ? fallbackFix.p1 : "Player 1";
-            adminState.p2Name = fallbackFix ? fallbackFix.p2 : "Player 2";
-        }
+        let fallbackFix = phase1Schedule.find(m => m.id === globalActiveMatchId);
+        adminState.p1Name = live.p1Name || (fallbackFix ? fallbackFix.p1 : "Player 1");
+        adminState.p2Name = live.p2Name || (fallbackFix ? fallbackFix.p2 : "Player 2");
 
-        document.getElementById("view-p1-name").innerText = adminState.p1Name;
-        document.getElementById("view-p2-name").innerText = adminState.p2Name;
-        document.getElementById("view-p1-score").innerText = adminState.p1Score;
-        document.getElementById("view-p2-score").innerText = adminState.p2Score;
+        // Update UI
+        document.getElementById("view-p1-name").innerText = adminState.p1Name; document.getElementById("view-p2-name").innerText = adminState.p2Name;
+        document.getElementById("view-p1-score").innerText = adminState.p1Score; document.getElementById("view-p2-score").innerText = adminState.p2Score;
         
-        let viewClockEl = document.getElementById("view-clock");
+        let vc = document.getElementById("view-clock");
         if (adminState.secondsLeft === 300 && !live.isRunning && adminState.p1Score === 0 && adminState.p2Score === 0 && !adminState.isOT) {
-            viewClockEl.innerText = "Match Not Started";
-            viewClockEl.style.color = "#8b949e";
-            viewClockEl.style.fontSize = "16px";
-        } else {
-            viewClockEl.style.color = "#fff";
-            viewClockEl.style.fontSize = "20px";
-            formatClockUI(adminState.secondsLeft, "view-clock");
-        }
+            vc.innerText = "Match Not Started"; vc.style.color = "#8b949e"; vc.style.fontSize = "16px";
+        } else { vc.style.color = "#fff"; vc.style.fontSize = "20px"; formatClockUI(adminState.secondsLeft, "view-clock"); }
 
-        let displayMatchId = globalActiveMatchId > 100 ? `F${globalActiveMatchId-100}` : globalActiveMatchId;
-        document.getElementById("admin-match-title").innerText = `Match #${displayMatchId}: ${adminState.p1Name} vs ${adminState.p2Name}`;
-        document.getElementById("admin-p1-name").innerText = adminState.p1Name;
-        document.getElementById("admin-p2-name").innerText = adminState.p2Name;
-        document.getElementById("admin-p1-score").innerText = adminState.p1Score;
-        document.getElementById("admin-p2-score").innerText = adminState.p2Score;
+        document.getElementById("admin-match-title").innerText = `Match #${globalActiveMatchId}: ${adminState.p1Name} vs ${adminState.p2Name}`;
+        document.getElementById("admin-p1-name").innerText = adminState.p1Name; document.getElementById("admin-p2-name").innerText = adminState.p2Name;
+        document.getElementById("admin-p1-score").innerText = adminState.p1Score; document.getElementById("admin-p2-score").innerText = adminState.p2Score;
         formatClockUI(adminState.secondsLeft, "admin-clock");
         
         let otBtn = document.getElementById("admin-ot-btn");
-        if(adminState.isOT) {
-            otBtn.innerText = "Toggle Overtime (OT: ACTIVE)"; otBtn.classList.add("ot-active");
-        } else {
-            otBtn.innerText = "Toggle Overtime (OT: OFF)"; otBtn.classList.remove("ot-active");
-        }
+        if(adminState.isOT) { otBtn.innerText = "Toggle Overtime (OT: ACTIVE)"; otBtn.classList.add("ot-active"); } 
+        else { otBtn.innerText = "Toggle Overtime (OT: OFF)"; otBtn.classList.remove("ot-active"); }
 
         runLocalTimerTick(live.isRunning);
-        renderDashboards(scores, settings.friendliesActive);
+        processData(scores); // Rebuilds data for both Website & TV
     });
 
+    function processData(logs) {
+        let stats = { "Zezo": { name: "Zezo", points: 0, gd: 0, goals: 0 }, "Asser": { name: "Asser", points: 0, gd: 0, goals: 0 }, "Lilly": { name: "Lilly (+Bot)", points: 0, gd: 0, goals: 0 } };
+        
+        let lastCompletedId = -1; let nextIncompleteMatch = null;
+        const p1Container = document.getElementById("matches-body"); p1Container.innerHTML = "";
+
+        phase1Schedule.forEach(fix => {
+            let log = logs[`match_${fix.id}`] || { completed: false };
+            let rowHtml = `<tr><td>${fix.id}</td><td><strong>${fix.p1}</strong> vs <strong>${fix.p2}</strong></td><td>${log.completed ? `${log.p1Score} : ${log.p2Score}` : '--'}</td><td>${log.completed ? '✅' : `<button class="btn btn-action" onclick="launchSelectedMatch(${fix.id}, '${fix.p1}', '${fix.p2}')">🚀 Boot</button>`}</td></tr>`;
+            p1Container.innerHTML += rowHtml;
+
+            if (log.completed) {
+                lastCompletedId = Math.max(lastCompletedId, fix.id);
+                let aP1 = log.p1Score + (fix.p1 === "Lilly" ? 5 : 0);
+                let aP2 = log.p2Score + (fix.p2 === "Lilly" ? 5 : 0);
+                stats[fix.p1].gd += (aP1 - aP2); stats[fix.p2].gd += (aP2 - aP1);
+                stats[fix.p1].goals += aP1; stats[fix.p2].goals += aP2; // Tracking goals for Golden Boot
+                
+                if (aP1 > aP2) { stats[fix.p1].points += log.isOT ? 2 : 3; } 
+                else if (aP2 > aP1) { stats[fix.p2].points += log.isOT ? 2 : 3; }
+            } else if (!nextIncompleteMatch) {
+                nextIncompleteMatch = { id: fix.id, p1: fix.p1, p2: fix.p2 };
+            }
+        });
+
+        // Sync to Global TV State
+        tvDataState.standings = Object.values(stats).sort((a,b) => b.points !== a.points ? b.points - a.points : b.gd - a.gd);
+        tvDataState.topScorer = Object.values(stats).sort((a,b) => b.goals - a.goals)[0];
+        
+        if (lastCompletedId > -1) {
+            let lastFix = phase1Schedule.find(m => m.id === lastCompletedId);
+            let log = logs[`match_${lastCompletedId}`];
+            tvDataState.lastMatch = { id: lastCompletedId, p1: lastFix.p1, p2: lastFix.p2, log: log };
+        } else { tvDataState.lastMatch = null; }
+        
+        tvDataState.nextMatch = nextIncompleteMatch;
+
+        // Render Website Tables
+        const lbEl = document.getElementById("leaderboard-body"); lbEl.innerHTML = "";
+        tvDataState.standings.forEach((p, pos) => { lbEl.innerHTML += `<tr><td><strong>${pos+1}</strong></td><td>${p.name}</td><td><strong>${p.points}</strong></td><td style="color:${p.gd>=0?'#2ea043':'#f85149'}">${p.gd>0?'+'+p.gd:p.gd}</td></tr>`; });
+
+        let rank1 = tvDataState.standings[0].name.replace(" (+Bot)", "");
+        let rank2 = tvDataState.standings[1].name.replace(" (+Bot)", "");
+        let rank3 = tvDataState.standings[2].name.replace(" (+Bot)", "");
+        
+        const p2Container = document.getElementById("phase2-body"); p2Container.innerHTML = "";
+        let log16 = logs['match_16'] || { completed: false };
+        let p2_17 = log16.completed ? (log16.p1Score > log16.p2Score ? rank2 : rank3) : "TBD";
+        let log17 = logs['match_17'] || { completed: false };
+        p2Container.innerHTML += `<tr><td>16</td><td>${rank2} vs ${rank3}</td><td>${log16.completed ? `${log16.p1Score}:${log16.p2Score}`:'--'}</td><td>${log16.completed ? '✅' : `<button class="btn btn-action" onclick="launchSelectedMatch(16, '${rank2}', '${rank3}')">🚀 Boot</button>`}</td></tr>`;
+        p2Container.innerHTML += `<tr><td>17</td><td>${rank1} vs ${p2_17}</td><td>${log17.completed ? `${log17.p1Score}:${log17.p2Score}`:'--'}</td><td>${log17.completed ? '✅' : `<button class="btn btn-action" onclick="launchSelectedMatch(17, '${rank1}', '${p2_17}')">🚀 Boot</button>`}</td></tr>`;
+    }
+
+    // --- REFEREE / ADMIN CONTROLS ---
     window.requestAdminAccess = function() {
-        let codeInput = prompt("Enter Referee Passcode:");
-        if (codeInput === "2013") {
-            document.getElementById("main-layout").style.display = "none";
-            document.getElementById("fullscreen-admin").style.display = "flex";
-        } else if (codeInput !== null) alert("Incorrect Password!");
+        let code = prompt("Referee Passcode:");
+        if(code === "2013") { document.getElementById("main-layout").style.display="none"; document.getElementById("fullscreen-admin").style.display="flex"; }
     };
-
-    window.exitAdminPanelWithoutSaving = function() {
-        document.getElementById("fullscreen-admin").style.display = "none";
-        document.getElementById("main-layout").style.display = "block";
-        window.scrollTo(0, 0);
-    };
-
+    window.exitAdminPanelWithoutSaving = function() { document.getElementById("fullscreen-admin").style.display="none"; document.getElementById("main-layout").style.display="block"; };
+    
     window.launchSelectedMatch = async function(matchId, p1Name, p2Name) {
-        if(p1Name === "TBD" || p2Name === "TBD") { alert("Cannot start match yet! Waiting on previous results."); return; }
-        let displayId = matchId > 100 ? `F${matchId-100}` : matchId;
-        let codeInput = prompt(`Enter Referee Passcode to start Match #${displayId}:`);
-        if (codeInput === "2013") {
-            await setDoc(doc(db, "tournaments", "tri-velocity-cup"), {
-                liveMatch: { matchId: parseInt(matchId), p1Name: p1Name, p2Name: p2Name, p1Score: 0, p2Score: 0, secondsLeft: 300, isRunning: false, isOT: false }
-            }, { merge: true });
-            document.getElementById("main-layout").style.display = "none";
-            document.getElementById("fullscreen-admin").style.display = "flex";
-        } else if (codeInput !== null) alert("Incorrect Password!");
-    };
-
-    window.resetMatchStatus = async function(matchId) {
-        let displayId = matchId > 100 ? `F${matchId-100}` : matchId;
-        let codeInput = prompt(`Enter Referee Passcode to RESET Match #${displayId}:`);
-        if (codeInput === "2013") {
-            if (!confirm(`⚠️ Are you sure? This deletes the logged score for Match #${displayId}.`)) return;
-            await setDoc(doc(db, "tournaments", "tri-velocity-cup"), { scores: { [`match_${matchId}`]: { p1Score: 0, p2Score: 0, isOT: false, completed: false } } }, { merge: true });
-            if (globalActiveMatchId == matchId) { await setDoc(doc(db, "tournaments", "tri-velocity-cup"), { liveMatch: { p1Score: 0, p2Score: 0, secondsLeft: 300, isRunning: false, isOT: false } }, { merge: true }); }
-        } else if (codeInput !== null) alert("Incorrect Password!");
+        if(p1Name === "TBD" || p2Name === "TBD") return alert("Waiting on previous match!");
+        let code = prompt("Referee Passcode:");
+        if (code === "2013") {
+            await setDoc(doc(db, "tournaments", "tri-velocity-cup"), { liveMatch: { matchId: matchId, p1Name: p1Name, p2Name: p2Name, p1Score: 0, p2Score: 0, secondsLeft: 300, isRunning: false, isOT: false } }, { merge: true });
+            document.getElementById("main-layout").style.display = "none"; document.getElementById("fullscreen-admin").style.display = "flex";
+        }
     };
     
-    window.activateFriendlies = async function() {
-        let codeInput = prompt("Enter Referee Passcode to unlock Friendlies Section:");
-        if (codeInput === "2013") { await setDoc(doc(db, "tournaments", "tri-velocity-cup"), { settings: { friendliesActive: true } }, { merge: true }); } 
-        else if (codeInput !== null) alert("Incorrect Password!");
-    };
-
-    window.modLiveScore = async function(targetPlayer, offset) {
-        let prop = targetPlayer === 'p1' ? 'p1Score' : 'p2Score';
-        let adjustedVal = Math.max(0, adminState[prop] + offset);
-        await setDoc(doc(db, "tournaments", "tri-velocity-cup"), { liveMatch: { [prop]: adjustedVal } }, { merge: true });
-    };
-
-    window.toggleAdminOT = async function() { await setDoc(doc(db, "tournaments", "tri-velocity-cup"), { liveMatch: { isOT: !adminState.isOT } }, { merge: true }); };
-    window.toggleAdminClock = async function() { await setDoc(doc(db, "tournaments", "tri-velocity-cup"), { liveMatch: { isRunning: !adminState.isRunning } }, { merge: true }); };
+    window.modLiveScore = async (tp, off) => { let p = tp==='p1'?'p1Score':'p2Score'; await setDoc(doc(db, "tournaments", "tri-velocity-cup"), { liveMatch: { [p]: Math.max(0, adminState[p]+off) } }, { merge: true }); };
+    window.toggleAdminOT = async () => await setDoc(doc(db, "tournaments", "tri-velocity-cup"), { liveMatch: { isOT: !adminState.isOT } }, { merge: true });
+    window.toggleAdminClock = async () => await setDoc(doc(db, "tournaments", "tri-velocity-cup"), { liveMatch: { isRunning: !adminState.isRunning } }, { merge: true });
 
     function runLocalTimerTick(active) {
-        adminState.isRunning = active;
-        clearInterval(clockInterval);
+        adminState.isRunning = active; clearInterval(clockInterval);
         if (active) {
             clockInterval = setInterval(() => {
                 adminState.secondsLeft--;
                 if (adminState.secondsLeft <= 0) { adminState.secondsLeft = 0; adminState.isRunning = false; clearInterval(clockInterval); }
                 formatClockUI(adminState.secondsLeft, "admin-clock"); formatClockUI(adminState.secondsLeft, "view-clock");
-                if (adminState.secondsLeft % 3 === 0 || adminState.secondsLeft === 0) {
-                    setDoc(doc(db, "tournaments", "tri-velocity-cup"), { liveMatch: { secondsLeft: adminState.secondsLeft, isRunning: adminState.isRunning } }, { merge: true });
-                }
+                if (adminState.secondsLeft % 4 === 0 || adminState.secondsLeft === 0) { setDoc(doc(db, "tournaments", "tri-velocity-cup"), { liveMatch: { secondsLeft: adminState.secondsLeft, isRunning: adminState.isRunning } }, { merge: true }); }
             }, 1000);
         }
     }
+    function formatClockUI(tickCount, id) { let m = Math.floor(tickCount/60); let s = tickCount%60; document.getElementById(id).innerText = `${m}:${s<10?'0':''}${s}`; }
 
-    function formatClockUI(tickCount, id) {
-        let m = Math.floor(tickCount / 60); let s = tickCount % 60;
-        document.getElementById(id).innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
-    }
-
-    // --- NEW BROADCAST LOGIC ---
-    window.commitAndSaveActiveMatch = function() {
-        if (!confirm("Are you ready to log the final score and open the broadcast report?")) return;
-        
+    // --- DATA SAVING (Stats go to server now) ---
+    window.triggerStatsEntry = function() {
+        if (!confirm("Commit final score and enter detailed stats?")) return;
         document.getElementById("modal-p1-label-shots").innerText = `${adminState.p1Name} Shots`;
         document.getElementById("modal-p2-label-shots").innerText = `${adminState.p2Name} Shots`;
-        document.getElementById("modal-p1-label-saves").innerText = `${adminState.p1Name} Saves`;
-        document.getElementById("modal-p2-label-saves").innerText = `${adminState.p2Name} Saves`;
         document.getElementById("input-mvp").value = adminState.p1Score > adminState.p2Score ? adminState.p1Name : adminState.p2Name;
-        
-        document.getElementById("input-p1-shots").value = "0";
-        document.getElementById("input-p2-shots").value = "0";
-        document.getElementById("input-p1-saves").value = "0";
-        document.getElementById("input-p2-saves").value = "0";
-
+        document.getElementById("input-p1-shots").value="0"; document.getElementById("input-p2-shots").value="0";
+        document.getElementById("input-p1-saves").value="0"; document.getElementById("input-p2-saves").value="0";
         document.getElementById("stats-input-modal").style.display = "flex";
     };
 
-    window.launchBroadcastView = async function() {
-        let p1Shots = parseInt(document.getElementById("input-p1-shots").value) || 0;
-        let p2Shots = parseInt(document.getElementById("input-p2-shots").value) || 0;
-        let p1Saves = parseInt(document.getElementById("input-p1-saves").value) || 0;
-        let p2Saves = parseInt(document.getElementById("input-p2-saves").value) || 0;
+    window.saveMatchToDatabase = async function() {
+        let p1Shots = parseInt(document.getElementById("input-p1-shots").value) || 0; let p2Shots = parseInt(document.getElementById("input-p2-shots").value) || 0;
+        let p1Saves = parseInt(document.getElementById("input-p1-saves").value) || 0; let p2Saves = parseInt(document.getElementById("input-p2-saves").value) || 0;
         let mvpName = document.getElementById("input-mvp").value || "None";
         
-        // 🧠 AUTO-CALCULATE POSSESSION (Pressure Formula: Shots + Opponent Saves)
-        let p1Pressure = p1Shots + p2Saves;
-        let p2Pressure = p2Shots + p1Saves;
-        let totalPressure = p1Pressure + p2Pressure;
-        
-        let p1Poss = 50; 
-        let p2Poss = 50;
-        if (totalPressure > 0) {
-            p1Poss = Math.round((p1Pressure / totalPressure) * 100);
-            p2Poss = 100 - p1Poss;
-        }
+        // Possession Calculation (Pressure formula)
+        let p1P = p1Shots + p2Saves; let p2P = p2Shots + p1Saves; let tot = p1P + p2P;
+        let p1Poss = tot > 0 ? Math.round((p1P/tot)*100) : 50; let p2Poss = 100 - p1Poss;
 
-        // 🎯 AUTO-CALCULATE ACCURACY
-        let p1Acc = p1Shots > 0 ? Math.round((adminState.p1Score / p1Shots) * 100) : 0;
-        let p2Acc = p2Shots > 0 ? Math.round((adminState.p2Score / p2Shots) * 100) : 0;
+        let matchPayload = { p1Score: adminState.p1Score, p2Score: adminState.p2Score, isOT: adminState.isOT, completed: true, p1Shots: p1Shots, p2Shots: p2Shots, p1Saves: p1Saves, p2Saves: p2Saves, p1Poss: p1Poss, p2Poss: p2Poss, mvp: mvpName };
         
-        document.getElementById("bc-p1-name").innerText = adminState.p1Name;
-        document.getElementById("bc-p2-name").innerText = adminState.p2Name;
-        document.getElementById("bc-p1-score").innerText = adminState.p1Score;
-        document.getElementById("bc-p2-score").innerText = adminState.p2Score;
-        let displayId = globalActiveMatchId > 100 ? `F${globalActiveMatchId-100}` : globalActiveMatchId;
-        document.getElementById("bc-match-tag").innerText = `The Tri-Velocity Cup — Match #${displayId}`;
-        document.getElementById("bc-mvp-player").innerText = mvpName;
+        await setDoc(doc(db, "tournaments", "tri-velocity-cup"), { scores: { [`match_${globalActiveMatchId}`]: matchPayload }, liveMatch: { isRunning: false } }, { merge: true });
         
-        let statsHtml = `
-            <div class="bc-stat-row" style="animation-delay: 0.6s;"><span>${adminState.p1Score}</span><span class="bc-stat-label">Goals</span><span>${adminState.p2Score}</span></div>
-            <div class="bc-stat-row" style="animation-delay: 1.2s;"><span>${p1Shots}</span><span class="bc-stat-label">Shots Taken</span><span>${p2Shots}</span></div>
-            <div class="bc-stat-row" style="animation-delay: 1.8s;"><span>${p1Acc}%</span><span class="bc-stat-label">Shot Accuracy</span><span>${p2Acc}%</span></div>
-            <div class="bc-stat-row" style="animation-delay: 2.4s;"><span>${p1Saves}</span><span class="bc-stat-label">Saves Made</span><span>${p2Saves}</span></div>
-            <div class="bc-stat-row" style="animation-delay: 3.0s;"><span>${p1Poss}%</span><span class="bc-stat-label">Ball Possession</span><span>${p2Poss}%</span></div>
-        `;
-        
-        document.getElementById("bc-stats-rows").innerHTML = statsHtml;
-        
-        let mvpBanner = document.getElementById("bc-mvp-banner");
-        mvpBanner.style.animation = 'none';
-        setTimeout(() => { mvpBanner.style.animation = 'scaleIn 0.6s ease forwards'; }, 3600);
-
         document.getElementById("fullscreen-admin").style.display = "none";
         document.getElementById("stats-input-modal").style.display = "none";
-        document.getElementById("broadcast-screen").style.display = "flex";
-        
-        await setDoc(doc(db, "tournaments", "tri-velocity-cup"), {
-            scores: { [`match_${globalActiveMatchId}`]: { p1Score: adminState.p1Score, p2Score: adminState.p2Score, isOT: adminState.isOT, completed: true } },
-            liveMatch: { isRunning: false }
-        }, { merge: true });
-    };
-
-    window.closeBroadcastShow = function() {
-        document.getElementById("broadcast-screen").style.display = "none";
         document.getElementById("main-layout").style.display = "block";
-        window.scrollTo(0, 0);
+        alert("Match Saved! The TV Receiver will update on its next cycle automatically.");
     };
-    // ----------------------------
 
-    function createMatchRow(id, p1, p2, log, displayLabel, extraClass="") {
-        let actionsHtml = log.completed 
-            ? `<span style="color:#8b949e">✅ Logged</span><br><button class="btn btn-secondary btn-reset" onclick="resetMatchStatus(${id})">🔄 Reset</button>` 
-            : `<button class="btn btn-secondary btn-action" onclick="launchSelectedMatch(${id}, '${p1}', '${p2}')">🚀 Boot</button>`;
-        return `<tr class="${extraClass}"><td>${displayLabel}</td><td><strong>${p1}</strong> vs <strong>${p2}</strong></td><td>${log.completed ? `${log.p1Score} : ${log.p2Score} ${log.isOT ? '(OT)' : ''}` : '--'}</td><td>${actionsHtml}</td></tr>`;
-    }
+    // --- 📺 TV RECEIVER LOOP LOGIC ---
+    window.startTVBroadcastMode = function() {
+        document.getElementById("main-layout").style.display = "none";
+        document.getElementById("tv-overlay").style.display = "flex";
+        renderTVSlide(); // Draw first immediately
+        tvLoopInterval = setInterval(() => {
+            tvSlideIndex = (tvSlideIndex + 1) % 4; // Cycles through 0, 1, 2, 3
+            renderTVSlide();
+        }, 12000); // 12 seconds per slide
+    };
 
-    function getWinner(log, p1Name, p2Name) {
-        let actualP1 = log.p1Score + (p1Name === "Lilly" ? 5 : 0);
-        let actualP2 = log.p2Score + (p2Name === "Lilly" ? 5 : 0);
-        return actualP1 > actualP2 ? p1Name : p2Name;
-    }
+    window.stopTVBroadcastMode = function() {
+        clearInterval(tvLoopInterval);
+        document.getElementById("tv-overlay").style.display = "none";
+        document.getElementById("main-layout").style.display = "flex";
+    };
 
-    function renderDashboards(historyLogs, friendliesActive) {
-        let statistics = {
-            "Zezo": { name: "Zezo", points: 0, gd: 0 },
-            "Asser": { name: "Asser", points: 0, gd: 0 },
-            "Lilly": { name: "Lilly (+Bot)", points: 0, gd: 0 }
-        };
+    function renderTVSlide() {
+        const box = document.getElementById("tv-dynamic-content");
+        // Force reflow to restart CSS animation
+        box.classList.remove("tv-content-box"); void box.offsetWidth; box.classList.add("tv-content-box");
+        let html = ``;
 
-        const p1Container = document.getElementById("matches-body");
-        p1Container.innerHTML = "";
-
-        phase1Schedule.forEach(fixture => {
-            let log = historyLogs[`match_${fixture.id}`] || { p1Score: 0, p2Score: 0, isOT: false, completed: false };
-            p1Container.innerHTML += createMatchRow(fixture.id, fixture.p1, fixture.p2, log, fixture.id);
-
-            if (log.completed) {
-                let actualP1 = log.p1Score + (fixture.p1 === "Lilly" ? 5 : 0);
-                let actualP2 = log.p2Score + (fixture.p2 === "Lilly" ? 5 : 0);
-                statistics[fixture.p1].gd += (actualP1 - actualP2);
-                statistics[fixture.p2].gd += (actualP2 - actualP1);
-                if (actualP1 > actualP2) { statistics[fixture.p1].points += log.isOT ? 2 : 3; } 
-                else if (actualP2 > actualP1) { statistics[fixture.p2].points += log.isOT ? 2 : 3; }
-            }
-        });
-
-        let sortedBoard = Object.values(statistics).sort((a, b) => (b.points !== a.points) ? b.points - a.points : b.gd - a.gd);
-        const lbElement = document.getElementById("leaderboard-body");
-        lbElement.innerHTML = "";
-        sortedBoard.forEach((p, pos) => {
-            lbElement.innerHTML += `<tr><td><strong>${pos+1}</strong></td><td>${p.name}</td><td><strong>${p.points}</strong></td><td style="color:${p.gd>=0?'#2ea043':'#f85149'}">${p.gd>0?'+'+p.gd:p.gd}</td></tr>`;
-        });
-
-        let rank1 = sortedBoard[0].name.replace(" (+Bot)", "");
-        let rank2 = sortedBoard[1].name.replace(" (+Bot)", "");
-        let rank3 = sortedBoard[2].name.replace(" (+Bot)", "");
-
-        let log16 = historyLogs['match_16'] || { completed: false };
-        let p2_17 = "TBD";
-        if (log16.completed) { p2_17 = getWinner(log16, rank2, rank3); }
-
-        let log17 = historyLogs['match_17'] || { completed: false };
-
-        const p2Container = document.getElementById("phase2-body");
-        p2Container.innerHTML = "";
-        p2Container.innerHTML += createMatchRow(16, rank2, rank3, log16, "16 (Semi)", "playoff-row");
-        p2Container.innerHTML += createMatchRow(17, rank1, p2_17, log17, "17 (FINAL)", "playoff-row");
-
-        const fContent = document.getElementById("friendlies-content");
-        if (friendliesActive) {
-            let fHtml = `<div class="table-scroll"><table><thead><tr><th>M#</th><th>Matchup</th><th>Logged Score</th><th>Status</th></tr></thead><tbody>`;
-            friendliesSchedule.forEach((fix, index) => {
-                let fLog = historyLogs[`match_${fix.id}`] || { completed: false };
-                fHtml += createMatchRow(fix.id, fix.p1, fix.p2, fLog, `F${index+1}`);
+        if (tvSlideIndex === 0) {
+            // SLIDE 1: STANDINGS
+            html += `<div class="tv-title">Tournament Standings</div><div class="tv-subtitle">Live Phase 1 Rankings</div>`;
+            tvDataState.standings.forEach((p, i) => {
+                let isTop = i === 0 ? "tv-rank-1" : "";
+                html += `<div class="tv-standing-row ${isTop}">
+                    <span style="color:${i===0?'var(--gold)':'#fff'}">#${i+1}</span>
+                    <div style="display:flex; align-items:center; gap:15px;"><img src="${getImg(p.name)}" onerror="this.style.display='none'" style="width:40px;height:40px;border-radius:50%;object-fit:cover;"> ${p.name.replace(" (+Bot)", "")}</div>
+                    <span style="color:var(--accent-color);">${p.points} PTS</span>
+                </div>`;
             });
-            fHtml += `</tbody></table></div>`;
-            fContent.innerHTML = fHtml;
+        } 
+        else if (tvSlideIndex === 1) {
+            // SLIDE 2: NEXT MATCH
+            if (tvDataState.nextMatch) {
+                let m = tvDataState.nextMatch;
+                html += `<div class="tv-title">Next Fixture</div><div class="tv-subtitle">Match #${m.id}</div>
+                <div class="tv-vs-container">
+                    <div class="tv-vs-side">
+                        <img class="tv-player-img" src="${getImg(m.p1)}" onerror="this.style.display='none'">
+                        <div class="tv-vs-name" style="color:var(--accent-color)">${m.p1}</div>
+                    </div>
+                    <div class="tv-vs-badge">VS</div>
+                    <div class="tv-vs-side">
+                        <img class="tv-player-img" src="${getImg(m.p2)}" onerror="this.style.display='none'" style="border-color:#ff7b72; box-shadow: 0 0 30px rgba(255,123,114,0.4);">
+                        <div class="tv-vs-name" style="color:#ff7b72">${m.p2}</div>
+                    </div>
+                </div>`;
+            } else { html += `<div class="tv-title">Group Stage Complete</div><div class="tv-subtitle">Preparing for Playoffs</div>`; }
         }
+        else if (tvSlideIndex === 2) {
+            // SLIDE 3: LAST MATCH STATS
+            if (tvDataState.lastMatch) {
+                let lm = tvDataState.lastMatch; let log = lm.log;
+                let p1Acc = log.p1Shots > 0 ? Math.round((log.p1Score / log.p1Shots) * 100) : 0;
+                let p2Acc = log.p2Shots > 0 ? Math.round((log.p2Score / log.p2Shots) * 100) : 0;
+                html += `<div class="tv-title">Post-Match Report</div><div class="tv-subtitle">Match #${lm.id} Final</div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+                    <div class="tv-vs-name" style="color:var(--accent-color); width:30%; text-align:right;">${lm.p1}</div>
+                    <div style="display:flex; gap:20px; align-items:center;"><div class="tv-score-box">${log.p1Score}</div><div style="font-size:24px; color:#8b949e; font-weight:bold;">FT</div><div class="tv-score-box">${log.p2Score}</div></div>
+                    <div class="tv-vs-name" style="color:#ff7b72; width:30%; text-align:left;">${lm.p2}</div>
+                </div>
+                <div class="tv-stat-row"><span>${log.p1Shots || 0}</span><span class="tv-stat-label">Shots</span><span>${log.p2Shots || 0}</span></div>
+                <div class="tv-stat-row"><span>${p1Acc}%</span><span class="tv-stat-label">Accuracy</span><span>${p2Acc}%</span></div>
+                <div class="tv-stat-row"><span>${log.p1Saves || 0}</span><span class="tv-stat-label">Saves</span><span>${log.p2Saves || 0}</span></div>
+                <div class="tv-stat-row"><span>${log.p1Poss || 50}%</span><span class="tv-stat-label">Possession</span><span>${log.p2Poss || 50}%</span></div>
+                <div class="tv-mvp-banner">🏅 MVP: ${log.mvp || 'None'}</div>`;
+            } else { html += `<div class="tv-title">Awaiting Match Results</div><div class="tv-subtitle">Tournament Commencing Soon</div>`; }
+        }
+        else if (tvSlideIndex === 3) {
+            // SLIDE 4: TOP SCORER
+            let ts = tvDataState.topScorer;
+            html += `<div class="tv-title" style="color:var(--gold);">Golden Boot Leader</div><div class="tv-subtitle">Tournament Top Scorer</div>
+            <img class="tv-player-img tv-scorer-img" src="${getImg(ts.name)}" onerror="this.style.display='none'">
+            <div class="tv-vs-name" style="font-size:48px; margin: 10px 0;">${ts.name.replace(" (+Bot)","")}</div>
+            <div class="tv-big-goals">${ts.goals}</div>
+            <div class="tv-goal-label">Goals Scored</div>`;
+        }
+        box.innerHTML = html;
     }
 </script>
 </body>
