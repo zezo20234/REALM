@@ -355,7 +355,18 @@
 
         phase1Schedule.forEach(fix => {
             let log = logs[`match_${fix.id}`] || { completed: false };
-            p1Container.innerHTML += `<tr><td>${fix.id}</td><td><strong>${fix.p1}</strong> vs <strong>${fix.p2}</strong></td><td>${log.completed ? `${log.p1Score} : ${log.p2Score}` : '--'}</td><td>${log.completed ? '✅' : `<button class="btn" style="padding:4px 10px;font-size:12px;min-height:30px;" onclick="launchSelectedMatch(${fix.id}, '${fix.p1}', '${fix.p2}')">🚀 Boot</button>`}</td></tr>`;
+            
+            // 🔄 NEW: Added Reset Button for completed matches
+            let actionButtons = log.completed 
+                ? `<span style="display:inline-flex; align-items:center; gap:8px;">✅ <button class="btn btn-secondary" style="padding:4px 8px; font-size:12px; min-height:28px; background-color:#da3633; color:white; border:none;" onclick="resetMatch(${fix.id})">🔄 Reset</button></span>` 
+                : `<button class="btn" style="padding:4px 10px;font-size:12px;min-height:30px;" onclick="launchSelectedMatch(${fix.id}, '${fix.p1}', '${fix.p2}')">🚀 Boot</button>`;
+            
+            p1Container.innerHTML += `<tr>
+                <td>${fix.id}</td>
+                <td><strong>${fix.p1}</strong> vs <strong>${fix.p2}</strong></td>
+                <td>${log.completed ? `${log.p1Score} : ${log.p2Score}` : '--'}</td>
+                <td>${actionButtons}</td>
+            </tr>`;
 
             if (log.completed) {
                 lastCompletedId = Math.max(lastCompletedId, fix.id);
@@ -380,7 +391,28 @@
     // Admin Panel Functions
     window.requestAdminAccess = function() { if(prompt("Passcode:")==="2013"){ document.getElementById("main-layout").style.display="none"; document.getElementById("fullscreen-admin").style.display="flex"; } };
     window.exitAdminPanelWithoutSaving = function() { document.getElementById("fullscreen-admin").style.display="none"; document.getElementById("main-layout").style.display="block"; };
-    window.launchSelectedMatch = async function(id, p1, p2) { if(prompt("Passcode:")==="2013"){ await setDoc(doc(db, "tournaments", "tri-velocity-cup"), { liveMatch: { matchId: id, p1Name: p1, p2Name: p2, p1Score: 0, p2Score: 0, secondsLeft: 300, isRunning: false, isOT: false } }, { merge: true }); document.getElementById("main-layout").style.display="none"; document.getElementById("fullscreen-admin").style.display="flex"; } };
+    
+    window.launchSelectedMatch = async function(id, p1, p2) { 
+        if(prompt("Passcode:")==="2013"){ 
+            await setDoc(doc(db, "tournaments", "tri-velocity-cup"), { liveMatch: { matchId: id, p1Name: p1, p2Name: p2, p1Score: 0, p2Score: 0, secondsLeft: 300, isRunning: false, isOT: false } }, { merge: true }); 
+            document.getElementById("main-layout").style.display="none"; document.getElementById("fullscreen-admin").style.display="flex"; 
+        } 
+    };
+
+    // 🔄 NEW: Function to reset a completed match
+    window.resetMatch = async function(id) {
+        if(prompt("Enter Admin Passcode to Reset Match:") === "2013") {
+            if(confirm(`Are you sure you want to completely erase the results for Match #${id}? This will update the leaderboard immediately.`)) {
+                await setDoc(doc(db, "tournaments", "tri-velocity-cup"), { 
+                    scores: { [`match_${id}`]: { completed: false, p1Score: 0, p2Score: 0, p1Shots: 0, p2Shots: 0, p1Saves: 0, p2Saves: 0, p1Poss: 50, p2Poss: 50, isOT: false, mvp: "" } } 
+                }, { merge: true });
+                alert(`✅ Match #${id} has been reset successfully.`);
+            }
+        } else {
+            alert("❌ Access Denied: Incorrect Passcode");
+        }
+    };
+
     window.modLiveScore = async (tp, off) => { let p = tp==='p1'?'p1Score':'p2Score'; await setDoc(doc(db, "tournaments", "tri-velocity-cup"), { liveMatch: { [p]: Math.max(0, adminState[p]+off) } }, { merge: true }); };
     window.toggleAdminOT = async () => await setDoc(doc(db, "tournaments", "tri-velocity-cup"), { liveMatch: { isOT: !adminState.isOT } }, { merge: true });
     window.toggleAdminClock = async () => await setDoc(doc(db, "tournaments", "tri-velocity-cup"), { liveMatch: { isRunning: !adminState.isRunning } }, { merge: true });
