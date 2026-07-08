@@ -42,7 +42,7 @@
         #p2-wrapper { align-items: flex-start; text-align: left; }
         .live-team { font-size: 18px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
         .platform-label { font-size: 11px; color: #8b949e; text-transform: uppercase; font-weight: bold; margin-top: 2px; letter-spacing: 0.5px; }
-        .live-number { font-size: 38px; font-weight: 800; color: #fff; font-family: monospace; background: #21262d; padding: 4px 16px; border-radius: 8px; border: 1px solid #30363d; min-width: 60px; }
+        .live-number { font-size: 38px; font-weight: 800; color: #fff; font-family: monospace; background: #21262d; padding: 4px 16px; border-radius: 8px; border: 1px solid #30363d; min-width: 60px; text-align: center; }
         .live-timer { font-size: 20px; color: #8b949e; font-family: monospace; font-weight: bold; height: 24px; }
 
         .table-scroll { width: 100%; overflow-x: auto; border-radius: 8px; border: 1px solid #30363d; }
@@ -59,6 +59,7 @@
 
         input, select, button { font-size: 16px !important; }
         .btn { background-color: var(--green); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .btn:hover { filter: brightness(1.1); }
         .btn-secondary { background-color: #21262d; border: 1px solid #30363d; color: white; }
         .btn-tv { background: linear-gradient(90deg, #6f42c1, #d29922); border: 2px solid #fff; box-shadow: 0 0 15px rgba(210, 153, 34, 0.4); margin-bottom: 20px; width: 100%; font-size: 18px; text-transform: uppercase; letter-spacing: 1px; }
 
@@ -66,18 +67,19 @@
         #fullscreen-admin { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #070a0e; z-index: 999999; flex-direction: column; align-items: center; justify-content: space-between; padding: 40px 20px; overflow-y: auto; }
         .admin-header { text-align: center; width: 100%; margin-bottom: 15px; }
         .admin-panel-row { display: flex; width: 100%; max-width: 800px; justify-content: space-around; align-items: center; flex-grow: 1; }
-        .admin-controller-box { text-align: center; background: #161b22; padding: 20px 10px; border-radius: 16px; border: 1px solid #30363d; width: 32%; }
-        .huge-score { font-size: 64px; font-weight: 900; margin: 10px 0; font-family: monospace; color: #fff; }
-        .score-controls { display: flex; justify-content: center; gap: 10px; }
-        .circle-btn { width: 55px; height: 55px; border-radius: 50%; border: none; font-size: 26px; font-weight: bold; cursor: pointer; color: white; }
+        .admin-controller-box { text-align: center; background: #161b22; padding: 20px 10px; border-radius: 16px; border: 1px solid #30363d; width: 32%; display: flex; flex-direction: column; align-items: center; }
+        .huge-score { font-size: 64px; font-weight: 900; margin: 10px 0; font-family: monospace; color: #fff; min-width: 80px; }
+        .score-controls { display: flex; justify-content: center; gap: 10px; width: 100%; }
+        .circle-btn { width: 55px; height: 55px; border-radius: 50%; border: none; font-size: 26px; font-weight: bold; cursor: pointer; color: white; transition: 0.1s transform; }
+        .circle-btn:active { transform: scale(0.9); }
         .btn-plus { background-color: #238636; } .btn-minus { background-color: #f85149; }
         .huge-clock { font-size: 42px; font-family: monospace; font-weight: bold; color: var(--accent-color); margin-bottom: 15px; }
-        .ot-toggle { background-color: #6f42c1; color: white; padding: 10px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; border: none; margin-top: 10px; }
-        .ot-active { background-color: #f9826c; animation: pulse 1s infinite; }
+        .ot-toggle { background-color: #21262d; border: 1px solid #30363d; color: white; padding: 10px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s all; }
+        .ot-active { background-color: #d29922; color: #000; border-color: #d29922; animation: pulse 1s infinite; box-shadow: 0 0 15px rgba(210, 153, 34, 0.6); }
 
         /* 📊 STATS ENTRY MODAL */
         #stats-input-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 9999998; justify-content: center; align-items: center; padding: 20px; }
-        .modal-box { background: var(--card-bg); border: 2px solid var(--accent-color); padding: 24px; border-radius: 16px; width: 100%; max-width: 480px; }
+        .modal-box { background: var(--card-bg); border: 2px solid var(--accent-color); padding: 24px; border-radius: 16px; width: 100%; max-width: 480px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
         .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0; }
         .modal-field { display: flex; flex-direction: column; gap: 6px; }
         .modal-field label { font-size: 12px; color: #8b949e; font-weight: bold; text-transform: uppercase; }
@@ -190,6 +192,7 @@
         .anim-stats { opacity: 0; transform-origin: top; animation: dropDownStats 0.8s cubic-bezier(0.1, 0.9, 0.2, 1) 1.8s forwards; }
 
         /* Animations */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes fadeInDown { from { opacity: 0; transform: translateY(-40px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes popInScore { 0% { opacity: 0; transform: scale(0.3); } 100% { opacity: 1; transform: scale(1); } }
         @keyframes dropDownStats { 
@@ -203,6 +206,7 @@
         @keyframes slideInLeft { to { transform: skewX(-15deg) translateX(0); } }
         @keyframes slideInRightSplit { to { transform: skewX(15deg) translateX(0); } }
         @keyframes popIn { 0% { opacity: 0; transform: translate(-50%, 50px) scale(0.5); } 100% { opacity: 1; transform: translate(-50%, 0) scale(1); } }
+        @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.8; transform: scale(0.98); } }
     </style>
 </head>
 <body>
@@ -369,6 +373,16 @@
         adminState.secondsLeft = live.secondsLeft !== undefined ? live.secondsLeft : 300;
         adminState.isOT = live.isOT || false;
 
+        // UI update for OT Button inside listener so it physically responds 
+        let otBtn = document.getElementById("admin-ot-btn");
+        if(adminState.isOT) {
+            otBtn.classList.add("ot-active");
+            otBtn.innerText = "Overtime: ON 🔥";
+        } else {
+            otBtn.classList.remove("ot-active");
+            otBtn.innerText = "Toggle Overtime (OT: OFF)";
+        }
+
         let fallbackFix = phase1Schedule.find(m => m.id === globalActiveMatchId);
         adminState.p1Name = live.p1Name || (fallbackFix ? fallbackFix.p1 : "Player 1");
         adminState.p2Name = live.p2Name || (fallbackFix ? fallbackFix.p2 : "Player 2");
@@ -447,9 +461,28 @@
         });
     }
 
-    window.requestAdminAccess = function() { if(prompt("Passcode:")==="2013"){ document.getElementById("main-layout").style.display="none"; document.getElementById("fullscreen-admin").style.display="flex"; } };
+    // Modal fade-in attached when opening admin
+    window.requestAdminAccess = function() { 
+        if(prompt("Passcode:")==="2013"){ 
+            document.getElementById("main-layout").style.display="none"; 
+            let admin = document.getElementById("fullscreen-admin");
+            admin.style.display="flex"; 
+            admin.style.animation = "fadeIn 0.3s ease-out";
+        } 
+    };
+
     window.exitAdminPanelWithoutSaving = function() { document.getElementById("fullscreen-admin").style.display="none"; document.getElementById("main-layout").style.display="block"; };
-    window.launchSelectedMatch = async function(id, p1, p2) { if(prompt("Passcode:")==="2013"){ await setDoc(doc(db, "tournaments", "tri-velocity-cup"), { liveMatch: { matchId: id, p1Name: p1, p2Name: p2, p1Score: 0, p2Score: 0, secondsLeft: 300, isRunning: false, isOT: false } }, { merge: true }); document.getElementById("main-layout").style.display="none"; document.getElementById("fullscreen-admin").style.display="flex"; } };
+    
+    // Smooth transition here too
+    window.launchSelectedMatch = async function(id, p1, p2) { 
+        if(prompt("Passcode:")==="2013"){ 
+            await setDoc(doc(db, "tournaments", "tri-velocity-cup"), { liveMatch: { matchId: id, p1Name: p1, p2Name: p2, p1Score: 0, p2Score: 0, secondsLeft: 300, isRunning: false, isOT: false } }, { merge: true }); 
+            document.getElementById("main-layout").style.display="none"; 
+            let admin = document.getElementById("fullscreen-admin");
+            admin.style.display="flex"; 
+            admin.style.animation = "fadeIn 0.3s ease-out";
+        } 
+    };
     
     window.resetMatch = async function(id) {
         if(prompt("Enter Admin Passcode to Reset Match:") === "2013") {
@@ -473,7 +506,9 @@
     window.triggerStatsEntry = function() {
         document.getElementById("modal-p1-label-shots").innerText = `${adminState.p1Name} Shots`; document.getElementById("modal-p2-label-shots").innerText = `${adminState.p2Name} Shots`;
         document.getElementById("input-mvp").value = adminState.p1Score > adminState.p2Score ? adminState.p1Name : adminState.p2Name;
-        document.getElementById("stats-input-modal").style.display = "flex";
+        let statsModal = document.getElementById("stats-input-modal");
+        statsModal.style.display = "flex";
+        statsModal.style.animation = "fadeIn 0.3s ease-out";
     };
 
     window.saveMatchToDatabase = async function() {
@@ -494,8 +529,16 @@
         document.getElementById("fullscreen-admin").style.display = "none"; document.getElementById("stats-input-modal").style.display = "none"; document.getElementById("main-layout").style.display = "block";
     };
 
+    // Fixed the glitch loop and added transition
     window.startTVBroadcastMode = function() {
-        document.getElementById("main-layout").style.display = "none"; document.getElementById("tv-overlay").style.display = "flex";
+        clearInterval(tvLoopInterval); // <--- Stops the glitching multiple timers 
+        tvSlideIndex = 0; // Starts from the beginning always
+        document.getElementById("main-layout").style.display = "none"; 
+        
+        let tvOver = document.getElementById("tv-overlay");
+        tvOver.style.display = "flex";
+        tvOver.style.animation = "fadeIn 0.5s ease-out"; // <--- Smooth entry
+        
         renderTVSlide();
         tvLoopInterval = setInterval(() => { tvSlideIndex = (tvSlideIndex + 1) % 4; renderTVSlide(); }, 12000); 
     };
