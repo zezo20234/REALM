@@ -321,7 +321,7 @@
     <div class="tv-bg"></div>
     <div class="tv-bg-pattern"></div>
     
-    <img src="cup.png" alt="The Foil-Wrapped Cup" class="tv-cup-logo">
+    <img src="cup.PNG" alt="The Foil-Wrapped Cup" class="tv-cup-logo">
     
     <div class="tv-top-bar">
         <div class="tv-live-header-indicator">
@@ -534,10 +534,19 @@
             html += `<div style="display:flex; flex-direction:column; align-items:center; width:100%;"><div class="tv-title" style="color:var(--accent-color)">Tournament Standings</div><div class="tv-subtitle">Live Rankings</div>`;
             tvDataState.standings.forEach((p, i) => {
                 let col = getTeamColor(p.name);
+                
+                // Grab the last 5 form results and build the HTML pills (scaled up for TV mode)
+                let recentFormHTML = p.form.slice(-5).map(f => `<span class="form-pill form-${f.toLowerCase()}" style="font-size: 16px; padding: 5px 12px; margin: 0 3px;">${f}</span>`).join('');
+                
                 html += `<div class="tv-standing-row" style="animation-delay: ${i*0.2}s; border-left: 8px solid ${col};">
-                    <span>#${i+1}</span>
-                    <div style="display:flex; align-items:center; gap:15px; color:${col};">${p.name.replace(" (+Bot)", "")}</div>
-                    <span style="color:#fff;">${p.points} PTS</span>
+                    <span style="min-width: 60px;">#${i+1}</span>
+                    <div style="display:flex; align-items:center; gap:15px; color:${col}; flex-grow: 1;">${p.name.replace(" (+Bot)", "")}</div>
+                    
+                    <div style="display:flex; align-items:center; margin-right: 25px;">
+                        ${recentFormHTML || '<span style="color:#8b949e; font-size:18px;">--</span>'}
+                    </div>
+                    
+                    <span style="color:#fff; min-width: 120px; text-align: right;">${p.points} PTS</span>
                 </div>`;
             });
             html += `</div>`;
