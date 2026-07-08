@@ -677,6 +677,7 @@
                 <div style="position:absolute; top:40px; width:100%; text-align:center;">
                     <div class="tv-title" style="${m.id >= 16 ? 'color: var(--gold); text-shadow: 0 0 15px rgba(210,153,34,0.6);' : ''}">Next Fixture</div>
                     <div class="tv-subtitle" style="${m.id >= 16 ? 'color: #fff; font-weight: 900;' : ''}">${m.title || 'Match #' + m.id}</div>
+                    ${m.id === 17 ? `<img src="cup.PNG" style="height: 180px; margin-top: 15px; animation: floatGold 3s infinite ease-in-out; filter: drop-shadow(0 15px 30px rgba(210,153,34,0.8)); position: relative; z-index: 100;">` : ''}
                 </div>
                 <div class="tv-vs-container">
                     <div class="tv-vs-side" style="padding-right: 6%;">
@@ -712,7 +713,8 @@
                 html += `
                 <div style="display:flex; flex-direction:column; align-items:center; width:100%; height:100%; justify-content:center;">
                     <div class="tv-title anim-teams">Match Result</div>
-                    <div class="tv-subtitle anim-teams" style="margin-bottom: 50px;">Final Stats: ${lm.title}</div>
+                    <div class="tv-subtitle anim-teams" style="margin-bottom: ${lm.id === 17 ? '20px' : '50px'};">Final Stats: ${lm.title}</div>
+                    ${lm.id === 17 ? `<img src="cup.PNG" class="anim-teams" style="height: 150px; margin-bottom: 25px; animation: floatGold 3s infinite ease-in-out; filter: drop-shadow(0 15px 30px rgba(210,153,34,0.8));">` : ''}
                     
                     <div class="match-result-header anim-teams">
                         <div class="result-team">
