@@ -373,7 +373,6 @@
         adminState.secondsLeft = live.secondsLeft !== undefined ? live.secondsLeft : 300;
         adminState.isOT = live.isOT || false;
 
-        // UI update for OT Button inside listener so it physically responds 
         let otBtn = document.getElementById("admin-ot-btn");
         if(adminState.isOT) {
             otBtn.classList.add("ot-active");
@@ -461,7 +460,6 @@
         });
     }
 
-    // Modal fade-in attached when opening admin
     window.requestAdminAccess = function() { 
         if(prompt("Passcode:")==="2013"){ 
             document.getElementById("main-layout").style.display="none"; 
@@ -473,7 +471,6 @@
 
     window.exitAdminPanelWithoutSaving = function() { document.getElementById("fullscreen-admin").style.display="none"; document.getElementById("main-layout").style.display="block"; };
     
-    // Smooth transition here too
     window.launchSelectedMatch = async function(id, p1, p2) { 
         if(prompt("Passcode:")==="2013"){ 
             await setDoc(doc(db, "tournaments", "tri-velocity-cup"), { liveMatch: { matchId: id, p1Name: p1, p2Name: p2, p1Score: 0, p2Score: 0, secondsLeft: 300, isRunning: false, isOT: false } }, { merge: true }); 
@@ -529,15 +526,14 @@
         document.getElementById("fullscreen-admin").style.display = "none"; document.getElementById("stats-input-modal").style.display = "none"; document.getElementById("main-layout").style.display = "block";
     };
 
-    // Fixed the glitch loop and added transition
     window.startTVBroadcastMode = function() {
-        clearInterval(tvLoopInterval); // <--- Stops the glitching multiple timers 
-        tvSlideIndex = 0; // Starts from the beginning always
+        clearInterval(tvLoopInterval); 
+        tvSlideIndex = 0; 
         document.getElementById("main-layout").style.display = "none"; 
         
         let tvOver = document.getElementById("tv-overlay");
         tvOver.style.display = "flex";
-        tvOver.style.animation = "fadeIn 0.5s ease-out"; // <--- Smooth entry
+        tvOver.style.animation = "fadeIn 0.5s ease-out";
         
         renderTVSlide();
         tvLoopInterval = setInterval(() => { tvSlideIndex = (tvSlideIndex + 1) % 4; renderTVSlide(); }, 12000); 
@@ -563,18 +559,14 @@
             html += `<div style="display:flex; flex-direction:column; align-items:center; width:100%;"><div class="tv-title" style="color:var(--accent-color)">Tournament Standings</div><div class="tv-subtitle">Live Rankings</div>`;
             tvDataState.standings.forEach((p, i) => {
                 let col = getTeamColor(p.name);
-                
-                // Grab the last 5 form results and build the HTML pills (scaled up for TV mode)
                 let recentFormHTML = p.form.slice(-5).map(f => `<span class="form-pill form-${f.toLowerCase()}" style="font-size: 16px; padding: 5px 12px; margin: 0 3px;">${f}</span>`).join('');
                 
                 html += `<div class="tv-standing-row" style="animation-delay: ${i*0.2}s; border-left: 8px solid ${col};">
                     <span style="min-width: 60px;">#${i+1}</span>
                     <div style="display:flex; align-items:center; gap:15px; color:${col}; flex-grow: 1;">${p.name.replace(" (+Bot)", "")}</div>
-                    
                     <div style="display:flex; align-items:center; margin-right: 25px;">
                         ${recentFormHTML || '<span style="color:#8b949e; font-size:18px;">--</span>'}
                     </div>
-                    
                     <span style="color:#fff; min-width: 120px; text-align: right;">${p.points} PTS</span>
                 </div>`;
             });
@@ -584,56 +576,99 @@
             if (tvDataState.nextMatch) {
                 let m = tvDataState.nextMatch; let c1 = getTeamColor(m.p1); let c2 = getTeamColor(m.p2);
                 
-                // 🔄 CALCULATE STATS EXCLUSIVELY FROM HEAD TO HEAD MATCHES
-                let h2hMatchesCount = 0;
-                let p1H2HWins = 0; let p2H2HWins = 0;
-                let p1H2HGoals = 0; let p2H2HGoals = 0;
+                // 🧠 ADVANCED HEURISTIC AI BRAIN START
+                let p1Stats = { wins: 0, goalsFor: 0, goalsAgainst: 0, matches: 0, form: 0 };
+                let p2Stats = { wins: 0, goalsFor: 0, goalsAgainst: 0, matches: 0, form: 0 };
+                let h2h = { p1Wins: 0, p2Wins: 0, p1Goals: 0, p2Goals: 0, matches: 0 };
 
+                // 1. Gather all historically completed data
                 phase1Schedule.forEach(fix => {
                     let log = tvDataState.rawScores[`match_${fix.id}`];
                     if (log && log.completed) {
-                        if (fix.p1 === m.p1 && fix.p2 === m.p2) {
-                            h2hMatchesCount++;
-                            p1H2HGoals += log.p1Score;
-                            p2H2HGoals += log.p2Score;
-                            let aP1 = log.p1Score + (fix.p1 === "Lilly" ? 5 : 0);
-                            let aP2 = log.p2Score + (fix.p2 === "Lilly" ? 5 : 0);
-                            if (aP1 > aP2) p1H2HWins++; else if (aP2 > aP1) p2H2HWins++;
-                        } else if (fix.p1 === m.p2 && fix.p2 === m.p1) {
-                            h2hMatchesCount++;
-                            p1H2HGoals += log.p2Score;
-                            p2H2HGoals += log.p1Score;
-                            let aP1 = log.p1Score + (fix.p1 === "Lilly" ? 5 : 0);
-                            let aP2 = log.p2Score + (fix.p2 === "Lilly" ? 5 : 0);
-                            if (aP1 > aP2) p2H2HWins++; else if (aP2 > aP1) p1H2HWins++;
+                        let aP1 = log.p1Score + (fix.p1 === "Lilly" ? 5 : 0);
+                        let aP2 = log.p2Score + (fix.p2 === "Lilly" ? 5 : 0);
+
+                        // P1 General Stats
+                        if (fix.p1 === m.p1 || fix.p2 === m.p1) {
+                            p1Stats.matches++;
+                            if (fix.p1 === m.p1) { p1Stats.goalsFor += aP1; p1Stats.goalsAgainst += aP2; if (aP1 > aP2) { p1Stats.wins++; p1Stats.form += 1; } else { p1Stats.form -= 0.5; } }
+                            else { p1Stats.goalsFor += aP2; p1Stats.goalsAgainst += aP1; if (aP2 > aP1) { p1Stats.wins++; p1Stats.form += 1; } else { p1Stats.form -= 0.5; } }
+                        }
+                        // P2 General Stats
+                        if (fix.p1 === m.p2 || fix.p2 === m.p2) {
+                            p2Stats.matches++;
+                            if (fix.p1 === m.p2) { p2Stats.goalsFor += aP1; p2Stats.goalsAgainst += aP2; if (aP1 > aP2) { p2Stats.wins++; p2Stats.form += 1; } else { p2Stats.form -= 0.5; } }
+                            else { p2Stats.goalsFor += aP2; p2Stats.goalsAgainst += aP1; if (aP2 > aP1) { p2Stats.wins++; p2Stats.form += 1; } else { p2Stats.form -= 0.5; } }
+                        }
+                        // H2H Stats
+                        if ((fix.p1 === m.p1 && fix.p2 === m.p2) || (fix.p1 === m.p2 && fix.p2 === m.p1)) {
+                            h2h.matches++;
+                            if (fix.p1 === m.p1) {
+                                h2h.p1Goals += aP1; h2h.p2Goals += aP2;
+                                if (aP1 > aP2) h2h.p1Wins++; else if (aP2 > aP1) h2h.p2Wins++;
+                            } else {
+                                h2h.p1Goals += aP2; h2h.p2Goals += aP1;
+                                if (aP2 > aP1) h2h.p1Wins++; else if (aP1 > aP2) h2h.p2Wins++;
+                            }
                         }
                     }
                 });
 
+                // 2. Generate Predictions based on logic and weights
                 let p1WinPct = 50; let p2WinPct = 50;
                 let predictedScoreP1 = 0; let predictedScoreP2 = 0;
 
-                // Check if they have ever played against each other
-                if (h2hMatchesCount > 0) {
-                    let totalWins = p1H2HWins + p2H2HWins;
-                    if (totalWins > 0) {
-                        p1WinPct = Math.round((p1H2HWins / totalWins) * 100);
-                        p2WinPct = 100 - p1WinPct;
-                    } else {
-                        p1WinPct = 50; p2WinPct = 50;
+                if (p1Stats.matches > 0 || p2Stats.matches > 0) {
+                    // Base rating based on Win %
+                    let p1Power = p1Stats.matches > 0 ? (p1Stats.wins / p1Stats.matches) * 100 : 50;
+                    let p2Power = p2Stats.matches > 0 ? (p2Stats.wins / p2Stats.matches) * 100 : 50;
+
+                    // Adjust for General Goal Differential
+                    let p1GD = p1Stats.matches > 0 ? (p1Stats.goalsFor - p1Stats.goalsAgainst) / p1Stats.matches : 0;
+                    let p2GD = p2Stats.matches > 0 ? (p2Stats.goalsFor - p2Stats.goalsAgainst) / p2Stats.matches : 0;
+                    p1Power += p1GD * 5; 
+                    p2Power += p2GD * 5;
+
+                    // Adjust for Momentum (Form)
+                    p1Power += p1Stats.form * 2; 
+                    p2Power += p2Stats.form * 2;
+
+                    // H2H Override (Heavily weights actual matchups over general stats)
+                    if (h2h.matches > 0) {
+                        let h2hP1WinRate = (h2h.p1Wins / h2h.matches) * 100;
+                        let h2hP2WinRate = (h2h.p2Wins / h2h.matches) * 100;
+                        p1Power = (p1Power * 0.4) + (h2hP1WinRate * 0.6);
+                        p2Power = (p2Power * 0.4) + (h2hP2WinRate * 0.6);
                     }
-                    predictedScoreP1 = Math.round(p1H2HGoals / h2hMatchesCount);
-                    predictedScoreP2 = Math.round(p2H2HGoals / h2hMatchesCount);
+
+                    // Keep math stable for the UI bars
+                    p1Power = Math.max(10, p1Power);
+                    p2Power = Math.max(10, p2Power);
+
+                    let totalPower = p1Power + p2Power;
+                    p1WinPct = Math.round((p1Power / totalPower) * 100);
+                    p2WinPct = 100 - p1WinPct;
+
+                    // Score Engine: Cross-match Offensive power against Defensive stability
+                    let p1ExpectedGoals = p1Stats.matches > 0 && p2Stats.matches > 0 ? ((p1Stats.goalsFor / p1Stats.matches) + (p2Stats.goalsAgainst / p2Stats.matches)) / 2 : 0;
+                    let p2ExpectedGoals = p1Stats.matches > 0 && p2Stats.matches > 0 ? ((p2Stats.goalsFor / p2Stats.matches) + (p1Stats.goalsAgainst / p1Stats.matches)) / 2 : 0;
+
+                    // Blend historical average with exact Head-to-Head goal average if available
+                    if (h2h.matches > 0) {
+                        p1ExpectedGoals = (p1ExpectedGoals * 0.4) + ((h2h.p1Goals / h2h.matches) * 0.6);
+                        p2ExpectedGoals = (p2ExpectedGoals * 0.4) + ((h2h.p2Goals / h2h.matches) * 0.6);
+                    }
                     
-                    // Break tie breakers if percentages don't match the rounded scores
+                    predictedScoreP1 = Math.round(p1ExpectedGoals);
+                    predictedScoreP2 = Math.round(p2ExpectedGoals);
+
+                    // Break exact ties based on overall probability advantage
                     if (predictedScoreP1 === predictedScoreP2 && p1WinPct !== p2WinPct) {
-                        if (p1WinPct > p2WinPct) predictedScoreP1 += 1; else predictedScoreP2 += 1;
+                        if (p1WinPct > p2WinPct) predictedScoreP1 += 1; 
+                        else predictedScoreP2 += 1;
                     }
-                } else {
-                    // 🤝 DEFAULT TO 50/50 IF THEY HAVE NEVER PLAYED AGAINST EACH OTHER
-                    p1WinPct = 50; p2WinPct = 50;
-                    predictedScoreP1 = 0; predictedScoreP2 = 0;
                 }
+                // 🧠 AI BRAIN END
 
                 html += `
                 <div style="position:absolute; top:40px; width:100%; text-align:center;">
@@ -665,11 +700,9 @@
         else if (tvSlideIndex === 2) {
             if (tvDataState.lastMatch) {
                 let lm = tvDataState.lastMatch; let log = lm.log;
-                // Automatically calculate shot accuracy
                 let p1Acc = log.p1Shots > 0 ? Math.round((log.p1Score / log.p1Shots) * 100) : 0;
                 let p2Acc = log.p2Shots > 0 ? Math.round((log.p2Score / log.p2Shots) * 100) : 0;
 
-                /* 🆕 NEW MATCH RESULT ANIMATION SYSTEM INCORPORATED HERE */
                 html += `
                 <div style="display:flex; flex-direction:column; align-items:center; width:100%; height:100%; justify-content:center;">
                     <div class="tv-title anim-teams">Match Result</div>
