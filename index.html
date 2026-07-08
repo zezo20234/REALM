@@ -77,7 +77,7 @@
         .modal-field label { font-size: 12px; color: #8b949e; font-weight: bold; text-transform: uppercase; }
         .modal-field input { padding: 10px; background: #21262d; border: 1px solid #30363d; color: white; border-radius: 8px; text-align: center; font-size: 16px; font-weight: bold; }
 
-        /* 📺 TV BROADCAST OVERLAY */
+        /* 📺 TV BROADCAST LOOP MODE (FOR RECEIVER) */
         #tv-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: #000; z-index: 9999999; flex-direction: column; align-items: center; justify-content: center;
@@ -87,20 +87,15 @@
         .tv-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, #161b22 0%, #050811 100%); z-index: -2; }
         .tv-bg-pattern { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: radial-gradient(rgba(255,255,255,0.03) 2px, transparent 2px); background-size: 40px 40px; z-index: -1; }
 
-        /* TV Header Utilities */
-        .tv-top-bar { position: absolute; top: 0; left: 0; width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 20px 30px; z-index: 100; background: linear-gradient(180deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 100%); }
-        .tv-live-header-indicator { display: flex; align-items: center; gap: 8px; font-weight: 900; font-size: 16px; letter-spacing: 2px; color: #ff3333; text-shadow: 0 0 10px rgba(255,51,51,0.6); text-transform: uppercase; }
-        .tv-live-dot { width: 12px; height: 12px; background-color: #ff3333; border-radius: 50%; box-shadow: 0 0 10px #ff3333; animation: blink 1.2s infinite; }
-        .tv-controls-group { display: flex; gap: 10px; }
-        .tv-utility-btn { font-size: 13px; padding: 8px 16px; opacity: 0.4; border-radius: 6px; transition: 0.3s; font-weight: bold; text-transform: uppercase; cursor: pointer; }
-        .tv-utility-btn:hover { opacity: 1; background-color: #21262d; }
+        .tv-exit-btn { position: absolute; top: 20px; right: 20px; z-index: 100; font-size: 14px; padding: 8px 16px; opacity: 0.3; transition: 0.3s; }
+        .tv-exit-btn:hover { opacity: 1; }
         
-        .tv-content-box { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding-top: 60px; }
+        .tv-content-box { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
         
         .tv-title { font-size: 40px; letter-spacing: 8px; font-weight: 900; text-transform: uppercase; text-shadow: 0 0 20px rgba(255,255,255,0.5); z-index: 10; margin-bottom: 10px; animation: fadeDown 1s ease-out; }
         .tv-subtitle { font-size: 18px; color: #8b949e; text-transform: uppercase; letter-spacing: 4px; z-index: 10; margin-bottom: 30px; }
 
-        /* 📸 CUTOUT IMAGES */
+        /* 📸 BIGGER CUTOUT IMAGES */
         .tv-huge-cutout { height: 75vh; max-height: 850px; object-fit: contain; animation: slideUp 1s ease-out forwards; filter: drop-shadow(0 20px 40px rgba(0,0,0,0.9)); z-index: 5; margin-top: auto; }
         .tv-split-cutout { height: 60vh; max-height: 650px; object-fit: contain; animation: slideUp 1s ease-out forwards; filter: drop-shadow(0 15px 30px rgba(0,0,0,0.9)); z-index: 5; }
 
@@ -128,43 +123,14 @@
 
         /* Layouts */
         .tv-vs-container { display: flex; width: 100%; height: 100%; justify-content: center; align-items: flex-end; position: relative; padding-bottom: 80px; }
-        .tv-vs-side { display: flex; flex-direction: column; align-items: center; width: 40%; position: relative; }
-        
-        /* 🔮 CENTER HUB (VS BADGE + AI SCORE PREDICTION) */
-        .tv-center-hub {
-            position: absolute; bottom: 22%; left: 50%; transform: translateX(-50%);
-            display: flex; flex-direction: column; align-items: center;
-            z-index: 30; width: 340px;
-            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.8s both;
-        }
-        .tv-vs-badge { 
-            font-size: 70px; font-weight: 900; color: #fff; font-style: italic; 
-            text-shadow: 0 0 30px rgba(255,255,255,0.6); margin-bottom: 10px;
-        }
-        .prediction-wrapper { 
-            width: 100%; background: rgba(22, 27, 34, 0.85); padding: 16px; 
-            border-radius: 16px; border: 1px solid #444c56; 
-            box-shadow: 0 20px 45px rgba(0,0,0,0.9); backdrop-filter: blur(12px);
-        }
-        .prediction-label { 
-            text-align: center; font-size: 14px; color: var(--gold); text-transform: uppercase; 
-            letter-spacing: 2px; font-weight: bold; margin-bottom: 6px; 
-            text-shadow: 0 0 10px rgba(210,153,34,0.5);
-        }
-        .predicted-score-banner {
-            text-align: center; font-size: 26px; font-weight: 900; color: #ffffff;
-            margin-bottom: 14px; letter-spacing: 1px; font-family: monospace;
-            text-shadow: 0 0 15px rgba(255,255,255,0.4);
-        }
-        .prediction-bar { 
-            display: flex; height: 30px; border-radius: 8px; overflow: hidden; 
-            background: #0d1117; border: 2px solid #000;
-        }
-        .prediction-fill { 
-            display: flex; align-items: center; justify-content: center; font-size: 14px; 
-            font-weight: 900; color: #fff; text-shadow: 0 0 5px rgba(0,0,0,0.9); 
-            transition: width 1.5s cubic-bezier(0.1, 0.9, 0.2, 1);
-        }
+        .tv-vs-side { display: flex; flex-direction: column; align-items: center; width: 45%; position: relative; }
+        .tv-vs-badge { position: absolute; bottom: 35%; left: 50%; transform: translateX(-50%); font-size: 80px; font-weight: 900; color: #fff; font-style: italic; text-shadow: 0 0 30px rgba(255,255,255,0.6); z-index: 20; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.8s both; }
+
+        /* 🔮 WIN PREDICTION BAR CSS */
+        .prediction-wrapper { position: absolute; bottom: 4%; left: 15%; width: 70%; z-index: 30; animation: fadeUp 1s ease-out 1s both; }
+        .prediction-label { text-align: center; font-size: 16px; color: var(--gold); text-transform: uppercase; letter-spacing: 3px; font-weight: bold; margin-bottom: 8px; text-shadow: 0 0 10px rgba(0,0,0,0.8); }
+        .prediction-bar { display: flex; height: 35px; border-radius: 12px; overflow: hidden; border: 2px solid #30363d; box-shadow: 0 10px 25px rgba(0,0,0,0.8); background: #21262d; }
+        .prediction-fill { display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 900; color: #fff; text-shadow: 0 0 5px rgba(0,0,0,0.9); transition: width 1.5s cubic-bezier(0.1, 0.9, 0.2, 1); }
 
         /* Standings & Stats TV Box */
         .tv-standing-row { display: flex; justify-content: space-between; background: rgba(22,27,34,0.8); padding: 20px 30px; margin-bottom: 15px; border-radius: 12px; border: 1px solid #30363d; font-size: 28px; font-weight: bold; align-items: center; width: 800px; animation: fadeUp 0.5s ease backwards; }
@@ -285,17 +251,7 @@
 <div id="tv-overlay">
     <div class="tv-bg"></div>
     <div class="tv-bg-pattern"></div>
-    
-    <div class="tv-top-bar">
-        <div class="tv-live-header-indicator">
-            <div class="tv-live-dot"></div>
-            <span>Tri-Velocity TV • LIVE</span>
-        </div>
-        <div class="tv-controls-group">
-            <button class="btn btn-secondary tv-utility-btn" onclick="toggleNativeFullscreen()">🖵 Go Fullscreen</button>
-            <button class="btn btn-secondary tv-utility-btn" style="background-color: #da3633; color: white; opacity: 0.7;" onclick="stopTVBroadcastMode()">Exit</button>
-        </div>
-    </div>
+    <button class="btn btn-secondary tv-exit-btn" onclick="stopTVBroadcastMode()">Exit TV Mode</button>
     
     <div id="tv-dynamic-content" class="tv-content-box">
         </div>
@@ -319,9 +275,10 @@
     let clockInterval = null; let globalActiveMatchId = 1;
     let adminState = { p1Name: "P1", p2Name: "P2", p1Score: 0, p2Score: 0, secondsLeft: 300, isRunning: false, isOT: false };
     
-    let tvDataState = { standings: [], topScorer: {name: "None", goals: 0}, lastMatch: null, nextMatch: null, rawScores: {} };
+    let tvDataState = { standings: [], topScorer: {name: "None", goals: 0}, lastMatch: null, nextMatch: null };
     let tvSlideIndex = 0; let tvLoopInterval = null;
     
+    // File Mapping for Images
     const getImg = (name) => {
         if(name.includes("Zezo")) return "Zezo.png";
         if(name.includes("Asser")) return "Asser.png";
@@ -329,11 +286,12 @@
         return ""; 
     };
 
+    // Color Mapping for Strips
     const getTeamColor = (name) => {
-        if(name.includes("Zezo")) return "#f85149";
-        if(name.includes("Asser")) return "#d29922";
-        if(name.includes("Lilly")) return "#ff69b4";
-        return "#58a6ff";
+        if(name.includes("Zezo")) return "#f85149"; // Red
+        if(name.includes("Asser")) return "#d29922"; // Yellow
+        if(name.includes("Lilly")) return "#ff69b4"; // Pink
+        return "#58a6ff"; // Default Blue
     };
 
     onSnapshot(doc(db, "tournaments", "tri-velocity-cup"), (snapshot) => {
@@ -341,7 +299,6 @@
         let live = database.liveMatch || {};
         let scores = database.scores || {};
         
-        tvDataState.rawScores = scores;
         globalActiveMatchId = live.matchId || 1;
         adminState.p1Score = live.p1Score || 0; adminState.p2Score = live.p2Score || 0;
         adminState.secondsLeft = live.secondsLeft !== undefined ? live.secondsLeft : 300;
@@ -368,24 +325,18 @@
     });
 
     function processData(logs) {
-        let stats = { "Zezo": { name: "Zezo", points: 0, gd: 0, goals: 0, gamesPlayed: 0 }, "Asser": { name: "Asser", points: 0, gd: 0, goals: 0, gamesPlayed: 0 }, "Lilly": { name: "Lilly (+Bot)", points: 0, gd: 0, goals: 0, gamesPlayed: 0 } };
+        let stats = { "Zezo": { name: "Zezo", points: 0, gd: 0, goals: 0 }, "Asser": { name: "Asser", points: 0, gd: 0, goals: 0 }, "Lilly": { name: "Lilly (+Bot)", points: 0, gd: 0, goals: 0 } };
         let lastCompletedId = -1; let nextIncompleteMatch = null;
         const p1Container = document.getElementById("matches-body"); p1Container.innerHTML = "";
 
         phase1Schedule.forEach(fix => {
             let log = logs[`match_${fix.id}`] || { completed: false };
-            let actionButtons = log.completed 
-                ? `<span style="display:inline-flex; align-items:center; gap:8px;">✅ <button class="btn btn-secondary" style="padding:4px 8px; font-size:12px; min-height:28px; background-color:#da3633; color:white; border:none;" onclick="resetMatch(${fix.id})">🔄 Reset</button></span>` 
-                : `<button class="btn" style="padding:4px 10px;font-size:12px;min-height:30px;" onclick="launchSelectedMatch(${fix.id}, '${fix.p1}', '${fix.p2}')">🚀 Boot</button>`;
-            
-            p1Container.innerHTML += `<tr><td>${fix.id}</td><td><strong>${fix.p1}</strong> vs <strong>${fix.p2}</strong></td><td>${log.completed ? `${log.p1Score} : ${log.p2Score}` : '--'}</td><td>${actionButtons}</td></tr>`;
+            p1Container.innerHTML += `<tr><td>${fix.id}</td><td><strong>${fix.p1}</strong> vs <strong>${fix.p2}</strong></td><td>${log.completed ? `${log.p1Score} : ${log.p2Score}` : '--'}</td><td>${log.completed ? '✅' : `<button class="btn" style="padding:4px 10px;font-size:12px;min-height:30px;" onclick="launchSelectedMatch(${fix.id}, '${fix.p1}', '${fix.p2}')">🚀 Boot</button>`}</td></tr>`;
 
             if (log.completed) {
                 lastCompletedId = Math.max(lastCompletedId, fix.id);
                 let aP1 = log.p1Score + (fix.p1 === "Lilly" ? 5 : 0);
                 let aP2 = log.p2Score + (fix.p2 === "Lilly" ? 5 : 0);
-                
-                stats[fix.p1].gamesPlayed += 1; stats[fix.p2].gamesPlayed += 1;
                 stats[fix.p1].gd += (aP1 - aP2); stats[fix.p2].gd += (aP2 - aP1);
                 stats[fix.p1].goals += aP1; stats[fix.p2].goals += aP2; 
                 if (aP1 > aP2) { stats[fix.p1].points += log.isOT ? 2 : 3; } else if (aP2 > aP1) { stats[fix.p2].points += log.isOT ? 2 : 3; }
@@ -402,20 +353,10 @@
         tvDataState.standings.forEach((p, pos) => { lbEl.innerHTML += `<tr><td><strong>${pos+1}</strong></td><td>${p.name}</td><td><strong>${p.points}</strong></td><td style="color:${p.gd>=0?'#2ea043':'#f85149'}">${p.gd>0?'+'+p.gd:p.gd}</td></tr>`; });
     }
 
-    // Admin Panel Actions
+    // Admin Panel Functions
     window.requestAdminAccess = function() { if(prompt("Passcode:")==="2013"){ document.getElementById("main-layout").style.display="none"; document.getElementById("fullscreen-admin").style.display="flex"; } };
     window.exitAdminPanelWithoutSaving = function() { document.getElementById("fullscreen-admin").style.display="none"; document.getElementById("main-layout").style.display="block"; };
     window.launchSelectedMatch = async function(id, p1, p2) { if(prompt("Passcode:")==="2013"){ await setDoc(doc(db, "tournaments", "tri-velocity-cup"), { liveMatch: { matchId: id, p1Name: p1, p2Name: p2, p1Score: 0, p2Score: 0, secondsLeft: 300, isRunning: false, isOT: false } }, { merge: true }); document.getElementById("main-layout").style.display="none"; document.getElementById("fullscreen-admin").style.display="flex"; } };
-    
-    window.resetMatch = async function(id) {
-        if(prompt("Enter Admin Passcode to Reset Match:") === "2013") {
-            if(confirm(`Are you sure you want to completely erase the results for Match #${id}? This updates the leaderboard immediately.`)) {
-                await setDoc(doc(db, "tournaments", "tri-velocity-cup"), { scores: { [`match_${id}`]: { completed: false, p1Score: 0, p2Score: 0, p1Shots: 0, p2Shots: 0, p1Saves: 0, p2Saves: 0, p1Poss: 50, p2Poss: 50, isOT: false, mvp: "" } } }, { merge: true });
-                alert(`✅ Match #${id} has been reset.`);
-            }
-        } else { alert("❌ Access Denied: Incorrect Passcode"); }
-    };
-
     window.modLiveScore = async (tp, off) => { let p = tp==='p1'?'p1Score':'p2Score'; await setDoc(doc(db, "tournaments", "tri-velocity-cup"), { liveMatch: { [p]: Math.max(0, adminState[p]+off) } }, { merge: true }); };
     window.toggleAdminOT = async () => await setDoc(doc(db, "tournaments", "tri-velocity-cup"), { liveMatch: { isOT: !adminState.isOT } }, { merge: true });
     window.toggleAdminClock = async () => await setDoc(doc(db, "tournaments", "tri-velocity-cup"), { liveMatch: { isRunning: !adminState.isRunning } }, { merge: true });
@@ -440,30 +381,14 @@
         document.getElementById("fullscreen-admin").style.display = "none"; document.getElementById("stats-input-modal").style.display = "none"; document.getElementById("main-layout").style.display = "block";
     };
 
-    // 📺 TV SYSTEM FUNCTIONS
+    // 📺 TV RECEIVER MODE
     window.startTVBroadcastMode = function() {
         document.getElementById("main-layout").style.display = "none"; document.getElementById("tv-overlay").style.display = "flex";
         renderTVSlide();
         tvLoopInterval = setInterval(() => { tvSlideIndex = (tvSlideIndex + 1) % 4; renderTVSlide(); }, 12000); 
     };
 
-    window.stopTVBroadcastMode = function() { 
-        clearInterval(tvLoopInterval); 
-        if (document.fullscreenElement) { document.exitFullscreen().catch(()=>{}); }
-        document.getElementById("tv-overlay").style.display = "none"; 
-        document.getElementById("main-layout").style.display = "flex"; 
-    };
-
-    // 🖵 Native Fullscreen Toggle for Smart TVs/Web Browsers
-    window.toggleNativeFullscreen = function() {
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen().catch(err => {
-                console.log(`Fullscreen error: ${err.message}`);
-            });
-        } else {
-            document.exitFullscreen();
-        }
-    };
+    window.stopTVBroadcastMode = function() { clearInterval(tvLoopInterval); document.getElementById("tv-overlay").style.display = "none"; document.getElementById("main-layout").style.display = "flex"; };
 
     function renderTVSlide() {
         const box = document.getElementById("tv-dynamic-content"); box.innerHTML = "";
@@ -485,54 +410,37 @@
             if (tvDataState.nextMatch) {
                 let m = tvDataState.nextMatch; let c1 = getTeamColor(m.p1); let c2 = getTeamColor(m.p2);
                 
-                // 🔮 ENHANCED AI PREDICTION LOGIC WITH ACTUAL SCORE PREDICTIONS
-                let p1Stats = tvDataState.standings.find(s => s.name.includes(m.p1)) || {points: 0, gd: 0, goals: 0, gamesPlayed: 0};
-                let p2Stats = tvDataState.standings.find(s => s.name.includes(m.p2)) || {points: 0, gd: 0, goals: 0, gamesPlayed: 0};
+                // 🔮 NEW AI PREDICTION LOGIC
+                let p1Stats = tvDataState.standings.find(s => s.name.includes(m.p1)) || {points: 0, gd: 0, goals: 0};
+                let p2Stats = tvDataState.standings.find(s => s.name.includes(m.p2)) || {points: 0, gd: 0, goals: 0};
                 
+                // Base strength 10 + (Points * 3) + Goals + GD
                 let s1 = Math.max(1, 10 + (p1Stats.points * 3) + p1Stats.goals + p1Stats.gd);
                 let s2 = Math.max(1, 10 + (p2Stats.points * 3) + p2Stats.goals + p2Stats.gd);
                 let p1WinPct = Math.round((s1 / (s1 + s2)) * 100);
                 let p2WinPct = 100 - p1WinPct;
-
-                // Base average goal evaluation
-                let avgG1 = p1Stats.gamesPlayed > 0 ? (p1Stats.goals / p1Stats.gamesPlayed) : 3.0;
-                let avgG2 = p2Stats.gamesPlayed > 0 ? (p2Stats.goals / p2Stats.gamesPlayed) : 3.0;
-
-                // Predict score weighted by dominance probability
-                let predictedScoreP1 = Math.max(0, Math.round(avgG1 * (p1WinPct / 50) * 0.95));
-                let predictedScoreP2 = Math.max(0, Math.round(avgG2 * (p2WinPct / 50) * 0.95));
-
-                // Safeguard against unrealistic or flat metrics
-                if (predictedScoreP1 === predictedScoreP2) {
-                    if (p1WinPct > p2WinPct) predictedScoreP1 += 1;
-                    else if (p2WinPct > p1WinPct) predictedScoreP2 += 1;
-                }
 
                 html += `
                 <div style="position:absolute; top:40px; width:100%; text-align:center;">
                     <div class="tv-title">Next Fixture</div><div class="tv-subtitle">Match #${m.id}</div>
                 </div>
                 <div class="tv-vs-container">
-                    <div class="tv-vs-side" style="padding-right: 6%;">
+                    <div class="tv-vs-side">
                         <img class="tv-split-cutout" src="${getImg(m.p1)}" onerror="this.style.display='none'">
                         <div class="tv-split-strip-left" style="background-color: ${c1}; animation-name: slideInLeft;"><span>${m.p1}</span></div>
                     </div>
-                    
-                    <div class="tv-center-hub">
-                        <div class="tv-vs-badge">VS</div>
-                        <div class="prediction-wrapper">
-                            <div class="prediction-label">✨ AI Match Prediction</div>
-                            <div class="predicted-score-banner">${predictedScoreP1} - ${predictedScoreP2}</div>
-                            <div class="prediction-bar">
-                                <div class="prediction-fill" style="width: ${p1WinPct}%; background-color: ${c1}; box-shadow: inset 0 0 10px rgba(255,255,255,0.4);">${p1WinPct}%</div>
-                                <div class="prediction-fill" style="width: ${p2WinPct}%; background-color: ${c2}; box-shadow: inset 0 0 10px rgba(255,255,255,0.4);">${p2WinPct}%</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="tv-vs-side" style="padding-left: 6%;">
+                    <div class="tv-vs-badge">VS</div>
+                    <div class="tv-vs-side">
                         <img class="tv-split-cutout" src="${getImg(m.p2)}" onerror="this.style.display='none'">
                         <div class="tv-split-strip-right" style="background-color: ${c2}; animation-name: slideInRightSplit;"><span>${m.p2}</span></div>
+                    </div>
+                </div>
+                
+                <div class="prediction-wrapper">
+                    <div class="prediction-label">AI Win Probability</div>
+                    <div class="prediction-bar">
+                        <div class="prediction-fill" style="width: ${p1WinPct}%; background-color: ${c1};">${p1WinPct}%</div>
+                        <div class="prediction-fill" style="width: ${p2WinPct}%; background-color: ${c2};">${p2WinPct}%</div>
                     </div>
                 </div>
                 `;
