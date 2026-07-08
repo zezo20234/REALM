@@ -29,138 +29,104 @@
             align-items: center;
         }
 
-        h1 {
-            color: #fff;
-            text-shadow: 0 0 10px var(--text-glow);
-            margin: 15px 0 5px 0;
-            text-align: center;
-            font-size: 24px;
-        }
-
+        h1 { color: #fff; text-shadow: 0 0 10px var(--text-glow); margin: 15px 0 5px 0; text-align: center; font-size: 24px; }
         .container { width: 100%; max-width: 900px; padding-bottom: 30px; }
 
         .section {
-            background-color: var(--card-bg);
-            border: 1px solid #30363d;
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            background-color: var(--card-bg); border: 1px solid #30363d; border-radius: 12px;
+            padding: 16px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.4);
         }
 
-        h2 {
-            margin-top: 0;
-            border-bottom: 2px solid #30363d;
-            padding-bottom: 8px;
-            color: var(--accent-color);
-            font-size: 18px;
-        }
-        
+        h2 { margin-top: 0; border-bottom: 2px solid #30363d; padding-bottom: 8px; color: var(--accent-color); font-size: 18px; }
         .gold-text { color: var(--gold) !important; text-shadow: 0 0 8px rgba(210, 153, 34, 0.4); }
 
         /* 📌 STICKY PINNED LIVE SCOREBOARD */
-        .pinned-wrapper {
-            position: -webkit-sticky; position: sticky; top: 10px; z-index: 999; margin-bottom: 25px; filter: drop-shadow(0 8px 16px rgba(0,0,0,0.6));
-        }
+        .pinned-wrapper { position: -webkit-sticky; position: sticky; top: 10px; z-index: 999; margin-bottom: 25px; filter: drop-shadow(0 8px 16px rgba(0,0,0,0.6)); }
+        .live-ticker { background: linear-gradient(135deg, #1f242c 0%, #0d1117 100%); border: 2px solid var(--accent-color); border-radius: 14px; padding: 16px; text-align: center; }
+        .live-badge { background-color: var(--live-red); color: white; padding: 4px 12px; border-radius: 20px; font-weight: bold; font-size: 12px; letter-spacing: 1px; display: inline-flex; align-items: center; gap: 6px; animation: pulse 1.5s infinite; }
 
-        .live-ticker {
-            background: linear-gradient(135deg, #1f242c 0%, #0d1117 100%);
-            border: 2px solid var(--accent-color); border-radius: 14px; padding: 16px; text-align: center;
-        }
+        @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(0.96); } 100% { opacity: 1; transform: scale(1); } }
 
-        .live-badge {
-            background-color: var(--live-red); color: white; padding: 4px 12px; border-radius: 20px; font-weight: bold; font-size: 12px; letter-spacing: 1px; display: inline-flex; align-items: center; gap: 6px; animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.6; transform: scale(0.96); }
-            100% { opacity: 1; transform: scale(1); }
-        }
-
-        .live-score-display {
-            display: flex; justify-content: space-between; align-items: center; max-width: 500px; margin: 12px auto;
-        }
-
-        .team-wrapper {
-            width: 35%; display: flex; flex-direction: column;
-        }
+        .live-score-display { display: flex; justify-content: space-between; align-items: center; max-width: 500px; margin: 12px auto; }
+        .team-wrapper { width: 35%; display: flex; flex-direction: column; }
         #p1-wrapper { align-items: flex-end; text-align: right; }
         #p2-wrapper { align-items: flex-start; text-align: left; }
-
-        .live-team {
-            font-size: 18px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;
-        }
-        
-        .platform-label {
-            font-size: 11px; color: #8b949e; text-transform: uppercase; font-weight: bold; margin-top: 2px; letter-spacing: 0.5px;
-        }
-
-        .live-number {
-            font-size: 38px; font-weight: 800; color: #fff; font-family: monospace; background: #21262d; padding: 4px 16px; border-radius: 8px; border: 1px solid #30363d; min-width: 60px;
-        }
-
+        .live-team { font-size: 18px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
+        .platform-label { font-size: 11px; color: #8b949e; text-transform: uppercase; font-weight: bold; margin-top: 2px; letter-spacing: 0.5px; }
+        .live-number { font-size: 38px; font-weight: 800; color: #fff; font-family: monospace; background: #21262d; padding: 4px 16px; border-radius: 8px; border: 1px solid #30363d; min-width: 60px; }
         .live-timer { font-size: 20px; color: #8b949e; font-family: monospace; font-weight: bold; height: 24px; }
 
-        .table-scroll {
-            width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 8px; border: 1px solid #30363d;
-        }
-
+        .table-scroll { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 8px; border: 1px solid #30363d; }
         table { width: 100%; border-collapse: collapse; min-width: 500px; }
         th, td { border: 1px solid #30363d; padding: 14px 10px; text-align: center; font-size: 14px; }
         th { background-color: #21262d; color: #fff; }
         tr:nth-child(even) { background-color: #1f242c; }
-        
         .playoff-row { background-color: #1e1910 !important; }
 
         input, select, button { font-size: 16px !important; }
-
-        .btn {
-            background-color: var(--green); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;
-        }
+        .btn { background-color: var(--green); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; }
         .btn-secondary { background-color: #21262d; border: 1px solid #30363d; color: white; }
         .btn-action { padding: 4px 10px; font-size: 12px; min-height: 32px; }
         .btn-reset { margin-top: 6px; padding: 6px 12px; font-size: 12px; min-height: 30px; }
 
         /* 🚨 FULLSCREEN REFEREE CONTROLLER 🚨 */
-        #fullscreen-admin {
-            display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #070a0e; z-index: 999999; flex-direction: column; align-items: center; justify-content: space-between; padding: calc(40px + env(safe-area-inset-top)) 20px calc(20px + env(safe-area-inset-bottom)) 20px; box-sizing: border-box; overflow-y: auto;
-        }
-
+        #fullscreen-admin { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #070a0e; z-index: 999999; flex-direction: column; align-items: center; justify-content: space-between; padding: calc(40px + env(safe-area-inset-top)) 20px calc(20px + env(safe-area-inset-bottom)) 20px; box-sizing: border-box; overflow-y: auto; }
         .admin-header { text-align: center; width: 100%; margin-bottom: 15px; }
         .admin-panel-row { display: flex; width: 100%; max-width: 800px; justify-content: space-around; align-items: center; flex-grow: 1; }
         .admin-controller-box { text-align: center; background: #161b22; padding: 20px 10px; border-radius: 16px; border: 1px solid #30363d; width: 32%; }
-        
         .player-info { margin-bottom: 10px; }
-        
         .huge-score { font-size: 64px; font-weight: 900; margin: 10px 0 15px 0; font-family: monospace; color: #fff; }
         .score-controls { display: flex; justify-content: center; gap: 10px; }
-        
         .circle-btn { width: 55px; height: 55px; border-radius: 50%; border: none; font-size: 26px; font-weight: bold; cursor: pointer; color: white; display: inline-flex; align-items: center; justify-content: center; }
         .btn-plus { background-color: #238636; }
         .btn-minus { background-color: #f85149; }
-
         .huge-clock { font-size: 42px; font-family: monospace; font-weight: bold; color: var(--accent-color); margin-bottom: 15px; }
         .admin-footer { width: 100%; display: flex; flex-direction: column; gap: 12px; max-width: 400px; margin-top: 20px; }
         .btn-huge { width: 100%; padding: 16px; font-size: 18px; border-radius: 12px; }
-        
         .ot-toggle { background-color: #6f42c1; color: white; padding: 10px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; border: none; margin-top: 10px; }
         .ot-active { background-color: #f9826c; animation: pulse 1s infinite; }
+
+        /* 📺 TV BROADCAST SHOW OVERLAY */
+        #broadcast-screen { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: linear-gradient(135deg, #050811 0%, #0d1527 100%); z-index: 9999999; flex-direction: column; align-items: center; justify-content: center; padding: 40px; box-sizing: border-box; color: white; font-family: -apple-system, sans-serif; overflow: hidden; }
+        .bc-title { font-size: 28px; letter-spacing: 6px; color: var(--accent-color); font-weight: 900; text-transform: uppercase; margin-bottom: 10px; animation: fadeInDown 0.8s ease forwards; text-shadow: 0 0 15px rgba(88, 166, 255, 0.4); }
+        .bc-subtitle { font-size: 14px; color: #8b949e; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 30px; animation: fadeInDown 0.8s ease forwards; }
+        .bc-teams { display: flex; align-items: center; justify-content: center; gap: 40px; margin-bottom: 40px; width: 100%; max-width: 800px; }
+        .bc-team-card { font-size: 32px; font-weight: 800; text-transform: uppercase; width: 35%; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .bc-score { font-size: 72px; font-weight: 900; background: #161b22; padding: 12px 32px; border-radius: 14px; border: 2px solid #30363d; animation: scaleIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; opacity: 0; box-shadow: 0 0 25px rgba(0,0,0,0.5); }
+        .bc-stats-container { width: 100%; max-width: 650px; display: flex; flex-direction: column; gap: 14px; margin-bottom: 40px; }
+        .bc-stat-row { display: flex; justify-content: space-between; align-items: center; background: rgba(22, 27, 34, 0.7); padding: 14px 24px; border-radius: 10px; border: 1px solid #30363d; font-size: 22px; font-weight: bold; opacity: 0; transform: translateY(20px); animation: fadeInUpNormal 0.5s ease forwards; font-family: monospace; }
+        .bc-stat-label { color: #8b949e; font-size: 14px; text-transform: uppercase; letter-spacing: 2px; font-family: -apple-system, sans-serif; }
+        .bc-mvp-banner { background: linear-gradient(90deg, transparent, var(--gold), transparent); width: 100%; max-width: 600px; text-align: center; padding: 16px; font-size: 26px; font-weight: 900; color: #070a0e; text-transform: uppercase; border-radius: 6px; box-shadow: 0 0 30px rgba(212, 153, 34, 0.5); opacity: 0; animation: scaleIn 0.6s ease forwards; }
+
+        /* 📊 STATS MANUAL INPUT DIALOG */
+        #stats-input-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 9999998; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
+        .modal-box { background: var(--card-bg); border: 2px solid var(--accent-color); padding: 24px; border-radius: 16px; width: 100%; max-width: 480px; box-shadow: 0 10px 30px rgba(0,0,0,0.7); }
+        .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0; }
+        .modal-field { display: flex; flex-direction: column; gap: 6px; }
+        .modal-field label { font-size: 12px; color: #8b949e; font-weight: bold; text-transform: uppercase; }
+        .modal-field input { padding: 10px; background: #21262d; border: 1px solid #30363d; color: white; border-radius: 8px; text-align: center; font-size: 16px; font-weight: bold; }
+        .modal-field input:focus { border-color: var(--accent-color); outline: none; }
+
+        /* 🎬 KEYFRAME ANIMATIONS */
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes scaleIn { from { opacity: 0; transform: scale(0.6); } to { opacity: 1; transform: scale(1); } }
+        @keyframes fadeInUpNormal { to { opacity: 1; transform: translateY(0); } }
 
         @media (max-width: 600px) {
             #fullscreen-admin { justify-content: flex-start; padding: calc(20px + env(safe-area-inset-top)) 15px calc(20px + env(safe-area-inset-bottom)) 15px; }
             .admin-panel-row { flex-direction: column; gap: 15px; width: 100%; }
             .admin-controller-box { width: 100%; display: flex; flex-direction: row; align-items: center; justify-content: space-between; padding: 15px 20px; }
-            
             .player-info { flex: 1; text-align: left; margin: 0; }
             .player-info h3 { font-size: 20px; margin: 0; }
-            
             .huge-score { margin: 0 15px; font-size: 52px; }
             .score-controls { gap: 8px; }
             .circle-btn { width: 50px; height: 50px; font-size: 24px; }
             .huge-clock { margin: 10px 0; font-size: 48px; }
             .live-team { font-size: 15px; }
             .live-number { font-size: 30px; }
+            .bc-score { font-size: 48px; padding: 8px 20px; }
+            .bc-team-card { font-size: 22px; }
+            .bc-stat-row { font-size: 18px; padding: 10px 16px; }
         }
     </style>
 </head>
@@ -175,17 +141,13 @@
         <div class="section live-ticker">
             <div class="live-badge">🔴 LIVE SCOREBOARD</div>
             <div class="live-score-display">
-                <!-- Player 1 (PS5) -->
                 <div class="team-wrapper" id="p1-wrapper">
                     <div class="live-team" id="view-p1-name">Loading...</div>
                     <div class="platform-label">🎮 PS5</div>
                 </div>
-                
                 <div class="live-number" id="view-p1-score">0</div>
                 <div style="font-size: 18px; color: #8b949e; font-weight: bold;">VS</div>
                 <div class="live-number" id="view-p2-score">0</div>
-                
-                <!-- Player 2 (Laptop) -->
                 <div class="team-wrapper" id="p2-wrapper">
                     <div class="live-team" id="view-p2-name">Loading...</div>
                     <div class="platform-label">💻 Laptop</div>
@@ -204,9 +166,7 @@
         <p style="font-size:12px; color:#8b949e; margin-top:-5px;">Only Phase 1 matches apply to points.</p>
         <div class="table-scroll">
             <table>
-                <thead>
-                    <tr><th>Rank</th><th>Player</th><th>Points</th><th>GD</th></tr>
-                </thead>
+                <thead><tr><th>Rank</th><th>Player</th><th>Points</th><th>GD</th></tr></thead>
                 <tbody id="leaderboard-body"></tbody>
             </table>
         </div>
@@ -217,9 +177,7 @@
         <h2 class="gold-text">🏅 Phase 2: Playoffs & Finals</h2>
         <div class="table-scroll">
             <table>
-                <thead>
-                    <tr><th>M#</th><th>Matchup</th><th>Logged Score</th><th>Status</th></tr>
-                </thead>
+                <thead><tr><th>M#</th><th>Matchup</th><th>Logged Score</th><th>Status</th></tr></thead>
                 <tbody id="phase2-body"></tbody>
             </table>
         </div>
@@ -230,9 +188,7 @@
         <h2>🎮 Phase 1: Group Stage (15 Matches)</h2>
         <div class="table-scroll">
             <table>
-                <thead>
-                    <tr><th>M#</th><th>Matchup</th><th>Logged Score</th><th>Status</th></tr>
-                </thead>
+                <thead><tr><th>M#</th><th>Matchup</th><th>Logged Score</th><th>Status</th></tr></thead>
                 <tbody id="matches-body"></tbody>
             </table>
         </div>
@@ -289,8 +245,68 @@
     </div>
 
     <div class="admin-footer">
-        <button class="btn btn-huge" onclick="commitAndSaveActiveMatch()" style="background-color: var(--green);">💾 Finish & Save Match</button>
+        <button class="btn btn-huge" onclick="commitAndSaveActiveMatch()" style="background-color: var(--green);">💾 Finish & Enter Stats</button>
         <button class="btn btn-secondary btn-huge" onclick="exitAdminPanelWithoutSaving()">❌ Cancel / Exit Panel</button>
+    </div>
+</div>
+
+<!-- STATS ENTRY MODAL FOR REFEREE -->
+<div id="stats-input-modal">
+    <div class="modal-box">
+        <h2 style="margin-top:0; font-size: 20px; text-align:center;">📊 Match Stats Entry</h2>
+        <p style="font-size:12px; color:#8b949e; text-align:center; margin-top:-8px;">Possession % is auto-calculated based on Shots + Saves!</p>
+        
+        <div class="modal-grid">
+            <div class="modal-field">
+                <label id="modal-p1-label-shots">Player 1 Shots</label>
+                <input type="number" id="input-p1-shots" value="0" min="0">
+            </div>
+            <div class="modal-field">
+                <label id="modal-p2-label-shots">Player 2 Shots</label>
+                <input type="number" id="input-p2-shots" value="0" min="0">
+            </div>
+            <div class="modal-field">
+                <label id="modal-p1-label-saves">Player 1 Saves</label>
+                <input type="number" id="input-p1-saves" value="0" min="0">
+            </div>
+            <div class="modal-field">
+                <label id="modal-p2-label-saves">Player 2 Saves</label>
+                <input type="number" id="input-p2-saves" value="0" min="0">
+            </div>
+        </div>
+
+        <div class="modal-field" style="margin-bottom: 24px; margin-top: 10px;">
+            <label>🏅 Match MVP Name</label>
+            <input type="text" id="input-mvp" placeholder="Enter player name">
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:10px;">
+            <button class="btn btn-huge" onclick="window.launchBroadcastView()" style="background-color: var(--accent-color); font-size:16px;">🎬 Launch TV Broadcast Show</button>
+            <button class="btn btn-secondary" onclick="document.getElementById('stats-input-modal').style.display='none'" style="min-height:40px;">Back to Referee Panel</button>
+        </div>
+    </div>
+</div>
+
+<!-- FULLSCREEN TV CHANNEL BROADCAST VIEW -->
+<div id="broadcast-screen">
+    <button class="btn btn-secondary" style="position:absolute; top:20px; right:20px; min-height:36px; padding:6px 12px; font-size:12px; z-index:10;" onclick="window.closeBroadcastShow()">❌ Close Show</button>
+    
+    <div class="bc-title">Post-Match Report</div>
+    <div class="bc-subtitle" id="bc-match-tag">The Tri-Velocity Cup</div>
+
+    <div class="bc-teams">
+        <div class="bc-team-card" id="bc-p1-name" style="color: var(--accent-color);">Player 1</div>
+        <div class="bc-score" id="bc-p1-score">0</div>
+        <div style="font-size:24px; font-weight:800; color:#8b949e;">FINAL</div>
+        <div class="bc-score" id="bc-p2-score">0</div>
+        <div class="bc-team-card" id="bc-p2-name" style="color: #ff7b72;">Player 2</div>
+    </div>
+
+    <!-- Stats presentation rows wrapped here -->
+    <div class="bc-stats-container" id="bc-stats-rows"></div>
+
+    <div class="bc-mvp-banner" id="bc-mvp-banner">
+        🏅 MVP: <span id="bc-mvp-player">None</span>
     </div>
 </div>
 
@@ -399,10 +415,7 @@
     };
 
     window.launchSelectedMatch = async function(matchId, p1Name, p2Name) {
-        if(p1Name === "TBD" || p2Name === "TBD") {
-            alert("Cannot start match yet! Waiting on previous results.");
-            return;
-        }
+        if(p1Name === "TBD" || p2Name === "TBD") { alert("Cannot start match yet! Waiting on previous results."); return; }
         let displayId = matchId > 100 ? `F${matchId-100}` : matchId;
         let codeInput = prompt(`Enter Referee Passcode to start Match #${displayId}:`);
         if (codeInput === "2013") {
@@ -418,25 +431,16 @@
         let displayId = matchId > 100 ? `F${matchId-100}` : matchId;
         let codeInput = prompt(`Enter Referee Passcode to RESET Match #${displayId}:`);
         if (codeInput === "2013") {
-            if (!confirm(`⚠️ Are you sure? This will delete the logged score for Match #${displayId} and wipe it back to 0-0.`)) return;
-
-            await setDoc(doc(db, "tournaments", "tri-velocity-cup"), {
-                scores: { [`match_${matchId}`]: { p1Score: 0, p2Score: 0, isOT: false, completed: false } }
-            }, { merge: true });
-
-            if (globalActiveMatchId == matchId) {
-                await setDoc(doc(db, "tournaments", "tri-velocity-cup"), {
-                    liveMatch: { p1Score: 0, p2Score: 0, secondsLeft: 300, isRunning: false, isOT: false }
-                }, { merge: true });
-            }
+            if (!confirm(`⚠️ Are you sure? This deletes the logged score for Match #${displayId}.`)) return;
+            await setDoc(doc(db, "tournaments", "tri-velocity-cup"), { scores: { [`match_${matchId}`]: { p1Score: 0, p2Score: 0, isOT: false, completed: false } } }, { merge: true });
+            if (globalActiveMatchId == matchId) { await setDoc(doc(db, "tournaments", "tri-velocity-cup"), { liveMatch: { p1Score: 0, p2Score: 0, secondsLeft: 300, isRunning: false, isOT: false } }, { merge: true }); }
         } else if (codeInput !== null) alert("Incorrect Password!");
     };
     
     window.activateFriendlies = async function() {
         let codeInput = prompt("Enter Referee Passcode to unlock Friendlies Section:");
-        if (codeInput === "2013") {
-            await setDoc(doc(db, "tournaments", "tri-velocity-cup"), { settings: { friendliesActive: true } }, { merge: true });
-        } else if (codeInput !== null) alert("Incorrect Password!");
+        if (codeInput === "2013") { await setDoc(doc(db, "tournaments", "tri-velocity-cup"), { settings: { friendliesActive: true } }, { merge: true }); } 
+        else if (codeInput !== null) alert("Incorrect Password!");
     };
 
     window.modLiveScore = async function(targetPlayer, offset) {
@@ -445,12 +449,8 @@
         await setDoc(doc(db, "tournaments", "tri-velocity-cup"), { liveMatch: { [prop]: adjustedVal } }, { merge: true });
     };
 
-    window.toggleAdminOT = async function() {
-        await setDoc(doc(db, "tournaments", "tri-velocity-cup"), { liveMatch: { isOT: !adminState.isOT } }, { merge: true });
-    };
-    window.toggleAdminClock = async function() {
-        await setDoc(doc(db, "tournaments", "tri-velocity-cup"), { liveMatch: { isRunning: !adminState.isRunning } }, { merge: true });
-    };
+    window.toggleAdminOT = async function() { await setDoc(doc(db, "tournaments", "tri-velocity-cup"), { liveMatch: { isOT: !adminState.isOT } }, { merge: true }); };
+    window.toggleAdminClock = async function() { await setDoc(doc(db, "tournaments", "tri-velocity-cup"), { liveMatch: { isRunning: !adminState.isRunning } }, { merge: true }); };
 
     function runLocalTimerTick(active) {
         adminState.isRunning = active;
@@ -472,26 +472,91 @@
         document.getElementById(id).innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
     }
 
-    window.commitAndSaveActiveMatch = async function() {
-        if (!confirm("Save final score to permanent tournament record?")) return;
+    // --- NEW BROADCAST LOGIC ---
+    window.commitAndSaveActiveMatch = function() {
+        if (!confirm("Are you ready to log the final score and open the broadcast report?")) return;
+        
+        document.getElementById("modal-p1-label-shots").innerText = `${adminState.p1Name} Shots`;
+        document.getElementById("modal-p2-label-shots").innerText = `${adminState.p2Name} Shots`;
+        document.getElementById("modal-p1-label-saves").innerText = `${adminState.p1Name} Saves`;
+        document.getElementById("modal-p2-label-saves").innerText = `${adminState.p2Name} Saves`;
+        document.getElementById("input-mvp").value = adminState.p1Score > adminState.p2Score ? adminState.p1Name : adminState.p2Name;
+        
+        document.getElementById("input-p1-shots").value = "0";
+        document.getElementById("input-p2-shots").value = "0";
+        document.getElementById("input-p1-saves").value = "0";
+        document.getElementById("input-p2-saves").value = "0";
+
+        document.getElementById("stats-input-modal").style.display = "flex";
+    };
+
+    window.launchBroadcastView = async function() {
+        let p1Shots = parseInt(document.getElementById("input-p1-shots").value) || 0;
+        let p2Shots = parseInt(document.getElementById("input-p2-shots").value) || 0;
+        let p1Saves = parseInt(document.getElementById("input-p1-saves").value) || 0;
+        let p2Saves = parseInt(document.getElementById("input-p2-saves").value) || 0;
+        let mvpName = document.getElementById("input-mvp").value || "None";
+        
+        // 🧠 AUTO-CALCULATE POSSESSION (Pressure Formula: Shots + Opponent Saves)
+        let p1Pressure = p1Shots + p2Saves;
+        let p2Pressure = p2Shots + p1Saves;
+        let totalPressure = p1Pressure + p2Pressure;
+        
+        let p1Poss = 50; 
+        let p2Poss = 50;
+        if (totalPressure > 0) {
+            p1Poss = Math.round((p1Pressure / totalPressure) * 100);
+            p2Poss = 100 - p1Poss;
+        }
+
+        // 🎯 AUTO-CALCULATE ACCURACY
+        let p1Acc = p1Shots > 0 ? Math.round((adminState.p1Score / p1Shots) * 100) : 0;
+        let p2Acc = p2Shots > 0 ? Math.round((adminState.p2Score / p2Shots) * 100) : 0;
+        
+        document.getElementById("bc-p1-name").innerText = adminState.p1Name;
+        document.getElementById("bc-p2-name").innerText = adminState.p2Name;
+        document.getElementById("bc-p1-score").innerText = adminState.p1Score;
+        document.getElementById("bc-p2-score").innerText = adminState.p2Score;
+        let displayId = globalActiveMatchId > 100 ? `F${globalActiveMatchId-100}` : globalActiveMatchId;
+        document.getElementById("bc-match-tag").innerText = `The Tri-Velocity Cup — Match #${displayId}`;
+        document.getElementById("bc-mvp-player").innerText = mvpName;
+        
+        let statsHtml = `
+            <div class="bc-stat-row" style="animation-delay: 0.6s;"><span>${adminState.p1Score}</span><span class="bc-stat-label">Goals</span><span>${adminState.p2Score}</span></div>
+            <div class="bc-stat-row" style="animation-delay: 1.2s;"><span>${p1Shots}</span><span class="bc-stat-label">Shots Taken</span><span>${p2Shots}</span></div>
+            <div class="bc-stat-row" style="animation-delay: 1.8s;"><span>${p1Acc}%</span><span class="bc-stat-label">Shot Accuracy</span><span>${p2Acc}%</span></div>
+            <div class="bc-stat-row" style="animation-delay: 2.4s;"><span>${p1Saves}</span><span class="bc-stat-label">Saves Made</span><span>${p2Saves}</span></div>
+            <div class="bc-stat-row" style="animation-delay: 3.0s;"><span>${p1Poss}%</span><span class="bc-stat-label">Ball Possession</span><span>${p2Poss}%</span></div>
+        `;
+        
+        document.getElementById("bc-stats-rows").innerHTML = statsHtml;
+        
+        let mvpBanner = document.getElementById("bc-mvp-banner");
+        mvpBanner.style.animation = 'none';
+        setTimeout(() => { mvpBanner.style.animation = 'scaleIn 0.6s ease forwards'; }, 3600);
+
+        document.getElementById("fullscreen-admin").style.display = "none";
+        document.getElementById("stats-input-modal").style.display = "none";
+        document.getElementById("broadcast-screen").style.display = "flex";
+        
         await setDoc(doc(db, "tournaments", "tri-velocity-cup"), {
             scores: { [`match_${globalActiveMatchId}`]: { p1Score: adminState.p1Score, p2Score: adminState.p2Score, isOT: adminState.isOT, completed: true } },
             liveMatch: { isRunning: false }
         }, { merge: true });
-        exitAdminPanelWithoutSaving();
     };
-    
+
+    window.closeBroadcastShow = function() {
+        document.getElementById("broadcast-screen").style.display = "none";
+        document.getElementById("main-layout").style.display = "block";
+        window.scrollTo(0, 0);
+    };
+    // ----------------------------
+
     function createMatchRow(id, p1, p2, log, displayLabel, extraClass="") {
         let actionsHtml = log.completed 
             ? `<span style="color:#8b949e">✅ Logged</span><br><button class="btn btn-secondary btn-reset" onclick="resetMatchStatus(${id})">🔄 Reset</button>` 
             : `<button class="btn btn-secondary btn-action" onclick="launchSelectedMatch(${id}, '${p1}', '${p2}')">🚀 Boot</button>`;
-        return `
-            <tr class="${extraClass}">
-                <td>${displayLabel}</td>
-                <td><strong>${p1}</strong> vs <strong>${p2}</strong></td>
-                <td>${log.completed ? `${log.p1Score} : ${log.p2Score} ${log.isOT ? '(OT)' : ''}` : '--'}</td>
-                <td>${actionsHtml}</td>
-            </tr>`;
+        return `<tr class="${extraClass}"><td>${displayLabel}</td><td><strong>${p1}</strong> vs <strong>${p2}</strong></td><td>${log.completed ? `${log.p1Score} : ${log.p2Score} ${log.isOT ? '(OT)' : ''}` : '--'}</td><td>${actionsHtml}</td></tr>`;
     }
 
     function getWinner(log, p1Name, p2Name) {
@@ -537,9 +602,7 @@
 
         let log16 = historyLogs['match_16'] || { completed: false };
         let p2_17 = "TBD";
-        if (log16.completed) {
-            p2_17 = getWinner(log16, rank2, rank3);
-        }
+        if (log16.completed) { p2_17 = getWinner(log16, rank2, rank3); }
 
         let log17 = historyLogs['match_17'] || { completed: false };
 
