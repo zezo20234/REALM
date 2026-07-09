@@ -280,6 +280,7 @@
             <span>Tri-Velocity TV • LIVE</span>
         </div>
         <div class="tv-controls-group">
+            <button class="btn btn-secondary tv-utility-btn" id="tv-photo-toggle" onclick="toggleTVPhotos()">🚫 Hide Photos</button>
             <button class="btn btn-secondary tv-utility-btn" onclick="toggleNativeFullscreen()">🖵 Go Fullscreen</button>
             <button class="btn btn-secondary tv-utility-btn" style="background-color: #da3633; color: white; opacity: 0.7;" onclick="stopTVBroadcastMode()">Exit</button>
         </div>
@@ -308,6 +309,7 @@
     
     let tvDataState = { standings: [], topScorer: {name: "None", goals: 0}, lastMatch: null, nextMatch: null, rawScores: {}, champion: null };
     let tvSlideIndex = 0; let tvLoopInterval = null;
+    let tvShowPhotos = true; // State for photo visibility
     
     const getImg = (name) => {
         if(name.includes("Zezo")) return "Zezo.png";
@@ -389,7 +391,6 @@
             if (log.completed) {
                 lastCompletedId = Math.max(lastCompletedId, fix.id);
                 
-                // CLEANED UP: Only uses the exact raw scores from your database to prevent double-counting 10 goals
                 let aP1 = log.p1Score;
                 let aP2 = log.p2Score;
                 
@@ -501,7 +502,6 @@
         if(prompt("Enter Admin Passcode to Reset Match:") === "2013") {
             if(confirm(`Are you sure you want to completely erase the results for Match #${id}?`)) {
                 await setDoc(doc(db, "tournaments", "tri-velocity-cup"), { scores: { [`match_${id}`]: { completed: false, p1Score: 0, p2Score: 0, p1Shots: 0, p2Shots: 0, p1Saves: 0, p2Saves: 0, p1Poss: 50, p2Poss: 50, isOT: false, mvp: "" } } }, { merge: true });
-                // If resolving Match 16 resets 17, also reset 17 for logic safety
                 if (id === 16) await setDoc(doc(db, "tournaments", "tri-velocity-cup"), { scores: { [`match_17`]: { completed: false } } }, { merge: true });
                 alert(`✅ Match(es) have been reset.`);
             }
@@ -550,7 +550,6 @@
         tvOver.style.display = "flex"; tvOver.style.animation = "fadeIn 0.5s ease-out";
         renderTVSlide();
         tvLoopInterval = setInterval(() => { 
-            // 5 slides total now
             tvSlideIndex = (tvSlideIndex + 1) % 5; 
             renderTVSlide(); 
         }, 12000); 
@@ -566,9 +565,17 @@
         if (!document.fullscreenElement) { document.documentElement.requestFullscreen().catch(()=>{}); } else { document.exitFullscreen(); }
     };
 
+    // Toggle Photo Visibility
+    window.toggleTVPhotos = function() {
+        tvShowPhotos = !tvShowPhotos;
+        document.getElementById("tv-photo-toggle").innerText = tvShowPhotos ? "🚫 Hide Photos" : "📸 Show Photos";
+        renderTVSlide(); // instantly re-render the current slide
+    };
+
     function renderTVSlide() {
         const box = document.getElementById("tv-dynamic-content"); box.innerHTML = "";
         let html = ``;
+        const imgStyle = tvShowPhotos ? "" : "display: none !important;"; // Applies dynamic hiding
 
         // SLIDE 0: CHAMPION (ONLY IF TOURNAMENT IS DONE)
         if (tvSlideIndex === 0) {
@@ -580,7 +587,7 @@
                     <div class="tv-title" style="color:var(--gold); font-size:65px; text-shadow: 0 0 50px rgba(210,153,34,1);">🏆 GRAND CHAMPION 🏆</div>
                     <div class="tv-subtitle" style="font-size: 24px; color:#fff;">THE TRI-VELOCITY CUP</div>
                 </div>
-                <img class="tv-huge-cutout" src="${getImg(champ)}" onerror="this.style.display='none'" style="transform: scale(1.1); margin-bottom: 20px; animation: floatGold 3s infinite ease-in-out;">
+                <img class="tv-huge-cutout" src="${getImg(champ)}" onerror="this.style.display='none'" style="${imgStyle} transform: scale(1.1); margin-bottom: 20px; animation: floatGold 3s infinite ease-in-out;">
                 <div class="tv-color-strip" style="background-color: var(--gold); bottom: 8%;">
                     <span style="color:#000;">${champ}</span><span style="opacity:0.3; color:#000;">|</span><span style="color:#000;">1ST PLACE</span>
                 </div>`;
@@ -605,7 +612,7 @@
             html += `</div>`;
         } 
         
-        // SLIDE 2: NEXT MATCH (99% ACCURATE HANDICAP ISOLATION MODEL)
+        // SLIDE 2: NEXT MATCH
         else if (tvSlideIndex === 2) {
             if (tvDataState.nextMatch) {
                 let m = tvDataState.nextMatch; let c1 = getTeamColor(m.p1); let c2 = getTeamColor(m.p2);
@@ -617,7 +624,6 @@
                 phase1Schedule.forEach(fix => {
                     let log = tvDataState.rawScores[`match_${fix.id}`];
                     if (log && log.completed) {
-                        // STEP 1: Strip Lilly's 5-goal head start to find TRUE gameplay performance
                         let realP1Score = (fix.p1 === "Lilly") ? Math.max(0, log.p1Score - 5) : log.p1Score;
                         let realP2Score = (fix.p2 === "Lilly") ? Math.max(0, log.p2Score - 5) : log.p2Score;
 
@@ -674,7 +680,6 @@
                     let totalPower = p1Power + p2Power;
                     p1WinPct = Math.round((p1Power / totalPower) * 100); p2WinPct = 100 - p1WinPct;
 
-                    // STEP 2: Calculate expected NATURAL gameplay goals
                     let p1ExpectedGoals = p1Stats.matches > 0 && p2Stats.matches > 0 ? ((p1Stats.goalsFor / p1Stats.matches) + (p2Stats.goalsAgainst / p2Stats.matches)) / 2 : 0;
                     let p2ExpectedGoals = p1Stats.matches > 0 && p2Stats.matches > 0 ? ((p2Stats.goalsFor / p2Stats.matches) + (p1Stats.goalsAgainst / p1Stats.matches)) / 2 : 0;
 
@@ -683,15 +688,12 @@
                         p2ExpectedGoals = (p2ExpectedGoals * 0.4) + ((h2h.p2Goals / h2h.matches) * 0.6);
                     }
                     
-                    // Round pure gameplay scores cleanly (uncapped to allow realistic high-scoring blowouts)
                     predictedScoreP1 = Math.max(0, Math.round(p1ExpectedGoals)); 
                     predictedScoreP2 = Math.max(0, Math.round(p2ExpectedGoals));
 
-                    // STEP 4: Add the 5-goal head start back to the final display prediction
                     if (m.p1 === "Lilly") predictedScoreP1 += 5;
                     if (m.p2 === "Lilly") predictedScoreP2 += 5;
 
-                    // Tie-breaker adjustment check
                     if (predictedScoreP1 === predictedScoreP2 && p1WinPct !== p2WinPct) {
                         if (p1WinPct > p2WinPct) predictedScoreP1 += 1; else predictedScoreP2 += 1;
                     }
@@ -705,7 +707,7 @@
                 </div>
                 <div class="tv-vs-container">
                     <div class="tv-vs-side" style="padding-right: 6%;">
-                        <img class="tv-split-cutout" src="${getImg(m.p1)}" onerror="this.style.display='none'">
+                        <img class="tv-split-cutout" src="${getImg(m.p1)}" onerror="this.style.display='none'" style="${imgStyle}">
                         <div class="tv-split-strip-left" style="background-color: ${c1};"><span>${m.p1}</span></div>
                     </div>
                     <div class="tv-center-hub">
@@ -720,7 +722,7 @@
                         </div>
                     </div>
                     <div class="tv-vs-side" style="padding-left: 6%;">
-                        <img class="tv-split-cutout" src="${getImg(m.p2)}" onerror="this.style.display='none'">
+                        <img class="tv-split-cutout" src="${getImg(m.p2)}" onerror="this.style.display='none'" style="${imgStyle}">
                         <div class="tv-split-strip-right" style="background-color: ${c2};"><span>${m.p2}</span></div>
                     </div>
                 </div>`;
@@ -742,12 +744,12 @@
                     
                     <div class="match-result-header anim-teams">
                         <div class="result-team">
-                            <img class="result-team-img" src="${getImg(lm.p1)}" onerror="this.style.display='none'">
+                            <img class="result-team-img" src="${getImg(lm.p1)}" onerror="this.style.display='none'" style="${imgStyle}">
                             <div style="color:${getTeamColor(lm.p1)};">${lm.p1}</div>
                         </div>
                         <div class="result-score anim-score">${log.p1Score} - ${log.p2Score}</div>
                         <div class="result-team">
-                            <img class="result-team-img" src="${getImg(lm.p2)}" onerror="this.style.display='none'">
+                            <img class="result-team-img" src="${getImg(lm.p2)}" onerror="this.style.display='none'" style="${imgStyle}">
                             <div style="color:${getTeamColor(lm.p2)};">${lm.p2}</div>
                         </div>
                     </div>
@@ -771,7 +773,7 @@
                 <div class="tv-title" style="color:var(--gold); text-shadow: 0 0 30px rgba(210,153,34,0.6);">GOLDEN BOOT</div>
                 <div class="tv-subtitle">Tournament Top Scorer</div>
             </div>
-            <img class="tv-huge-cutout" src="${getImg(ts.name)}" onerror="this.style.display='none'">
+            <img class="tv-huge-cutout" src="${getImg(ts.name)}" onerror="this.style.display='none'" style="${imgStyle}">
             <div class="tv-color-strip" style="background-color: ${tsColor};">
                 <span>${ts.name.replace(" (+Bot)","")}</span><span style="opacity:0.3;">|</span><span>${ts.goals} GOALS</span>
             </div>`;
