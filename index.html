@@ -683,9 +683,9 @@
                         p2ExpectedGoals = (p2ExpectedGoals * 0.4) + ((h2h.p2Goals / h2h.matches) * 0.6);
                     }
                     
-                    // Round pure gameplay scores cleanly (max 6 natural goals to keep it realistic)
-                    predictedScoreP1 = Math.min(6, Math.round(p1ExpectedGoals)); 
-                    predictedScoreP2 = Math.min(6, Math.round(p2ExpectedGoals));
+                    // Round pure gameplay scores cleanly (uncapped to allow realistic high-scoring blowouts)
+                    predictedScoreP1 = Math.max(0, Math.round(p1ExpectedGoals)); 
+                    predictedScoreP2 = Math.max(0, Math.round(p2ExpectedGoals));
 
                     // STEP 4: Add the 5-goal head start back to the final display prediction
                     if (m.p1 === "Lilly") predictedScoreP1 += 5;
