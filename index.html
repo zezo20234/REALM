@@ -2,785 +2,1166 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>🏆 The Tri-Velocity Cup 🏆</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Team - Football Manager & Trading Simulator</title>
+    
+    <!-- Google Fonts & FontAwesome Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Teko:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Firebase SDKs (v10.8.0 Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
+    <!-- MASTER GAME STYLES -->
     <style>
         :root {
-            --bg-color: #0d1117; --card-bg: #161b22; --accent-color: #58a6ff;
-            --text-color: #c9d1d9; --text-glow: #388bfd; --live-red: #f85149;
-            --green: #238636; --gold: #d29922;
+            --bg-dark: #0b0e14;
+            --bg-card: #151a23;
+            --bg-card-hover: #1c2330;
+            --accent-gold: #ffb700;
+            --accent-gold-glow: rgba(255, 183, 0, 0.35);
+            --accent-green: #00e676;
+            --accent-red: #ff3d00;
+            --accent-blue: #00e5ff;
+            --text-main: #f0f4f8;
+            --text-muted: #8a99ad;
+            --border-color: #232d3f;
+            --pitch-green: #1b432c;
+            --pitch-lines: rgba(255, 255, 255, 0.25);
+            --font-main: 'Montserrat', sans-serif;
+            --font-display: 'Teko', sans-serif;
         }
-        
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; overflow-x: hidden; }
-        h1 { color: #fff; text-shadow: 0 0 10px var(--text-glow); margin: 15px 0 5px 0; text-align: center; font-size: 24px; text-transform: uppercase; }
-        .container { width: 100%; max-width: 900px; padding-bottom: 30px; }
-        .section { background-color: var(--card-bg); border: 1px solid #30363d; border-radius: 12px; padding: 16px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
-        h2 { margin-top: 0; border-bottom: 2px solid #30363d; padding-bottom: 8px; color: var(--accent-color); font-size: 18px; display: flex; justify-content: space-between; align-items: center;}
-        .gold-text { color: var(--gold) !important; text-shadow: 0 0 8px rgba(210, 153, 34, 0.4); }
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+        body { background-color: var(--bg-dark); color: var(--text-main); font-family: var(--font-main); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
+        .hidden { display: none !important; }
 
-        /* 📌 STICKY PINNED LIVE SCOREBOARD */
-        .pinned-wrapper { position: -webkit-sticky; position: sticky; top: 10px; z-index: 999; margin-bottom: 25px; filter: drop-shadow(0 8px 16px rgba(0,0,0,0.6)); }
-        .live-ticker { background: linear-gradient(135deg, #1f242c 0%, #0d1117 100%); border: 2px solid var(--accent-color); border-radius: 14px; padding: 16px; text-align: center; }
-        
-        /* 🔥 UPGRADED LIVE BADGE */
-        .live-badge { 
-            background: linear-gradient(90deg, #ff0000, #cc0000); 
-            box-shadow: 0 0 12px rgba(255, 0, 0, 0.6);
-            color: white; padding: 6px 16px; border-radius: 20px; font-weight: 900; font-size: 13px; letter-spacing: 1px; display: inline-flex; align-items: center; gap: 8px; 
-        }
-        .live-badge::before { content: ''; display: inline-block; width: 10px; height: 10px; background: white; border-radius: 50%; animation: blink 1s infinite; }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
+        /* HEADER & NAV */
+        header.app-header { background: linear-gradient(180deg, #111622 0%, #0b0e14 100%); border-bottom: 2px solid var(--border-color); padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; }
+        .brand-logo { display: flex; align-items: center; gap: 12px; }
+        .brand-logo i { font-size: 1.8rem; color: var(--accent-gold); }
+        .brand-logo h1 { font-family: var(--font-display); font-size: 2.2rem; letter-spacing: 1px; text-transform: uppercase; line-height: 1; }
+        .user-hud { display: flex; align-items: center; gap: 16px; }
+        .hud-item { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-color); padding: 6px 14px; border-radius: 20px; display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 0.95rem; }
 
-        .live-score-display { display: flex; justify-content: space-between; align-items: center; max-width: 500px; margin: 12px auto; }
-        .team-wrapper { width: 35%; display: flex; flex-direction: column; }
-        #p1-wrapper { align-items: flex-end; text-align: right; }
-        #p2-wrapper { align-items: flex-start; text-align: left; }
-        .live-team { font-size: 18px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
-        .platform-label { font-size: 11px; color: #8b949e; text-transform: uppercase; font-weight: bold; margin-top: 2px; letter-spacing: 0.5px; }
-        .live-number { font-size: 38px; font-weight: 800; color: #fff; font-family: monospace; background: #21262d; padding: 4px 16px; border-radius: 8px; border: 1px solid #30363d; min-width: 60px; text-align: center; }
-        .live-timer { font-size: 20px; color: #8b949e; font-family: monospace; font-weight: bold; height: 24px; }
+        nav.main-nav { background: var(--bg-card); border-bottom: 1px solid var(--border-color); display: flex; justify-content: center; gap: 8px; padding: 8px 16px; }
+        .nav-btn { background: transparent; border: none; color: var(--text-muted); padding: 10px 20px; font-family: var(--font-main); font-weight: 700; font-size: 0.9rem; text-transform: uppercase; cursor: pointer; border-radius: 8px; transition: all 0.2s ease; display: flex; align-items: center; gap: 8px; }
+        .nav-btn:hover { color: var(--text-main); background: rgba(255, 255, 255, 0.05); }
+        .nav-btn.active { color: var(--bg-dark); background: var(--accent-gold); box-shadow: 0 0 12px var(--accent-gold-glow); }
 
-        .table-scroll { width: 100%; overflow-x: auto; border-radius: 8px; border: 1px solid #30363d; }
-        table { width: 100%; border-collapse: collapse; min-width: 500px; }
-        th, td { border: 1px solid #30363d; padding: 14px 10px; text-align: center; font-size: 14px; }
-        th { background-color: #21262d; color: #fff; }
-        tr:nth-child(even) { background-color: #1f242c; }
+        /* MAIN CONTENT & VIEWS */
+        main.main-content { flex: 1; padding: 24px; max-width: 1400px; width: 100%; margin: 0 auto; }
+        .view-section { display: none; animation: fadeIn 0.3s ease-in-out; }
+        .view-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
-        .form-row { display: inline-flex; gap: 4px; justify-content: center; align-items: center; }
-        .form-pill { font-size: 11px; font-weight: 900; padding: 3px 7px; border-radius: 4px; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
-        .form-w { background-color: var(--green); }
-        .form-l { background-color: var(--live-red); }
+        /* SQUAD PITCH UI */
+        .squad-layout { display: grid; grid-template-columns: 1fr 340px; gap: 24px; }
+        .pitch-container { background: var(--pitch-green); border: 3px solid #2d6a4f; border-radius: 16px; height: 680px; position: relative; box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.6); overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; padding: 20px 10px; }
+        .pitch-center-circle { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 140px; height: 140px; border: 2px solid var(--pitch-lines); border-radius: 50%; pointer-events: none; }
+        .pitch-row { display: flex; justify-content: space-around; align-items: center; z-index: 2; width: 100%; }
 
-        input, select, button { font-size: 16px !important; }
-        .btn { background-color: var(--green); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; transition: 0.2s; }
-        .btn:hover { filter: brightness(1.1); }
-        .btn-secondary { background-color: #21262d; border: 1px solid #30363d; color: white; }
-        .btn-tv { background: linear-gradient(90deg, #6f42c1, #d29922); border: 2px solid #fff; box-shadow: 0 0 15px rgba(210, 153, 34, 0.4); margin-bottom: 20px; width: 100%; font-size: 18px; text-transform: uppercase; letter-spacing: 1px; }
-        .btn-ko { background: linear-gradient(90deg, #d29922, #f85149); border: none; font-weight: 900; }
+        .position-slot { width: 100px; height: 135px; border: 2px dashed rgba(255, 255, 255, 0.3); border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.25); cursor: pointer; transition: all 0.2s ease; }
+        .position-slot:hover { border-color: var(--accent-gold); transform: scale(1.05); background: rgba(255, 183, 0, 0.1); }
+        .slot-label { font-family: var(--font-display); font-size: 1.4rem; color: rgba(255, 255, 255, 0.7); }
 
-        /* 🚨 REFEREE CONTROLLER */
-        #fullscreen-admin { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #070a0e; z-index: 999999; flex-direction: column; align-items: center; justify-content: space-between; padding: 40px 20px; overflow-y: auto; }
-        .admin-header { text-align: center; width: 100%; margin-bottom: 15px; }
-        .admin-panel-row { display: flex; width: 100%; max-width: 800px; justify-content: space-around; align-items: center; flex-grow: 1; }
-        .admin-controller-box { text-align: center; background: #161b22; padding: 20px 10px; border-radius: 16px; border: 1px solid #30363d; width: 32%; display: flex; flex-direction: column; align-items: center; }
-        .huge-score { font-size: 64px; font-weight: 900; margin: 10px 0; font-family: monospace; color: #fff; min-width: 80px; }
-        .score-controls { display: flex; justify-content: center; gap: 10px; width: 100%; }
-        .circle-btn { width: 55px; height: 55px; border-radius: 50%; border: none; font-size: 26px; font-weight: bold; cursor: pointer; color: white; transition: 0.1s transform; }
-        .circle-btn:active { transform: scale(0.9); }
-        .btn-plus { background-color: #238636; } .btn-minus { background-color: #f85149; }
-        .huge-clock { font-size: 42px; font-family: monospace; font-weight: bold; color: var(--accent-color); margin-bottom: 15px; }
-        .ot-toggle { background-color: #21262d; border: 1px solid #30363d; color: white; padding: 10px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s all; }
-        .ot-active { background-color: #d29922; color: #000; border-color: #d29922; animation: pulse 1s infinite; box-shadow: 0 0 15px rgba(210, 153, 34, 0.6); }
+        /* CARDS */
+        .player-card { width: 105px; height: 145px; border-radius: 10px; background: linear-gradient(135deg, #2a2d34 0%, #111318 100%); border: 2px solid var(--accent-gold); padding: 6px; display: flex; flex-direction: column; justify-content: space-between; position: relative; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5); transition: transform 0.2s ease; cursor: pointer; }
+        .player-card:hover { transform: translateY(-4px); }
+        .player-card.card-special { border-color: var(--accent-blue); background: linear-gradient(135deg, #002b4d 0%, #00101d 100%); }
+        .player-card.card-gold { border-color: var(--accent-gold); background: linear-gradient(135deg, #4a3b10 0%, #1a1403 100%); }
+        .player-card.card-silver { border-color: #a8b8c8; background: linear-gradient(135deg, #3a4450 0%, #151a20 100%); }
+        .player-card.card-bronze { border-color: #8c533e; background: linear-gradient(135deg, #382118 0%, #140b08 100%); }
+        .card-header { display: flex; justify-content: space-between; align-items: flex-start; }
+        .card-rating { font-family: var(--font-display); font-size: 1.6rem; font-weight: 700; line-height: 1; }
+        .card-position { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); }
+        .card-info { text-align: center; margin: 2px 0; }
+        .card-name { font-size: 0.75rem; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .card-club { font-size: 0.6rem; color: var(--text-muted); display: block; }
+        .card-stats { display: flex; justify-content: space-around; font-size: 0.55rem; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 4px; }
+        .stat-col { display: flex; flex-direction: column; gap: 1px; }
 
-        /* 📊 STATS ENTRY MODAL */
-        #stats-input-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 9999998; justify-content: center; align-items: center; padding: 20px; }
-        .modal-box { background: var(--card-bg); border: 2px solid var(--accent-color); padding: 24px; border-radius: 16px; width: 100%; max-width: 480px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
-        .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0; }
-        .modal-field { display: flex; flex-direction: column; gap: 6px; }
-        .modal-field label { font-size: 12px; color: #8b949e; font-weight: bold; text-transform: uppercase; }
-        .modal-field input { padding: 10px; background: #21262d; border: 1px solid #30363d; color: white; border-radius: 8px; text-align: center; font-size: 16px; font-weight: bold; }
-
-        /* 📺 TV BROADCAST OVERLAY */
-        #tv-overlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: #000; z-index: 9999999; flex-direction: column; align-items: center; justify-content: center;
-            color: white; font-family: -apple-system, sans-serif; overflow: hidden;
-        }
-        
-        .tv-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, #161b22 0%, #050811 100%); z-index: -2; }
-        .tv-bg-pattern { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: radial-gradient(rgba(255,255,255,0.03) 2px, transparent 2px); background-size: 40px 40px; z-index: -1; }
-        .tv-top-bar { position: absolute; top: 0; left: 0; width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 20px 30px; z-index: 100; background: linear-gradient(180deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 100%); }
-        .tv-live-header-indicator { display: flex; align-items: center; gap: 8px; font-weight: 900; font-size: 16px; letter-spacing: 2px; color: #ff3333; text-shadow: 0 0 10px rgba(255,51,51,0.6); text-transform: uppercase; }
-        .tv-live-dot { width: 12px; height: 12px; background-color: #ff3333; border-radius: 50%; box-shadow: 0 0 10px #ff3333; animation: blink 1.2s infinite; }
-        .tv-controls-group { display: flex; gap: 10px; }
-        .tv-utility-btn { font-size: 13px; padding: 8px 16px; opacity: 0.4; border-radius: 6px; transition: 0.3s; font-weight: bold; text-transform: uppercase; cursor: pointer; }
-        .tv-utility-btn:hover { opacity: 1; background-color: #21262d; }
-        
-        .tv-content-box { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding-top: 60px; }
-        .tv-title { font-size: 40px; letter-spacing: 8px; font-weight: 900; text-transform: uppercase; text-shadow: 0 0 20px rgba(255,255,255,0.5); z-index: 10; margin-bottom: 10px; animation: fadeDown 1s ease-out; }
-        .tv-subtitle { font-size: 18px; color: #8b949e; text-transform: uppercase; letter-spacing: 4px; z-index: 10; margin-bottom: 30px; }
-
-        .tv-huge-cutout { height: 75vh; max-height: 850px; object-fit: contain; animation: slideUp 1s ease-out forwards; filter: drop-shadow(0 20px 40px rgba(0,0,0,0.9)); z-index: 5; margin-top: auto; }
-        .tv-split-cutout { height: 60vh; max-height: 650px; object-fit: contain; animation: slideUp 1s ease-out forwards; filter: drop-shadow(0 15px 30px rgba(0,0,0,0.9)); z-index: 5; }
-
-        .tv-color-strip { position: absolute; bottom: 12%; width: 120%; padding: 25px 0; display: flex; justify-content: center; align-items: center; gap: 30px; font-size: 50px; font-weight: 900; color: #000; text-transform: uppercase; transform: skewY(-3deg) translateX(-100%); box-shadow: 0 15px 40px rgba(0,0,0,0.6); z-index: 8; animation: slideInRight 0.8s cubic-bezier(0.1, 0.9, 0.2, 1) 0.5s forwards; }
-        .tv-color-strip span { transform: skewY(3deg); }
-        .tv-split-strip-left, .tv-split-strip-right { position: absolute; bottom: 15%; width: 60%; padding: 15px 0; font-size: 40px; font-weight: 900; color: #000; text-transform: uppercase; box-shadow: 0 10px 30px rgba(0,0,0,0.6); z-index: 8; text-align: center; }
-        .tv-split-strip-left { left: -5%; transform: skewX(-15deg) translateX(-100%); animation: slideInLeft 0.8s ease-out 0.4s forwards; }
-        .tv-split-strip-right { right: -5%; transform: skewX(15deg) translateX(100%); animation: slideInRight 0.8s ease-out 0.4s forwards; }
-        .tv-split-strip-left span { display: block; transform: skewX(15deg); }
-        .tv-split-strip-right span { display: block; transform: skewX(-15deg); }
-
-        .tv-vs-container { display: flex; width: 100%; height: 100%; justify-content: center; align-items: flex-end; position: relative; padding-bottom: 80px; }
-        .tv-vs-side { display: flex; flex-direction: column; align-items: center; width: 40%; position: relative; }
-        
-        .tv-center-hub { position: absolute; bottom: 22%; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; z-index: 30; width: 340px; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.8s both; }
-        .tv-vs-badge { font-size: 70px; font-weight: 900; color: #fff; font-style: italic; text-shadow: 0 0 30px rgba(255,255,255,0.6); margin-bottom: 10px; }
-        .prediction-wrapper { width: 100%; background: rgba(22, 27, 34, 0.85); padding: 16px; border-radius: 16px; border: 1px solid #444c56; box-shadow: 0 20px 45px rgba(0,0,0,0.9); backdrop-filter: blur(12px); }
-        .prediction-label { text-align: center; font-size: 14px; color: var(--gold); text-transform: uppercase; letter-spacing: 2px; font-weight: bold; margin-bottom: 6px; text-shadow: 0 0 10px rgba(210,153,34,0.5); }
-        .predicted-score-banner { text-align: center; font-size: 26px; font-weight: 900; color: #ffffff; margin-bottom: 14px; letter-spacing: 1px; font-family: monospace; text-shadow: 0 0 15px rgba(255,255,255,0.4); }
-        .prediction-bar { display: flex; height: 30px; border-radius: 8px; overflow: hidden; background: #0d1117; border: 2px solid #000; }
-        .prediction-fill { display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 900; color: #fff; text-shadow: 0 0 5px rgba(0,0,0,0.9); transition: width 1.5s cubic-bezier(0.1, 0.9, 0.2, 1); }
-
-        .tv-standing-row { display: flex; justify-content: space-between; background: rgba(22,27,34,0.8); padding: 20px 30px; margin-bottom: 15px; border-radius: 12px; border: 1px solid #30363d; font-size: 28px; font-weight: bold; align-items: center; width: 800px; animation: fadeUp 0.5s ease backwards; }
-        .tv-stat-row { display: flex; justify-content: space-between; align-items: center; background: rgba(22,27,34,0.7); padding: 16px 28px; border-radius: 10px; border: 1px solid #30363d; font-size: 26px; font-weight: bold; margin-bottom: 12px; font-family: monospace; width: 800px; }
-        .tv-stat-label { color: #8b949e; font-size: 16px; text-transform: uppercase; letter-spacing: 2px; font-family: -apple-system, sans-serif; }
-
-        .match-result-header { display: flex; justify-content: center; align-items: center; gap: 60px; margin-bottom: 40px; width: 100%; }
-        .result-team { display: flex; flex-direction: column; align-items: center; font-size: 45px; font-weight: 900; text-transform: uppercase; }
-        .result-team-img { height: 250px; object-fit: contain; filter: drop-shadow(0 15px 25px rgba(0,0,0,0.9)); margin-bottom: 15px; }
-        .result-score { font-size: 90px; font-weight: 900; padding: 0 50px; text-shadow: 0 0 40px rgba(255,255,255,0.5); font-family: monospace; color: white; }
-        .match-stats-dropdown { width: 800px; display: flex; flex-direction: column; gap: 8px; }
-        .mvp-banner { background: var(--gold); color: #000; padding: 18px; text-align: center; font-size: 28px; font-weight: 900; margin-top: 15px; border-radius: 8px; text-transform: uppercase; box-shadow: 0 10px 20px rgba(0,0,0,0.6); }
-
-        .anim-teams { animation: fadeInDown 0.8s ease-out forwards; }
-        .anim-score { opacity: 0; animation: popInScore 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) 1s forwards; }
-        .anim-stats { opacity: 0; transform-origin: top; animation: dropDownStats 0.8s cubic-bezier(0.1, 0.9, 0.2, 1) 1.8s forwards; }
-
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-40px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes popInScore { 0% { opacity: 0; transform: scale(0.3); } 100% { opacity: 1; transform: scale(1); } }
-        @keyframes dropDownStats { 0% { opacity: 0; transform: translateY(-50px); clip-path: inset(0 0 100% 0); } 100% { opacity: 1; transform: translateY(0); clip-path: inset(0 0 0 0); } }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(100px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes fadeDown { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes slideInRight { to { transform: skewY(-3deg) translateX(0); } }
-        @keyframes slideInLeft { to { transform: skewX(-15deg) translateX(0); } }
-        @keyframes popIn { 0% { opacity: 0; transform: translate(-50%, 50px) scale(0.5); } 100% { opacity: 1; transform: translate(-50%, 0) scale(1); } }
-        @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.8; transform: scale(0.98); } }
-        @keyframes floatGold { 0%, 100% { filter: drop-shadow(0 0 30px rgba(210,153,34,0.6)); transform: translateY(0); } 50% { filter: drop-shadow(0 0 50px rgba(210,153,34,1)); transform: translateY(-15px); } }
+        /* BUTTONS & MODALS */
+        .btn-primary { background: var(--accent-gold); color: var(--bg-dark); border: none; padding: 10px 18px; font-weight: 700; border-radius: 6px; cursor: pointer; transition: all 0.2s ease; }
+        .btn-primary:hover { box-shadow: 0 0 12px var(--accent-gold-glow); transform: translateY(-1px); }
+        .sidebar-panel { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(6px); display: flex; justify-content: center; align-items: center; z-index: 2000; }
+        .modal-body { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 28px; width: 100%; max-width: 480px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 0.85rem; margin-bottom: 6px; color: var(--text-muted); }
+        .form-group input, .form-group select { width: 100%; padding: 10px 14px; background: var(--bg-dark); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-main); font-family: var(--font-main); }
     </style>
 </head>
 <body>
 
-<div class="container" id="main-layout">
-    <button class="btn btn-tv" onclick="startTVBroadcastMode()">📺 Launch TV Receiver Broadcast</button>
+    <!-- TOP NAVIGATION HUD -->
+    <header class="app-header">
+        <div class="brand-logo">
+            <i class="fa-solid fa-shield-halved"></i>
+            <h1>Ultimate Team</h1>
+        </div>
+        <div class="user-hud">
+            <div class="hud-item" style="color: var(--accent-gold);">
+                <i class="fa-solid fa-coins"></i> <span id="hud-coins">10,000</span>
+            </div>
+            <div class="hud-item" style="color: var(--accent-blue);">
+                <i class="fa-solid fa-trophy"></i> <span id="hud-rank">Amateur (1000 pts)</span>
+            </div>
+            <div class="hud-item">
+                <i class="fa-solid fa-user"></i> <span id="hud-username">Guest Manager</span>
+            </div>
+            <button class="btn-primary" id="btn-logout" style="padding: 6px 12px; font-size: 0.8rem;">
+                <i class="fa-solid fa-right-from-bracket"></i>
+            </button>
+        </div>
+    </header>
 
-    <h1>🏆 THE TRI-VELOCITY CUP 🏆</h1>
-    <p style="text-align:center; color: #8b949e; margin: 0 0 20px 0; font-size: 13px;">Live Match Central</p>
+    <!-- NAVIGATION TABS -->
+    <nav class="main-nav">
+        <button class="nav-btn active" data-target="view-squad"><i class="fa-solid fa-users-line"></i> Squad</button>
+        <button class="nav-btn" data-target="view-store"><i class="fa-solid fa-box-open"></i> Packs</button>
+        <button class="nav-btn" data-target="view-market"><i class="fa-solid fa-chart-line"></i> Market</button>
+        <button class="nav-btn" data-target="view-match"><i class="fa-solid fa-futbol"></i> Matches</button>
+        <button class="nav-btn" data-target="view-leaderboards"><i class="fa-solid fa-ranking-star"></i> Rank</button>
+    </nav>
 
-    <div class="pinned-wrapper">
-        <div class="section live-ticker">
-            <div class="live-badge">LIVE SCOREBOARD</div>
-            <div class="live-score-display">
-                <div class="team-wrapper" id="p1-wrapper">
-                    <div class="live-team" id="view-p1-name">Loading...</div>
-                    <div class="platform-label">🎮 PS5</div>
+    <!-- MAIN DASHBOARD CONTENT -->
+    <main class="main-content">
+        <!-- 1. SQUAD BUILDER VIEW -->
+        <section id="view-squad" class="view-section active">
+            <div class="squad-layout">
+                <div class="pitch-container">
+                    <div class="pitch-center-circle"></div>
+                    <!-- Attackers -->
+                    <div class="pitch-row">
+                        <div class="position-slot" data-position="LW"><span class="slot-label">LW</span></div>
+                        <div class="position-slot" data-position="ST"><span class="slot-label">ST</span></div>
+                        <div class="position-slot" data-position="RW"><span class="slot-label">RW</span></div>
+                    </div>
+                    <!-- Midfielders -->
+                    <div class="pitch-row">
+                        <div class="position-slot" data-position="CAM"><span class="slot-label">CAM</span></div>
+                        <div class="position-slot" data-position="CM"><span class="slot-label">CM</span></div>
+                        <div class="position-slot" data-position="CDM"><span class="slot-label">CDM</span></div>
+                    </div>
+                    <!-- Defenders & Keeper -->
+                    <div class="pitch-row">
+                        <div class="position-slot" data-position="LB"><span class="slot-label">LB</span></div>
+                        <div class="position-slot" data-position="CB"><span class="slot-label">CB</span></div>
+                        <div class="position-slot" data-position="RB"><span class="slot-label">RB</span></div>
+                    </div>
+                    <div class="pitch-row">
+                        <div class="position-slot" data-position="GK"><span class="slot-label">GK</span></div>
+                    </div>
                 </div>
-                <div class="live-number" id="view-p1-score">0</div>
-                <div style="font-size: 18px; color: #8b949e; font-weight: bold;">VS</div>
-                <div class="live-number" id="view-p2-score">0</div>
-                <div class="team-wrapper" id="p2-wrapper">
-                    <div class="live-team" id="view-p2-name">Loading...</div>
-                    <div class="platform-label">💻 Laptop</div>
+
+                <!-- SIDEBAR STATS & FORMATION CONTROL -->
+                <div class="sidebar-panel">
+                    <h2 style="font-family: var(--font-display); font-size: 1.8rem; margin-bottom: 12px;">Squad Tactics</h2>
+                    <div class="form-group">
+                        <label>Formation</label>
+                        <select id="formation-select">
+                            <option value="4-3-3">4-3-3 Attack</option>
+                            <option value="4-4-2">4-4-2 Standard</option>
+                            <option value="4-2-3-1">4-2-3-1 Narrow</option>
+                        </select>
+                    </div>
+                    <div style="margin-top: 20px;">
+                        <h3>Overall Chemistry: <span id="squad-chem" style="color: var(--accent-green);">100</span></h3>
+                        <h3>Team Rating: <span id="squad-rating" style="color: var(--accent-gold);">88</span></h3>
+                    </div>
                 </div>
             </div>
-            <div class="live-timer" id="view-clock">5:00</div>
-            <div style="margin-top: 12px;">
-                <button class="btn btn-secondary" style="padding: 8px 16px; min-height: 38px;" onclick="requestAdminAccess()">🔒 Unlock Referee Controller</button>
+        </section>
+
+        <!-- 2. PACK STORE VIEW -->
+        <section id="view-store" class="view-section">
+            <h2 style="font-family: var(--font-display); font-size: 2rem; margin-bottom: 16px;">Packs Store</h2>
+            <div id="packs-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px;">
+                <!-- Dynamically Populated Packs -->
+            </div>
+        </section>
+
+        <!-- 3. TRANSFER MARKET VIEW -->
+        <section id="view-market" class="view-section">
+            <h2 style="font-family: var(--font-display); font-size: 2rem; margin-bottom: 16px;">Transfer Market</h2>
+            <div id="market-listings" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px;">
+                <!-- Live Listings -->
+            </div>
+        </section>
+
+        <!-- 4. MATCH SIMULATOR VIEW -->
+        <section id="view-match" class="view-section">
+            <h2 style="font-family: var(--font-display); font-size: 2rem; margin-bottom: 16px;">Match Engine</h2>
+            <div class="sidebar-panel" style="text-align: center; max-width: 600px; margin: 0 auto;">
+                <h3>Simulate League Match</h3>
+                <p style="color: var(--text-muted); margin: 12px 0;">Test your squad chemistry & ratings in real-time play-by-play.</p>
+                <button class="btn-primary" id="btn-start-match">Start Match</button>
+            </div>
+        </section>
+
+        <!-- 5. LEADERBOARDS VIEW -->
+        <section id="view-leaderboards" class="view-section">
+            <h2 style="font-family: var(--font-display); font-size: 2rem; margin-bottom: 16px;">Global Rankings</h2>
+            <div id="leaderboard-table" class="sidebar-panel">Loading leaderboard...</div>
+        </section>
+    </main>
+    <!-- MODAL OVERLAYS -->
+    <!-- 1. AUTHENTICATION MODAL -->
+    <div id="modal-auth" class="modal-overlay">
+        <div class="modal-body">
+            <h2 style="font-family: var(--font-display); font-size: 2.2rem; text-align: center; margin-bottom: 20px;" class="text-gold">
+                Ultimate Team Manager
+            </h2>
+            <div id="auth-error-msg" style="color: var(--accent-red); font-size: 0.85rem; margin-bottom: 12px; display: none; text-align: center;"></div>
+
+            <!-- Login Form -->
+            <form id="form-login" class="auth-form active">
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="login-email" required placeholder="manager@ultimateteam.com">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="login-password" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn-primary" style="width: 100%; margin-top: 10px;">Login to Club</button>
+                <div style="margin-top: 16px; text-align: center; font-size: 0.85rem;">
+                    Don't have a team? <a href="#" id="link-show-register" style="color: var(--accent-gold); font-weight: 700;">Create Club</a>
+                </div>
+            </form>
+
+            <!-- Register Form -->
+            <form id="form-register" class="auth-form">
+                <div class="form-group">
+                    <label>Club Name</label>
+                    <input type="text" id="reg-clubname" required placeholder="FC Barcelona UK">
+                </div>
+                <div class="form-group">
+                    <label>Manager Name</label>
+                    <input type="text" id="reg-username" required placeholder="Alex Ferguson">
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="reg-email" required placeholder="manager@ultimateteam.com">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="reg-password" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn-primary" style="width: 100%; margin-top: 10px;">Establish Club</button>
+                <div style="margin-top: 16px; text-align: center; font-size: 0.85rem;">
+                    Already a manager? <a href="#" id="link-show-login" style="color: var(--accent-gold); font-weight: 700;">Sign In</a>
+                </div>
+            </form>
+            <div style="text-align: center; margin-top: 15px;">
+                <button id="btn-guest-login" style="background: transparent; border: 1px solid var(--text-muted); color: var(--text-muted); padding: 6px 12px; border-radius: 4px; font-size: 0.75rem; cursor: pointer;">
+                    Continue as Guest Play
+                </button>
             </div>
         </div>
     </div>
 
-    <div class="section">
-        <h2>📊 Live Leaderboard Standings</h2>
-        <div class="table-scroll">
-            <table>
-                <thead><tr><th>Rank</th><th>Player</th><th>Points</th><th>GD</th><th>Form</th></tr></thead>
-                <tbody id="leaderboard-body"></tbody>
-            </table>
-        </div>
-    </div>
-
-    <div class="section" id="knockout-section">
-        <h2 class="gold-text">⚔️ Phase 2: Knockout Stage ⚔️</h2>
-        <div class="table-scroll">
-            <table>
-                <thead><tr><th>Match</th><th>Fixture</th><th>Score</th><th>Action</th></tr></thead>
-                <tbody id="knockout-body">
-                    <tr><td colspan="4" style="color: #8b949e;">Awaiting Group Stage Completion...</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <div class="section">
-        <h2>🎮 Phase 1: Group Stage (15 Matches)</h2>
-        <div class="table-scroll">
-            <table>
-                <thead><tr><th>Match</th><th>Fixture</th><th>Score</th><th>Action</th></tr></thead>
-                <tbody id="matches-body"></tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-<div id="fullscreen-admin">
-    <div class="admin-header">
-        <span class="live-badge" style="background-color: var(--accent-color);">🛠️ REFEREE DASHBOARD</span>
-        <h2 id="admin-match-title" style="color:#fff; margin-top:10px; font-size: 20px;">Match: Loading...</h2>
-        <button id="admin-ot-btn" class="ot-toggle" onclick="toggleAdminOT()">Toggle Overtime (OT: OFF)</button>
-    </div>
-
-    <div class="admin-panel-row">
-        <div class="admin-controller-box">
-            <h3 id="admin-p1-name" style="margin: 0; font-size: 20px;">Player 1</h3>
-            <div class="huge-score" id="admin-p1-score">0</div>
-            <div class="score-controls">
-                <button class="circle-btn btn-minus" onclick="modLiveScore('p1', -1)">-</button>
-                <button class="circle-btn btn-plus" onclick="modLiveScore('p1', 1)">+</button>
+    <!-- 2. CLUB INVENTORY / PLAYER PICKER MODAL -->
+    <div id="modal-select-player" class="modal-overlay hidden">
+        <div class="modal-body" style="max-width: 650px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="font-family: var(--font-display); font-size: 1.8rem;" id="picker-slot-title">Select Player</h3>
+                <button class="btn-close-modal" style="background: transparent; border: none; color: white; font-size: 1.4rem; cursor: pointer;">&times;</button>
+            </div>
+            <div id="club-inventory-picker" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; max-height: 400px; overflow-y: auto; padding: 10px 0;">
+                <!-- Dynamically Populated Inventory Cards -->
             </div>
         </div>
+    </div>
+
+    <!-- 3. TRANSFER MARKET LISTING MODAL -->
+    <div id="modal-list-card" class="modal-overlay hidden">
+        <div class="modal-body">
+            <h3 style="font-family: var(--font-display); font-size: 1.8rem; margin-bottom: 16px;">List Card on Market</h3>
+            <div id="listing-card-preview" style="display: flex; justify-content: center; margin-bottom: 16px;"></div>
+            <form id="form-list-market">
+                <input type="hidden" id="list-card-instance-id">
+                <div class="form-group">
+                    <label>Asking Price (Coins)</label>
+                    <input type="number" id="list-card-price" min="100" max="10000000" required placeholder="5000">
+                </div>
+                <div style="display: flex; gap: 12px; margin-top: 20px;">
+                    <button type="button" class="btn-close-modal" style="flex: 1; background: transparent; border: 1px solid var(--border-color); color: white; padding: 10px; border-radius: 6px; cursor: pointer;">Cancel</button>
+                    <button type="submit" class="btn-primary" style="flex: 1;">List Player</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 4. PACK REVEAL MODAL -->
+    <div id="modal-pack-reveal" class="modal-overlay hidden" style="background: rgba(0,0,0,0.95);">
         <div style="text-align: center;">
-            <div class="huge-clock" id="admin-clock">5:00</div>
-            <button class="btn" onclick="toggleAdminClock()" style="background-color:#388bfd;">⏯️ START/PAUSE</button>
-        </div>
-        <div class="admin-controller-box">
-            <h3 id="admin-p2-name" style="margin: 0; font-size: 20px;">Player 2</h3>
-            <div class="huge-score" id="admin-p2-score">0</div>
-            <div class="score-controls">
-                <button class="circle-btn btn-minus" onclick="modLiveScore('p2', -1)">-</button>
-                <button class="circle-btn btn-plus" onclick="modLiveScore('p2', 1)">+</button>
+            <h2 class="text-gold" style="font-family: var(--font-display); font-size: 3rem; margin-bottom: 20px; animation: pulse 1s infinite alternate;">NEW SIGNING!</h2>
+            <div id="pack-card-animation-target" style="display: inline-block; transform: scale(1.4); transition: transform 0.6s ease;"></div>
+            <div style="margin-top: 40px;">
+                <button class="btn-primary btn-close-modal" style="font-size: 1.1rem; padding: 12px 30px;">Send to Club</button>
             </div>
         </div>
     </div>
 
-    <div style="display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 400px; margin-top: 30px;">
-        <button class="btn" onclick="triggerStatsEntry()" style="background-color: var(--green); padding: 16px;">💾 Finish Match & Enter Stats</button>
-        <button class="btn btn-secondary" onclick="exitAdminPanelWithoutSaving()">❌ Cancel / Exit Panel</button>
-    </div>
-</div>
 
-<div id="stats-input-modal">
-    <div class="modal-box">
-        <h2 style="margin-top:0; font-size: 20px; text-align:center;">📊 Log Match Stats</h2>
-        <div class="modal-grid">
-            <div class="modal-field"><label id="modal-p1-label-shots">P1 Shots</label><input type="number" id="input-p1-shots" value="0"></div>
-            <div class="modal-field"><label id="modal-p2-label-shots">P2 Shots</label><input type="number" id="input-p2-shots" value="0"></div>
-            <div class="modal-field"><label id="modal-p1-label-saves">P1 Saves</label><input type="number" id="input-p1-saves" value="0"></div>
-            <div class="modal-field"><label id="modal-p2-label-saves">P2 Saves</label><input type="number" id="input-p2-saves" value="0"></div>
-        </div>
-        <div class="modal-field" style="margin-bottom: 24px;"><label>🏅 MVP Name</label><input type="text" id="input-mvp"></div>
-        <div style="display:flex; flex-direction:column; gap:10px;">
-            <button class="btn" onclick="saveMatchToDatabase()" style="background-color: var(--accent-color);">🚀 Save Server Data</button>
-            <button class="btn btn-secondary" onclick="document.getElementById('stats-input-modal').style.display='none'">Back to Dashboard</button>
-        </div>
-    </div>
-</div>
-
-<div id="tv-overlay">
-    <div class="tv-bg"></div>
-    <div class="tv-bg-pattern"></div>
-    
-    <div class="tv-top-bar">
-        <div class="tv-live-header-indicator">
-            <div class="tv-live-dot"></div>
-            <span>Tri-Velocity TV • LIVE</span>
-        </div>
-        <div class="tv-controls-group">
-            <button class="btn btn-secondary tv-utility-btn" id="tv-photo-toggle" onclick="toggleTVPhotos()">🚫 Hide Photos</button>
-            <button class="btn btn-secondary tv-utility-btn" onclick="toggleNativeFullscreen()">🖵 Go Fullscreen</button>
-            <button class="btn btn-secondary tv-utility-btn" style="background-color: #da3633; color: white; opacity: 0.7;" onclick="stopTVBroadcastMode()">Exit</button>
-        </div>
-    </div>
-    
-    <div id="tv-dynamic-content" class="tv-content-box"></div>
-</div>
-
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-    const firebaseConfig = { apiKey: "AIzaSyAjeXycCBhYoAU-0iiC4LbSTylKrrThN8Y", authDomain: "sharplabubu.firebaseapp.com", databaseURL: "https://sharplabubu-default-rtdb.firebaseio.com", projectId: "sharplabubu" };
-    const app = initializeApp(firebaseConfig); const db = getFirestore(app);
-
-    const phase1Schedule = [
-        { id: 1, p1: "Zezo", p2: "Asser" }, { id: 2, p1: "Asser", p2: "Lilly" }, { id: 3, p1: "Lilly", p2: "Zezo" },
-        { id: 4, p1: "Asser", p2: "Zezo" }, { id: 5, p1: "Lilly", p2: "Asser" }, { id: 6, p1: "Zezo", p2: "Lilly" },
-        { id: 7, p1: "Zezo", p2: "Asser" }, { id: 8, p1: "Asser", p2: "Lilly" }, { id: 9, p1: "Lilly", p2: "Zezo" },
-        { id: 10, p1: "Asser", p2: "Zezo" }, { id: 11, p1: "Lilly", p2: "Asser" }, { id: 12, p1: "Zezo", p2: "Lilly" },
-        { id: 13, p1: "Zezo", p2: "Asser" }, { id: 14, p1: "Asser", p2: "Lilly" }, { id: 15, p1: "Lilly", p2: "Zezo" }
-    ];
-
-    let clockInterval = null; let globalActiveMatchId = 1;
-    let adminState = { p1Name: "P1", p2Name: "P2", p1Score: 0, p2Score: 0, secondsLeft: 300, isRunning: false, isOT: false };
-    
-    let tvDataState = { standings: [], topScorer: {name: "None", goals: 0}, lastMatch: null, nextMatch: null, rawScores: {}, champion: null };
-    let tvSlideIndex = 0; let tvLoopInterval = null;
-    let tvShowPhotos = true; // State for photo visibility
-    
-    const getImg = (name) => {
-        if(name.includes("Zezo")) return "Zezo.png";
-        if(name.includes("Asser")) return "Asser.png";
-        if(name.includes("Lilly")) return "Lilly.png";
-        return ""; 
-    };
-
-    const getTeamColor = (name) => {
-        if(name.includes("Zezo")) return "#f85149";
-        if(name.includes("Asser")) return "#d29922";
-        if(name.includes("Lilly")) return "#ff69b4";
-        return "#58a6ff";
-    };
-
-    // Helper to build match rows UI
-    const buildMatchRow = (id, p1, p2, log, isKnockout = false) => {
-        let actionButtons = log.completed 
-            ? `<span style="display:inline-flex; align-items:center; gap:8px;">✅ <button class="btn btn-secondary" style="padding:4px 8px; font-size:12px; min-height:28px; background-color:#da3633; color:white; border:none;" onclick="resetMatch(${id})">🔄 Reset</button></span>` 
-            : `<button class="btn ${isKnockout ? 'btn-ko' : ''}" style="padding:4px 10px;font-size:12px;min-height:30px;" onclick="launchSelectedMatch(${id}, '${p1}', '${p2}')">🚀 Boot</button>`;
-        let label = isKnockout ? (id === 16 ? "SEMI-FINAL" : "GRAND FINAL") : id;
-        return `<tr><td>${label}</td><td><strong>${p1}</strong> vs <strong>${p2}</strong></td><td>${log.completed ? `${log.p1Score} : ${log.p2Score}` : '--'}</td><td>${actionButtons}</td></tr>`;
-    };
-
-    onSnapshot(doc(db, "tournaments", "tri-velocity-cup"), (snapshot) => {
-        let database = snapshot.exists() ? snapshot.data() : { scores: {}, liveMatch: {} };
-        let live = database.liveMatch || {};
-        let scores = database.scores || {};
-        
-        tvDataState.rawScores = scores;
-        globalActiveMatchId = live.matchId || 1;
-        adminState.p1Score = live.p1Score || 0; adminState.p2Score = live.p2Score || 0;
-        adminState.secondsLeft = live.secondsLeft !== undefined ? live.secondsLeft : 300;
-        adminState.isOT = live.isOT || false;
-
-        let otBtn = document.getElementById("admin-ot-btn");
-        if(adminState.isOT) {
-            otBtn.classList.add("ot-active"); otBtn.innerText = "Overtime: ON 🔥";
-        } else {
-            otBtn.classList.remove("ot-active"); otBtn.innerText = "Toggle Overtime (OT: OFF)";
-        }
-
-        let fallbackFix = phase1Schedule.find(m => m.id === globalActiveMatchId);
-        // If it's match 16 or 17, fallback to live names since they are dynamic
-        adminState.p1Name = live.p1Name || (fallbackFix ? fallbackFix.p1 : "Player 1");
-        adminState.p2Name = live.p2Name || (fallbackFix ? fallbackFix.p2 : "Player 2");
-
-        document.getElementById("view-p1-name").innerText = adminState.p1Name; document.getElementById("view-p2-name").innerText = adminState.p2Name;
-        document.getElementById("view-p1-score").innerText = adminState.p1Score; document.getElementById("view-p2-score").innerText = adminState.p2Score;
-        
-        let vc = document.getElementById("view-clock");
-        if (adminState.secondsLeft === 300 && !live.isRunning && adminState.p1Score === 0 && adminState.p2Score === 0 && !adminState.isOT) {
-            vc.innerText = "Match Not Started"; vc.style.color = "#8b949e";
-        } else { vc.style.color = "#fff"; formatClockUI(adminState.secondsLeft, "view-clock"); }
-
-        let titleLabel = globalActiveMatchId === 16 ? "SEMI-FINAL" : (globalActiveMatchId === 17 ? "GRAND FINAL" : `Match #${globalActiveMatchId}`);
-        document.getElementById("admin-match-title").innerText = `${titleLabel}: ${adminState.p1Name} vs ${adminState.p2Name}`;
-        document.getElementById("admin-p1-name").innerText = adminState.p1Name; document.getElementById("admin-p2-name").innerText = adminState.p2Name;
-        document.getElementById("admin-p1-score").innerText = adminState.p1Score; document.getElementById("admin-p2-score").innerText = adminState.p2Score;
-        formatClockUI(adminState.secondsLeft, "admin-clock");
-        
-        runLocalTimerTick(live.isRunning); processData(scores);
-    });
-
-    function processData(logs) {
-        let stats = { 
-            "Zezo": { name: "Zezo", points: 0, gd: 0, goals: 0, gamesPlayed: 0, form: [] }, 
-            "Asser": { name: "Asser", points: 0, gd: 0, goals: 0, gamesPlayed: 0, form: [] }, 
-            "Lilly": { name: "Lilly (+Bot)", points: 0, gd: 0, goals: 0, gamesPlayed: 0, form: [] } 
+    <!-- ========================================================================== -->
+    <!-- MASTER JAVASCRIPT GAME ENGINE                                              -->
+    <!-- ========================================================================== -->
+    <script>
+        /* ==========================================================================
+           MODULE 1: FIREBASE CONFIGURATION & INITIALIZATION
+           ========================================================================== */
+        const firebaseConfig = {
+            apiKey: "AIzaSyDemoConfigKeyForUltimateTeamApp12345",
+            authDomain: "ultimate-team-simulator.firebaseapp.com",
+            databaseURL: "https://ultimate-team-simulator-default-rtdb.firebaseio.com",
+            projectId: "ultimate-team-simulator",
+            storageBucket: "ultimate-team-simulator.appspot.com",
+            messagingSenderId: "123456789012",
+            appId: "1:123456789012:web:abc123def456789"
         };
-        let lastCompletedId = -1; let nextIncompleteMatch = null;
-        const p1Container = document.getElementById("matches-body"); p1Container.innerHTML = "";
 
-        // PROCESS GROUP STAGE (Match 1-15)
-        phase1Schedule.forEach(fix => {
-            let log = logs[`match_${fix.id}`] || { completed: false };
-            p1Container.innerHTML += buildMatchRow(fix.id, fix.p1, fix.p2, log);
-
-            if (log.completed) {
-                lastCompletedId = Math.max(lastCompletedId, fix.id);
-                
-                let aP1 = log.p1Score;
-                let aP2 = log.p2Score;
-                
-                stats[fix.p1].gamesPlayed += 1; stats[fix.p2].gamesPlayed += 1;
-                stats[fix.p1].gd += (aP1 - aP2); stats[fix.p2].gd += (aP2 - aP1);
-                stats[fix.p1].goals += aP1; stats[fix.p2].goals += aP2; 
-
-                if (aP1 > aP2) { 
-                    stats[fix.p1].points += log.isOT ? 2 : 3; stats[fix.p1].form.push('W'); stats[fix.p2].form.push('L');
-                } else if (aP2 > aP1) { 
-                    stats[fix.p2].points += log.isOT ? 2 : 3; stats[fix.p2].form.push('W'); stats[fix.p1].form.push('L');
-                }
-            } else if (!nextIncompleteMatch) { nextIncompleteMatch = { id: fix.id, p1: fix.p1, p2: fix.p2, title: `Group Stage - Match #${fix.id}` }; }
-        });
-
-        tvDataState.standings = Object.values(stats).sort((a,b) => b.points !== a.points ? b.points - a.points : b.gd - a.gd);
-        tvDataState.topScorer = Object.values(stats).sort((a,b) => b.goals - a.goals)[0];
-        tvDataState.champion = null; // Reset champion
-
-        // PROCESS KNOCKOUT STAGE (Match 16 & 17)
-        const koContainer = document.getElementById("knockout-body");
-        let groupStageComplete = phase1Schedule.every(fix => logs[`match_${fix.id}`] && logs[`match_${fix.id}`].completed);
-
-        if (groupStageComplete && tvDataState.standings.length >= 3) {
-            koContainer.innerHTML = "";
-            let rank1 = tvDataState.standings[0].name.replace(" (+Bot)", "");
-            let rank2 = tvDataState.standings[1].name.replace(" (+Bot)", "");
-            let rank3 = tvDataState.standings[2].name.replace(" (+Bot)", "");
-            let sfWinner = null;
-
-            // Match 16: Semi-Final (2nd vs 3rd)
-            let log16 = logs[`match_16`] || { completed: false };
-            if (!log16.completed && !nextIncompleteMatch) {
-                nextIncompleteMatch = { id: 16, p1: rank2, p2: rank3, title: "SEMI-FINAL" };
-            }
-            if (log16.completed) {
-                sfWinner = (log16.p1Score > log16.p2Score) ? rank2 : rank3;
-                lastCompletedId = Math.max(lastCompletedId, 16);
-            }
-            koContainer.innerHTML += buildMatchRow(16, rank2, rank3, log16, true);
-
-            // Match 17: Grand Final (1st vs Winner of Match 16)
-            if (log16.completed) {
-                let log17 = logs[`match_17`] || { completed: false };
-                if (!log17.completed && !nextIncompleteMatch) {
-                    nextIncompleteMatch = { id: 17, p1: rank1, p2: sfWinner, title: "GRAND FINAL" };
-                }
-                if (log17.completed) {
-                    tvDataState.champion = (log17.p1Score > log17.p2Score) ? rank1 : sfWinner;
-                    lastCompletedId = Math.max(lastCompletedId, 17);
-                }
-                koContainer.innerHTML += buildMatchRow(17, rank1, sfWinner, log17, true);
-            } else {
-                koContainer.innerHTML += `<tr><td>GRAND FINAL</td><td><strong>${rank1}</strong> vs <strong>TBD</strong></td><td>--</td><td style="color:#8b949e; font-size:12px;">Awaiting Semi-Final</td></tr>`;
-            }
+        // Initialize Firebase safely
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
         }
+        window.auth = firebase.auth();
+        window.db = firebase.database();
 
-        // Assign Last/Next Matches for TV
-        if (lastCompletedId > -1) { 
-            let p1 = "", p2 = "", title = "";
-            if (lastCompletedId === 16) { 
-                p1 = tvDataState.standings[1].name.replace(" (+Bot)", ""); p2 = tvDataState.standings[2].name.replace(" (+Bot)", ""); title = "SEMI-FINAL";
-            } else if (lastCompletedId === 17) {
-                let log16 = logs[`match_16`];
-                p1 = tvDataState.standings[0].name.replace(" (+Bot)", ""); 
-                p2 = (log16.p1Score > log16.p2Score) ? tvDataState.standings[1].name.replace(" (+Bot)", "") : tvDataState.standings[2].name.replace(" (+Bot)", "");
-                title = "GRAND FINAL";
-            } else {
-                let lastFix = phase1Schedule.find(m => m.id === lastCompletedId); 
-                p1 = lastFix.p1; p2 = lastFix.p2; title = `Match #${lastCompletedId}`;
+
+        /* ==========================================================================
+           MODULE 2: UTILITY ENGINE (utils.js)
+           ========================================================================== */
+        const Utils = {
+            formatCoins(num) {
+                return new Intl.NumberFormat('en-US').format(num || 0);
+            },
+            generateId(prefix = 'id') {
+                return `${prefix}_${Math.random().toString(36).substr(2, 9)}_${Date.now()}`;
+            },
+            clamp(val, min, max) {
+                return Math.min(Math.max(val, min), max);
+            },
+            randomChoice(arr) {
+                return arr[Math.floor(Math.random() * arr.length)];
+            },
+            getRandomInt(min, max) {
+                return Math.floor(Math.random() * (max - min + 1)) + min;
+            },
+            calculateCardRarity(rating) {
+                if (rating >= 90) return 'Special';
+                if (rating >= 75) return 'Gold';
+                if (rating >= 65) return 'Silver';
+                return 'Bronze';
+            },
+            getRarityColor(rarity) {
+                switch ((rarity || '').toLowerCase()) {
+                    case 'special': return '#00e5ff';
+                    case 'gold': return '#ffb700';
+                    case 'silver': return '#a8b8c8';
+                    case 'bronze': return '#8c533e';
+                    default: return '#ffb700';
+                }
+            },
+            calculateQuickSellValue(rating) {
+                if (rating >= 90) return 5000;
+                if (rating >= 85) return 1000;
+                if (rating >= 75) return 300;
+                if (rating >= 65) return 100;
+                return 30;
+            },
+            sanitizeInput(str) {
+                if (!str) return '';
+                return String(str).replace(/[&<>"']/g, function (m) {
+                    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+                });
+            },
+            deepCopy(obj) {
+                return JSON.parse(JSON.stringify(obj));
             }
-            tvDataState.lastMatch = { id: lastCompletedId, p1: p1, p2: p2, log: logs[`match_${lastCompletedId}`], title: title }; 
-        } else { tvDataState.lastMatch = null; }
-        
-        tvDataState.nextMatch = nextIncompleteMatch;
+        };
+        window.Utils = Utils;
 
-        // Render Leaderboard UI
-        const lbEl = document.getElementById("leaderboard-body"); lbEl.innerHTML = "";
-        tvDataState.standings.forEach((p, pos) => { 
-            let recentFormHTML = p.form.slice(-5).map(f => `<span class="form-pill form-${f.toLowerCase()}">${f}</span>`).join(' ');
-            lbEl.innerHTML += `<tr>
-                <td><strong>${pos+1}</strong></td><td>${p.name}</td><td><strong>${p.points}</strong></td>
-                <td style="color:${p.gd>=0?'#2ea043':'#f85149'}">${p.gd>0?'+'+p.gd:p.gd}</td>
-                <td><div class="form-row">${recentFormHTML || '--'}</div></td>
-            </tr>`; 
-        });
-    }
 
-    window.requestAdminAccess = function() { 
-        if(prompt("Passcode:")==="2013"){ 
-            document.getElementById("main-layout").style.display="none"; 
-            let admin = document.getElementById("fullscreen-admin");
-            admin.style.display="flex"; admin.style.animation = "fadeIn 0.3s ease-out";
-        } 
-    };
+        /* ==========================================================================
+           MODULE 3: AUTHENTICATION MANAGER (auth.js)
+           ========================================================================== */
+        const AuthManager = {
+            currentUser: null,
+            userProfile: null,
 
-    window.exitAdminPanelWithoutSaving = function() { document.getElementById("fullscreen-admin").style.display="none"; document.getElementById("main-layout").style.display="block"; };
-    
-    window.launchSelectedMatch = async function(id, p1, p2) { 
-        if(prompt("Passcode:")==="2013"){ 
-            await setDoc(doc(db, "tournaments", "tri-velocity-cup"), { liveMatch: { matchId: id, p1Name: p1, p2Name: p2, p1Score: 0, p2Score: 0, secondsLeft: 300, isRunning: false, isOT: false } }, { merge: true }); 
-            document.getElementById("main-layout").style.display="none"; 
-            let admin = document.getElementById("fullscreen-admin");
-            admin.style.display="flex"; admin.style.animation = "fadeIn 0.3s ease-out";
-        } 
-    };
-    
-    window.resetMatch = async function(id) {
-        if(prompt("Enter Admin Passcode to Reset Match:") === "2013") {
-            if(confirm(`Are you sure you want to completely erase the results for Match #${id}?`)) {
-                await setDoc(doc(db, "tournaments", "tri-velocity-cup"), { scores: { [`match_${id}`]: { completed: false, p1Score: 0, p2Score: 0, p1Shots: 0, p2Shots: 0, p1Saves: 0, p2Saves: 0, p1Poss: 50, p2Poss: 50, isOT: false, mvp: "" } } }, { merge: true });
-                if (id === 16) await setDoc(doc(db, "tournaments", "tri-velocity-cup"), { scores: { [`match_17`]: { completed: false } } }, { merge: true });
-                alert(`✅ Match(es) have been reset.`);
-            }
-        } else { alert("❌ Access Denied"); }
-    };
-
-    window.modLiveScore = async (tp, off) => { let p = tp==='p1'?'p1Score':'p2Score'; await setDoc(doc(db, "tournaments", "tri-velocity-cup"), { liveMatch: { [p]: Math.max(0, adminState[p]+off) } }, { merge: true }); };
-    window.toggleAdminOT = async () => await setDoc(doc(db, "tournaments", "tri-velocity-cup"), { liveMatch: { isOT: !adminState.isOT } }, { merge: true });
-    window.toggleAdminClock = async () => await setDoc(doc(db, "tournaments", "tri-velocity-cup"), { liveMatch: { isRunning: !adminState.isRunning } }, { merge: true });
-
-    function runLocalTimerTick(active) {
-        adminState.isRunning = active; clearInterval(clockInterval);
-        if (active) { clockInterval = setInterval(() => { adminState.secondsLeft--; if (adminState.secondsLeft <= 0) { adminState.secondsLeft = 0; adminState.isRunning = false; clearInterval(clockInterval); } formatClockUI(adminState.secondsLeft, "admin-clock"); formatClockUI(adminState.secondsLeft, "view-clock"); if (adminState.secondsLeft % 4 === 0 || adminState.secondsLeft === 0) { setDoc(doc(db, "tournaments", "tri-velocity-cup"), { liveMatch: { secondsLeft: adminState.secondsLeft, isRunning: adminState.isRunning } }, { merge: true }); } }, 1000); }
-    }
-    function formatClockUI(t, id) { let m=Math.floor(t/60); let s=t%60; document.getElementById(id).innerText = `${m}:${s<10?'0':''}${s}`; }
-
-    window.triggerStatsEntry = function() {
-        document.getElementById("modal-p1-label-shots").innerText = `${adminState.p1Name} Shots`; document.getElementById("modal-p2-label-shots").innerText = `${adminState.p2Name} Shots`;
-        document.getElementById("input-mvp").value = adminState.p1Score > adminState.p2Score ? adminState.p1Name : adminState.p2Name;
-        let statsModal = document.getElementById("stats-input-modal");
-        statsModal.style.display = "flex"; statsModal.style.animation = "fadeIn 0.3s ease-out";
-    };
-
-    window.saveMatchToDatabase = async function() {
-        let p1Shots = parseInt(document.getElementById("input-p1-shots").value)||0; let p2Shots = parseInt(document.getElementById("input-p2-shots").value)||0;
-        let p1Saves = parseInt(document.getElementById("input-p1-saves").value)||0; let p2Saves = parseInt(document.getElementById("input-p2-saves").value)||0;
-        let p1Poss = (p1Shots+p2Saves) > 0 ? Math.round(((p1Shots+p2Saves)/(p1Shots+p2Saves+p2Shots+p1Saves))*100) : 50;
-        
-        await setDoc(doc(db, "tournaments", "tri-velocity-cup"), { 
-            scores: { 
-                [`match_${globalActiveMatchId}`]: { 
-                    p1Score: adminState.p1Score, p2Score: adminState.p2Score, isOT: adminState.isOT, completed: true, 
-                    p1Shots: p1Shots, p2Shots: p2Shots, p1Saves: p1Saves, p2Saves: p2Saves,
-                    p1Poss: p1Poss, p2Poss: 100-p1Poss, mvp: document.getElementById("input-mvp").value||"None" 
-                } 
-            }, liveMatch: { isRunning: false } 
-        }, { merge: true });
-        
-        document.getElementById("fullscreen-admin").style.display = "none"; document.getElementById("stats-input-modal").style.display = "none"; document.getElementById("main-layout").style.display = "block";
-    };
-
-    window.startTVBroadcastMode = function() {
-        clearInterval(tvLoopInterval); tvSlideIndex = 0; 
-        document.getElementById("main-layout").style.display = "none"; 
-        let tvOver = document.getElementById("tv-overlay");
-        tvOver.style.display = "flex"; tvOver.style.animation = "fadeIn 0.5s ease-out";
-        renderTVSlide();
-        tvLoopInterval = setInterval(() => { 
-            tvSlideIndex = (tvSlideIndex + 1) % 5; 
-            renderTVSlide(); 
-        }, 12000); 
-    };
-
-    window.stopTVBroadcastMode = function() { 
-        clearInterval(tvLoopInterval); 
-        if (document.fullscreenElement) { document.exitFullscreen().catch(()=>{}); }
-        document.getElementById("tv-overlay").style.display = "none"; document.getElementById("main-layout").style.display = "flex"; 
-    };
-
-    window.toggleNativeFullscreen = function() {
-        if (!document.fullscreenElement) { document.documentElement.requestFullscreen().catch(()=>{}); } else { document.exitFullscreen(); }
-    };
-
-    // Toggle Photo Visibility
-    window.toggleTVPhotos = function() {
-        tvShowPhotos = !tvShowPhotos;
-        document.getElementById("tv-photo-toggle").innerText = tvShowPhotos ? "🚫 Hide Photos" : "📸 Show Photos";
-        renderTVSlide(); // instantly re-render the current slide
-    };
-
-    function renderTVSlide() {
-        const box = document.getElementById("tv-dynamic-content"); box.innerHTML = "";
-        let html = ``;
-        const imgStyle = tvShowPhotos ? "" : "display: none !important;"; // Applies dynamic hiding
-
-        // SLIDE 0: CHAMPION (ONLY IF TOURNAMENT IS DONE)
-        if (tvSlideIndex === 0) {
-            if (tvDataState.champion) {
-                let champ = tvDataState.champion.replace(" (+Bot)", "");
-                let cColor = getTeamColor(champ);
-                html += `
-                <div style="position:absolute; top:30px; width:100%; text-align:center; z-index:50;">
-                    <div class="tv-title" style="color:var(--gold); font-size:65px; text-shadow: 0 0 50px rgba(210,153,34,1);">🏆 GRAND CHAMPION 🏆</div>
-                    <div class="tv-subtitle" style="font-size: 24px; color:#fff;">THE TRI-VELOCITY CUP</div>
-                </div>
-                <img class="tv-huge-cutout" src="${getImg(champ)}" onerror="this.style.display='none'" style="${imgStyle} transform: scale(1.1); margin-bottom: 20px; animation: floatGold 3s infinite ease-in-out;">
-                <div class="tv-color-strip" style="background-color: var(--gold); bottom: 8%;">
-                    <span style="color:#000;">${champ}</span><span style="opacity:0.3; color:#000;">|</span><span style="color:#000;">1ST PLACE</span>
-                </div>`;
-            } else {
-                tvSlideIndex++; // Skip to standings if no champion yet
-            }
-        }
-
-        // SLIDE 1: STANDINGS
-        if (tvSlideIndex === 1) {
-            html += `<div style="display:flex; flex-direction:column; align-items:center; width:100%;"><div class="tv-title" style="color:var(--accent-color)">Tournament Standings</div><div class="tv-subtitle">Live Rankings</div>`;
-            tvDataState.standings.forEach((p, i) => {
-                let col = getTeamColor(p.name);
-                let recentFormHTML = p.form.slice(-5).map(f => `<span class="form-pill form-${f.toLowerCase()}" style="font-size: 16px; padding: 5px 12px; margin: 0 3px;">${f}</span>`).join('');
-                html += `<div class="tv-standing-row" style="animation-delay: ${i*0.2}s; border-left: 8px solid ${col};">
-                    <span style="min-width: 60px;">#${i+1}</span>
-                    <div style="display:flex; align-items:center; gap:15px; color:${col}; flex-grow: 1;">${p.name.replace(" (+Bot)", "")}</div>
-                    <div style="display:flex; align-items:center; margin-right: 25px;">${recentFormHTML || '<span style="color:#8b949e; font-size:18px;">--</span>'}</div>
-                    <span style="color:#fff; min-width: 120px; text-align: right;">${p.points} PTS</span>
-                </div>`;
-            });
-            html += `</div>`;
-        } 
-        
-        // SLIDE 2: NEXT MATCH
-        else if (tvSlideIndex === 2) {
-            if (tvDataState.nextMatch) {
-                let m = tvDataState.nextMatch; let c1 = getTeamColor(m.p1); let c2 = getTeamColor(m.p2);
-                
-                let p1Stats = { wins: 0, goalsFor: 0, goalsAgainst: 0, matches: 0, form: 0 };
-                let p2Stats = { wins: 0, goalsFor: 0, goalsAgainst: 0, matches: 0, form: 0 };
-                let h2h = { p1Wins: 0, p2Wins: 0, p1Goals: 0, p2Goals: 0, matches: 0 };
-
-                phase1Schedule.forEach(fix => {
-                    let log = tvDataState.rawScores[`match_${fix.id}`];
-                    if (log && log.completed) {
-                        let realP1Score = (fix.p1 === "Lilly") ? Math.max(0, log.p1Score - 5) : log.p1Score;
-                        let realP2Score = (fix.p2 === "Lilly") ? Math.max(0, log.p2Score - 5) : log.p2Score;
-
-                        if (fix.p1 === m.p1 || fix.p2 === m.p1) {
-                            p1Stats.matches++;
-                            if (fix.p1 === m.p1) { 
-                                p1Stats.goalsFor += realP1Score; p1Stats.goalsAgainst += realP2Score; 
-                                if (log.p1Score > log.p2Score) { p1Stats.wins++; p1Stats.form += 1; } else { p1Stats.form -= 0.5; } 
-                            } else { 
-                                p1Stats.goalsFor += realP2Score; p1Stats.goalsAgainst += realP1Score; 
-                                if (log.p2Score > log.p1Score) { p1Stats.wins++; p1Stats.form += 1; } else { p1Stats.form -= 0.5; } 
-                            }
-                        }
-                        if (fix.p1 === m.p2 || fix.p2 === m.p2) {
-                            p2Stats.matches++;
-                            if (fix.p1 === m.p2) { 
-                                p2Stats.goalsFor += realP1Score; p2Stats.goalsAgainst += realP2Score; 
-                                if (log.p1Score > log.p2Score) { p2Stats.wins++; p2Stats.form += 1; } else { p2Stats.form -= 0.5; } 
-                            } else { 
-                                p2Stats.goalsFor += realP2Score; p2Stats.goalsAgainst += realP1Score; 
-                                if (log.p2Score > log.p1Score) { p2Stats.wins++; p2Stats.form += 1; } else { p2Stats.form -= 0.5; } 
-                            }
-                        }
-                        if ((fix.p1 === m.p1 && fix.p2 === m.p2) || (fix.p1 === m.p2 && fix.p2 === m.p1)) {
-                            h2h.matches++;
-                            if (fix.p1 === m.p1) {
-                                h2h.p1Goals += realP1Score; h2h.p2Goals += realP2Score; 
-                                if (log.p1Score > log.p2Score) h2h.p1Wins++; else if (log.p2Score > log.p1Score) h2h.p2Wins++;
-                            } else {
-                                h2h.p1Goals += realP2Score; h2h.p2Goals += realP1Score; 
-                                if (log.p2Score > log.p1Score) h2h.p1Wins++; else if (log.p1Score > log.p2Score) h2h.p2Wins++;
-                            }
-                        }
+            init() {
+                window.auth.onAuthStateChanged(async (user) => {
+                    if (user) {
+                        this.currentUser = user;
+                        await this.loadUserProfile(user.uid);
+                        document.getElementById('modal-auth').classList.add('hidden');
+                        if (window.UIMaster) window.UIMaster.onUserLoggedIn(this.userProfile);
+                    } else {
+                        this.currentUser = null;
+                        this.userProfile = null;
+                        document.getElementById('modal-auth').classList.remove('hidden');
                     }
                 });
+            },
 
-                let p1WinPct = 50; let p2WinPct = 50; let predictedScoreP1 = 0; let predictedScoreP2 = 0;
-                if (p1Stats.matches > 0 || p2Stats.matches > 0) {
-                    let p1Power = p1Stats.matches > 0 ? (p1Stats.wins / p1Stats.matches) * 100 : 50;
-                    let p2Power = p2Stats.matches > 0 ? (p2Stats.wins / p2Stats.matches) * 100 : 50;
-                    let p1GD = p1Stats.matches > 0 ? (p1Stats.goalsFor - p1Stats.goalsAgainst) / p1Stats.matches : 0;
-                    let p2GD = p2Stats.matches > 0 ? (p2Stats.goalsFor - p2Stats.goalsAgainst) / p2Stats.matches : 0;
-                    
-                    p1Power += p1GD * 5; p2Power += p2GD * 5; p1Power += p1Stats.form * 2; p2Power += p2Stats.form * 2;
-
-                    if (h2h.matches > 0) {
-                        let h2hP1WinRate = (h2h.p1Wins / h2h.matches) * 100;
-                        let h2hP2WinRate = (h2h.p2Wins / h2h.matches) * 100;
-                        p1Power = (p1Power * 0.4) + (h2hP1WinRate * 0.6);
-                        p2Power = (p2Power * 0.4) + (h2hP2WinRate * 0.6);
-                    }
-
-                    p1Power = Math.max(10, p1Power); p2Power = Math.max(10, p2Power);
-                    let totalPower = p1Power + p2Power;
-                    p1WinPct = Math.round((p1Power / totalPower) * 100); p2WinPct = 100 - p1WinPct;
-
-                    let p1ExpectedGoals = p1Stats.matches > 0 && p2Stats.matches > 0 ? ((p1Stats.goalsFor / p1Stats.matches) + (p2Stats.goalsAgainst / p2Stats.matches)) / 2 : 0;
-                    let p2ExpectedGoals = p1Stats.matches > 0 && p2Stats.matches > 0 ? ((p2Stats.goalsFor / p2Stats.matches) + (p1Stats.goalsAgainst / p1Stats.matches)) / 2 : 0;
-
-                    if (h2h.matches > 0) {
-                        p1ExpectedGoals = (p1ExpectedGoals * 0.4) + ((h2h.p1Goals / h2h.matches) * 0.6);
-                        p2ExpectedGoals = (p2ExpectedGoals * 0.4) + ((h2h.p2Goals / h2h.matches) * 0.6);
-                    }
-                    
-                    predictedScoreP1 = Math.max(0, Math.round(p1ExpectedGoals)); 
-                    predictedScoreP2 = Math.max(0, Math.round(p2ExpectedGoals));
-
-                    if (m.p1 === "Lilly") predictedScoreP1 += 5;
-                    if (m.p2 === "Lilly") predictedScoreP2 += 5;
-
-                    if (predictedScoreP1 === predictedScoreP2 && p1WinPct !== p2WinPct) {
-                        if (p1WinPct > p2WinPct) predictedScoreP1 += 1; else predictedScoreP2 += 1;
-                    }
+            async register(email, password, username, clubName) {
+                try {
+                    const res = await window.auth.createUserWithEmailAndPassword(email, password);
+                    const uid = res.user.uid;
+                    const profile = {
+                        uid,
+                        email,
+                        username: Utils.sanitizeInput(username),
+                        clubName: Utils.sanitizeInput(clubName),
+                        coins: 10000,
+                        divisionPoints: 1000,
+                        rankTitle: "Amateur",
+                        createdAt: Date.now(),
+                        inventory: []
+                    };
+                    await window.DatabaseManager.write(`users/${uid}`, profile);
+                    this.userProfile = profile;
+                    return profile;
+                } catch (err) {
+                    console.error("Auth Register Error:", err);
+                    throw err;
                 }
+            },
 
-                html += `
-                <div style="position:absolute; top:40px; width:100%; text-align:center;">
-                    <div class="tv-title" style="${m.id >= 16 ? 'color: var(--gold); text-shadow: 0 0 15px rgba(210,153,34,0.6);' : ''}">Next Fixture</div>
-                    <div class="tv-subtitle" style="${m.id >= 16 ? 'color: #fff; font-weight: 900;' : ''}">${m.title || 'Match #' + m.id}</div>
-                    ${m.id === 17 ? `<img src="cup.PNG" style="height: 180px; margin-top: 15px; animation: floatGold 3s infinite ease-in-out; filter: drop-shadow(0 15px 30px rgba(210,153,34,0.8)); position: relative; z-index: 100;">` : ''}
-                </div>
-                <div class="tv-vs-container">
-                    <div class="tv-vs-side" style="padding-right: 6%;">
-                        <img class="tv-split-cutout" src="${getImg(m.p1)}" onerror="this.style.display='none'" style="${imgStyle}">
-                        <div class="tv-split-strip-left" style="background-color: ${c1};"><span>${m.p1}</span></div>
-                    </div>
-                    <div class="tv-center-hub">
-                        <div class="tv-vs-badge">VS</div>
-                        <div class="prediction-wrapper">
-                            <div class="prediction-label">✨ AI Match Prediction</div>
-                            <div class="predicted-score-banner">${predictedScoreP1} - ${predictedScoreP2}</div>
-                            <div class="prediction-bar">
-                                <div class="prediction-fill" style="width: ${p1WinPct}%; background-color: ${c1};">${p1WinPct}%</div>
-                                <div class="prediction-fill" style="width: ${p2WinPct}%; background-color: ${c2};">${p2WinPct}%</div>
+            async login(email, password) {
+                try {
+                    const res = await window.auth.signInWithEmailAndPassword(email, password);
+                    await this.loadUserProfile(res.user.uid);
+                    return this.userProfile;
+                } catch (err) {
+                    console.error("Auth Login Error:", err);
+                    throw err;
+                }
+            },
+
+            async guestLogin() {
+                try {
+                    const res = await window.auth.signInAnonymously();
+                    const uid = res.user.uid;
+                    const profile = {
+                        uid,
+                        email: "guest@ultimateteam.com",
+                        username: "Guest Manager",
+                        clubName: "FC Guest",
+                        coins: 15000,
+                        divisionPoints: 1000,
+                        rankTitle: "Amateur",
+                        createdAt: Date.now(),
+                        inventory: []
+                    };
+                    await window.DatabaseManager.write(`users/${uid}`, profile);
+                    this.userProfile = profile;
+                    return profile;
+                } catch (err) {
+                    console.error("Guest Auth Error:", err);
+                    throw err;
+                }
+            },
+
+            async loadUserProfile(uid) {
+                const profile = await window.DatabaseManager.read(`users/${uid}`);
+                this.userProfile = profile || {};
+                return this.userProfile;
+            },
+
+            async logout() {
+                await window.auth.signOut();
+            }
+        };
+        window.AuthManager = AuthManager;
+
+
+        /* ==========================================================================
+           MODULE 4: DATABASE MANAGER / DAL (database.js)
+           ========================================================================== */
+        const DatabaseManager = {
+            activeListeners: new Map(),
+
+            async read(path) {
+                try {
+                    const snap = await window.db.ref(path).once('value');
+                    return snap.exists() ? snap.val() : null;
+                } catch (err) {
+                    console.error(`DB Read Error [${path}]:`, err);
+                    return null;
+                }
+            },
+            async write(path, data) {
+                await window.db.ref(path).set(data);
+            },
+            async update(path, data) {
+                await window.db.ref(path).update(data);
+            },
+            async remove(path) {
+                await window.db.ref(path).remove();
+            },
+            async push(path, data) {
+                const newRef = window.db.ref(path).push();
+                await newRef.set(data);
+                return newRef.key;
+            },
+            listen(path, callback) {
+                const ref = window.db.ref(path);
+                const listener = ref.on('value', snap => callback(snap.exists() ? snap.val() : null));
+                this.activeListeners.set(path, { ref, listener });
+                return () => ref.off('value', listener);
+            },
+            async transaction(path, updateFn) {
+                return await window.db.ref(path).transaction(updateFn);
+            }
+        };
+        window.DatabaseManager = DatabaseManager;
+
+
+        /* ==========================================================================
+           MODULE 5: PLAYER ENGINE & DATABASE (players.js)
+           ========================================================================== */
+        const PlayerManager = {
+            basePlayerDatabase: [
+                { id: "ply_01", name: "Lionel Messi", position: "RW", rating: 93, pace: 85, shooting: 92, passing: 91, dribbling: 95, defending: 35, physical: 65, nation: "Argentina", club: "Inter Miami", rarity: "Special" },
+                { id: "ply_02", name: "Cristiano Ronaldo", position: "ST", rating: 91, pace: 87, shooting: 93, passing: 78, dribbling: 85, defending: 34, physical: 77, nation: "Portugal", club: "Al Nassr", rarity: "Special" },
+                { id: "ply_03", name: "Kylian Mbappé", position: "ST", rating: 92, pace: 97, shooting: 89, passing: 80, dribbling: 92, defending: 36, physical: 78, nation: "France", club: "Real Madrid", rarity: "Special" },
+                { id: "ply_04", name: "Erling Haaland", position: "ST", rating: 91, pace: 89, shooting: 93, passing: 66, dribbling: 80, defending: 45, physical: 88, nation: "Norway", club: "Man City", rarity: "Special" },
+                { id: "ply_05", name: "Kevin De Bruyne", position: "CM", rating: 91, pace: 72, shooting: 88, passing: 94, dribbling: 87, defending: 65, physical: 78, nation: "Belgium", club: "Man City", rarity: "Special" },
+                { id: "ply_06", name: "Mohamed Salah", position: "RW", rating: 89, pace: 89, shooting: 87, passing: 81, dribbling: 88, defending: 45, physical: 75, nation: "Egypt", club: "Liverpool", rarity: "Gold" },
+                { id: "ply_07", name: "Jude Bellingham", position: "CAM", rating: 88, pace: 80, shooting: 82, passing: 84, dribbling: 87, defending: 78, physical: 83, nation: "England", club: "Real Madrid", rarity: "Gold" },
+                { id: "ply_08", name: "Virgil van Dijk", position: "CB", rating: 89, pace: 78, shooting: 60, passing: 71, dribbling: 72, defending: 89, physical: 86, nation: "Netherlands", club: "Liverpool", rarity: "Gold" },
+                { id: "ply_09", name: "Vinícius Júnior", position: "LW", rating: 89, pace: 95, shooting: 82, passing: 78, dribbling: 90, defending: 29, physical: 68, nation: "Brazil", club: "Real Madrid", rarity: "Gold" },
+                { id: "ply_10", name: "Rodri", position: "CDM", rating: 89, pace: 58, shooting: 73, passing: 85, dribbling: 80, defending: 87, physical: 85, nation: "Spain", club: "Man City", rarity: "Gold" },
+                { id: "ply_11", name: "Bukayo Saka", position: "RW", rating: 86, pace: 85, shooting: 80, passing: 82, dribbling: 86, defending: 65, physical: 69, nation: "England", club: "Arsenal", rarity: "Gold" },
+                { id: "ply_12", name: "Alisson Becker", position: "GK", rating: 89, pace: 86, shooting: 85, passing: 85, dribbling: 89, defending: 54, physical: 90, nation: "Brazil", club: "Liverpool", rarity: "Gold" },
+                { id: "ply_13", name: "Archie Gray", position: "CM", rating: 73, pace: 75, shooting: 62, passing: 72, dribbling: 74, defending: 70, physical: 71, nation: "England", club: "Tottenham", rarity: "Silver" },
+                { id: "ply_14", name: "Ethan Nwaneri", position: "CAM", rating: 64, pace: 74, shooting: 60, passing: 63, dribbling: 67, defending: 42, physical: 52, nation: "England", club: "Arsenal", rarity: "Bronze" }
+            ],
+
+            createPlayer(baseData = {}) {
+                const template = Utils.randomChoice(this.basePlayerDatabase);
+                const player = Utils.deepCopy({ ...template, ...baseData });
+                player.instanceId = Utils.generateId("card");
+                player.acquiredAt = Date.now();
+                player.rarity = Utils.calculateCardRarity(player.rating);
+                return player;
+            },
+
+            renderCardHTML(player, options = {}) {
+                if (!player) return `<div class="empty-card-slot">Empty Slot</div>`;
+                const rarityClass = (player.rarity || 'Gold').toLowerCase();
+                const rarityColor = Utils.getRarityColor(player.rarity);
+                const name = Utils.sanitizeInput(player.name);
+
+                return `
+                    <div class="player-card card-${rarityClass}" data-instance-id="${player.instanceId || ''}" style="border-color: ${rarityColor}">
+                        <div class="card-header">
+                            <div class="card-rating-box">
+                                <span class="card-rating">${player.rating}</span>
+                                <span class="card-position">${player.position}</span>
+                            </div>
+                            <span style="font-size:0.6rem; color:var(--text-muted);">${player.nation ? player.nation.substr(0,3).toUpperCase() : 'WLD'}</span>
+                        </div>
+                        <div class="card-info">
+                            <h4 class="card-name">${name}</h4>
+                            <span class="card-club">${Utils.sanitizeInput(player.club || 'Free Agent')}</span>
+                        </div>
+                        <div class="card-stats">
+                            <div class="stat-col">
+                                <span><strong>${player.pace || 50}</strong> PAC</span>
+                                <span><strong>${player.shooting || 50}</strong> SHO</span>
+                                <span><strong>${player.passing || 50}</strong> PAS</span>
+                            </div>
+                            <div class="stat-col">
+                                <span><strong>${player.dribbling || 50}</strong> DRI</span>
+                                <span><strong>${player.defending || 50}</strong> DEF</span>
+                                <span><strong>${player.physical || 50}</strong> PHY</span>
                             </div>
                         </div>
                     </div>
-                    <div class="tv-vs-side" style="padding-left: 6%;">
-                        <img class="tv-split-cutout" src="${getImg(m.p2)}" onerror="this.style.display='none'" style="${imgStyle}">
-                        <div class="tv-split-strip-right" style="background-color: ${c2};"><span>${m.p2}</span></div>
-                    </div>
-                </div>`;
-            } else { html += `<div class="tv-title">Tournament Concluded</div>`; }
-        }
-        
-        // SLIDE 3: LAST MATCH STATS
-        else if (tvSlideIndex === 3) {
-            if (tvDataState.lastMatch) {
-                let lm = tvDataState.lastMatch; let log = lm.log;
-                let p1Acc = log.p1Shots > 0 ? Math.round((log.p1Score / log.p1Shots) * 100) : 0;
-                let p2Acc = log.p2Shots > 0 ? Math.round((log.p2Score / log.p2Shots) * 100) : 0;
+                `;
+            }
+        };
+        window.PlayerManager = PlayerManager;
 
-                html += `
-                <div style="display:flex; flex-direction:column; align-items:center; width:100%; height:100%; justify-content:center;">
-                    <div class="tv-title anim-teams">Match Result</div>
-                    <div class="tv-subtitle anim-teams" style="margin-bottom: ${lm.id === 17 ? '20px' : '50px'};">Final Stats: ${lm.title}</div>
-                    ${lm.id === 17 ? `<img src="cup.PNG" class="anim-teams" style="height: 150px; margin-bottom: 25px; animation: floatGold 3s infinite ease-in-out; filter: drop-shadow(0 15px 30px rgba(210,153,34,0.8));">` : ''}
+
+        /* ==========================================================================
+           MODULE 6: SQUAD BUILDER ENGINE (squad.js)
+           ========================================================================== */
+        const SquadManager = {
+            activeSquad: {
+                formation: "4-3-3",
+                slots: {
+                    LW: null, ST: null, RW: null,
+                    CAM: null, CM: null, CDM: null,
+                    LB: null, CB: null, RB: null, GK: null
+                }
+            },
+
+            assignPlayerToSlot(positionSlot, player) {
+                if (!this.activeSquad.slots.hasOwnProperty(positionSlot)) return false;
+                this.activeSquad.slots[positionSlot] = player;
+                this.recalculateSquadStats();
+                return true;
+            },
+
+            removePlayerFromSlot(positionSlot) {
+                if (this.activeSquad.slots.hasOwnProperty(positionSlot)) {
+                    this.activeSquad.slots[positionSlot] = null;
+                    this.recalculateSquadStats();
+                }
+            },
+
+            recalculateSquadStats() {
+                let totalRating = 0;
+                let count = 0;
+                let chemistry = 0;
+
+                const filledSlots = Object.entries(this.activeSquad.slots).filter(([pos, card]) => card !== null);
+
+                filledSlots.forEach(([pos, card]) => {
+                    totalRating += card.rating;
+                    count++;
+                    // Basic position match bonus
+                    if (card.position === pos) chemistry += 7;
+                    else chemistry += 3;
+                });
+
+                // Club/Nation link bonus computation
+                for (let i = 0; i < filledSlots.length; i++) {
+                    for (let j = i + 1; j < filledSlots.length; j++) {
+                        const cardA = filledSlots[i][1];
+                        const cardB = filledSlots[j][1];
+                        if (cardA.club === cardB.club) chemistry += 2;
+                        if (cardA.nation === cardB.nation) chemistry += 1.5;
+                    }
+                }
+
+                const avgRating = count > 0 ? Math.round(totalRating / count) : 0;
+                const finalChem = Utils.clamp(Math.round(chemistry), 0, 100);
+
+                const chemEl = document.getElementById('squad-chem');
+                const ratingEl = document.getElementById('squad-rating');
+                if (chemEl) chemEl.textContent = finalChem;
+                if (ratingEl) ratingEl.textContent = avgRating;
+
+                return { teamRating: avgRating, chemistry: finalChem };
+            }
+        };
+        window.SquadManager = SquadManager;
+        /* ==========================================================================
+           MODULE 7: PACK STORE ENGINE (packs.js)
+           ========================================================================== */
+        const PackStoreManager = {
+            packs: [
+                { id: "pack_bronze", name: "Bronze Pack", cost: 500, minRating: 45, maxRating: 64, color: "#8c533e", icon: "fa-box" },
+                { id: "pack_silver", name: "Silver Pack", cost: 2500, minRating: 65, maxRating: 74, color: "#a8b8c8", icon: "fa-box-open" },
+                { id: "pack_gold", name: "Gold Pack", cost: 7500, minRating: 75, maxRating: 89, color: "#ffb700", icon: "fa-cubes" },
+                { id: "pack_special", name: "Icon / Special Pack", cost: 50000, minRating: 90, maxRating: 99, color: "#00e5ff", icon: "fa-gem" }
+            ],
+
+            renderStore() {
+                const container = document.getElementById('packs-container');
+                if (!container) return;
+
+                container.innerHTML = this.packs.map(pack => `
+                    <div class="sidebar-panel" style="border-top: 4px solid ${pack.color}; text-align: center;">
+                        <i class="fa-solid ${pack.icon}" style="font-size: 2.5rem; color: ${pack.color}; margin-bottom: 12px;"></i>
+                        <h3 style="font-family: var(--font-display); font-size: 1.8rem;">${pack.name}</h3>
+                        <p style="color: var(--text-muted); font-size: 0.85rem; margin: 8px 0;">Ratings ${pack.minRating} - ${pack.maxRating}</p>
+                        <div style="font-size: 1.2rem; font-weight: 800; color: var(--accent-gold); margin: 12px 0;">
+                            <i class="fa-solid fa-coins"></i> ${Utils.formatCoins(pack.cost)}
+                        </div>
+                        <button class="btn-primary" onclick="PackStoreManager.buyPack('${pack.id}')" style="width: 100%;">
+                            Open Pack
+                        </button>
+                    </div>
+                `).join('');
+            },
+
+            async buyPack(packId) {
+                const pack = this.packs.find(p => p.id === packId);
+                if (!pack) return;
+
+                const profile = AuthManager.userProfile;
+                if (!profile) return alert("Please log in first!");
+
+                if ((profile.coins || 0) < pack.cost) {
+                    return alert("Insufficient coins to purchase this pack!");
+                }
+
+                // Deduct coins
+                profile.coins -= pack.cost;
+                await DatabaseManager.write(`users/${profile.uid}/coins`, profile.coins);
+                UIMaster.updateHUD();
+
+                // Generate new dynamic player card within pack bounds
+                const pool = PlayerManager.basePlayerDatabase.filter(p => p.rating >= pack.minRating && p.rating <= pack.maxRating);
+                const selectedBase = pool.length > 0 ? Utils.randomChoice(pool) : Utils.randomChoice(PlayerManager.basePlayerDatabase);
+                
+                const newCard = PlayerManager.createPlayer(selectedBase);
+
+                // Save player card to user inventory in Firebase
+                profile.inventory = profile.inventory || [];
+                profile.inventory.push(newCard);
+                await DatabaseManager.write(`users/${profile.uid}/inventory`, profile.inventory);
+
+                // Display Reveal Animation Modal
+                this.triggerPackReveal(newCard);
+            },
+
+            triggerPackReveal(player) {
+                const modal = document.getElementById('modal-pack-reveal');
+                const target = document.getElementById('pack-card-animation-target');
+                if (!modal || !target) return;
+
+                target.innerHTML = PlayerManager.renderCardHTML(player);
+                modal.classList.remove('hidden');
+            }
+        };
+        window.PackStoreManager = PackStoreManager;
+
+
+        /* ==========================================================================
+           MODULE 8: TRANSFER MARKET ENGINE (market.js)
+           ========================================================================== */
+        const TransferMarketManager = {
+            initListener() {
+                DatabaseManager.listen('market/listings', (listings) => {
+                    this.renderListings(listings || {});
+                });
+            },
+
+            renderListings(listingsObj) {
+                const container = document.getElementById('market-listings');
+                if (!container) return;
+
+                const listings = Object.entries(listingsObj).map(([id, data]) => ({ listingId: id, ...data }));
+
+                if (listings.length === 0) {
+                    container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 40px;">No players currently listed on the market.</div>`;
+                    return;
+                }
+
+                container.innerHTML = listings.map(item => `
+                    <div class="sidebar-panel" style="padding: 12px; display: flex; flex-direction: column; align-items: center; text-align: center;">
+                        ${PlayerManager.renderCardHTML(item.player)}
+                        <div style="margin: 10px 0; font-size: 0.85rem;">
+                            <span style="color: var(--text-muted);">Seller:</span> ${Utils.sanitizeInput(item.sellerName)}
+                        </div>
+                        <div style="font-weight: 800; color: var(--accent-gold); margin-bottom: 8px;">
+                            <i class="fa-solid fa-coins"></i> ${Utils.formatCoins(item.price)}
+                        </div>
+                        ${AuthManager.currentUser && AuthManager.currentUser.uid === item.sellerUid ? `
+                            <button class="btn-primary" style="background: var(--accent-red); width: 100%; font-size: 0.8rem;" onclick="TransferMarketManager.cancelListing('${item.listingId}')">
+                                Cancel Listing
+                            </button>
+                        ` : `
+                            <button class="btn-primary" style="width: 100%; font-size: 0.8rem;" onclick="TransferMarketManager.buyListing('${item.listingId}', ${item.price}, '${item.sellerUid}')">
+                                Buy Card
+                            </button>
+                        `}
+                    </div>
+                `).join('');
+            },
+
+            openListModal(instanceId) {
+                const profile = AuthManager.userProfile;
+                if (!profile || !profile.inventory) return;
+
+                const card = profile.inventory.find(c => c.instanceId === instanceId);
+                if (!card) return;
+
+                document.getElementById('list-card-instance-id').value = instanceId;
+                document.getElementById('listing-card-preview').innerHTML = PlayerManager.renderCardHTML(card);
+                document.getElementById('modal-list-card').classList.remove('hidden');
+            },
+
+            async submitListing(instanceId, price) {
+                const profile = AuthManager.userProfile;
+                if (!profile) return;
+
+                const cardIndex = (profile.inventory || []).findIndex(c => c.instanceId === instanceId);
+                if (cardIndex === -1) return alert("Card not found in inventory!");
+
+                const card = profile.inventory[cardIndex];
+
+                // Create listing object
+                const listingData = {
+                    sellerUid: profile.uid,
+                    sellerName: profile.username || "Manager",
+                    price: Number(price),
+                    player: card,
+                    listedAt: Date.now()
+                };
+
+                // Push listing to global market node
+                await DatabaseManager.push('market/listings', listingData);
+
+                // Remove card from seller inventory
+                profile.inventory.splice(cardIndex, 1);
+                await DatabaseManager.write(`users/${profile.uid}/inventory`, profile.inventory);
+
+                document.getElementById('modal-list-card').classList.add('hidden');
+                alert("Player successfully listed on Transfer Market!");
+            },
+
+            async buyListing(listingId, price, sellerUid) {
+                const profile = AuthManager.userProfile;
+                if (!profile) return alert("Please log in to purchase cards!");
+                if (profile.uid === sellerUid) return alert("You cannot buy your own card!");
+                if ((profile.coins || 0) < price) return alert("Insufficient coins!");
+
+                // Deduct coins from buyer
+                profile.coins -= price;
+                await DatabaseManager.write(`users/${profile.uid}/coins`, profile.coins);
+
+                // Retrieve listing data
+                const listing = await DatabaseManager.read(`market/listings/${listingId}`);
+                if (!listing) return alert("Listing is no longer available.");
+
+                // Add card to buyer inventory
+                profile.inventory = profile.inventory || [];
+                profile.inventory.push(listing.player);
+                await DatabaseManager.write(`users/${profile.uid}/inventory`, profile.inventory);
+
+                // Credit seller with coins
+                const sellerCoins = await DatabaseManager.read(`users/${sellerUid}/coins`) || 0;
+                await DatabaseManager.write(`users/${sellerUid}/coins`, sellerCoins + price);
+
+                // Delete market listing
+                await DatabaseManager.remove(`market/listings/${listingId}`);
+
+                UIMaster.updateHUD();
+                alert("Transfer completed! Card added to your club.");
+            },
+
+            async cancelListing(listingId) {
+                const listing = await DatabaseManager.read(`market/listings/${listingId}`);
+                if (!listing) return;
+
+                const profile = AuthManager.userProfile;
+                if (listing.sellerUid !== profile.uid) return;
+
+                // Return card to seller inventory
+                profile.inventory = profile.inventory || [];
+                profile.inventory.push(listing.player);
+                await DatabaseManager.write(`users/${profile.uid}/inventory`, profile.inventory);
+
+                // Delete listing node
+                await DatabaseManager.remove(`market/listings/${listingId}`);
+            }
+        };
+        window.TransferMarketManager = TransferMarketManager;
+
+
+        /* ==========================================================================
+           MODULE 9: MATCH SIMULATOR ENGINE (match.js)
+           ========================================================================== */
+        const MatchEngine = {
+            opponents: [
+                { name: "Real Madrid XI", rating: 89, chem: 100 },
+                { name: "Manchester City", rating: 88, chem: 95 },
+                { name: "Bayern Munich", rating: 86, chem: 90 },
+                { name: "FC Barcelona", rating: 85, chem: 88 }
+            ],
+
+            async startMatch() {
+                const squadStats = SquadManager.recalculateSquadStats();
+                if (squadStats.teamRating === 0) {
+                    return alert("Please field players in your squad before playing a match!");
+                }
+
+                const opponent = Utils.randomChoice(this.opponents);
+                const btn = document.getElementById('btn-start-match');
+                if (btn) btn.disabled = true;
+
+                // Calculate win probability based on team ratings and squad chemistry
+                const userScoreBase = (squadStats.teamRating * 0.7) + (squadStats.chemistry * 0.3);
+                const oppScoreBase = (opponent.rating * 0.7) + (opponent.chem * 0.3);
+
+                let userGoals = 0;
+                let oppGoals = 0;
+
+                for (let i = 0; i < 5; i++) {
+                    if (Math.random() * userScoreBase > Math.random() * oppScoreBase * 0.95) userGoals++;
+                    if (Math.random() * oppScoreBase > Math.random() * userScoreBase * 0.95) oppGoals++;
+                }
+
+                // Award points & coins
+                let coinReward = 500;
+                let pointsReward = 15;
+                let resultText = "DRAW";
+
+                if (userGoals > oppGoals) {
+                    coinReward = 1200;
+                    pointsReward = 35;
+                    resultText = "VICTORY!";
+                } else if (userGoals < oppGoals) {
+                    coinReward = 300;
+                    pointsReward = -10;
+                    resultText = "DEFEAT";
+                }
+
+                const profile = AuthManager.userProfile;
+                if (profile) {
+                    profile.coins = (profile.coins || 0) + coinReward;
+                    profile.divisionPoints = Math.max(0, (profile.divisionPoints || 1000) + pointsReward);
                     
-                    <div class="match-result-header anim-teams">
-                        <div class="result-team">
-                            <img class="result-team-img" src="${getImg(lm.p1)}" onerror="this.style.display='none'" style="${imgStyle}">
-                            <div style="color:${getTeamColor(lm.p1)};">${lm.p1}</div>
-                        </div>
-                        <div class="result-score anim-score">${log.p1Score} - ${log.p2Score}</div>
-                        <div class="result-team">
-                            <img class="result-team-img" src="${getImg(lm.p2)}" onerror="this.style.display='none'" style="${imgStyle}">
-                            <div style="color:${getTeamColor(lm.p2)};">${lm.p2}</div>
-                        </div>
-                    </div>
+                    await DatabaseManager.write(`users/${profile.uid}/coins`, profile.coins);
+                    await DatabaseManager.write(`users/${profile.uid}/divisionPoints`, profile.divisionPoints);
+                    UIMaster.updateHUD();
+                }
 
-                    <div class="match-stats-dropdown anim-stats">
-                        <div class="tv-stat-row"><span>${log.p1Shots||0}</span><span class="tv-stat-label">Shots</span><span>${log.p2Shots||0}</span></div>
-                        <div class="tv-stat-row"><span>${p1Acc}%</span><span class="tv-stat-label">Shot Accuracy</span><span>${p2Acc}%</span></div>
-                        <div class="tv-stat-row"><span>${log.p1Saves||0}</span><span class="tv-stat-label">Saves</span><span>${log.p2Saves||0}</span></div>
-                        <div class="tv-stat-row"><span>${log.p1Poss||50}%</span><span class="tv-stat-label">Possession</span><span>${log.p2Poss||50}%</span></div>
-                        <div class="mvp-banner">🏅 MVP: ${log.mvp}</div>
-                    </div>
-                </div>`;
-            } else { html += `<div class="tv-title">Awaiting Results</div>`; }
-        }
-        
-        // SLIDE 4: TOP SCORER
-        else if (tvSlideIndex === 4) {
-            let ts = tvDataState.topScorer; let tsColor = getTeamColor(ts.name);
-            html += `
-            <div style="position:absolute; top:40px; width:100%; text-align:center;">
-                <div class="tv-title" style="color:var(--gold); text-shadow: 0 0 30px rgba(210,153,34,0.6);">GOLDEN BOOT</div>
-                <div class="tv-subtitle">Tournament Top Scorer</div>
-            </div>
-            <img class="tv-huge-cutout" src="${getImg(ts.name)}" onerror="this.style.display='none'" style="${imgStyle}">
-            <div class="tv-color-strip" style="background-color: ${tsColor};">
-                <span>${ts.name.replace(" (+Bot)","")}</span><span style="opacity:0.3;">|</span><span>${ts.goals} GOALS</span>
-            </div>`;
-        }
-        
-        if(html !== "") box.innerHTML = html;
-    }
-</script>
+                alert(`MATCH RESULT: ${resultText}\n\nYour Club ${userGoals} - ${oppGoals} ${opponent.name}\n\nRewards:\n+ ${coinReward} Coins\n+ ${pointsReward} Rank Points`);
+                if (btn) btn.disabled = false;
+            }
+        };
+        window.MatchEngine = MatchEngine;
+
+
+        /* ==========================================================================
+           MODULE 10: LEADERBOARDS ENGINE (leaderboard.js)
+           ========================================================================== */
+        const LeaderboardManager = {
+            initListener() {
+                DatabaseManager.listen('users', (usersObj) => {
+                    this.renderLeaderboard(usersObj || {});
+                });
+            },
+
+            renderLeaderboard(usersObj) {
+                const container = document.getElementById('leaderboard-table');
+                if (!container) return;
+
+                const users = Object.values(usersObj)
+                    .sort((a, b) => (b.divisionPoints || 0) - (a.divisionPoints || 0))
+                    .slice(0, 10);
+
+                if (users.length === 0) {
+                    container.innerHTML = `<p style="text-align:center;">No rankings available yet.</p>`;
+                    return;
+                }
+
+                container.innerHTML = `
+                    <table style="width:100%; text-align:left; border-collapse:collapse;">
+                        <thead>
+                            <tr style="border-bottom: 2px solid var(--border-color); color: var(--text-muted); font-size: 0.85rem;">
+                                <th style="padding: 10px;">Rank</th>
+                                <th>Club Name</th>
+                                <th>Manager</th>
+                                <th style="text-align:right; padding: 10px;">Division Points</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${users.map((user, idx) => `
+                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); font-size:0.9rem;">
+                                    <td style="padding: 12px 10px; font-weight:800; color:${idx === 0 ? 'var(--accent-gold)' : 'inherit'}">#${idx + 1}</td>
+                                    <td style="font-weight:700;">${Utils.sanitizeInput(user.clubName || 'FC Club')}</td>
+                                    <td>${Utils.sanitizeInput(user.username || 'Manager')}</td>
+                                    <td style="text-align:right; padding: 10px; font-weight:800; color:var(--accent-blue);">${user.divisionPoints || 1000} pts</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            }
+        };
+        window.LeaderboardManager = LeaderboardManager;
+
+
+        /* ==========================================================================
+           MODULE 11: MASTER UI CONTROLLER & EVENT BINDINGS (ui.js)
+           ========================================================================== */
+        const UIMaster = {
+            selectedSlotPosition: null,
+
+            init() {
+                this.bindNavigation();
+                this.bindModals();
+                this.bindSquadSlots();
+                this.bindForms();
+                
+                // Render initial Store & dynamic elements
+                PackStoreManager.renderStore();
+                TransferMarketManager.initListener();
+                LeaderboardManager.initListener();
+
+                // Initialize Auth state check
+                AuthManager.init();
+            },
+
+            bindNavigation() {
+                const navBtns = document.querySelectorAll('.nav-btn');
+                navBtns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const targetId = btn.dataset.target;
+                        if (!targetId) return;
+
+                        navBtns.forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+
+                        document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
+                        const targetSec = document.getElementById(targetId);
+                        if (targetSec) targetSec.classList.add('active');
+                    });
+                });
+            },
+
+            bindModals() {
+                // Modal Close Buttons
+                document.querySelectorAll('.btn-close-modal').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        document.querySelectorAll('.modal-overlay').forEach(m => {
+                            if (m.id !== 'modal-auth') m.classList.add('hidden');
+                        });
+                    });
+                });
+
+                // Auth form tab switches
+                document.getElementById('link-show-register')?.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    document.getElementById('form-login').classList.remove('active');
+                    document.getElementById('form-register').classList.add('active');
+                });
+
+                document.getElementById('link-show-login')?.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    document.getElementById('form-register').classList.remove('active');
+                    document.getElementById('form-login').classList.add('active');
+                });
+            },
+
+            bindSquadSlots() {
+                const slots = document.querySelectorAll('.position-slot');
+                slots.forEach(slot => {
+                    slot.addEventListener('click', () => {
+                        const pos = slot.dataset.position;
+                        this.openPlayerPickerModal(pos);
+                    });
+                });
+            },
+
+            bindForms() {
+                // Login Submit
+                document.getElementById('form-login')?.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const email = document.getElementById('login-email').value;
+                    const pass = document.getElementById('login-password').value;
+                    try {
+                        await AuthManager.login(email, pass);
+                    } catch (err) {
+                        alert("Login Failed: " + err.message);
+                    }
+                });
+
+                // Register Submit
+                document.getElementById('form-register')?.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const email = document.getElementById('reg-email').value;
+                    const pass = document.getElementById('reg-password').value;
+                    const user = document.getElementById('reg-username').value;
+                    const club = document.getElementById('reg-clubname').value;
+                    try {
+                        await AuthManager.register(email, pass, user, club);
+                    } catch (err) {
+                        alert("Registration Failed: " + err.message);
+                    }
+                });
+
+                // Guest Login
+                document.getElementById('btn-guest-login')?.addEventListener('click', async () => {
+                    await AuthManager.guestLogin();
+                });
+
+                // Logout Button
+                document.getElementById('btn-logout')?.addEventListener('click', () => {
+                    AuthManager.logout();
+                });
+
+                // Listing Form
+                document.getElementById('form-list-market')?.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const instanceId = document.getElementById('list-card-instance-id').value;
+                    const price = document.getElementById('list-card-price').value;
+                    TransferMarketManager.submitListing(instanceId, price);
+                });
+
+                // Match Button
+                document.getElementById('btn-start-match')?.addEventListener('click', () => {
+                    MatchEngine.startMatch();
+                });
+            },
+
+            openPlayerPickerModal(position) {
+                this.selectedSlotPosition = position;
+                const titleEl = document.getElementById('picker-slot-title');
+                if (titleEl) titleEl.textContent = `Select ${position}`;
+
+                const container = document.getElementById('club-inventory-picker');
+                if (!container) return;
+
+                const inventory = AuthManager.userProfile?.inventory || [];
+
+                if (inventory.length === 0) {
+                    container.innerHTML = `<p style="grid-column:1/-1; text-align:center; color:var(--text-muted);">No cards in your club inventory. Open packs in the Store!</p>`;
+                } else {
+                    container.innerHTML = inventory.map(card => `
+                        <div onclick="UIMaster.selectPlayerForSlot('${card.instanceId}')">
+                            ${PlayerManager.renderCardHTML(card)}
+                        </div>
+                    `).join('');
+                }
+
+                document.getElementById('modal-select-player').classList.remove('hidden');
+            },
+
+            selectPlayerForSlot(instanceId) {
+                const inventory = AuthManager.userProfile?.inventory || [];
+                const card = inventory.find(c => c.instanceId === instanceId);
+
+                if (card && this.selectedSlotPosition) {
+                    SquadManager.assignPlayerToSlot(this.selectedSlotPosition, card);
+
+                    // Update slot element on pitch UI
+                    const slotEl = document.querySelector(`.position-slot[data-position="${this.selectedSlotPosition}"]`);
+                    if (slotEl) {
+                        slotEl.innerHTML = PlayerManager.renderCardHTML(card);
+                    }
+
+                    document.getElementById('modal-select-player').classList.add('hidden');
+                }
+            },
+
+            onUserLoggedIn(profile) {
+                this.updateHUD();
+            },
+
+            updateHUD() {
+                const profile = AuthManager.userProfile || {};
+                const coinsEl = document.getElementById('hud-coins');
+                const rankEl = document.getElementById('hud-rank');
+                const userEl = document.getElementById('hud-username');
+
+                if (coinsEl) coinsEl.textContent = Utils.formatCoins(profile.coins || 0);
+                if (rankEl) rankEl.textContent = `${profile.rankTitle || 'Amateur'} (${profile.divisionPoints || 1000} pts)`;
+                if (userEl) userEl.textContent = profile.username || 'Manager';
+            }
+        };
+        window.UIMaster = UIMaster;
+
+        // BOOTSTRAP APPLICATION ON DOM LOAD
+        document.addEventListener('DOMContentLoaded', () => {
+            UIMaster.init();
+        });
+    </script>
 </body>
 </html>
