@@ -1,21 +1,21 @@
 {
-  "name": "Realm - Card Economy",
-  "short_name": "Realm",
-  "description": "An economy-driven multiplayer card game.",
+  "name": "Ultimate Team",
+  "short_name": "Ultimate Team",
+  "description": "Build your dream squad, open packs, and dominate the market",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#090d16",
-  "theme_color": "#2563eb",
+  "background_color": "#050505",
+  "theme_color": "#050505",
   "orientation": "portrait",
+  "scope": "./",
   "icons": [
     {
-      "src": "logo-192.png",
+      "src": "https://cdn-icons-png.flaticon.com/512/5900/5900544.png",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     },
     {
-      "src": "logo-512.png",
+      "src": "https://cdn-icons-png.flaticon.com/512/5900/5900544.png",
       "sizes": "512x512",
       "type": "image/png"
     }

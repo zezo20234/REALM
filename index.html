@@ -2,1166 +2,511 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ultimate Team - Football Manager & Trading Simulator</title>
-    
-    <!-- Google Fonts & FontAwesome Icons -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0b0e14">
+    <meta name="description" content="Ultimate Team - Build your dream squad, open premium packs, and dominate the market.">
+    <title>Ultimate Team | Web App</title>
+
+    <!-- Google Fonts: Inter for UI, Oswald for Player Cards -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Teko:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Ultimate Team">
+    
+    <!-- FontAwesome Pro Icons (Free CDN fallback) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <!-- Firebase SDKs (v10.8.0 Compat) -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
-
-    <!-- MASTER GAME STYLES -->
-    <style>
-        :root {
-            --bg-dark: #0b0e14;
-            --bg-card: #151a23;
-            --bg-card-hover: #1c2330;
-            --accent-gold: #ffb700;
-            --accent-gold-glow: rgba(255, 183, 0, 0.35);
-            --accent-green: #00e676;
-            --accent-red: #ff3d00;
-            --accent-blue: #00e5ff;
-            --text-main: #f0f4f8;
-            --text-muted: #8a99ad;
-            --border-color: #232d3f;
-            --pitch-green: #1b432c;
-            --pitch-lines: rgba(255, 255, 255, 0.25);
-            --font-main: 'Montserrat', sans-serif;
-            --font-display: 'Teko', sans-serif;
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
-        body { background-color: var(--bg-dark); color: var(--text-main); font-family: var(--font-main); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
-        .hidden { display: none !important; }
-
-        /* HEADER & NAV */
-        header.app-header { background: linear-gradient(180deg, #111622 0%, #0b0e14 100%); border-bottom: 2px solid var(--border-color); padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; }
-        .brand-logo { display: flex; align-items: center; gap: 12px; }
-        .brand-logo i { font-size: 1.8rem; color: var(--accent-gold); }
-        .brand-logo h1 { font-family: var(--font-display); font-size: 2.2rem; letter-spacing: 1px; text-transform: uppercase; line-height: 1; }
-        .user-hud { display: flex; align-items: center; gap: 16px; }
-        .hud-item { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-color); padding: 6px 14px; border-radius: 20px; display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 0.95rem; }
-
-        nav.main-nav { background: var(--bg-card); border-bottom: 1px solid var(--border-color); display: flex; justify-content: center; gap: 8px; padding: 8px 16px; }
-        .nav-btn { background: transparent; border: none; color: var(--text-muted); padding: 10px 20px; font-family: var(--font-main); font-weight: 700; font-size: 0.9rem; text-transform: uppercase; cursor: pointer; border-radius: 8px; transition: all 0.2s ease; display: flex; align-items: center; gap: 8px; }
-        .nav-btn:hover { color: var(--text-main); background: rgba(255, 255, 255, 0.05); }
-        .nav-btn.active { color: var(--bg-dark); background: var(--accent-gold); box-shadow: 0 0 12px var(--accent-gold-glow); }
-
-        /* MAIN CONTENT & VIEWS */
-        main.main-content { flex: 1; padding: 24px; max-width: 1400px; width: 100%; margin: 0 auto; }
-        .view-section { display: none; animation: fadeIn 0.3s ease-in-out; }
-        .view-section.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* SQUAD PITCH UI */
-        .squad-layout { display: grid; grid-template-columns: 1fr 340px; gap: 24px; }
-        .pitch-container { background: var(--pitch-green); border: 3px solid #2d6a4f; border-radius: 16px; height: 680px; position: relative; box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.6); overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; padding: 20px 10px; }
-        .pitch-center-circle { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 140px; height: 140px; border: 2px solid var(--pitch-lines); border-radius: 50%; pointer-events: none; }
-        .pitch-row { display: flex; justify-content: space-around; align-items: center; z-index: 2; width: 100%; }
-
-        .position-slot { width: 100px; height: 135px; border: 2px dashed rgba(255, 255, 255, 0.3); border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.25); cursor: pointer; transition: all 0.2s ease; }
-        .position-slot:hover { border-color: var(--accent-gold); transform: scale(1.05); background: rgba(255, 183, 0, 0.1); }
-        .slot-label { font-family: var(--font-display); font-size: 1.4rem; color: rgba(255, 255, 255, 0.7); }
-
-        /* CARDS */
-        .player-card { width: 105px; height: 145px; border-radius: 10px; background: linear-gradient(135deg, #2a2d34 0%, #111318 100%); border: 2px solid var(--accent-gold); padding: 6px; display: flex; flex-direction: column; justify-content: space-between; position: relative; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5); transition: transform 0.2s ease; cursor: pointer; }
-        .player-card:hover { transform: translateY(-4px); }
-        .player-card.card-special { border-color: var(--accent-blue); background: linear-gradient(135deg, #002b4d 0%, #00101d 100%); }
-        .player-card.card-gold { border-color: var(--accent-gold); background: linear-gradient(135deg, #4a3b10 0%, #1a1403 100%); }
-        .player-card.card-silver { border-color: #a8b8c8; background: linear-gradient(135deg, #3a4450 0%, #151a20 100%); }
-        .player-card.card-bronze { border-color: #8c533e; background: linear-gradient(135deg, #382118 0%, #140b08 100%); }
-        .card-header { display: flex; justify-content: space-between; align-items: flex-start; }
-        .card-rating { font-family: var(--font-display); font-size: 1.6rem; font-weight: 700; line-height: 1; }
-        .card-position { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); }
-        .card-info { text-align: center; margin: 2px 0; }
-        .card-name { font-size: 0.75rem; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .card-club { font-size: 0.6rem; color: var(--text-muted); display: block; }
-        .card-stats { display: flex; justify-content: space-around; font-size: 0.55rem; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 4px; }
-        .stat-col { display: flex; flex-direction: column; gap: 1px; }
-
-        /* BUTTONS & MODALS */
-        .btn-primary { background: var(--accent-gold); color: var(--bg-dark); border: none; padding: 10px 18px; font-weight: 700; border-radius: 6px; cursor: pointer; transition: all 0.2s ease; }
-        .btn-primary:hover { box-shadow: 0 0 12px var(--accent-gold-glow); transform: translateY(-1px); }
-        .sidebar-panel { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; }
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(6px); display: flex; justify-content: center; align-items: center; z-index: 2000; }
-        .modal-body { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 28px; width: 100%; max-width: 480px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
-        .form-group { margin-bottom: 16px; }
-        .form-group label { display: block; font-size: 0.85rem; margin-bottom: 6px; color: var(--text-muted); }
-        .form-group input, .form-group select { width: 100%; padding: 10px 14px; background: var(--bg-dark); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-main); font-family: var(--font-main); }
-    </style>
+    
+    <!-- Premium Stylesheet -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Scripts -->
+    <script type="module" src="friends.js"></script>
 </head>
 <body>
 
-    <!-- TOP NAVIGATION HUD -->
-    <header class="app-header">
-        <div class="brand-logo">
-            <i class="fa-solid fa-shield-halved"></i>
-            <h1>Ultimate Team</h1>
+    <!-- ==========================================================================
+       INITIAL APP LOADER
+       ========================================================================== -->
+    <div id="initial-loader" class="full-screen-overlay" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: #0b0e14; position: fixed; inset: 0; z-index: 9999; transition: opacity 0.5s;">
+        <i class="fa-solid fa-futbol fa-spin" style="font-size: 3rem; color: #f3c653; margin-bottom: 1rem;"></i>
+        <h2 style="color: white; font-weight: 800; letter-spacing: 2px;">ZA SPORTS</h2>
+        <p style="color: #8b949e; margin-bottom: 1rem;" id="loading-status">Initializing Web App Engine...</p>
+        <div class="loading-bar-container">
+            <div class="loading-bar" id="loading-bar"></div>
         </div>
+        <p style="color: #8b949e; font-size: 0.85rem; margin-top: 0.5rem;" id="loading-percent">0%</p>
+    </div>
+
+    <!-- ==========================================================================
+       GLOBAL APP HEADER (Visible when authenticated)
+       ========================================================================== -->
+    <header id="app-header" class="hidden">
+        <div class="brand-logo">
+            <i class="fa-solid fa-shield-halved"></i> ULTIMATE TEAM
+        </div>
+        
+        <nav class="app-nav-links">
+            <button class="nav-btn active" data-target-screen="dashboard"><i class="fa-solid fa-house"></i> Home</button>
+            <button class="nav-btn" data-target-screen="store"><i class="fa-solid fa-store"></i> Store</button>
+            <button class="nav-btn" data-target-screen="market"><i class="fa-solid fa-arrow-right-arrow-left"></i> Transfers</button>
+            <button class="nav-btn" data-target-screen="club"><i class="fa-solid fa-users"></i> Club</button>
+            <button class="nav-btn" data-target-screen="squad"><i class="fa-solid fa-people-group"></i> Squad</button>
+            <button class="nav-btn" data-target-screen="friends"><i class="fa-solid fa-user-group"></i> Friends</button>
+            <button class="nav-btn" data-target-screen="matchmaking"><i class="fa-solid fa-futbol"></i> Play</button>
+            <button class="nav-btn" data-target-screen="admin"><i class="fa-solid fa-cog"></i> Admin</button>
+        </nav>
+
         <div class="user-hud">
-            <div class="hud-item" style="color: var(--accent-gold);">
-                <i class="fa-solid fa-coins"></i> <span id="hud-coins">10,000</span>
+            <div class="hud-item badge">
+                <i class="fa-solid fa-shield"></i> <span class="user-club-name">Loading...</span>
             </div>
-            <div class="hud-item" style="color: var(--accent-blue);">
-                <i class="fa-solid fa-trophy"></i> <span id="hud-rank">Amateur (1000 pts)</span>
+            <div class="hud-item coins">
+                <i class="fa-solid fa-coins gold-text"></i> <span class="user-coin-balance">0</span>
             </div>
-            <div class="hud-item">
-                <i class="fa-solid fa-user"></i> <span id="hud-username">Guest Manager</span>
-            </div>
-            <button class="btn-primary" id="btn-logout" style="padding: 6px 12px; font-size: 0.8rem;">
+            <button class="btn btn-outline logout-btn" title="Logout">
                 <i class="fa-solid fa-right-from-bracket"></i>
             </button>
         </div>
     </header>
 
-    <!-- NAVIGATION TABS -->
-    <nav class="main-nav">
-        <button class="nav-btn active" data-target="view-squad"><i class="fa-solid fa-users-line"></i> Squad</button>
-        <button class="nav-btn" data-target="view-store"><i class="fa-solid fa-box-open"></i> Packs</button>
-        <button class="nav-btn" data-target="view-market"><i class="fa-solid fa-chart-line"></i> Market</button>
-        <button class="nav-btn" data-target="view-match"><i class="fa-solid fa-futbol"></i> Matches</button>
-        <button class="nav-btn" data-target="view-leaderboards"><i class="fa-solid fa-ranking-star"></i> Rank</button>
-    </nav>
-
-    <!-- MAIN DASHBOARD CONTENT -->
-    <main class="main-content">
-        <!-- 1. SQUAD BUILDER VIEW -->
-        <section id="view-squad" class="view-section active">
-            <div class="squad-layout">
-                <div class="pitch-container">
-                    <div class="pitch-center-circle"></div>
-                    <!-- Attackers -->
-                    <div class="pitch-row">
-                        <div class="position-slot" data-position="LW"><span class="slot-label">LW</span></div>
-                        <div class="position-slot" data-position="ST"><span class="slot-label">ST</span></div>
-                        <div class="position-slot" data-position="RW"><span class="slot-label">RW</span></div>
-                    </div>
-                    <!-- Midfielders -->
-                    <div class="pitch-row">
-                        <div class="position-slot" data-position="CAM"><span class="slot-label">CAM</span></div>
-                        <div class="position-slot" data-position="CM"><span class="slot-label">CM</span></div>
-                        <div class="position-slot" data-position="CDM"><span class="slot-label">CDM</span></div>
-                    </div>
-                    <!-- Defenders & Keeper -->
-                    <div class="pitch-row">
-                        <div class="position-slot" data-position="LB"><span class="slot-label">LB</span></div>
-                        <div class="position-slot" data-position="CB"><span class="slot-label">CB</span></div>
-                        <div class="position-slot" data-position="RB"><span class="slot-label">RB</span></div>
-                    </div>
-                    <div class="pitch-row">
-                        <div class="position-slot" data-position="GK"><span class="slot-label">GK</span></div>
-                    </div>
-                </div>
-
-                <!-- SIDEBAR STATS & FORMATION CONTROL -->
-                <div class="sidebar-panel">
-                    <h2 style="font-family: var(--font-display); font-size: 1.8rem; margin-bottom: 12px;">Squad Tactics</h2>
+    <!-- ==========================================================================
+       SCREEN 1: AUTHENTICATION
+       ========================================================================== -->
+    <main id="auth-screen" class="app-screen">
+        <div class="auth-wrapper">
+            <div class="auth-hero">
+                <h1>Build Your Dream Squad.</h1>
+                <p>Trade, open packs, and compete in the ultimate football ecosystem.</p>
+            </div>
+            <div class="auth-card">
+                <h2><i class="fa-solid fa-user-lock" style="color: var(--fc-neon);"></i> Manager Portal</h2>
+                
+                <!-- Login Form -->
+                <form id="login-form">
                     <div class="form-group">
-                        <label>Formation</label>
-                        <select id="formation-select">
-                            <option value="4-3-3">4-3-3 Attack</option>
-                            <option value="4-4-2">4-4-2 Standard</option>
-                            <option value="4-2-3-1">4-2-3-1 Narrow</option>
-                        </select>
+                        <label for="login-email">Email Address</label>
+                        <div class="input-icon-wrap">
+                            <i class="fa-solid fa-envelope"></i>
+                            <input type="email" id="login-email" required placeholder="manager@fut.com" autocomplete="email">
+                        </div>
                     </div>
-                    <div style="margin-top: 20px;">
-                        <h3>Overall Chemistry: <span id="squad-chem" style="color: var(--accent-green);">100</span></h3>
-                        <h3>Team Rating: <span id="squad-rating" style="color: var(--accent-gold);">88</span></h3>
+                    <div class="form-group">
+                        <label for="login-password">Password</label>
+                        <div class="input-icon-wrap">
+                            <i class="fa-solid fa-lock"></i>
+                            <input type="password" id="login-password" required placeholder="•••••••••" autocomplete="current-password">
+                        </div>
                     </div>
-                </div>
-            </div>
-        </section>
+                    <button type="submit" class="btn btn-primary btn-large">
+                        <i class="fa-solid fa-right-to-bracket"></i> Secure Login
+                    </button>
+                </form>
 
-        <!-- 2. PACK STORE VIEW -->
-        <section id="view-store" class="view-section">
-            <h2 style="font-family: var(--font-display); font-size: 2rem; margin-bottom: 16px;">Packs Store</h2>
-            <div id="packs-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px;">
-                <!-- Dynamically Populated Packs -->
-            </div>
-        </section>
+                <!-- Register Form (Hidden by default) -->
+                <form id="register-form" class="hidden">
+                    <div class="form-group">
+                        <label for="reg-clubname">Club Name</label>
+                        <div class="input-icon-wrap">
+                            <i class="fa-solid fa-shield"></i>
+                            <input type="text" id="reg-clubname" required placeholder="e.g. FC Legends" maxlength="15">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-email">Email Address</label>
+                        <div class="input-icon-wrap">
+                            <i class="fa-solid fa-envelope"></i>
+                            <input type="email" id="reg-email" required placeholder="manager@fut.com" autocomplete="email">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-password">Password</label>
+                        <div class="input-icon-wrap">
+                            <i class="fa-solid fa-lock"></i>
+                            <input type="password" id="reg-password" required placeholder="Minimum 6 characters" minlength="6" autocomplete="new-password">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-large">
+                        <i class="fa-solid fa-user-plus"></i> Establish Club
+                    </button>
+                </form>
 
-        <!-- 3. TRANSFER MARKET VIEW -->
-        <section id="view-market" class="view-section">
-            <h2 style="font-family: var(--font-display); font-size: 2rem; margin-bottom: 16px;">Transfer Market</h2>
-            <div id="market-listings" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px;">
-                <!-- Live Listings -->
-            </div>
-        </section>
-
-        <!-- 4. MATCH SIMULATOR VIEW -->
-        <section id="view-match" class="view-section">
-            <h2 style="font-family: var(--font-display); font-size: 2rem; margin-bottom: 16px;">Match Engine</h2>
-            <div class="sidebar-panel" style="text-align: center; max-width: 600px; margin: 0 auto;">
-                <h3>Simulate League Match</h3>
-                <p style="color: var(--text-muted); margin: 12px 0;">Test your squad chemistry & ratings in real-time play-by-play.</p>
-                <button class="btn-primary" id="btn-start-match">Start Match</button>
-            </div>
-        </section>
-
-        <!-- 5. LEADERBOARDS VIEW -->
-        <section id="view-leaderboards" class="view-section">
-            <h2 style="font-family: var(--font-display); font-size: 2rem; margin-bottom: 16px;">Global Rankings</h2>
-            <div id="leaderboard-table" class="sidebar-panel">Loading leaderboard...</div>
-        </section>
-    </main>
-    <!-- MODAL OVERLAYS -->
-    <!-- 1. AUTHENTICATION MODAL -->
-    <div id="modal-auth" class="modal-overlay">
-        <div class="modal-body">
-            <h2 style="font-family: var(--font-display); font-size: 2.2rem; text-align: center; margin-bottom: 20px;" class="text-gold">
-                Ultimate Team Manager
-            </h2>
-            <div id="auth-error-msg" style="color: var(--accent-red); font-size: 0.85rem; margin-bottom: 12px; display: none; text-align: center;"></div>
-
-            <!-- Login Form -->
-            <form id="form-login" class="auth-form active">
-                <div class="form-group">
-                    <label>Email Address</label>
-                    <input type="email" id="login-email" required placeholder="manager@ultimateteam.com">
-                </div>
-                <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" id="login-password" required placeholder="••••••••">
-                </div>
-                <button type="submit" class="btn-primary" style="width: 100%; margin-top: 10px;">Login to Club</button>
-                <div style="margin-top: 16px; text-align: center; font-size: 0.85rem;">
-                    Don't have a team? <a href="#" id="link-show-register" style="color: var(--accent-gold); font-weight: 700;">Create Club</a>
-                </div>
-            </form>
-
-            <!-- Register Form -->
-            <form id="form-register" class="auth-form">
-                <div class="form-group">
-                    <label>Club Name</label>
-                    <input type="text" id="reg-clubname" required placeholder="FC Barcelona UK">
-                </div>
-                <div class="form-group">
-                    <label>Manager Name</label>
-                    <input type="text" id="reg-username" required placeholder="Alex Ferguson">
-                </div>
-                <div class="form-group">
-                    <label>Email Address</label>
-                    <input type="email" id="reg-email" required placeholder="manager@ultimateteam.com">
-                </div>
-                <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" id="reg-password" required placeholder="••••••••">
-                </div>
-                <button type="submit" class="btn-primary" style="width: 100%; margin-top: 10px;">Establish Club</button>
-                <div style="margin-top: 16px; text-align: center; font-size: 0.85rem;">
-                    Already a manager? <a href="#" id="link-show-login" style="color: var(--accent-gold); font-weight: 700;">Sign In</a>
-                </div>
-            </form>
-            <div style="text-align: center; margin-top: 15px;">
-                <button id="btn-guest-login" style="background: transparent; border: 1px solid var(--text-muted); color: var(--text-muted); padding: 6px 12px; border-radius: 4px; font-size: 0.75rem; cursor: pointer;">
-                    Continue as Guest Play
+                <div class="auth-divider"><span>OR</span></div>
+                
+                <button type="button" id="toggle-auth-mode" class="btn btn-secondary" style="width: 100%;">
+                    Create New Club Instead
                 </button>
             </div>
         </div>
-    </div>
+    </main>
 
-    <!-- 2. CLUB INVENTORY / PLAYER PICKER MODAL -->
-    <div id="modal-select-player" class="modal-overlay hidden">
-        <div class="modal-body" style="max-width: 650px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                <h3 style="font-family: var(--font-display); font-size: 1.8rem;" id="picker-slot-title">Select Player</h3>
-                <button class="btn-close-modal" style="background: transparent; border: none; color: white; font-size: 1.4rem; cursor: pointer;">&times;</button>
+    <!-- ==========================================================================
+       SCREEN 2: DASHBOARD (Home)
+       ========================================================================== -->
+    <main id="dashboard-screen" class="app-screen hidden">
+        <section class="dashboard-header">
+            <div>
+                <h1 class="welcome-text">Welcome Back, <span class="user-club-name text-gold">Manager</span></h1>
+                <p class="text-muted">Season 1 is active. Daily objectives reset in 12 hours.</p>
             </div>
-            <div id="club-inventory-picker" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; max-height: 400px; overflow-y: auto; padding: 10px 0;">
-                <!-- Dynamically Populated Inventory Cards -->
-            </div>
-        </div>
-    </div>
-
-    <!-- 3. TRANSFER MARKET LISTING MODAL -->
-    <div id="modal-list-card" class="modal-overlay hidden">
-        <div class="modal-body">
-            <h3 style="font-family: var(--font-display); font-size: 1.8rem; margin-bottom: 16px;">List Card on Market</h3>
-            <div id="listing-card-preview" style="display: flex; justify-content: center; margin-bottom: 16px;"></div>
-            <form id="form-list-market">
-                <input type="hidden" id="list-card-instance-id">
-                <div class="form-group">
-                    <label>Asking Price (Coins)</label>
-                    <input type="number" id="list-card-price" min="100" max="10000000" required placeholder="5000">
+        </section>
+        
+        <div class="dashboard-grid">
+            <div class="dash-card store-promo" data-target-screen="store">
+                <div class="card-content">
+                    <h3><i class="fa-solid fa-bolt"></i> Promo Packs Available</h3>
+                    <p>New Team of the Week cards are in packs now. Test your luck!</p>
+                    <button class="btn btn-primary">Go to Store</button>
                 </div>
-                <div style="display: flex; gap: 12px; margin-top: 20px;">
-                    <button type="button" class="btn-close-modal" style="flex: 1; background: transparent; border: 1px solid var(--border-color); color: white; padding: 10px; border-radius: 6px; cursor: pointer;">Cancel</button>
-                    <button type="submit" class="btn-primary" style="flex: 1;">List Player</button>
+            </div>
+            
+            <div class="dash-card match-promo" data-target-screen="matchmaking">
+                <div class="card-content">
+                    <h3><i class="fa-solid fa-futbol"></i> Ranked Matches</h3>
+                    <p>Climb the ladder and earn exclusive rewards. Matches are 4 minutes.</p>
+                    <button class="btn btn-primary">Play Ranked</button>
                 </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- 4. PACK REVEAL MODAL -->
-    <div id="modal-pack-reveal" class="modal-overlay hidden" style="background: rgba(0,0,0,0.95);">
-        <div style="text-align: center;">
-            <h2 class="text-gold" style="font-family: var(--font-display); font-size: 3rem; margin-bottom: 20px; animation: pulse 1s infinite alternate;">NEW SIGNING!</h2>
-            <div id="pack-card-animation-target" style="display: inline-block; transform: scale(1.4); transition: transform 0.6s ease;"></div>
-            <div style="margin-top: 40px;">
-                <button class="btn-primary btn-close-modal" style="font-size: 1.1rem; padding: 12px 30px;">Send to Club</button>
+            </div>
+            
+            <div class="dash-card squad-promo" data-target-screen="squad">
+                <div class="card-content">
+                    <h3><i class="fa-solid fa-users"></i> Build Your Squad</h3>
+                    <p>Your current squad rating: <span class="text-gold">75</span></p>
+                    <button class="btn btn-primary">Manage Squad</button>
+                </div>
             </div>
         </div>
-    </div>
+    </main>
 
+    <!-- ==========================================================================
+       SCREEN 3: STORE
+       ========================================================================== -->
+    <main id="store-screen" class="app-screen hidden">
+        <div class="store-container">
+            <div class="store-header">
+                <h2>Pack Store</h2>
+                <p class="text-muted">Open packs to build your dream squad</p>
+            </div>
+            
+            <div class="packs-grid" id="packs-grid">
+                <!-- Packs will be loaded dynamically -->
+            </div>
+        </div>
+    </main>
 
-    <!-- ========================================================================== -->
-    <!-- MASTER JAVASCRIPT GAME ENGINE                                              -->
-    <!-- ========================================================================== -->
-    <script>
-        /* ==========================================================================
-           MODULE 1: FIREBASE CONFIGURATION & INITIALIZATION
-           ========================================================================== */
-        const firebaseConfig = {
-            apiKey: "AIzaSyDemoConfigKeyForUltimateTeamApp12345",
-            authDomain: "ultimate-team-simulator.firebaseapp.com",
-            databaseURL: "https://ultimate-team-simulator-default-rtdb.firebaseio.com",
-            projectId: "ultimate-team-simulator",
-            storageBucket: "ultimate-team-simulator.appspot.com",
-            messagingSenderId: "123456789012",
-            appId: "1:123456789012:web:abc123def456789"
-        };
+    <!-- ==========================================================================
+       SCREEN 4: MARKET
+       ========================================================================== -->
+    <main id="market-screen" class="app-screen hidden">
+        <div class="market-container">
+            <div class="market-header">
+                <h2>Transfer Market</h2>
+                <p class="text-muted">Buy and sell players with the community</p>
+            </div>
+            
+            <div class="market-search">
+                <input type="text" id="market-search-input" class="search-input" placeholder="Search players...">
+                <button id="market-search-btn" class="btn btn-primary">Search</button>
+            </div>
+            
+            <div class="market-tabs">
+                <button class="market-tab active" data-tab="buy">Buy Players</button>
+                <button class="market-tab" data-tab="sell">Sell Players</button>
+            </div>
+            
+            <div class="market-content" id="market-content">
+                <!-- Market listings will be loaded here -->
+            </div>
+        </div>
+    </main>
 
-        // Initialize Firebase safely
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
-        window.auth = firebase.auth();
-        window.db = firebase.database();
+    <!-- ==========================================================================
+       SCREEN 5: CLUB
+       ========================================================================== -->
+    <main id="club-screen" class="app-screen hidden">
+        <div class="club-container">
+            <div class="club-header">
+                <h2>My Club</h2>
+                <p class="text-muted">Manage your player collection</p>
+            </div>
+            
+            <div class="club-stats">
+                <div class="stat-item">
+                    <span class="stat-value" id="club-player-count">0</span>
+                    <span class="stat-label">Players</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="club-total-rating">0</span>
+                    <span class="stat-label">Avg Rating</span>
+                </div>
+            </div>
+            
+            <div class="club-grid" id="club-grid">
+                <!-- Players will be loaded here -->
+            </div>
+        </div>
+    </main>
 
+    <!-- ==========================================================================
+       SCREEN 6: SQUAD
+       ========================================================================== -->
+    <main id="squad-screen" class="app-screen hidden">
+        <div class="squad-container">
+            <div class="squad-header">
+                <h2>Squad Builder</h2>
+                <p class="text-muted">Build your starting eleven</p>
+            </div>
+            
+            <div class="squad-info">
+                <div class="squad-stat">
+                    <span class="stat-label">Players:</span>
+                    <span class="stat-value" id="player-count">0/11</span>
+                </div>
+                <div class="squad-stat">
+                    <span class="stat-label">Rating:</span>
+                    <span class="stat-value" id="squad-rating">0</span>
+                </div>
+            </div>
+            
+            <div class="formation-selector">
+                <label>Formation:</label>
+                <select id="formation-select" class="search-input">
+                    <option value="4-3-3">4-3-3</option>
+                    <option value="4-4-2">4-4-2</option>
+                    <option value="4-5-1">4-5-1</option>
+                    <option value="3-5-2">3-5-2</option>
+                    <option value="3-4-3">3-4-3</option>
+                </select>
+            </div>
+            
+            <div class="pitch-container">
+                <div class="football-pitch" id="football-pitch">
+                    <!-- Formation positions will be rendered here -->
+                </div>
+            </div>
+        </div>
+    </main>
 
-        /* ==========================================================================
-           MODULE 2: UTILITY ENGINE (utils.js)
-           ========================================================================== */
-        const Utils = {
-            formatCoins(num) {
-                return new Intl.NumberFormat('en-US').format(num || 0);
-            },
-            generateId(prefix = 'id') {
-                return `${prefix}_${Math.random().toString(36).substr(2, 9)}_${Date.now()}`;
-            },
-            clamp(val, min, max) {
-                return Math.min(Math.max(val, min), max);
-            },
-            randomChoice(arr) {
-                return arr[Math.floor(Math.random() * arr.length)];
-            },
-            getRandomInt(min, max) {
-                return Math.floor(Math.random() * (max - min + 1)) + min;
-            },
-            calculateCardRarity(rating) {
-                if (rating >= 90) return 'Special';
-                if (rating >= 75) return 'Gold';
-                if (rating >= 65) return 'Silver';
-                return 'Bronze';
-            },
-            getRarityColor(rarity) {
-                switch ((rarity || '').toLowerCase()) {
-                    case 'special': return '#00e5ff';
-                    case 'gold': return '#ffb700';
-                    case 'silver': return '#a8b8c8';
-                    case 'bronze': return '#8c533e';
-                    default: return '#ffb700';
-                }
-            },
-            calculateQuickSellValue(rating) {
-                if (rating >= 90) return 5000;
-                if (rating >= 85) return 1000;
-                if (rating >= 75) return 300;
-                if (rating >= 65) return 100;
-                return 30;
-            },
-            sanitizeInput(str) {
-                if (!str) return '';
-                return String(str).replace(/[&<>"']/g, function (m) {
-                    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
-                });
-            },
-            deepCopy(obj) {
-                return JSON.parse(JSON.stringify(obj));
-            }
-        };
-        window.Utils = Utils;
-
-
-        /* ==========================================================================
-           MODULE 3: AUTHENTICATION MANAGER (auth.js)
-           ========================================================================== */
-        const AuthManager = {
-            currentUser: null,
-            userProfile: null,
-
-            init() {
-                window.auth.onAuthStateChanged(async (user) => {
-                    if (user) {
-                        this.currentUser = user;
-                        await this.loadUserProfile(user.uid);
-                        document.getElementById('modal-auth').classList.add('hidden');
-                        if (window.UIMaster) window.UIMaster.onUserLoggedIn(this.userProfile);
-                    } else {
-                        this.currentUser = null;
-                        this.userProfile = null;
-                        document.getElementById('modal-auth').classList.remove('hidden');
-                    }
-                });
-            },
-
-            async register(email, password, username, clubName) {
-                try {
-                    const res = await window.auth.createUserWithEmailAndPassword(email, password);
-                    const uid = res.user.uid;
-                    const profile = {
-                        uid,
-                        email,
-                        username: Utils.sanitizeInput(username),
-                        clubName: Utils.sanitizeInput(clubName),
-                        coins: 10000,
-                        divisionPoints: 1000,
-                        rankTitle: "Amateur",
-                        createdAt: Date.now(),
-                        inventory: []
-                    };
-                    await window.DatabaseManager.write(`users/${uid}`, profile);
-                    this.userProfile = profile;
-                    return profile;
-                } catch (err) {
-                    console.error("Auth Register Error:", err);
-                    throw err;
-                }
-            },
-
-            async login(email, password) {
-                try {
-                    const res = await window.auth.signInWithEmailAndPassword(email, password);
-                    await this.loadUserProfile(res.user.uid);
-                    return this.userProfile;
-                } catch (err) {
-                    console.error("Auth Login Error:", err);
-                    throw err;
-                }
-            },
-
-            async guestLogin() {
-                try {
-                    const res = await window.auth.signInAnonymously();
-                    const uid = res.user.uid;
-                    const profile = {
-                        uid,
-                        email: "guest@ultimateteam.com",
-                        username: "Guest Manager",
-                        clubName: "FC Guest",
-                        coins: 15000,
-                        divisionPoints: 1000,
-                        rankTitle: "Amateur",
-                        createdAt: Date.now(),
-                        inventory: []
-                    };
-                    await window.DatabaseManager.write(`users/${uid}`, profile);
-                    this.userProfile = profile;
-                    return profile;
-                } catch (err) {
-                    console.error("Guest Auth Error:", err);
-                    throw err;
-                }
-            },
-
-            async loadUserProfile(uid) {
-                const profile = await window.DatabaseManager.read(`users/${uid}`);
-                this.userProfile = profile || {};
-                return this.userProfile;
-            },
-
-            async logout() {
-                await window.auth.signOut();
-            }
-        };
-        window.AuthManager = AuthManager;
-
-
-        /* ==========================================================================
-           MODULE 4: DATABASE MANAGER / DAL (database.js)
-           ========================================================================== */
-        const DatabaseManager = {
-            activeListeners: new Map(),
-
-            async read(path) {
-                try {
-                    const snap = await window.db.ref(path).once('value');
-                    return snap.exists() ? snap.val() : null;
-                } catch (err) {
-                    console.error(`DB Read Error [${path}]:`, err);
-                    return null;
-                }
-            },
-            async write(path, data) {
-                await window.db.ref(path).set(data);
-            },
-            async update(path, data) {
-                await window.db.ref(path).update(data);
-            },
-            async remove(path) {
-                await window.db.ref(path).remove();
-            },
-            async push(path, data) {
-                const newRef = window.db.ref(path).push();
-                await newRef.set(data);
-                return newRef.key;
-            },
-            listen(path, callback) {
-                const ref = window.db.ref(path);
-                const listener = ref.on('value', snap => callback(snap.exists() ? snap.val() : null));
-                this.activeListeners.set(path, { ref, listener });
-                return () => ref.off('value', listener);
-            },
-            async transaction(path, updateFn) {
-                return await window.db.ref(path).transaction(updateFn);
-            }
-        };
-        window.DatabaseManager = DatabaseManager;
-
-
-        /* ==========================================================================
-           MODULE 5: PLAYER ENGINE & DATABASE (players.js)
-           ========================================================================== */
-        const PlayerManager = {
-            basePlayerDatabase: [
-                { id: "ply_01", name: "Lionel Messi", position: "RW", rating: 93, pace: 85, shooting: 92, passing: 91, dribbling: 95, defending: 35, physical: 65, nation: "Argentina", club: "Inter Miami", rarity: "Special" },
-                { id: "ply_02", name: "Cristiano Ronaldo", position: "ST", rating: 91, pace: 87, shooting: 93, passing: 78, dribbling: 85, defending: 34, physical: 77, nation: "Portugal", club: "Al Nassr", rarity: "Special" },
-                { id: "ply_03", name: "Kylian Mbappé", position: "ST", rating: 92, pace: 97, shooting: 89, passing: 80, dribbling: 92, defending: 36, physical: 78, nation: "France", club: "Real Madrid", rarity: "Special" },
-                { id: "ply_04", name: "Erling Haaland", position: "ST", rating: 91, pace: 89, shooting: 93, passing: 66, dribbling: 80, defending: 45, physical: 88, nation: "Norway", club: "Man City", rarity: "Special" },
-                { id: "ply_05", name: "Kevin De Bruyne", position: "CM", rating: 91, pace: 72, shooting: 88, passing: 94, dribbling: 87, defending: 65, physical: 78, nation: "Belgium", club: "Man City", rarity: "Special" },
-                { id: "ply_06", name: "Mohamed Salah", position: "RW", rating: 89, pace: 89, shooting: 87, passing: 81, dribbling: 88, defending: 45, physical: 75, nation: "Egypt", club: "Liverpool", rarity: "Gold" },
-                { id: "ply_07", name: "Jude Bellingham", position: "CAM", rating: 88, pace: 80, shooting: 82, passing: 84, dribbling: 87, defending: 78, physical: 83, nation: "England", club: "Real Madrid", rarity: "Gold" },
-                { id: "ply_08", name: "Virgil van Dijk", position: "CB", rating: 89, pace: 78, shooting: 60, passing: 71, dribbling: 72, defending: 89, physical: 86, nation: "Netherlands", club: "Liverpool", rarity: "Gold" },
-                { id: "ply_09", name: "Vinícius Júnior", position: "LW", rating: 89, pace: 95, shooting: 82, passing: 78, dribbling: 90, defending: 29, physical: 68, nation: "Brazil", club: "Real Madrid", rarity: "Gold" },
-                { id: "ply_10", name: "Rodri", position: "CDM", rating: 89, pace: 58, shooting: 73, passing: 85, dribbling: 80, defending: 87, physical: 85, nation: "Spain", club: "Man City", rarity: "Gold" },
-                { id: "ply_11", name: "Bukayo Saka", position: "RW", rating: 86, pace: 85, shooting: 80, passing: 82, dribbling: 86, defending: 65, physical: 69, nation: "England", club: "Arsenal", rarity: "Gold" },
-                { id: "ply_12", name: "Alisson Becker", position: "GK", rating: 89, pace: 86, shooting: 85, passing: 85, dribbling: 89, defending: 54, physical: 90, nation: "Brazil", club: "Liverpool", rarity: "Gold" },
-                { id: "ply_13", name: "Archie Gray", position: "CM", rating: 73, pace: 75, shooting: 62, passing: 72, dribbling: 74, defending: 70, physical: 71, nation: "England", club: "Tottenham", rarity: "Silver" },
-                { id: "ply_14", name: "Ethan Nwaneri", position: "CAM", rating: 64, pace: 74, shooting: 60, passing: 63, dribbling: 67, defending: 42, physical: 52, nation: "England", club: "Arsenal", rarity: "Bronze" }
-            ],
-
-            createPlayer(baseData = {}) {
-                const template = Utils.randomChoice(this.basePlayerDatabase);
-                const player = Utils.deepCopy({ ...template, ...baseData });
-                player.instanceId = Utils.generateId("card");
-                player.acquiredAt = Date.now();
-                player.rarity = Utils.calculateCardRarity(player.rating);
-                return player;
-            },
-
-            renderCardHTML(player, options = {}) {
-                if (!player) return `<div class="empty-card-slot">Empty Slot</div>`;
-                const rarityClass = (player.rarity || 'Gold').toLowerCase();
-                const rarityColor = Utils.getRarityColor(player.rarity);
-                const name = Utils.sanitizeInput(player.name);
-
-                return `
-                    <div class="player-card card-${rarityClass}" data-instance-id="${player.instanceId || ''}" style="border-color: ${rarityColor}">
-                        <div class="card-header">
-                            <div class="card-rating-box">
-                                <span class="card-rating">${player.rating}</span>
-                                <span class="card-position">${player.position}</span>
-                            </div>
-                            <span style="font-size:0.6rem; color:var(--text-muted);">${player.nation ? player.nation.substr(0,3).toUpperCase() : 'WLD'}</span>
-                        </div>
-                        <div class="card-info">
-                            <h4 class="card-name">${name}</h4>
-                            <span class="card-club">${Utils.sanitizeInput(player.club || 'Free Agent')}</span>
-                        </div>
-                        <div class="card-stats">
-                            <div class="stat-col">
-                                <span><strong>${player.pace || 50}</strong> PAC</span>
-                                <span><strong>${player.shooting || 50}</strong> SHO</span>
-                                <span><strong>${player.passing || 50}</strong> PAS</span>
-                            </div>
-                            <div class="stat-col">
-                                <span><strong>${player.dribbling || 50}</strong> DRI</span>
-                                <span><strong>${player.defending || 50}</strong> DEF</span>
-                                <span><strong>${player.physical || 50}</strong> PHY</span>
-                            </div>
-                        </div>
+    <!-- ==========================================================================
+       SCREEN 7: FRIENDS
+       ========================================================================== -->
+    <main id="friends-screen" class="app-screen hidden">
+        <div class="friends-container">
+            <div class="friends-header">
+                <h2>Friends</h2>
+                <p class="text-muted">Add friends and play matches together</p>
+            </div>
+            
+            <div class="friends-sections">
+                <!-- Friend Requests -->
+                <div class="friends-section">
+                    <h3>Friend Requests</h3>
+                    <div id="friend-requests-list">
+                        <p class="text-muted">No pending friend requests</p>
                     </div>
-                `;
-            }
-        };
-        window.PlayerManager = PlayerManager;
-
-
-        /* ==========================================================================
-           MODULE 6: SQUAD BUILDER ENGINE (squad.js)
-           ========================================================================== */
-        const SquadManager = {
-            activeSquad: {
-                formation: "4-3-3",
-                slots: {
-                    LW: null, ST: null, RW: null,
-                    CAM: null, CM: null, CDM: null,
-                    LB: null, CB: null, RB: null, GK: null
-                }
-            },
-
-            assignPlayerToSlot(positionSlot, player) {
-                if (!this.activeSquad.slots.hasOwnProperty(positionSlot)) return false;
-                this.activeSquad.slots[positionSlot] = player;
-                this.recalculateSquadStats();
-                return true;
-            },
-
-            removePlayerFromSlot(positionSlot) {
-                if (this.activeSquad.slots.hasOwnProperty(positionSlot)) {
-                    this.activeSquad.slots[positionSlot] = null;
-                    this.recalculateSquadStats();
-                }
-            },
-
-            recalculateSquadStats() {
-                let totalRating = 0;
-                let count = 0;
-                let chemistry = 0;
-
-                const filledSlots = Object.entries(this.activeSquad.slots).filter(([pos, card]) => card !== null);
-
-                filledSlots.forEach(([pos, card]) => {
-                    totalRating += card.rating;
-                    count++;
-                    // Basic position match bonus
-                    if (card.position === pos) chemistry += 7;
-                    else chemistry += 3;
-                });
-
-                // Club/Nation link bonus computation
-                for (let i = 0; i < filledSlots.length; i++) {
-                    for (let j = i + 1; j < filledSlots.length; j++) {
-                        const cardA = filledSlots[i][1];
-                        const cardB = filledSlots[j][1];
-                        if (cardA.club === cardB.club) chemistry += 2;
-                        if (cardA.nation === cardB.nation) chemistry += 1.5;
-                    }
-                }
-
-                const avgRating = count > 0 ? Math.round(totalRating / count) : 0;
-                const finalChem = Utils.clamp(Math.round(chemistry), 0, 100);
-
-                const chemEl = document.getElementById('squad-chem');
-                const ratingEl = document.getElementById('squad-rating');
-                if (chemEl) chemEl.textContent = finalChem;
-                if (ratingEl) ratingEl.textContent = avgRating;
-
-                return { teamRating: avgRating, chemistry: finalChem };
-            }
-        };
-        window.SquadManager = SquadManager;
-        /* ==========================================================================
-           MODULE 7: PACK STORE ENGINE (packs.js)
-           ========================================================================== */
-        const PackStoreManager = {
-            packs: [
-                { id: "pack_bronze", name: "Bronze Pack", cost: 500, minRating: 45, maxRating: 64, color: "#8c533e", icon: "fa-box" },
-                { id: "pack_silver", name: "Silver Pack", cost: 2500, minRating: 65, maxRating: 74, color: "#a8b8c8", icon: "fa-box-open" },
-                { id: "pack_gold", name: "Gold Pack", cost: 7500, minRating: 75, maxRating: 89, color: "#ffb700", icon: "fa-cubes" },
-                { id: "pack_special", name: "Icon / Special Pack", cost: 50000, minRating: 90, maxRating: 99, color: "#00e5ff", icon: "fa-gem" }
-            ],
-
-            renderStore() {
-                const container = document.getElementById('packs-container');
-                if (!container) return;
-
-                container.innerHTML = this.packs.map(pack => `
-                    <div class="sidebar-panel" style="border-top: 4px solid ${pack.color}; text-align: center;">
-                        <i class="fa-solid ${pack.icon}" style="font-size: 2.5rem; color: ${pack.color}; margin-bottom: 12px;"></i>
-                        <h3 style="font-family: var(--font-display); font-size: 1.8rem;">${pack.name}</h3>
-                        <p style="color: var(--text-muted); font-size: 0.85rem; margin: 8px 0;">Ratings ${pack.minRating} - ${pack.maxRating}</p>
-                        <div style="font-size: 1.2rem; font-weight: 800; color: var(--accent-gold); margin: 12px 0;">
-                            <i class="fa-solid fa-coins"></i> ${Utils.formatCoins(pack.cost)}
-                        </div>
-                        <button class="btn-primary" onclick="PackStoreManager.buyPack('${pack.id}')" style="width: 100%;">
-                            Open Pack
-                        </button>
-                    </div>
-                `).join('');
-            },
-
-            async buyPack(packId) {
-                const pack = this.packs.find(p => p.id === packId);
-                if (!pack) return;
-
-                const profile = AuthManager.userProfile;
-                if (!profile) return alert("Please log in first!");
-
-                if ((profile.coins || 0) < pack.cost) {
-                    return alert("Insufficient coins to purchase this pack!");
-                }
-
-                // Deduct coins
-                profile.coins -= pack.cost;
-                await DatabaseManager.write(`users/${profile.uid}/coins`, profile.coins);
-                UIMaster.updateHUD();
-
-                // Generate new dynamic player card within pack bounds
-                const pool = PlayerManager.basePlayerDatabase.filter(p => p.rating >= pack.minRating && p.rating <= pack.maxRating);
-                const selectedBase = pool.length > 0 ? Utils.randomChoice(pool) : Utils.randomChoice(PlayerManager.basePlayerDatabase);
+                </div>
                 
-                const newCard = PlayerManager.createPlayer(selectedBase);
-
-                // Save player card to user inventory in Firebase
-                profile.inventory = profile.inventory || [];
-                profile.inventory.push(newCard);
-                await DatabaseManager.write(`users/${profile.uid}/inventory`, profile.inventory);
-
-                // Display Reveal Animation Modal
-                this.triggerPackReveal(newCard);
-            },
-
-            triggerPackReveal(player) {
-                const modal = document.getElementById('modal-pack-reveal');
-                const target = document.getElementById('pack-card-animation-target');
-                if (!modal || !target) return;
-
-                target.innerHTML = PlayerManager.renderCardHTML(player);
-                modal.classList.remove('hidden');
-            }
-        };
-        window.PackStoreManager = PackStoreManager;
-
-
-        /* ==========================================================================
-           MODULE 8: TRANSFER MARKET ENGINE (market.js)
-           ========================================================================== */
-        const TransferMarketManager = {
-            initListener() {
-                DatabaseManager.listen('market/listings', (listings) => {
-                    this.renderListings(listings || {});
-                });
-            },
-
-            renderListings(listingsObj) {
-                const container = document.getElementById('market-listings');
-                if (!container) return;
-
-                const listings = Object.entries(listingsObj).map(([id, data]) => ({ listingId: id, ...data }));
-
-                if (listings.length === 0) {
-                    container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 40px;">No players currently listed on the market.</div>`;
-                    return;
-                }
-
-                container.innerHTML = listings.map(item => `
-                    <div class="sidebar-panel" style="padding: 12px; display: flex; flex-direction: column; align-items: center; text-align: center;">
-                        ${PlayerManager.renderCardHTML(item.player)}
-                        <div style="margin: 10px 0; font-size: 0.85rem;">
-                            <span style="color: var(--text-muted);">Seller:</span> ${Utils.sanitizeInput(item.sellerName)}
-                        </div>
-                        <div style="font-weight: 800; color: var(--accent-gold); margin-bottom: 8px;">
-                            <i class="fa-solid fa-coins"></i> ${Utils.formatCoins(item.price)}
-                        </div>
-                        ${AuthManager.currentUser && AuthManager.currentUser.uid === item.sellerUid ? `
-                            <button class="btn-primary" style="background: var(--accent-red); width: 100%; font-size: 0.8rem;" onclick="TransferMarketManager.cancelListing('${item.listingId}')">
-                                Cancel Listing
-                            </button>
-                        ` : `
-                            <button class="btn-primary" style="width: 100%; font-size: 0.8rem;" onclick="TransferMarketManager.buyListing('${item.listingId}', ${item.price}, '${item.sellerUid}')">
-                                Buy Card
-                            </button>
-                        `}
+                <!-- Add Friend -->
+                <div class="friends-section">
+                    <h3>Add Friend</h3>
+                    <div class="add-friend-form">
+                        <input type="text" id="friend-email-input" class="search-input" placeholder="Enter friend's email" />
+                        <button id="send-friend-request-btn" class="btn btn-primary">Send Request</button>
                     </div>
-                `).join('');
-            },
+                </div>
+                
+                <!-- Friends List -->
+                <div class="friends-section">
+                    <h3>My Friends</h3>
+                    <div id="friends-list">
+                        <p class="text-muted">No friends yet. Add some friends to play with!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
 
-            openListModal(instanceId) {
-                const profile = AuthManager.userProfile;
-                if (!profile || !profile.inventory) return;
+    <!-- ==========================================================================
+       SCREEN 8: MATCHMAKING (PLAY MENU)
+       ========================================================================== -->
+    <main id="matchmaking-screen" class="app-screen hidden">
+        <div class="play-menu-wrapper">
+            <!-- Play menu content will be injected by matchmaking.js -->
+            <div id="matchmaking-options" class="matchmaking-options">
+                <!-- Initial loading state -->
+                <div class="loading-container">
+                    <i class="fa-solid fa-spinner fa-spin text-gold"></i>
+                    <p class="text-muted mt-4">Loading play menu...</p>
+                </div>
+            </div>
+        </div>
+    </main>
 
-                const card = profile.inventory.find(c => c.instanceId === instanceId);
-                if (!card) return;
+    <!-- ==========================================================================
+       SCREEN 9: MATCH PLAY
+       ========================================================================== -->
+    <main id="match-screen" class="app-screen hidden">
+        <div class="match-container">
+            <!-- Scoreboard -->
+            <div class="scoreboard">
+                <div class="scoreboard-team home">
+                    <div class="team-name" id="match-home-name">Home Team</div>
+                    <div class="team-score" id="match-home-score">0</div>
+                </div>
+                <div class="scoreboard-center">
+                    <div class="match-time" id="match-time">0'</div>
+                </div>
+                <div class="scoreboard-team away">
+                    <div class="team-name" id="match-away-name">Away Team</div>
+                    <div class="team-score" id="match-away-score">0</div>
+                </div>
+            </div>
 
-                document.getElementById('list-card-instance-id').value = instanceId;
-                document.getElementById('listing-card-preview').innerHTML = PlayerManager.renderCardHTML(card);
-                document.getElementById('modal-list-card').classList.remove('hidden');
-            },
-
-            async submitListing(instanceId, price) {
-                const profile = AuthManager.userProfile;
-                if (!profile) return;
-
-                const cardIndex = (profile.inventory || []).findIndex(c => c.instanceId === instanceId);
-                if (cardIndex === -1) return alert("Card not found in inventory!");
-
-                const card = profile.inventory[cardIndex];
-
-                // Create listing object
-                const listingData = {
-                    sellerUid: profile.uid,
-                    sellerName: profile.username || "Manager",
-                    price: Number(price),
-                    player: card,
-                    listedAt: Date.now()
-                };
-
-                // Push listing to global market node
-                await DatabaseManager.push('market/listings', listingData);
-
-                // Remove card from seller inventory
-                profile.inventory.splice(cardIndex, 1);
-                await DatabaseManager.write(`users/${profile.uid}/inventory`, profile.inventory);
-
-                document.getElementById('modal-list-card').classList.add('hidden');
-                alert("Player successfully listed on Transfer Market!");
-            },
-
-            async buyListing(listingId, price, sellerUid) {
-                const profile = AuthManager.userProfile;
-                if (!profile) return alert("Please log in to purchase cards!");
-                if (profile.uid === sellerUid) return alert("You cannot buy your own card!");
-                if ((profile.coins || 0) < price) return alert("Insufficient coins!");
-
-                // Deduct coins from buyer
-                profile.coins -= price;
-                await DatabaseManager.write(`users/${profile.uid}/coins`, profile.coins);
-
-                // Retrieve listing data
-                const listing = await DatabaseManager.read(`market/listings/${listingId}`);
-                if (!listing) return alert("Listing is no longer available.");
-
-                // Add card to buyer inventory
-                profile.inventory = profile.inventory || [];
-                profile.inventory.push(listing.player);
-                await DatabaseManager.write(`users/${profile.uid}/inventory`, profile.inventory);
-
-                // Credit seller with coins
-                const sellerCoins = await DatabaseManager.read(`users/${sellerUid}/coins`) || 0;
-                await DatabaseManager.write(`users/${sellerUid}/coins`, sellerCoins + price);
-
-                // Delete market listing
-                await DatabaseManager.remove(`market/listings/${listingId}`);
-
-                UIMaster.updateHUD();
-                alert("Transfer completed! Card added to your club.");
-            },
-
-            async cancelListing(listingId) {
-                const listing = await DatabaseManager.read(`market/listings/${listingId}`);
-                if (!listing) return;
-
-                const profile = AuthManager.userProfile;
-                if (listing.sellerUid !== profile.uid) return;
-
-                // Return card to seller inventory
-                profile.inventory = profile.inventory || [];
-                profile.inventory.push(listing.player);
-                await DatabaseManager.write(`users/${profile.uid}/inventory`, profile.inventory);
-
-                // Delete listing node
-                await DatabaseManager.remove(`market/listings/${listingId}`);
-            }
-        };
-        window.TransferMarketManager = TransferMarketManager;
-
-
-        /* ==========================================================================
-           MODULE 9: MATCH SIMULATOR ENGINE (match.js)
-           ========================================================================== */
-        const MatchEngine = {
-            opponents: [
-                { name: "Real Madrid XI", rating: 89, chem: 100 },
-                { name: "Manchester City", rating: 88, chem: 95 },
-                { name: "Bayern Munich", rating: 86, chem: 90 },
-                { name: "FC Barcelona", rating: 85, chem: 88 }
-            ],
-
-            async startMatch() {
-                const squadStats = SquadManager.recalculateSquadStats();
-                if (squadStats.teamRating === 0) {
-                    return alert("Please field players in your squad before playing a match!");
-                }
-
-                const opponent = Utils.randomChoice(this.opponents);
-                const btn = document.getElementById('btn-start-match');
-                if (btn) btn.disabled = true;
-
-                // Calculate win probability based on team ratings and squad chemistry
-                const userScoreBase = (squadStats.teamRating * 0.7) + (squadStats.chemistry * 0.3);
-                const oppScoreBase = (opponent.rating * 0.7) + (opponent.chem * 0.3);
-
-                let userGoals = 0;
-                let oppGoals = 0;
-
-                for (let i = 0; i < 5; i++) {
-                    if (Math.random() * userScoreBase > Math.random() * oppScoreBase * 0.95) userGoals++;
-                    if (Math.random() * oppScoreBase > Math.random() * userScoreBase * 0.95) oppGoals++;
-                }
-
-                // Award points & coins
-                let coinReward = 500;
-                let pointsReward = 15;
-                let resultText = "DRAW";
-
-                if (userGoals > oppGoals) {
-                    coinReward = 1200;
-                    pointsReward = 35;
-                    resultText = "VICTORY!";
-                } else if (userGoals < oppGoals) {
-                    coinReward = 300;
-                    pointsReward = -10;
-                    resultText = "DEFEAT";
-                }
-
-                const profile = AuthManager.userProfile;
-                if (profile) {
-                    profile.coins = (profile.coins || 0) + coinReward;
-                    profile.divisionPoints = Math.max(0, (profile.divisionPoints || 1000) + pointsReward);
+            <!-- Football Field -->
+            <div class="field-container">
+                <div class="football-field" id="football-field">
+                    <!-- Field markings -->
+                    <div class="field-markings">
+                        <div class="halfway-line"></div>
+                        <div class="center-circle"></div>
+                        <div class="center-spot"></div>
+                        <div class="penalty-box-left"></div>
+                        <div class="penalty-box-right"></div>
+                        <div class="goal-area-left"></div>
+                        <div class="goal-area-right"></div>
+                        <div class="goal-left"></div>
+                        <div class="goal-right"></div>
+                    </div>
                     
-                    await DatabaseManager.write(`users/${profile.uid}/coins`, profile.coins);
-                    await DatabaseManager.write(`users/${profile.uid}/divisionPoints`, profile.divisionPoints);
-                    UIMaster.updateHUD();
-                }
+                    <!-- Ball -->
+                    <div class="ball" id="ball"></div>
+                    
+                    <!-- Goal Indicators -->
+                    <div class="goal-indicator home-goal hidden" id="home-goal-indicator">
+                        <div class="goal-score" id="home-goal-score">0</div>
+                    </div>
+                    <div class="goal-indicator away-goal hidden" id="away-goal-indicator">
+                        <div class="goal-score" id="away-goal-score">0</div>
+                    </div>
+                    
+                    <!-- Attack Banner -->
+                    <div class="attack-banner hidden" id="attack-banner">
+                        <i class="fa-solid fa-bolt"></i>
+                        <span>Attack for <span id="attack-team">Team</span></span>
+                    </div>
+                    
+                    <!-- Goal Banner -->
+                    <div class="goal-banner hidden" id="goal-banner">
+                        <div class="goal-icon">⚽</div>
+                        <div class="goal-text">GOAL!</div>
+                        <div class="goal-scorer" id="goal-scorer">Player</div>
+                        <div class="goal-assist" id="goal-assist">Assist: Player</div>
+                        <div class="goal-minute" id="goal-minute">45'</div>
+                    </div>
+                    
+                    <!-- Half-Time Banner -->
+                    <div class="halftime-banner hidden" id="halftime-banner">
+                        <div class="halftime-text">HALF TIME</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
 
-                alert(`MATCH RESULT: ${resultText}\n\nYour Club ${userGoals} - ${oppGoals} ${opponent.name}\n\nRewards:\n+ ${coinReward} Coins\n+ ${pointsReward} Rank Points`);
-                if (btn) btn.disabled = false;
-            }
-        };
-        window.MatchEngine = MatchEngine;
-
-
-        /* ==========================================================================
-           MODULE 10: LEADERBOARDS ENGINE (leaderboard.js)
-           ========================================================================== */
-        const LeaderboardManager = {
-            initListener() {
-                DatabaseManager.listen('users', (usersObj) => {
-                    this.renderLeaderboard(usersObj || {});
-                });
-            },
-
-            renderLeaderboard(usersObj) {
-                const container = document.getElementById('leaderboard-table');
-                if (!container) return;
-
-                const users = Object.values(usersObj)
-                    .sort((a, b) => (b.divisionPoints || 0) - (a.divisionPoints || 0))
-                    .slice(0, 10);
-
-                if (users.length === 0) {
-                    container.innerHTML = `<p style="text-align:center;">No rankings available yet.</p>`;
-                    return;
-                }
-
-                container.innerHTML = `
-                    <table style="width:100%; text-align:left; border-collapse:collapse;">
-                        <thead>
-                            <tr style="border-bottom: 2px solid var(--border-color); color: var(--text-muted); font-size: 0.85rem;">
-                                <th style="padding: 10px;">Rank</th>
-                                <th>Club Name</th>
-                                <th>Manager</th>
-                                <th style="text-align:right; padding: 10px;">Division Points</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${users.map((user, idx) => `
-                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); font-size:0.9rem;">
-                                    <td style="padding: 12px 10px; font-weight:800; color:${idx === 0 ? 'var(--accent-gold)' : 'inherit'}">#${idx + 1}</td>
-                                    <td style="font-weight:700;">${Utils.sanitizeInput(user.clubName || 'FC Club')}</td>
-                                    <td>${Utils.sanitizeInput(user.username || 'Manager')}</td>
-                                    <td style="text-align:right; padding: 10px; font-weight:800; color:var(--accent-blue);">${user.divisionPoints || 1000} pts</td>
+    <!-- ==========================================================================
+       SCREEN 10: ADMIN
+       ========================================================================== -->
+    <main id="admin-screen" class="app-screen hidden">
+        <div class="admin-container">
+            <div class="admin-header">
+                <h2>Admin Panel</h2>
+                <p class="text-muted">Manage database and settings</p>
+            </div>
+            
+            <div class="admin-nav">
+                <button class="admin-nav-item active" data-admin-section="players">Players</button>
+                <button class="admin-nav-item" data-admin-section="packs">Packs</button>
+                <button class="admin-nav-item" data-admin-section="settings">Settings</button>
+            </div>
+            
+            <div class="admin-content">
+                <!-- Players Section -->
+                <div id="admin-players" class="admin-section active">
+                    <h2 style="font-family: 'Oswald', sans-serif; color: var(--fc-neon); margin-bottom: 1.5rem;">PLAYER MANAGEMENT</h2>
+                    <div class="flex gap-4 mb-4">
+                        <input type="text" id="admin-player-search" class="search-input" placeholder="Search players...">
+                        <button id="admin-player-search-btn" class="btn btn-primary">Search</button>
+                    </div>
+                    <div id="admin-players-table">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Rating</th>
+                                    <th>Position</th>
+                                    <th>Rarity</th>
+                                    <th>Actions</th>
                                 </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                `;
-            }
-        };
-        window.LeaderboardManager = LeaderboardManager;
+                            </thead>
+                            <tbody id="admin-players-list">
+                                <!-- Player rows will be populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
 
+                <!-- Packs Section -->
+                <div id="admin-packs" class="admin-section">
+                    <h2 style="font-family: 'Oswald', sans-serif; color: var(--fc-neon); margin-bottom: 1.5rem;">PACK MANAGEMENT</h2>
+                    <div id="admin-packs-table">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Cost</th>
+                                    <th>Items</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-packs-list">
+                                <!-- Pack rows will be populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
 
-        /* ==========================================================================
-           MODULE 11: MASTER UI CONTROLLER & EVENT BINDINGS (ui.js)
-           ========================================================================== */
-        const UIMaster = {
-            selectedSlotPosition: null,
-
-            init() {
-                this.bindNavigation();
-                this.bindModals();
-                this.bindSquadSlots();
-                this.bindForms();
-                
-                // Render initial Store & dynamic elements
-                PackStoreManager.renderStore();
-                TransferMarketManager.initListener();
-                LeaderboardManager.initListener();
-
-                // Initialize Auth state check
-                AuthManager.init();
-            },
-
-            bindNavigation() {
-                const navBtns = document.querySelectorAll('.nav-btn');
-                navBtns.forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        const targetId = btn.dataset.target;
-                        if (!targetId) return;
-
-                        navBtns.forEach(b => b.classList.remove('active'));
-                        btn.classList.add('active');
-
-                        document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
-                        const targetSec = document.getElementById(targetId);
-                        if (targetSec) targetSec.classList.add('active');
-                    });
-                });
-            },
-
-            bindModals() {
-                // Modal Close Buttons
-                document.querySelectorAll('.btn-close-modal').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        document.querySelectorAll('.modal-overlay').forEach(m => {
-                            if (m.id !== 'modal-auth') m.classList.add('hidden');
-                        });
-                    });
-                });
-
-                // Auth form tab switches
-                document.getElementById('link-show-register')?.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    document.getElementById('form-login').classList.remove('active');
-                    document.getElementById('form-register').classList.add('active');
-                });
-
-                document.getElementById('link-show-login')?.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    document.getElementById('form-register').classList.remove('active');
-                    document.getElementById('form-login').classList.add('active');
-                });
-            },
-
-            bindSquadSlots() {
-                const slots = document.querySelectorAll('.position-slot');
-                slots.forEach(slot => {
-                    slot.addEventListener('click', () => {
-                        const pos = slot.dataset.position;
-                        this.openPlayerPickerModal(pos);
-                    });
-                });
-            },
-
-            bindForms() {
-                // Login Submit
-                document.getElementById('form-login')?.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    const email = document.getElementById('login-email').value;
-                    const pass = document.getElementById('login-password').value;
-                    try {
-                        await AuthManager.login(email, pass);
-                    } catch (err) {
-                        alert("Login Failed: " + err.message);
-                    }
-                });
-
-                // Register Submit
-                document.getElementById('form-register')?.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    const email = document.getElementById('reg-email').value;
-                    const pass = document.getElementById('reg-password').value;
-                    const user = document.getElementById('reg-username').value;
-                    const club = document.getElementById('reg-clubname').value;
-                    try {
-                        await AuthManager.register(email, pass, user, club);
-                    } catch (err) {
-                        alert("Registration Failed: " + err.message);
-                    }
-                });
-
-                // Guest Login
-                document.getElementById('btn-guest-login')?.addEventListener('click', async () => {
-                    await AuthManager.guestLogin();
-                });
-
-                // Logout Button
-                document.getElementById('btn-logout')?.addEventListener('click', () => {
-                    AuthManager.logout();
-                });
-
-                // Listing Form
-                document.getElementById('form-list-market')?.addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    const instanceId = document.getElementById('list-card-instance-id').value;
-                    const price = document.getElementById('list-card-price').value;
-                    TransferMarketManager.submitListing(instanceId, price);
-                });
-
-                // Match Button
-                document.getElementById('btn-start-match')?.addEventListener('click', () => {
-                    MatchEngine.startMatch();
-                });
-            },
-
-            openPlayerPickerModal(position) {
-                this.selectedSlotPosition = position;
-                const titleEl = document.getElementById('picker-slot-title');
-                if (titleEl) titleEl.textContent = `Select ${position}`;
-
-                const container = document.getElementById('club-inventory-picker');
-                if (!container) return;
-
-                const inventory = AuthManager.userProfile?.inventory || [];
-
-                if (inventory.length === 0) {
-                    container.innerHTML = `<p style="grid-column:1/-1; text-align:center; color:var(--text-muted);">No cards in your club inventory. Open packs in the Store!</p>`;
-                } else {
-                    container.innerHTML = inventory.map(card => `
-                        <div onclick="UIMaster.selectPlayerForSlot('${card.instanceId}')">
-                            ${PlayerManager.renderCardHTML(card)}
+                <!-- Settings Section -->
+                <div id="admin-settings" class="admin-section">
+                    <h2 style="font-family: 'Oswald', sans-serif; color: var(--fc-neon); margin-bottom: 1.5rem;">SETTINGS</h2>
+                    <div class="dash-card" style="padding: 1.5rem;">
+                        <h3>AI Settings</h3>
+                        <div class="form-group mt-4">
+                            <label>AI Market Activity</label>
+                            <select id="admin-ai-activity" class="filter-select">
+                                <option value="enabled">Enabled</option>
+                                <option value="disabled">Disabled</option>
+                            </select>
                         </div>
-                    `).join('');
-                }
+                        <div class="form-group">
+                            <label>AI Listing Interval (minutes)</label>
+                            <input type="number" id="admin-ai-interval" class="search-input" value="5" min="1" max="60">
+                        </div>
+                        <button id="admin-save-ai-btn" class="btn btn-primary">Save AI Settings</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
 
-                document.getElementById('modal-select-player').classList.remove('hidden');
-            },
-
-            selectPlayerForSlot(instanceId) {
-                const inventory = AuthManager.userProfile?.inventory || [];
-                const card = inventory.find(c => c.instanceId === instanceId);
-
-                if (card && this.selectedSlotPosition) {
-                    SquadManager.assignPlayerToSlot(this.selectedSlotPosition, card);
-
-                    // Update slot element on pitch UI
-                    const slotEl = document.querySelector(`.position-slot[data-position="${this.selectedSlotPosition}"]`);
-                    if (slotEl) {
-                        slotEl.innerHTML = PlayerManager.renderCardHTML(card);
-                    }
-
-                    document.getElementById('modal-select-player').classList.add('hidden');
-                }
-            },
-
-            onUserLoggedIn(profile) {
-                this.updateHUD();
-            },
-
-            updateHUD() {
-                const profile = AuthManager.userProfile || {};
-                const coinsEl = document.getElementById('hud-coins');
-                const rankEl = document.getElementById('hud-rank');
-                const userEl = document.getElementById('hud-username');
-
-                if (coinsEl) coinsEl.textContent = Utils.formatCoins(profile.coins || 0);
-                if (rankEl) rankEl.textContent = `${profile.rankTitle || 'Amateur'} (${profile.divisionPoints || 1000} pts)`;
-                if (userEl) userEl.textContent = profile.username || 'Manager';
-            }
-        };
-        window.UIMaster = UIMaster;
-
-        // BOOTSTRAP APPLICATION ON DOM LOAD
-        document.addEventListener('DOMContentLoaded', () => {
-            UIMaster.init();
-        });
-    </script>
+    <!-- ==========================================================================
+       SCRIPTS
+       ========================================================================== -->
+    <script type="module" src="app.js"></script>
 </body>
 </html>
