@@ -50,35 +50,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('[App Controller] Initializing Ultimate Team Application...');
     
     try {
-        // Register Service Worker for PWA
+        // Register Service Worker for PWA (non-blocking)
         if ('serviceWorker' in navigator) {
             try {
-                await navigator.serviceWorker.register('./service-worker.js');
-                console.log('[App Controller] Service Worker registered');
+                navigator.serviceWorker.register('./service-worker.js').catch(() => {
+                    console.log('[App Controller] Service Worker registration failed (non-critical)');
+                });
             } catch (error) {
                 console.log('[App Controller] Service Worker registration failed:', error);
             }
         }
         
-        // 1. Preload the master player database from Firebase or local cache
-        const loaded = await loadPlayerDatabase();
-        if (!loaded) {
-            showToast('Warning: Failed to load master player database. Some features may break.', 'error');
-        }
-
-        // 2. Initialize pack store if needed
-        await initializePackStore();
-
-        // 3. Seed database with initial data
-        await seedDatabase();
-
-        // 4. Start AI market activity
-        startAIMarketActivity();
-
-        // 5. Start maintenance tasks
-        startMaintenanceTasks();
-
-        // 6. Initialize Auth State Listener
+        // 1. Initialize Auth State Listener FIRST (most important)
         initAuthStateListener(
             async (user) => {
                 // ON LOGIN
@@ -91,8 +74,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (appHeader) appHeader.classList.remove('hidden');
 
                 // Fetch profile data
-                userProfile = await getUserProfile(user.uid);
-                window.userProfile = userProfile; // Make available globally for match system
+                try {
+                    userProfile = await getUserProfile(user.uid);
+                    window.userProfile = userProfile; // Make available globally for match system
+                } catch (error) {
+                    console.error('[App Controller] Error fetching profile:', error);
+                }
                 
                 // Ensure user is set as online
                 try {
@@ -104,21 +91,29 @@ document.addEventListener('DOMContentLoaded', async () => {
                 
                 // Give starter pack if not received yet
                 if (userProfile && !userProfile.hasReceivedStarterPack) {
-                    const { giveStarterPack } = await import('./database.js');
-                    await giveStarterPack(user.uid);
-                    // Reload profile after giving pack
-                    userProfile = await getUserProfile(user.uid);
-                    window.userProfile = userProfile;
+                    try {
+                        const { giveStarterPack } = await import('./database.js');
+                        await giveStarterPack(user.uid);
+                        // Reload profile after giving pack
+                        userProfile = await getUserProfile(user.uid);
+                        window.userProfile = userProfile;
+                    } catch (error) {
+                        console.error('[App Controller] Error giving starter pack:', error);
+                    }
                 }
                 
                 // Setup real-time listeners for coins
                 if (coinListenerUnsub) coinListenerUnsub();
-                coinListenerUnsub = listenToUserCoins(user.uid, (newCoins) => {
-                    if (userProfile && userProfile.economy) {
-                        userProfile.economy.coins = newCoins;
-                    }
-                    updateCoinUI(newCoins);
-                });
+                try {
+                    coinListenerUnsub = listenToUserCoins(user.uid, (newCoins) => {
+                        if (userProfile && userProfile.economy) {
+                            userProfile.economy.coins = newCoins;
+                        }
+                        updateCoinUI(newCoins);
+                    });
+                } catch (error) {
+                    console.error('[App Controller] Error setting up coin listener:', error);
+                }
 
                 updateHeaderUI();
                 switchScreen('dashboard');
@@ -142,26 +137,54 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         );
 
-        // 7. Bind Global UI Events & Listeners
+        // 2. Load other resources in background (non-blocking)
+        Promise.allSettled([
+            // Preload the master player database from Firebase or local cache
+            loadPlayerDatabase().catch(err => {
+                console.warn('[App Controller] Failed to load player database:', err);
+                return false;
+            }),
+            // Initialize pack store if needed
+            initializePackStore().catch(err => {
+                console.warn('[App Controller] Failed to initialize pack store:', err);
+            }),
+            // Seed database with initial data
+            seedDatabase().catch(err => {
+                console.warn('[App Controller] Failed to seed database:', err);
+            })
+        ]).then(results => {
+            const loaded = results[0].value || results[0].status === 'fulfilled';
+            if (!loaded) {
+                console.warn('[App Controller] Some resources failed to load, but app will continue');
+            }
+            
+            // Start background services after initial load
+            try {
+                startAIMarketActivity();
+                startMaintenanceTasks();
+            } catch (error) {
+                console.warn('[App Controller] Failed to start background services:', error);
+            }
+        });
+
+        // 3. Bind Global UI Events & Listeners
         bindAuthForms();
         bindNavigationEvents();
         bindGlobalEvents();
         
-        // 8. Check for existing matchmaking queue
+        // 4. Check for existing matchmaking queue
         checkExistingQueue();
         
-        // 9. Simulate loading progress
-        simulateLoadingProgress();
+        // 5. Hide initial loader immediately (no long timeout)
+        const loader = document.getElementById('initial-loader');
+        if (loader) {
+            loader.style.opacity = '0';
+            setTimeout(() => {
+                if (loader.parentNode) loader.remove();
+            }, 500);
+        }
+        console.log('[App Controller] Loader hidden');
         
-        // 10. Hide initial loader after loading completes (reduced timeout)
-        setTimeout(() => {
-            const loader = document.getElementById('initial-loader');
-            if (loader) {
-                loader.style.opacity = '0';
-                setTimeout(() => loader.remove(), 500);
-            }
-            console.log('[App Controller] Loader hidden');
-        }, 1000);
     } catch (error) {
         console.error('[App Controller] Error during initialization:', error);
         showToast('Error loading application. Please refresh.', 'error');
@@ -170,7 +193,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         const loader = document.getElementById('initial-loader');
         if (loader) {
             loader.style.opacity = '0';
-            setTimeout(() => loader.remove(), 500);
+            setTimeout(() => {
+                if (loader.parentNode) loader.remove();
+            }, 500);
         }
     }
 });
