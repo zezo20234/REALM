@@ -6,125 +6,238 @@
 <title>Hotel Murder</title>
 
 <style>
-*{box-sizing:border-box}
+*{
+  box-sizing:border-box;
+}
+
 body{
   margin:0;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  background:#090b12;
-  color:#fff;
   min-height:100vh;
+  background:
+    radial-gradient(circle at top,#202844 0%,#0b0e16 45%,#070910 100%);
+  color:#fff;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
 }
-button,input{
+
+button,input,select{
   font:inherit;
 }
-button{
-  border:0;
-  cursor:pointer;
-}
+
 .app{
+  width:100%;
   max-width:900px;
   margin:auto;
-  padding:20px;
+  padding:18px;
 }
+
 .card{
-  background:#151925;
-  border:1px solid #292e3d;
-  border-radius:22px;
+  background:rgba(22,27,42,.94);
+  border:1px solid rgba(255,255,255,.09);
+  border-radius:24px;
   padding:22px;
   margin-bottom:16px;
+  box-shadow:0 15px 40px rgba(0,0,0,.25);
 }
-h1{font-size:38px;margin:0 0 8px}
-h2{margin-top:0}
-p{color:#aeb5c8;line-height:1.5}
-input{
+
+h1{
+  margin:0 0 8px;
+  font-size:38px;
+}
+
+h2{
+  margin-top:0;
+}
+
+h3{
+  margin-top:24px;
+}
+
+p{
+  color:#b2bad0;
+  line-height:1.55;
+}
+
+label{
+  display:block;
+  color:#9fa8c0;
+  font-size:14px;
+  margin-top:14px;
+}
+
+input,select{
   width:100%;
-  padding:15px;
-  margin:7px 0 12px;
+  margin-top:7px;
+  padding:14px;
   border-radius:14px;
-  border:1px solid #343a4c;
-  background:#0e1119;
+  border:1px solid #343b50;
+  background:#0e121d;
   color:white;
   outline:none;
 }
+
 button{
   width:100%;
   padding:15px;
+  margin-top:10px;
+  border:0;
   border-radius:14px;
-  background:#6f8cff;
+  background:#718cff;
   color:white;
   font-weight:800;
-  margin-top:8px;
+  cursor:pointer;
 }
+
 button.secondary{
-  background:#252b3a;
+  background:#272e40;
 }
-button.red{
-  background:#d94b5b;
-}
+
 button.green{
-  background:#38a978;
+  background:#35a878;
 }
-.hidden{display:none!important}
-.room{
+
+button.red{
+  background:#d54d5d;
+}
+
+button:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+}
+
+.hidden{
+  display:none!important;
+}
+
+.center{
+  text-align:center;
+}
+
+.room-code{
+  background:#0c1019;
+  padding:16px;
+  border-radius:15px;
   font-size:30px;
   font-weight:900;
-  letter-spacing:3px;
-  background:#0d1018;
-  padding:15px;
-  border-radius:14px;
+  letter-spacing:4px;
   text-align:center;
+  margin:15px 0;
 }
+
 .player{
-  padding:12px;
-  border-radius:12px;
-  background:#202535;
+  background:#202638;
+  padding:13px;
+  border-radius:13px;
   margin:7px 0;
 }
+
+.host{
+  color:#ffd36a;
+}
+
 .role{
-  padding:15px;
-  border-radius:17px;
-  margin-bottom:15px;
-  font-size:22px;
+  padding:18px;
+  border-radius:18px;
+  font-size:23px;
   font-weight:900;
+  margin-bottom:18px;
 }
-.detective{background:#25366d}
-.murderer{background:#652630}
-.innocent{background:#24583f}
-.big{
-  font-size:42px;
-  font-weight:900;
-  text-align:center;
-  margin:20px 0;
+
+.role.detective{
+  background:#26396e;
 }
+
+.role.murderer{
+  background:#672630;
+}
+
+.role.innocent{
+  background:#20543c;
+}
+
 .task{
+  background:#202638;
+  border:1px solid rgba(255,255,255,.06);
   padding:15px;
-  background:#202535;
-  border-radius:14px;
+  border-radius:15px;
   margin:9px 0;
 }
+
+.task-time{
+  font-size:13px;
+  color:#8fa3ff;
+  font-weight:800;
+  margin-bottom:5px;
+}
+
 .warning{
+  background:#382c19;
+  color:#ffd88a;
   padding:14px;
-  border-radius:13px;
-  background:#332817;
-  color:#ffd98a;
-  margin-top:12px;
+  border-radius:14px;
+  margin:12px 0;
 }
+
 .success{
+  background:#163b2b;
+  color:#9bf0c4;
   padding:14px;
-  border-radius:13px;
-  background:#173c2b;
-  color:#9ff0c8;
+  border-radius:14px;
+  margin:12px 0;
 }
-.small{font-size:13px;color:#929aad}
-.center{text-align:center}
+
+.timer{
+  font-size:58px;
+  font-weight:900;
+  text-align:center;
+  letter-spacing:2px;
+  margin:20px 0;
+}
+
+.small{
+  color:#858ea5;
+  font-size:13px;
+  line-height:1.5;
+}
+
+.big{
+  font-size:20px;
+  line-height:1.5;
+}
+
 .row{
   display:grid;
   grid-template-columns:1fr 1fr;
   gap:10px;
 }
+
+.badge{
+  display:inline-block;
+  padding:7px 11px;
+  border-radius:999px;
+  background:#262d40;
+  color:#b7c0d8;
+  font-size:13px;
+  margin:3px;
+}
+
+.divider{
+  height:1px;
+  background:#2c3345;
+  margin:20px 0;
+}
+
 @media(max-width:600px){
-  .row{grid-template-columns:1fr}
-  h1{font-size:30px}
+  .row{
+    grid-template-columns:1fr;
+  }
+
+  h1{
+    font-size:31px;
+  }
+
+  .timer{
+    font-size:48px;
+  }
 }
 </style>
 </head>
@@ -133,419 +246,963 @@ button.green{
 
 <div class="app">
 
-<div id="home">
+<!-- =====================================================
+     HOME
+====================================================== -->
+
+<section id="home">
+
   <div class="card">
+
     <h1>🕵️ Hotel Murder</h1>
+
     <p>
-      A 3-player real-time mystery game.
-      One Detective, one Murderer and one Innocent.
-      The murder is completely fictional.
+      A real-time fictional mystery game for your group.
+      There is always exactly one Detective and one Murderer.
+      Everyone else becomes an Innocent.
     </p>
 
     <label>Your name</label>
-    <input id="nameInput" placeholder="Enter your name">
+
+    <input
+      id="nameInput"
+      placeholder="Example: Zezo"
+      autocomplete="off"
+    >
 
     <label>Room code</label>
-    <input id="roomInput" placeholder="Example: HOTEL123">
 
-    <button onclick="joinRoom()">JOIN ROOM</button>
-  </div>
+    <input
+      id="roomInput"
+      placeholder="Example: HOTEL123"
+      autocomplete="off"
+    >
 
-  <div class="card">
-    <h2>How to play</h2>
-    <p>
-      1. All 3 players join the same room code.<br>
-      2. The game secretly assigns everyone a role.<br>
-      3. The Detective leaves for 5 minutes.<br>
-      4. The other two players complete their secret tasks.<br>
-      5. A fictional murder happens at a specific location and time.<br>
-      6. After 5 minutes, the Detective returns.<br>
-      7. The Detective investigates by asking questions.<br>
-      8. Everyone is allowed to lie.<br>
-      9. Detective chooses who they think is the murderer.
-    </p>
-  </div>
-</div>
-
-
-<div id="lobby" class="hidden">
-
-  <div class="card center">
-    <h1>🏨 Lobby</h1>
-    <p>Give this room code to the other 2 players.</p>
-
-    <div class="room" id="roomDisplay"></div>
-
-    <p id="playerCount"></p>
-  </div>
-
-  <div class="card">
-    <h2>Players</h2>
-    <div id="playersList"></div>
-  </div>
-
-  <div id="hostControls" class="card hidden">
-    <h2>Host controls</h2>
-    <p>
-      Once all 3 players are here, start the round.
-      Everyone will receive their secret information.
-    </p>
-
-    <button onclick="startGame()">START GAME</button>
-  </div>
-
-  <div class="card">
-    <p class="small">
-      Do not show another player your phone.
-      Your tasks and role are secret.
-    </p>
-  </div>
-
-</div>
-
-
-<div id="game" class="hidden">
-
-  <div class="card center">
-    <h1 id="gameTitle">Game</h1>
-    <p id="gameStatus"></p>
-  </div>
-
-  <div id="secretCard" class="card"></div>
-
-  <div id="detectivePanel" class="card hidden">
-    <h2>🕵️ Detective</h2>
-
-    <div class="big" id="detectiveTimer">05:00</div>
-
-    <p>
-      Stay outside while the other two players complete the murder scenario.
-      When the timer reaches zero, return to them.
-    </p>
-
-    <button id="returnButton" onclick="detectiveReturned()" class="green hidden">
-      I'M BACK — START INVESTIGATION
+    <button onclick="createRoom()">
+      CREATE NEW ROOM
     </button>
+
+    <button
+      class="secondary"
+      onclick="joinExistingRoom()"
+    >
+      JOIN ROOM
+    </button>
+
   </div>
 
-  <div id="investigation" class="card hidden">
+
+  <div class="card">
+
+    <h2>🎮 How it works</h2>
+
+    <p>
+      The host chooses how many people are playing.
+    </p>
+
+    <p>
+      🕵️ 1 Detective<br>
+      🔪 1 Murderer<br>
+      👤 Everyone else is Innocent
+    </p>
+
+    <p>
+      The Detective leaves for 5 minutes.
+      During that time, everyone else follows their own
+      secret tasks. The murder is completely fictional.
+    </p>
+
+    <p>
+      When the Detective returns, they investigate the suspects
+      and try to figure out who is lying.
+    </p>
+
+  </div>
+
+</section>
+
+
+<!-- =====================================================
+     CREATE ROOM
+====================================================== -->
+
+<section id="createScreen" class="hidden">
+
+  <div class="card">
+
+    <h1>🏨 Create Room</h1>
+
+    <p>
+      Choose how many players will participate.
+    </p>
+
+    <label>Number of players</label>
+
+    <select id="playerLimit">
+
+      <option value="2">2 Players</option>
+      <option value="3" selected>3 Players</option>
+      <option value="4">4 Players</option>
+      <option value="5">5 Players</option>
+      <option value="6">6 Players</option>
+      <option value="7">7 Players</option>
+      <option value="8">8 Players</option>
+      <option value="9">9 Players</option>
+      <option value="10">10 Players</option>
+
+    </select>
+
+    <button onclick="finishCreateRoom()">
+      CREATE ROOM
+    </button>
+
+    <button
+      class="secondary"
+      onclick="backHome()"
+    >
+      BACK
+    </button>
+
+  </div>
+
+</section>
+
+
+<!-- =====================================================
+     LOBBY
+====================================================== -->
+
+<section id="lobby" class="hidden">
+
+  <div class="card center">
+
+    <h1>🏨 Lobby</h1>
+
+    <p>Share this code with everyone.</p>
+
+    <div
+      id="roomDisplay"
+      class="room-code"
+    ></div>
+
+    <div id="lobbyPlayerCount"></div>
+
+  </div>
+
+
+  <div class="card">
+
+    <h2>👥 Players</h2>
+
+    <div id="playersList"></div>
+
+  </div>
+
+
+  <div
+    id="hostPanel"
+    class="card hidden"
+  >
+
+    <h2>👑 Host Controls</h2>
+
+    <p id="hostInfo"></p>
+
+    <button
+      id="startButton"
+      onclick="startRound()"
+      disabled
+    >
+      START ROUND
+    </button>
+
+  </div>
+
+
+  <div class="card">
+
+    <h2>Rules</h2>
+
+    <p>
+      • Do not show your secret screen to anyone.<br>
+      • Do not involve hotel staff or strangers.<br>
+      • Stay only in places where your group is allowed.<br>
+      • The murder is fictional.<br>
+      • Nobody is actually attacked or harmed.
+    </p>
+
+  </div>
+
+</section>
+
+
+<!-- =====================================================
+     GAME
+====================================================== -->
+
+<section id="game" class="hidden">
+
+  <div class="card center">
+
+    <h1>🎭 The Round Has Started</h1>
+
+    <p id="gameMessage"></p>
+
+  </div>
+
+
+  <!-- SECRET PLAYER SCREEN -->
+
+  <div
+    id="secretCard"
+    class="card"
+  ></div>
+
+
+  <!-- DETECTIVE TIMER -->
+
+  <div
+    id="detectiveArea"
+    class="card hidden center"
+  >
+
+    <h2>🕵️ Detective Waiting Time</h2>
+
+    <p>
+      Leave the game area now.
+      Do not return until the timer reaches zero.
+    </p>
+
+    <div
+      id="timer"
+      class="timer"
+    >
+      05:00
+    </div>
+
+    <button
+      id="returnButton"
+      class="green hidden"
+      onclick="returnDetective()"
+    >
+      I'M BACK
+    </button>
+
+  </div>
+
+
+  <!-- INVESTIGATION -->
+
+  <div
+    id="investigation"
+    class="card hidden"
+  >
+
     <h2>🔎 Investigation</h2>
 
     <div id="caseFile"></div>
 
-    <hr style="border-color:#292e3d;margin:20px 0">
+    <div class="divider"></div>
 
-    <h3>Final accusation</h3>
+    <h3>Who is the murderer?</h3>
 
-    <div class="row">
-      <button onclick="accuse(0)" id="accuse0"></button>
-      <button onclick="accuse(1)" id="accuse1"></button>
-    </div>
+    <div id="accusationButtons"></div>
 
     <div id="result"></div>
+
   </div>
 
-</div>
+
+  <!-- NORMAL PLAYERS -->
+
+  <div
+    id="waitingAfterGame"
+    class="card hidden center"
+  >
+
+    <h2>🤫 Investigation in progress</h2>
+
+    <p>
+      The Detective is questioning everyone.
+      Remember your secret timeline.
+    </p>
+
+  </div>
+
+</section>
 
 </div>
 
 
 <script type="module">
 
-import {initializeApp}
-from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+/* =========================================================
+   FIREBASE
+====================================================== */
+
+import {
+  initializeApp
+}
+from
+"https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
 
 import {
   getDatabase,
   ref,
-  set,
   get,
-  onValue,
-  update
+  set,
+  update,
+  onValue
 }
-from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
+from
+"https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
 
-
-/* =========================================================
-   YOUR FIREBASE CONFIG
-   ========================================================= */
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCugS0qHKstXGZArd5vEBzm-DaLZAIDugo",
-  authDomain: "money-e560a.firebaseapp.com",
-  databaseURL: "https://money-e560a-default-rtdb.firebaseio.com",
-  projectId: "money-e560a",
-  storageBucket: "money-e560a.firebasestorage.app",
-  messagingSenderId: "477551627159",
-  appId: "1:477551627159:web:b19f853905331f71ee92d2",
-  measurementId: "G-YYQD2E5J7J"
+
+  apiKey:
+  "AIzaSyCugS0qHKstXGZArd5vEBzm-DaLZAIDugo",
+
+  authDomain:
+  "money-e560a.firebaseapp.com",
+
+  databaseURL:
+  "https://money-e560a-default-rtdb.firebaseio.com",
+
+  projectId:
+  "money-e560a",
+
+  storageBucket:
+  "money-e560a.firebasestorage.app",
+
+  messagingSenderId:
+  "477551627159",
+
+  appId:
+  "1:477551627159:web:b19f853905331f71ee92d2",
+
+  measurementId:
+  "G-YYQD2E5J7J5"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+
+const app =
+initializeApp(firebaseConfig);
+
+const db =
+getDatabase(app);
 
 
 /* =========================================================
    LOCAL PLAYER ID
-   ========================================================= */
+====================================================== */
 
-let playerId = localStorage.getItem("hotelMurderPlayerId");
+let playerId =
+localStorage.getItem(
+  "hotelMurderPlayerId"
+);
 
 if(!playerId){
+
   playerId =
-    "p_" +
+    "player_" +
     Date.now().toString(36) +
     "_" +
-    Math.random().toString(36).substring(2,10);
+    Math.random()
+      .toString(36)
+      .substring(2,10);
 
-  localStorage.setItem("hotelMurderPlayerId",playerId);
+  localStorage.setItem(
+    "hotelMurderPlayerId",
+    playerId
+  );
 }
 
 
+/* =========================================================
+   VARIABLES
+====================================================== */
+
 let roomCode = "";
 let myName = "";
+let isHost = false;
 let roomData = null;
+let mySecret = null;
 let timerInterval = null;
 
 
 /* =========================================================
-   RANDOM DATA
-   ========================================================= */
+   DATA
+====================================================== */
 
 const locations = [
-  "lobby seating area",
-  "reception",
-  "staircase",
-  "Floor 1 hallway",
-  "hotel entrance",
-  "chair near the lobby window",
-  "table in the lobby",
-  "area beside reception"
+
+  "the lobby seating area",
+  "near reception",
+  "the staircase",
+  "the Floor 1 hallway",
+  "the hotel entrance",
+  "the lobby window",
+  "a lobby table",
+  "the area beside the reception sign",
+  "the corridor near the stairs"
+
 ];
+
 
 const activities = [
-  "sit quietly for a while",
-  "walk around the lobby",
-  "stand near the reception area",
-  "walk toward the staircase",
-  "sit at a lobby table",
-  "walk through the public hallway",
-  "wait near the entrance",
-  "look around the lobby"
+
+  "sit quietly",
+  "walk around",
+  "stand for a moment",
+  "look around",
+  "wait in the area",
+  "walk slowly through the area",
+  "sit at a nearby seat"
+
 ];
 
+
 const objects = [
+
   "a phone",
-  "a hotel key card",
   "a wallet",
+  "a hotel key card",
   "a note",
   "a bag",
   "a watch",
   "a drink"
+
 ];
+
 
 const victims = [
-  "a hotel guest",
-  "a visitor",
-  "a fictional hotel employee",
+
+  "a fictional hotel guest",
+  "a fictional visitor",
   "a fictional guest",
-  "a fictional visitor"
+  "a fictional character",
+  "a fictional hotel employee"
+
 ];
 
+
 const cases = [
-  "A valuable item disappeared.",
-  "A mysterious note was found.",
-  "A hotel guest was found dead in the fictional story.",
-  "An important object disappeared.",
-  "A suspicious incident happened inside the hotel."
+
+  "A fictional hotel guest was found dead in the story.",
+
+  "A fictional visitor was found dead in the story.",
+
+  "A fictional guest disappeared from the story.",
+
+  "A fictional incident occurred inside the hotel.",
+
+  "A fictional guest was discovered dead near the crime scene."
+
 ];
 
 
 /* =========================================================
-   HELPERS
-   ========================================================= */
+   RANDOM FUNCTIONS
+====================================================== */
 
-function random(arr){
-  return arr[Math.floor(Math.random()*arr.length)];
+function random(array){
+
+  return array[
+    Math.floor(
+      Math.random()*array.length
+    )
+  ];
+
 }
+
+
+function shuffle(array){
+
+  const a =
+    [...array];
+
+  for(
+    let i=a.length-1;
+    i>0;
+    i--
+  ){
+
+    const j =
+      Math.floor(
+        Math.random()*(i+1)
+      );
+
+    [
+      a[i],
+      a[j]
+    ] =
+    [
+      a[j],
+      a[i]
+    ];
+
+  }
+
+  return a;
+
+}
+
 
 function randomTime(){
 
   const hour =
-    7 + Math.floor(Math.random()*4);
+    7 +
+    Math.floor(
+      Math.random()*4
+    );
 
   const minute =
-    Math.floor(Math.random()*60);
+    Math.floor(
+      Math.random()*60
+    );
 
   return {
+
     hour,
     minute,
+
     text:
-      String(hour).padStart(2,"0") +
-      ":" +
-      String(minute).padStart(2,"0")
+      String(hour)
+      .padStart(2,"0")
+      + ":" +
+      String(minute)
+      .padStart(2,"0")
+
   };
+
 }
 
-function addMinutes(time,amount){
+
+function addMinutes(time,minutes){
 
   let total =
     time.hour*60 +
     time.minute +
-    amount;
+    minutes;
+
+  total =
+    total % 1440;
+
+  const hour =
+    Math.floor(total/60);
+
+  const minute =
+    total%60;
 
   return {
-    hour:Math.floor(total/60)%24,
-    minute:total%60,
+
+    hour,
+    minute,
+
     text:
-      String(Math.floor(total/60)%24).padStart(2,"0") +
-      ":" +
-      String(total%60).padStart(2,"0")
+      String(hour)
+      .padStart(2,"0")
+      + ":" +
+      String(minute)
+      .padStart(2,"0")
+
   };
+
 }
 
-function makeId(){
 
-  return Math.random()
-    .toString(36)
-    .substring(2,10);
+function makeUniqueLocation(
+  used,
+  forbidden
+){
+
+  let location;
+
+  do{
+
+    location =
+      random(locations);
+
+  }
+  while(
+    used.includes(location) ||
+    location===forbidden
+  );
+
+  used.push(location);
+
+  return location;
+
 }
 
-function escapeHtml(text){
 
-  return String(text)
+function escapeHtml(value){
+
+  return String(value)
     .replaceAll("&","&amp;")
     .replaceAll("<","&lt;")
     .replaceAll(">","&gt;")
     .replaceAll('"',"&quot;")
     .replaceAll("'","&#039;");
+
 }
 
 
 /* =========================================================
-   JOIN ROOM
-   ========================================================= */
+   HOME
+====================================================== */
 
-window.joinRoom = async function(){
+window.createRoom = function(){
+
+  const name =
+    document
+      .getElementById("nameInput")
+      .value
+      .trim();
+
+  if(!name){
+
+    alert("Enter your name first.");
+
+    return;
+
+  }
 
   myName =
-    document.getElementById("nameInput")
-      .value.trim();
+    name;
 
-  roomCode =
-    document.getElementById("roomInput")
-      .value.trim()
+  document
+    .getElementById("home")
+    .classList
+    .add("hidden");
+
+  document
+    .getElementById("createScreen")
+    .classList
+    .remove("hidden");
+
+};
+
+
+window.backHome = function(){
+
+  document
+    .getElementById("createScreen")
+    .classList
+    .add("hidden");
+
+  document
+    .getElementById("home")
+    .classList
+    .remove("hidden");
+
+};
+
+
+window.finishCreateRoom = async function(){
+
+  const code =
+    document
+      .getElementById("roomInput")
+      .value
+      .trim()
       .toUpperCase();
 
-  if(!myName){
-    alert("Enter your name.");
-    return;
-  }
+  const limit =
+    Number(
+      document
+        .getElementById("playerLimit")
+        .value
+    );
 
-  if(!roomCode){
+
+  if(!code){
+
     alert("Enter a room code.");
+
     return;
+
   }
 
-  if(roomCode.length < 3){
-    alert("Make the room code at least 3 characters.");
+
+  if(limit<2 || limit>10){
+
+    alert("Choose between 2 and 10 players.");
+
     return;
+
   }
+
+
+  roomCode =
+    code;
+
 
   const roomRef =
-    ref(db,"rooms/"+roomCode);
+    ref(
+      db,
+      "rooms/"+roomCode
+    );
+
+
+  const existing =
+    await get(roomRef);
+
+
+  if(existing.exists()){
+
+    alert(
+      "That room already exists. Choose another code."
+    );
+
+    return;
+
+  }
+
+
+  await set(
+    roomRef,
+    {
+
+      status:"lobby",
+
+      host:playerId,
+
+      playerLimit:limit,
+
+      createdAt:Date.now(),
+
+      roundNumber:0,
+
+      players:{
+
+        [playerId]:{
+
+          name:myName,
+
+          joinedAt:Date.now()
+
+        }
+
+      }
+
+    }
+  );
+
+
+  enterLobby();
+
+};
+
+
+window.joinExistingRoom = async function(){
+
+  const name =
+    document
+      .getElementById("nameInput")
+      .value
+      .trim();
+
+  const code =
+    document
+      .getElementById("roomInput")
+      .value
+      .trim()
+      .toUpperCase();
+
+
+  if(!name){
+
+    alert("Enter your name.");
+
+    return;
+
+  }
+
+
+  if(!code){
+
+    alert("Enter the room code.");
+
+    return;
+
+  }
+
+
+  myName =
+    name;
+
+  roomCode =
+    code;
+
+
+  const roomRef =
+    ref(
+      db,
+      "rooms/"+roomCode
+    );
+
 
   const snapshot =
     await get(roomRef);
 
+
   if(!snapshot.exists()){
 
-    await set(roomRef,{
-      status:"lobby",
-      host:playerId,
-      createdAt:Date.now(),
-      players:{
-        [playerId]:{
-          name:myName,
-          joinedAt:Date.now()
-        }
-      }
-    });
-
-  }else{
-
-    const data = snapshot.val();
-
-    if(data.status !== "lobby"){
-      alert("That room is already in a game.");
-      return;
-    }
-
-    const players =
-      data.players || {};
-
-    if(Object.keys(players).length >= 3 &&
-       !players[playerId]){
-
-      alert("This room already has 3 players.");
-      return;
-    }
-
-    await update(
-      ref(db,"rooms/"+roomCode+"/players/"+playerId),
-      {
-        name:myName,
-        joinedAt:Date.now()
-      }
+    alert(
+      "Room not found. Check the code."
     );
+
+    return;
+
   }
 
-  document.getElementById("home")
-    .classList.add("hidden");
 
-  document.getElementById("lobby")
-    .classList.remove("hidden");
+  const data =
+    snapshot.val();
 
-  document.getElementById("roomDisplay")
-    .textContent=roomCode;
 
-  listenToRoom();
+  if(data.status!=="lobby"){
+
+    alert(
+      "That game has already started."
+    );
+
+    return;
+
+  }
+
+
+  const players =
+    data.players || {};
+
+
+  if(
+    !players[playerId] &&
+    Object.keys(players).length >=
+    data.playerLimit
+  ){
+
+    alert(
+      "This room is already full."
+    );
+
+    return;
+
+  }
+
+
+  await update(
+
+    ref(
+      db,
+      "rooms/"+roomCode+
+      "/players/"+playerId
+    ),
+
+    {
+
+      name:myName,
+
+      joinedAt:Date.now()
+
+    }
+
+  );
+
+
+  enterLobby();
+
 };
 
 
 /* =========================================================
-   REALTIME ROOM LISTENER
-   ========================================================= */
+   LOBBY
+====================================================== */
+
+function enterLobby(){
+
+  document
+    .getElementById("home")
+    .classList
+    .add("hidden");
+
+  document
+    .getElementById("createScreen")
+    .classList
+    .add("hidden");
+
+  document
+    .getElementById("lobby")
+    .classList
+    .remove("hidden");
+
+
+  document
+    .getElementById("roomDisplay")
+    .textContent =
+    roomCode;
+
+
+  listenToRoom();
+
+}
+
 
 function listenToRoom(){
 
   const roomRef =
-    ref(db,"rooms/"+roomCode);
+    ref(
+      db,
+      "rooms/"+roomCode
+    );
 
-  onValue(roomRef,(snapshot)=>{
 
-    if(!snapshot.exists()){
-      return;
+  onValue(
+    roomRef,
+    snapshot=>{
+
+      if(!snapshot.exists()){
+
+        alert("The room no longer exists.");
+
+        location.reload();
+
+        return;
+
+      }
+
+
+      roomData =
+        snapshot.val();
+
+
+      renderLobby();
+
+
+      if(
+        roomData.status==="game"
+      ){
+
+        loadGame();
+
+      }
+
     }
+  );
 
-    roomData =
-      snapshot.val();
-
-    renderRoom();
-
-    if(roomData.status === "game"){
-      showGame();
-    }
-
-  });
 }
 
 
-/* =========================================================
-   LOBBY
-   ========================================================= */
+function renderLobby(){
 
-function renderRoom(){
+  if(!roomData){
+
+    return;
+
+  }
+
 
   const players =
     roomData.players || {};
@@ -553,64 +1210,135 @@ function renderRoom(){
   const entries =
     Object.entries(players);
 
-  document.getElementById("playerCount")
-    .textContent =
-    entries.length +
-    "/3 players joined";
 
-  document.getElementById("playersList")
+  document
+    .getElementById("lobbyPlayerCount")
     .innerHTML =
-    entries.map(([id,p])=>`
-      <div class="player">
-        👤 ${escapeHtml(p.name)}
-        ${id === roomData.host ? " 👑" : ""}
-      </div>
-    `).join("");
 
-  const isHost =
+    `<span class="badge">
+      ${entries.length}/${roomData.playerLimit} players
+    </span>
+    <span class="badge">
+      🕵️ 1 Detective
+    </span>
+    <span class="badge">
+      🔪 1 Murderer
+    </span>
+    <span class="badge">
+      👤 ${Math.max(0,roomData.playerLimit-2)} Innocent
+    </span>`;
+
+
+  document
+    .getElementById("playersList")
+    .innerHTML =
+
+    entries
+      .map(
+        ([id,player])=>`
+
+          <div class="player">
+
+            👤
+            ${escapeHtml(player.name)}
+
+            ${
+              id===roomData.host
+              ?
+              `<span class="host">
+                👑 HOST
+              </span>`
+              :
+              ""
+            }
+
+          </div>
+
+        `
+      )
+      .join("");
+
+
+  isHost =
     roomData.host === playerId;
 
-  if(isHost &&
-     entries.length === 3 &&
-     roomData.status === "lobby"){
 
-    document.getElementById("hostControls")
-      .classList.remove("hidden");
+  if(isHost){
+
+    document
+      .getElementById("hostPanel")
+      .classList
+      .remove("hidden");
+
+
+    document
+      .getElementById("hostInfo")
+      .textContent =
+
+      `You selected ${roomData.playerLimit} players. `+
+      `${entries.length}/${roomData.playerLimit} have joined.`;
+
+
+    const start =
+      document
+        .getElementById("startButton");
+
+
+    start.disabled =
+      entries.length !==
+      roomData.playerLimit;
+
 
   }else{
 
-    document.getElementById("hostControls")
-      .classList.add("hidden");
+    document
+      .getElementById("hostPanel")
+      .classList
+      .add("hidden");
+
   }
+
 }
 
 
 /* =========================================================
-   CREATE ROUND
-   ========================================================= */
+   START ROUND
+====================================================== */
 
-window.startGame = async function(){
+window.startRound = async function(){
 
-  if(!roomData ||
-     roomData.host !== playerId){
+  if(!isHost){
+
     return;
+
   }
+
 
   const players =
     roomData.players || {};
 
+
   const ids =
     Object.keys(players);
 
-  if(ids.length !== 3){
-    alert("You need exactly 3 players.");
+
+  if(
+    ids.length !==
+    roomData.playerLimit
+  ){
+
+    alert(
+      "Wait until everyone joins."
+    );
+
     return;
+
   }
 
+
   const shuffled =
-    [...ids].sort(
-      ()=>Math.random()-.5
-    );
+    shuffle(ids);
+
 
   const detective =
     shuffled[0];
@@ -618,327 +1346,480 @@ window.startGame = async function(){
   const murderer =
     shuffled[1];
 
-  const innocent =
-    shuffled[2];
+  const innocents =
+    shuffled.slice(2);
+
 
   const crimeLocation =
     random(locations);
 
-  const victim =
-    random(victims);
-
-  const caseDescription =
-    random(cases);
 
   const murderTime =
     randomTime();
 
-  const detectiveTime =
-    addMinutes(murderTime,2);
 
-  const gameStart =
-    Date.now();
-
-  const investigationStart =
-    gameStart + 5*60*1000;
-
-
-  /*
-    Every player receives different movement tasks.
-  */
-
-  const usedLocations = [];
-
-  function uniqueLocation(){
-
-    let x;
-
-    do{
-      x=random(locations);
-    }
-    while(
-      usedLocations.includes(x) ||
-      x===crimeLocation
+  const detectiveArrival =
+    addMinutes(
+      murderTime,
+      2
     );
 
-    usedLocations.push(x);
 
-    return x;
-  }
-
-
-  function makeTasks(){
-
-    return [
-      {
-        time:"Minute 1",
-        text:
-          "Go to "+
-          uniqueLocation()+
-          " and stay there briefly."
-      },
-      {
-        time:"Minute 2",
-        text:
-          random(activities)+
-          " near "+
-          uniqueLocation()+"."
-      },
-      {
-        time:"Minute 3",
-        text:
-          "Move toward "+
-          uniqueLocation()+
-          " and stay there."
-      },
-      {
-        time:"Minute 4",
-        text:
-          random(activities)+
-          "."
-      }
-    ];
-  }
+  const investigationStart =
+    Date.now() +
+    5*60*1000;
 
 
-  const innocentTasks =
-    makeTasks();
+  const victim =
+    random(victims);
 
 
-  const murdererTasks =
-    makeTasks();
+  const caseDescription =
+    random(cases);
+
+
+  const usedByPlayers =
+    {};
+
+
+  const privateData =
+    {};
 
 
   /*
-    Murderer-specific timeline.
+    DETECTIVE
   */
 
-  murdererTasks[2] = {
-    time:murderTime.text,
-    text:
-      "Go to the fictional crime scene: "+
-      crimeLocation+
-      ". The fictional murder happens here at "+
-      murderTime.text+
-      "."
-  };
-
-
-  murdererTasks[3] = {
-    time:detectiveTime.text,
-    text:
-      "Leave the crime scene and return to "+
-      random([
-        "the lobby",
-        "reception",
-        "the staircase area"
-      ])+
-      " before the Detective returns."
-  };
-
-
-  const sharedCase = {
-
-    victim,
-    crimeLocation,
-    murderTime:murderTime.text,
-    detectiveArrival:detectiveTime.text,
-    caseDescription,
-
-    investigationStart,
-
-    detective,
-    suspectIds:[
-      murderer,
-      innocent
-    ],
-
-    murdererName:
-      players[murderer].name,
-
-    innocentName:
-      players[innocent].name,
-
-    startedAt:gameStart,
-
-    roundId:makeId()
-  };
-
-
-  /*
-    NOTE:
-    The secret role data is stored separately for each
-    player. The UI only displays the current player's data.
-  */
-
-  const updates = {};
-
-
-  updates["rooms/"+roomCode+"/status"] =
-    "game";
-
-  updates["rooms/"+roomCode+"/game"] =
-    sharedCase;
-
-
-  updates[
-    "rooms/"+roomCode+
-    "/private/"+detective
-  ] = {
+  privateData[detective] = {
 
     role:"detective",
 
     tasks:[],
 
     message:
-      "Stay outside for 5 minutes. "+
-      "Do not investigate until the timer ends."
+      "You are the Detective. "+
+      "Leave for 5 minutes. "+
+      "Come back when your timer ends."
+
   };
 
 
-  updates[
-    "rooms/"+roomCode+
-    "/private/"+murderer
-  ] = {
+  /*
+    MURDERER
+  */
+
+  const murdererTasks =
+    [];
+
+  const murdererUsed =
+    [];
+
+
+  murdererTasks.push({
+
+    time:"Start",
+
+    text:
+      "Go to "+
+      makeUniqueLocation(
+        murdererUsed,
+        crimeLocation
+      )+
+      " and spend a short time there."
+
+  });
+
+
+  murdererTasks.push({
+
+    time:"Next",
+
+    text:
+      random(activities)+
+      " near "+
+      makeUniqueLocation(
+        murdererUsed,
+        crimeLocation
+      )+
+      "."
+
+  });
+
+
+  murdererTasks.push({
+
+    time:murderTime.text,
+
+    text:
+      "Go to the fictional crime scene: "+
+      crimeLocation+
+      ". The fictional murder happens in the story at "+
+      murderTime.text+
+      "."
+
+  });
+
+
+  murdererTasks.push({
+
+    time:"After the fictional murder",
+
+    text:
+      "Leave the crime scene and go to "+
+      makeUniqueLocation(
+        murdererUsed,
+        crimeLocation
+      )+
+      ". Do not stay at the crime scene."
+
+  });
+
+
+  privateData[murderer] = {
 
     role:"murderer",
 
     tasks:murdererTasks,
 
     message:
-      "You are the murderer. "+
+      "You are the Murderer. "+
       "The murder is completely fictional. "+
-      "Follow your timeline, then leave the crime scene."
+      "Follow your secret timeline and then leave."
+
   };
+
+
+  /*
+    INNOCENTS
+  */
+
+  innocents.forEach(
+    innocentId=>{
+
+      const tasks =
+        [];
+
+      const used =
+        [];
+
+
+      tasks.push({
+
+        time:"Start",
+
+        text:
+          random(activities)+
+          " at "+
+          makeUniqueLocation(
+            used,
+            crimeLocation
+          )+
+          "."
+
+      });
+
+
+      tasks.push({
+
+        time:"Next",
+
+        text:
+          "Go to "+
+          makeUniqueLocation(
+            used,
+            crimeLocation
+          )+
+          " and stay there briefly."
+
+      });
+
+
+      tasks.push({
+
+        time:murderTime.text,
+
+        text:
+          random(activities)+
+          " near "+
+          makeUniqueLocation(
+            used,
+            crimeLocation
+          )+
+          "."
+
+      });
+
+
+      tasks.push({
+
+        time:"After",
+
+        text:
+          "Move to "+
+          makeUniqueLocation(
+            used,
+            crimeLocation
+          )+
+          " and continue your normal timeline."
+
+      });
+
+
+      privateData[innocentId] = {
+
+        role:"innocent",
+
+        tasks,
+
+        message:
+          "You are Innocent. "+
+          "Complete your own secret tasks. "+
+          "You can lie during the investigation."
+
+      };
+
+    }
+  );
+
+
+  /*
+    SHARED GAME DATA
+  */
+
+  const game = {
+
+    roundNumber:
+      (roomData.roundNumber || 0)+1,
+
+    startedAt:
+      Date.now(),
+
+    investigationStart,
+
+    murderTime:
+      murderTime.text,
+
+    detectiveArrival:
+      detectiveArrival.text,
+
+    crimeLocation,
+
+    victim,
+
+    caseDescription,
+
+    detective,
+
+    murderer,
+
+    suspects:[
+      murderer,
+      ...innocents
+    ]
+
+  };
+
+
+  const updates =
+    {};
 
 
   updates[
     "rooms/"+roomCode+
-    "/private/"+innocent
-  ] = {
+    "/status"
+  ] =
+    "game";
 
-    role:"innocent",
 
-    tasks:innocentTasks,
+  updates[
+    "rooms/"+roomCode+
+    "/roundNumber"
+  ] =
+    game.roundNumber;
 
-    message:
-      "You are innocent. "+
-      "Complete your own secret tasks and create your own believable timeline."
-  };
+
+  updates[
+    "rooms/"+roomCode+
+    "/game"
+  ] =
+    game;
+
+
+  /*
+    Store each player's secret separately.
+  */
+
+  Object.entries(privateData)
+    .forEach(
+      ([id,data])=>{
+
+        updates[
+          "rooms/"+roomCode+
+          "/private/"+id
+        ] =
+        data;
+
+      }
+    );
 
 
   await update(
     ref(db),
     updates
   );
-};
+
+}
 
 
 /* =========================================================
-   SHOW GAME
-   ========================================================= */
+   LOAD GAME
+====================================================== */
 
-async function showGame(){
+async function loadGame(){
 
-  document.getElementById("home")
-    .classList.add("hidden");
-
-  document.getElementById("lobby")
-    .classList.add("hidden");
-
-  document.getElementById("game")
-    .classList.remove("hidden");
-
-  document.getElementById("gameTitle")
-    .textContent="🏨 The Murder Happened";
+  document
+    .getElementById("lobby")
+    .classList
+    .add("hidden");
 
 
-  const privateRef =
+  document
+    .getElementById("game")
+    .classList
+    .remove("hidden");
+
+
+  /*
+    Don't repeatedly reload the secret.
+  */
+
+  if(mySecret){
+
+    return;
+
+  }
+
+
+  const secretRef =
     ref(
       db,
       "rooms/"+roomCode+
       "/private/"+playerId
     );
 
-  const snap =
-    await get(privateRef);
 
-  if(!snap.exists()){
+  const snapshot =
+    await get(secretRef);
 
-    document.getElementById("secretCard")
+
+  if(!snapshot.exists()){
+
+    document
+      .getElementById("secretCard")
       .innerHTML =
-      "<p>Loading your secret information...</p>";
+
+      `<p>
+        Loading your secret information...
+      </p>`;
 
     return;
+
   }
 
-  const secret =
-    snap.val();
 
-  renderSecret(secret);
+  mySecret =
+    snapshot.val();
 
-  if(secret.role === "detective"){
 
-    document.getElementById("detectivePanel")
-      .classList.remove("hidden");
+  renderSecret();
 
-    startDetectiveTimer();
+
+  if(
+    mySecret.role ===
+    "detective"
+  ){
+
+    document
+      .getElementById("detectiveArea")
+      .classList
+      .remove("hidden");
+
+
+    startTimer();
 
   }else{
 
-    document.getElementById("detectivePanel")
-      .classList.add("hidden");
+    document
+      .getElementById("waitingAfterGame")
+      .classList
+      .remove("hidden");
+
   }
+
 }
 
 
 /* =========================================================
    SECRET SCREEN
-   ========================================================= */
+====================================================== */
 
-function renderSecret(secret){
+function renderSecret(){
 
   const card =
-    document.getElementById("secretCard");
+    document
+      .getElementById("secretCard");
 
 
-  if(secret.role === "detective"){
+  if(
+    mySecret.role ===
+    "detective"
+  ){
 
-    card.innerHTML=`
+    card.innerHTML = `
 
       <div class="role detective">
         🕵️ YOU ARE THE DETECTIVE
       </div>
 
-      <h2>Your job</h2>
+      <div class="big">
+        Your mission is to solve the case.
+      </div>
 
       <p>
         Leave the game area now.
-        Stay outside for the full 5 minutes.
+        The other players have 5 minutes
+        to complete their secret timelines.
       </p>
 
       <div class="warning">
-        Do NOT read the other players' phones.
-        When the timer ends, come back.
+        Do not come back until your timer reaches 00:00.
       </div>
 
-      <h2>After you return</h2>
+      <h3>When you return</h3>
 
       <p>
-        Question both suspects.
-        They are both allowed to lie.
-        Compare their stories and look for contradictions.
+        Question the suspects.
+        Ask where they were, what they were doing,
+        and what they remember.
+      </p>
+
+      <p>
+        Everyone is allowed to lie.
       </p>
 
     `;
 
     return;
+
   }
 
 
-  if(secret.role === "murderer"){
+  if(
+    mySecret.role ===
+    "murderer"
+  ){
 
-    card.innerHTML=`
+    card.innerHTML = `
 
       <div class="role murderer">
         🔪 YOU ARE THE MURDERER
@@ -946,299 +1827,545 @@ function renderSecret(secret){
 
       <p>
         The murder is completely fictional.
-        Nobody is actually hurt.
+        Nobody is actually attacked or harmed.
       </p>
 
       <div class="warning">
-        Follow your secret timeline.
         The Detective is outside for 5 minutes.
+        Complete your timeline before they return.
       </div>
 
-      <h2>Your secret tasks</h2>
+      <h2>Your secret timeline</h2>
 
       ${
-        secret.tasks.map(t=>`
-          <div class="task">
-            <b>${escapeHtml(t.time)}</b><br>
-            ${escapeHtml(t.text)}
-          </div>
-        `).join("")
+        mySecret.tasks
+        .map(
+          task=>`
+
+            <div class="task">
+
+              <div class="task-time">
+                ${escapeHtml(task.time)}
+              </div>
+
+              ${escapeHtml(task.text)}
+
+            </div>
+
+          `
+        )
+        .join("")
       }
 
       <p>
-        You may lie during the investigation.
-        Keep your story consistent.
+        After the Detective returns,
+        keep your story consistent.
+        You may lie.
       </p>
 
     `;
 
     return;
+
   }
 
 
-  if(secret.role === "innocent"){
+  if(
+    mySecret.role ===
+    "innocent"
+  ){
 
-    card.innerHTML=`
+    card.innerHTML = `
 
       <div class="role innocent">
         👤 YOU ARE INNOCENT
       </div>
 
       <p>
-        You did not commit the fictional murder.
-        But you have your own secret timeline.
+        You are NOT the murderer.
+        You have your own secret timeline.
       </p>
 
-      <h2>Your secret tasks</h2>
+      <div class="warning">
+        Do not show your tasks to anyone.
+      </div>
+
+      <h2>Your secret timeline</h2>
 
       ${
-        secret.tasks.map(t=>`
-          <div class="task">
-            <b>${escapeHtml(t.time)}</b><br>
-            ${escapeHtml(t.text)}
-          </div>
-        `).join("")
+        mySecret.tasks
+        .map(
+          task=>`
+
+            <div class="task">
+
+              <div class="task-time">
+                ${escapeHtml(task.time)}
+              </div>
+
+              ${escapeHtml(task.text)}
+
+            </div>
+
+          `
+        )
+        .join("")
       }
 
       <p>
-        You may lie during the investigation.
-        The Detective does not know your tasks.
+        During the investigation,
+        answer however you want.
+        You may lie.
       </p>
 
     `;
+
   }
+
 }
 
 
 /* =========================================================
    DETECTIVE TIMER
-   ========================================================= */
+====================================================== */
 
-function startDetectiveTimer(){
+function startTimer(){
 
   clearInterval(timerInterval);
 
-  const start =
-    roomData.game.investigationStart;
 
-  function tick(){
+  function updateTimer(){
+
+    if(
+      !roomData ||
+      !roomData.game
+    ){
+
+      return;
+
+    }
+
+
+    const end =
+      roomData.game
+        .investigationStart;
+
 
     const remaining =
       Math.max(
         0,
-        start-Date.now()
+        end-Date.now()
       );
 
-    const seconds =
+
+    const totalSeconds =
       Math.ceil(
         remaining/1000
       );
 
-    const mins =
-      Math.floor(seconds/60);
 
-    const secs =
-      seconds%60;
+    const minutes =
+      Math.floor(
+        totalSeconds/60
+      );
 
-    document.getElementById("detectiveTimer")
+
+    const seconds =
+      totalSeconds%60;
+
+
+    document
+      .getElementById("timer")
       .textContent =
-      String(mins).padStart(2,"0")+
-      ":"+
-      String(secs).padStart(2,"0");
 
-    if(seconds<=0){
+      String(minutes)
+      .padStart(2,"0")
+      + ":" +
 
-      clearInterval(timerInterval);
+      String(seconds)
+      .padStart(2,"0");
 
-      document.getElementById("gameStatus")
+
+    if(
+      totalSeconds<=0
+    ){
+
+      clearInterval(
+        timerInterval
+      );
+
+
+      document
+        .getElementById("returnButton")
+        .classList
+        .remove("hidden");
+
+
+      document
+        .getElementById("gameMessage")
         .textContent =
-        "⏰ Time is up. Return to the game.";
+        "⏰ The 5 minutes are over.";
 
-      document.getElementById("returnButton")
-        .classList.remove("hidden");
     }
+
   }
 
-  tick();
+
+  updateTimer();
+
 
   timerInterval =
-    setInterval(tick,500);
+    setInterval(
+      updateTimer,
+      500
+    );
+
 }
 
 
 /* =========================================================
    DETECTIVE RETURNS
-   ========================================================= */
+====================================================== */
 
-window.detectiveReturned = function(){
+window.returnDetective =
+function(){
 
-  document.getElementById("detectivePanel")
-    .classList.add("hidden");
+  if(
+    !roomData ||
+    !roomData.game
+  ){
 
-  document.getElementById("investigation")
-    .classList.remove("hidden");
+    return;
 
-  renderCaseFile();
+  }
+
+
+  if(
+    Date.now() <
+    roomData.game.investigationStart
+  ){
+
+    alert(
+      "The 5 minutes are not finished yet."
+    );
+
+    return;
+
+  }
+
+
+  document
+    .getElementById("detectiveArea")
+    .classList
+    .add("hidden");
+
+
+  document
+    .getElementById("investigation")
+    .classList
+    .remove("hidden");
+
+
+  document
+    .getElementById("waitingAfterGame")
+    .classList
+    .add("hidden");
+
+
+  renderCase();
+
 };
 
 
 /* =========================================================
    CASE FILE
-   ========================================================= */
+====================================================== */
 
-function renderCaseFile(){
+function renderCase(){
 
   const game =
     roomData.game;
 
-  document.getElementById("caseFile")
-    .innerHTML=`
 
-    <div class="success">
-      The 5-minute waiting period is finished.
-      The investigation begins now.
-    </div>
-
-    <h3>CASE</h3>
-
-    <p>
-      ${escapeHtml(game.caseDescription)}
-    </p>
-
-    <p>
-      <b>Victim:</b>
-      ${escapeHtml(game.victim)}
-    </p>
-
-    <p>
-      <b>Fictional murder time:</b>
-      ${escapeHtml(game.murderTime)}
-    </p>
-
-    <p>
-      <b>Crime location:</b>
-      ${escapeHtml(game.crimeLocation)}
-    </p>
-
-    <p>
-      <b>You arrived:</b>
-      ${escapeHtml(game.detectiveArrival)}
-    </p>
-
-    <h3>YOUR SUSPECTS</h3>
-
-    <div class="player">
-      👤 ${escapeHtml(game.murdererName)}
-    </div>
-
-    <div class="player">
-      👤 ${escapeHtml(game.innocentName)}
-    </div>
-
-    <p>
-      Both suspects may lie.
-      Ask them about where they were and what they were doing.
-    </p>
-  `;
+  const suspectIds =
+    game.suspects;
 
 
-  document.getElementById("accuse0")
-    .textContent =
-    "Accuse "+game.murdererName;
+  const suspectNames =
+    suspectIds
+      .map(
+        id=>
+          roomData.players[id]
+            ?.name ||
+          "Unknown"
+      );
 
-  document.getElementById("accuse1")
-    .textContent =
-    "Accuse "+game.innocentName;
+
+  document
+    .getElementById("caseFile")
+    .innerHTML = `
+
+      <div class="success">
+
+        ⏰ The 5-minute waiting period
+        is finished.
+
+        The investigation begins now.
+
+      </div>
+
+
+      <h3>CASE</h3>
+
+      <p>
+        ${escapeHtml(
+          game.caseDescription
+        )}
+      </p>
+
+
+      <p>
+        <b>Victim:</b>
+        ${escapeHtml(
+          game.victim
+        )}
+      </p>
+
+
+      <p>
+        <b>Fictional murder time:</b>
+        ${escapeHtml(
+          game.murderTime
+        )}
+      </p>
+
+
+      <p>
+        <b>Crime location:</b>
+        ${escapeHtml(
+          game.crimeLocation
+        )}
+      </p>
+
+
+      <p>
+        <b>Detective arrival:</b>
+        ${escapeHtml(
+          game.detectiveArrival
+        )}
+      </p>
+
+
+      <h3>SUSPECTS</h3>
+
+      ${
+        suspectNames
+          .map(
+            name=>
+              `<div class="player">
+                👤 ${escapeHtml(name)}
+              </div>`
+          )
+          .join("")
+      }
+
+
+      <p>
+        Every suspect has their own secret timeline.
+        Some may lie.
+      </p>
+
+    `;
+
+
+  const buttons =
+    document
+      .getElementById(
+        "accusationButtons"
+      );
+
+
+  buttons.innerHTML =
+    suspectIds
+      .map(
+        (id,index)=>`
+
+          <button
+            onclick="accuse('${id}')"
+          >
+
+            Accuse
+            ${escapeHtml(
+              roomData.players[id]
+                ?.name ||
+              "Unknown"
+            )}
+
+          </button>
+
+        `
+      )
+      .join("");
+
 }
 
 
 /* =========================================================
    ACCUSATION
-   ========================================================= */
+====================================================== */
 
-window.accuse = async function(index){
+window.accuse =
+async function(accusedId){
 
   const game =
     roomData.game;
 
-  const accused =
-    index===0
-      ? game.murdererName
-      : game.innocentName;
+
+  if(
+    playerId !==
+    game.detective
+  ){
+
+    return;
+
+  }
+
 
   const correct =
-    accused === game.murdererName;
+    accusedId ===
+    game.murderer;
 
 
-  document.getElementById("result")
-    .innerHTML = correct
-      ? `
-        <div class="success" style="margin-top:20px">
-          🎉 CORRECT!<br><br>
-          You caught the murderer: 
-          <b>${escapeHtml(game.murdererName)}</b>.
-        </div>
-      `
-      : `
-        <div class="warning" style="margin-top:20px">
-          ❌ WRONG!<br><br>
-          The murderer was
-          <b>${escapeHtml(game.murdererName)}</b>.
-        </div>
-      `;
+  const accusedName =
+    roomData
+      .players[accusedId]
+      ?.name ||
+    "Unknown";
+
+
+  document
+    .getElementById("result")
+    .innerHTML =
+
+    correct
+
+    ?
+
+    `<div class="success">
+
+      🎉 CORRECT!
+
+      <br><br>
+
+      You caught the murderer:
+
+      <b>
+        ${escapeHtml(
+          accusedName
+        )}
+      </b>
+
+    </div>`
+
+    :
+
+    `<div class="warning">
+
+      ❌ WRONG!
+
+      <br><br>
+
+      You accused:
+
+      <b>
+        ${escapeHtml(
+          accusedName
+        )}
+      </b>
+
+      <br><br>
+
+      The murderer was:
+
+      <b>
+        ${escapeHtml(
+          roomData
+            .players[
+              game.murderer
+            ]
+            ?.name ||
+          "Unknown"
+        )}
+      </b>
+
+    </div>`;
+
 
   await update(
-    ref(db,"rooms/"+roomCode),
+
+    ref(
+      db,
+      "rooms/"+roomCode+
+      "/result"
+    ),
+
     {
-      result:{
-        accused,
-        correct,
-        finishedAt:Date.now()
-      }
+
+      accusedId,
+
+      correct,
+
+      finishedAt:
+        Date.now()
+
     }
+
   );
+
 };
 
 
 /* =========================================================
-   AUTO LOAD FROM URL
-   ========================================================= */
-
-/*
-  You can optionally open:
-
-  index.html?room=HOTEL123
-
-  The room code will automatically fill in.
-*/
-
-const params =
-  new URLSearchParams(
-    window.location.search
-  );
-
-if(params.get("room")){
-
-  document.getElementById("roomInput")
-    .value =
-    params.get("room").toUpperCase();
-}
-
-
-/* =========================================================
    ERROR HANDLING
-   ========================================================= */
+====================================================== */
 
 window.addEventListener(
   "unhandledrejection",
   event=>{
-    console.error(event.reason);
+
+    console.error(
+      event.reason
+    );
 
     alert(
-      "Firebase error. Check your Realtime Database rules and Firebase config."
+      "Firebase error. Check that your Realtime Database exists and your rules allow read/write."
     );
+
   }
 );
+
+
+/* =========================================================
+   OPTIONAL URL ROOM
+====================================================== */
+
+const params =
+new URLSearchParams(
+  window.location.search
+);
+
+if(
+  params.get("room")
+){
+
+  document
+    .getElementById("roomInput")
+    .value =
+    params
+      .get("room")
+      .toUpperCase();
+
+}
 
 </script>
 
