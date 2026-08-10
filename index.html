@@ -1,512 +1,1246 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#0b0e14">
-    <meta name="description" content="Ultimate Team - Build your dream squad, open premium packs, and dominate the market.">
-    <title>Ultimate Team | Web App</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Hotel Murder</title>
 
-    <!-- Google Fonts: Inter for UI, Oswald for Player Cards -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
-    
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Ultimate Team">
-    
-    <!-- FontAwesome Pro Icons (Free CDN fallback) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Premium Stylesheet -->
-    <link rel="stylesheet" href="styles.css">
-    
-    <!-- Scripts -->
-    <script type="module" src="friends.js"></script>
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:#090b12;
+  color:#fff;
+  min-height:100vh;
+}
+button,input{
+  font:inherit;
+}
+button{
+  border:0;
+  cursor:pointer;
+}
+.app{
+  max-width:900px;
+  margin:auto;
+  padding:20px;
+}
+.card{
+  background:#151925;
+  border:1px solid #292e3d;
+  border-radius:22px;
+  padding:22px;
+  margin-bottom:16px;
+}
+h1{font-size:38px;margin:0 0 8px}
+h2{margin-top:0}
+p{color:#aeb5c8;line-height:1.5}
+input{
+  width:100%;
+  padding:15px;
+  margin:7px 0 12px;
+  border-radius:14px;
+  border:1px solid #343a4c;
+  background:#0e1119;
+  color:white;
+  outline:none;
+}
+button{
+  width:100%;
+  padding:15px;
+  border-radius:14px;
+  background:#6f8cff;
+  color:white;
+  font-weight:800;
+  margin-top:8px;
+}
+button.secondary{
+  background:#252b3a;
+}
+button.red{
+  background:#d94b5b;
+}
+button.green{
+  background:#38a978;
+}
+.hidden{display:none!important}
+.room{
+  font-size:30px;
+  font-weight:900;
+  letter-spacing:3px;
+  background:#0d1018;
+  padding:15px;
+  border-radius:14px;
+  text-align:center;
+}
+.player{
+  padding:12px;
+  border-radius:12px;
+  background:#202535;
+  margin:7px 0;
+}
+.role{
+  padding:15px;
+  border-radius:17px;
+  margin-bottom:15px;
+  font-size:22px;
+  font-weight:900;
+}
+.detective{background:#25366d}
+.murderer{background:#652630}
+.innocent{background:#24583f}
+.big{
+  font-size:42px;
+  font-weight:900;
+  text-align:center;
+  margin:20px 0;
+}
+.task{
+  padding:15px;
+  background:#202535;
+  border-radius:14px;
+  margin:9px 0;
+}
+.warning{
+  padding:14px;
+  border-radius:13px;
+  background:#332817;
+  color:#ffd98a;
+  margin-top:12px;
+}
+.success{
+  padding:14px;
+  border-radius:13px;
+  background:#173c2b;
+  color:#9ff0c8;
+}
+.small{font-size:13px;color:#929aad}
+.center{text-align:center}
+.row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+@media(max-width:600px){
+  .row{grid-template-columns:1fr}
+  h1{font-size:30px}
+}
+</style>
 </head>
+
 <body>
 
-    <!-- ==========================================================================
-       INITIAL APP LOADER
-       ========================================================================== -->
-    <div id="initial-loader" class="full-screen-overlay" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: #0b0e14; position: fixed; inset: 0; z-index: 9999; transition: opacity 0.5s;">
-        <i class="fa-solid fa-futbol fa-spin" style="font-size: 3rem; color: #f3c653; margin-bottom: 1rem;"></i>
-        <h2 style="color: white; font-weight: 800; letter-spacing: 2px;">ZA SPORTS</h2>
-        <p style="color: #8b949e; margin-bottom: 1rem;" id="loading-status">Initializing Web App Engine...</p>
-        <div class="loading-bar-container">
-            <div class="loading-bar" id="loading-bar"></div>
-        </div>
-        <p style="color: #8b949e; font-size: 0.85rem; margin-top: 0.5rem;" id="loading-percent">0%</p>
+<div class="app">
+
+<div id="home">
+  <div class="card">
+    <h1>🕵️ Hotel Murder</h1>
+    <p>
+      A 3-player real-time mystery game.
+      One Detective, one Murderer and one Innocent.
+      The murder is completely fictional.
+    </p>
+
+    <label>Your name</label>
+    <input id="nameInput" placeholder="Enter your name">
+
+    <label>Room code</label>
+    <input id="roomInput" placeholder="Example: HOTEL123">
+
+    <button onclick="joinRoom()">JOIN ROOM</button>
+  </div>
+
+  <div class="card">
+    <h2>How to play</h2>
+    <p>
+      1. All 3 players join the same room code.<br>
+      2. The game secretly assigns everyone a role.<br>
+      3. The Detective leaves for 5 minutes.<br>
+      4. The other two players complete their secret tasks.<br>
+      5. A fictional murder happens at a specific location and time.<br>
+      6. After 5 minutes, the Detective returns.<br>
+      7. The Detective investigates by asking questions.<br>
+      8. Everyone is allowed to lie.<br>
+      9. Detective chooses who they think is the murderer.
+    </p>
+  </div>
+</div>
+
+
+<div id="lobby" class="hidden">
+
+  <div class="card center">
+    <h1>🏨 Lobby</h1>
+    <p>Give this room code to the other 2 players.</p>
+
+    <div class="room" id="roomDisplay"></div>
+
+    <p id="playerCount"></p>
+  </div>
+
+  <div class="card">
+    <h2>Players</h2>
+    <div id="playersList"></div>
+  </div>
+
+  <div id="hostControls" class="card hidden">
+    <h2>Host controls</h2>
+    <p>
+      Once all 3 players are here, start the round.
+      Everyone will receive their secret information.
+    </p>
+
+    <button onclick="startGame()">START GAME</button>
+  </div>
+
+  <div class="card">
+    <p class="small">
+      Do not show another player your phone.
+      Your tasks and role are secret.
+    </p>
+  </div>
+
+</div>
+
+
+<div id="game" class="hidden">
+
+  <div class="card center">
+    <h1 id="gameTitle">Game</h1>
+    <p id="gameStatus"></p>
+  </div>
+
+  <div id="secretCard" class="card"></div>
+
+  <div id="detectivePanel" class="card hidden">
+    <h2>🕵️ Detective</h2>
+
+    <div class="big" id="detectiveTimer">05:00</div>
+
+    <p>
+      Stay outside while the other two players complete the murder scenario.
+      When the timer reaches zero, return to them.
+    </p>
+
+    <button id="returnButton" onclick="detectiveReturned()" class="green hidden">
+      I'M BACK — START INVESTIGATION
+    </button>
+  </div>
+
+  <div id="investigation" class="card hidden">
+    <h2>🔎 Investigation</h2>
+
+    <div id="caseFile"></div>
+
+    <hr style="border-color:#292e3d;margin:20px 0">
+
+    <h3>Final accusation</h3>
+
+    <div class="row">
+      <button onclick="accuse(0)" id="accuse0"></button>
+      <button onclick="accuse(1)" id="accuse1"></button>
     </div>
 
-    <!-- ==========================================================================
-       GLOBAL APP HEADER (Visible when authenticated)
-       ========================================================================== -->
-    <header id="app-header" class="hidden">
-        <div class="brand-logo">
-            <i class="fa-solid fa-shield-halved"></i> ULTIMATE TEAM
+    <div id="result"></div>
+  </div>
+
+</div>
+
+</div>
+
+
+<script type="module">
+
+import {initializeApp}
+from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+
+import {
+  getDatabase,
+  ref,
+  set,
+  get,
+  onValue,
+  update
+}
+from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
+
+
+/* =========================================================
+   YOUR FIREBASE CONFIG
+   ========================================================= */
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCugS0qHKstXGZArd5vEBzm-DaLZAIDugo",
+  authDomain: "money-e560a.firebaseapp.com",
+  databaseURL: "https://money-e560a-default-rtdb.firebaseio.com",
+  projectId: "money-e560a",
+  storageBucket: "money-e560a.firebasestorage.app",
+  messagingSenderId: "477551627159",
+  appId: "1:477551627159:web:b19f853905331f71ee92d2",
+  measurementId: "G-YYQD2E5J7J"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+
+/* =========================================================
+   LOCAL PLAYER ID
+   ========================================================= */
+
+let playerId = localStorage.getItem("hotelMurderPlayerId");
+
+if(!playerId){
+  playerId =
+    "p_" +
+    Date.now().toString(36) +
+    "_" +
+    Math.random().toString(36).substring(2,10);
+
+  localStorage.setItem("hotelMurderPlayerId",playerId);
+}
+
+
+let roomCode = "";
+let myName = "";
+let roomData = null;
+let timerInterval = null;
+
+
+/* =========================================================
+   RANDOM DATA
+   ========================================================= */
+
+const locations = [
+  "lobby seating area",
+  "reception",
+  "staircase",
+  "Floor 1 hallway",
+  "hotel entrance",
+  "chair near the lobby window",
+  "table in the lobby",
+  "area beside reception"
+];
+
+const activities = [
+  "sit quietly for a while",
+  "walk around the lobby",
+  "stand near the reception area",
+  "walk toward the staircase",
+  "sit at a lobby table",
+  "walk through the public hallway",
+  "wait near the entrance",
+  "look around the lobby"
+];
+
+const objects = [
+  "a phone",
+  "a hotel key card",
+  "a wallet",
+  "a note",
+  "a bag",
+  "a watch",
+  "a drink"
+];
+
+const victims = [
+  "a hotel guest",
+  "a visitor",
+  "a fictional hotel employee",
+  "a fictional guest",
+  "a fictional visitor"
+];
+
+const cases = [
+  "A valuable item disappeared.",
+  "A mysterious note was found.",
+  "A hotel guest was found dead in the fictional story.",
+  "An important object disappeared.",
+  "A suspicious incident happened inside the hotel."
+];
+
+
+/* =========================================================
+   HELPERS
+   ========================================================= */
+
+function random(arr){
+  return arr[Math.floor(Math.random()*arr.length)];
+}
+
+function randomTime(){
+
+  const hour =
+    7 + Math.floor(Math.random()*4);
+
+  const minute =
+    Math.floor(Math.random()*60);
+
+  return {
+    hour,
+    minute,
+    text:
+      String(hour).padStart(2,"0") +
+      ":" +
+      String(minute).padStart(2,"0")
+  };
+}
+
+function addMinutes(time,amount){
+
+  let total =
+    time.hour*60 +
+    time.minute +
+    amount;
+
+  return {
+    hour:Math.floor(total/60)%24,
+    minute:total%60,
+    text:
+      String(Math.floor(total/60)%24).padStart(2,"0") +
+      ":" +
+      String(total%60).padStart(2,"0")
+  };
+}
+
+function makeId(){
+
+  return Math.random()
+    .toString(36)
+    .substring(2,10);
+}
+
+function escapeHtml(text){
+
+  return String(text)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+
+/* =========================================================
+   JOIN ROOM
+   ========================================================= */
+
+window.joinRoom = async function(){
+
+  myName =
+    document.getElementById("nameInput")
+      .value.trim();
+
+  roomCode =
+    document.getElementById("roomInput")
+      .value.trim()
+      .toUpperCase();
+
+  if(!myName){
+    alert("Enter your name.");
+    return;
+  }
+
+  if(!roomCode){
+    alert("Enter a room code.");
+    return;
+  }
+
+  if(roomCode.length < 3){
+    alert("Make the room code at least 3 characters.");
+    return;
+  }
+
+  const roomRef =
+    ref(db,"rooms/"+roomCode);
+
+  const snapshot =
+    await get(roomRef);
+
+  if(!snapshot.exists()){
+
+    await set(roomRef,{
+      status:"lobby",
+      host:playerId,
+      createdAt:Date.now(),
+      players:{
+        [playerId]:{
+          name:myName,
+          joinedAt:Date.now()
+        }
+      }
+    });
+
+  }else{
+
+    const data = snapshot.val();
+
+    if(data.status !== "lobby"){
+      alert("That room is already in a game.");
+      return;
+    }
+
+    const players =
+      data.players || {};
+
+    if(Object.keys(players).length >= 3 &&
+       !players[playerId]){
+
+      alert("This room already has 3 players.");
+      return;
+    }
+
+    await update(
+      ref(db,"rooms/"+roomCode+"/players/"+playerId),
+      {
+        name:myName,
+        joinedAt:Date.now()
+      }
+    );
+  }
+
+  document.getElementById("home")
+    .classList.add("hidden");
+
+  document.getElementById("lobby")
+    .classList.remove("hidden");
+
+  document.getElementById("roomDisplay")
+    .textContent=roomCode;
+
+  listenToRoom();
+};
+
+
+/* =========================================================
+   REALTIME ROOM LISTENER
+   ========================================================= */
+
+function listenToRoom(){
+
+  const roomRef =
+    ref(db,"rooms/"+roomCode);
+
+  onValue(roomRef,(snapshot)=>{
+
+    if(!snapshot.exists()){
+      return;
+    }
+
+    roomData =
+      snapshot.val();
+
+    renderRoom();
+
+    if(roomData.status === "game"){
+      showGame();
+    }
+
+  });
+}
+
+
+/* =========================================================
+   LOBBY
+   ========================================================= */
+
+function renderRoom(){
+
+  const players =
+    roomData.players || {};
+
+  const entries =
+    Object.entries(players);
+
+  document.getElementById("playerCount")
+    .textContent =
+    entries.length +
+    "/3 players joined";
+
+  document.getElementById("playersList")
+    .innerHTML =
+    entries.map(([id,p])=>`
+      <div class="player">
+        👤 ${escapeHtml(p.name)}
+        ${id === roomData.host ? " 👑" : ""}
+      </div>
+    `).join("");
+
+  const isHost =
+    roomData.host === playerId;
+
+  if(isHost &&
+     entries.length === 3 &&
+     roomData.status === "lobby"){
+
+    document.getElementById("hostControls")
+      .classList.remove("hidden");
+
+  }else{
+
+    document.getElementById("hostControls")
+      .classList.add("hidden");
+  }
+}
+
+
+/* =========================================================
+   CREATE ROUND
+   ========================================================= */
+
+window.startGame = async function(){
+
+  if(!roomData ||
+     roomData.host !== playerId){
+    return;
+  }
+
+  const players =
+    roomData.players || {};
+
+  const ids =
+    Object.keys(players);
+
+  if(ids.length !== 3){
+    alert("You need exactly 3 players.");
+    return;
+  }
+
+  const shuffled =
+    [...ids].sort(
+      ()=>Math.random()-.5
+    );
+
+  const detective =
+    shuffled[0];
+
+  const murderer =
+    shuffled[1];
+
+  const innocent =
+    shuffled[2];
+
+  const crimeLocation =
+    random(locations);
+
+  const victim =
+    random(victims);
+
+  const caseDescription =
+    random(cases);
+
+  const murderTime =
+    randomTime();
+
+  const detectiveTime =
+    addMinutes(murderTime,2);
+
+  const gameStart =
+    Date.now();
+
+  const investigationStart =
+    gameStart + 5*60*1000;
+
+
+  /*
+    Every player receives different movement tasks.
+  */
+
+  const usedLocations = [];
+
+  function uniqueLocation(){
+
+    let x;
+
+    do{
+      x=random(locations);
+    }
+    while(
+      usedLocations.includes(x) ||
+      x===crimeLocation
+    );
+
+    usedLocations.push(x);
+
+    return x;
+  }
+
+
+  function makeTasks(){
+
+    return [
+      {
+        time:"Minute 1",
+        text:
+          "Go to "+
+          uniqueLocation()+
+          " and stay there briefly."
+      },
+      {
+        time:"Minute 2",
+        text:
+          random(activities)+
+          " near "+
+          uniqueLocation()+"."
+      },
+      {
+        time:"Minute 3",
+        text:
+          "Move toward "+
+          uniqueLocation()+
+          " and stay there."
+      },
+      {
+        time:"Minute 4",
+        text:
+          random(activities)+
+          "."
+      }
+    ];
+  }
+
+
+  const innocentTasks =
+    makeTasks();
+
+
+  const murdererTasks =
+    makeTasks();
+
+
+  /*
+    Murderer-specific timeline.
+  */
+
+  murdererTasks[2] = {
+    time:murderTime.text,
+    text:
+      "Go to the fictional crime scene: "+
+      crimeLocation+
+      ". The fictional murder happens here at "+
+      murderTime.text+
+      "."
+  };
+
+
+  murdererTasks[3] = {
+    time:detectiveTime.text,
+    text:
+      "Leave the crime scene and return to "+
+      random([
+        "the lobby",
+        "reception",
+        "the staircase area"
+      ])+
+      " before the Detective returns."
+  };
+
+
+  const sharedCase = {
+
+    victim,
+    crimeLocation,
+    murderTime:murderTime.text,
+    detectiveArrival:detectiveTime.text,
+    caseDescription,
+
+    investigationStart,
+
+    detective,
+    suspectIds:[
+      murderer,
+      innocent
+    ],
+
+    murdererName:
+      players[murderer].name,
+
+    innocentName:
+      players[innocent].name,
+
+    startedAt:gameStart,
+
+    roundId:makeId()
+  };
+
+
+  /*
+    NOTE:
+    The secret role data is stored separately for each
+    player. The UI only displays the current player's data.
+  */
+
+  const updates = {};
+
+
+  updates["rooms/"+roomCode+"/status"] =
+    "game";
+
+  updates["rooms/"+roomCode+"/game"] =
+    sharedCase;
+
+
+  updates[
+    "rooms/"+roomCode+
+    "/private/"+detective
+  ] = {
+
+    role:"detective",
+
+    tasks:[],
+
+    message:
+      "Stay outside for 5 minutes. "+
+      "Do not investigate until the timer ends."
+  };
+
+
+  updates[
+    "rooms/"+roomCode+
+    "/private/"+murderer
+  ] = {
+
+    role:"murderer",
+
+    tasks:murdererTasks,
+
+    message:
+      "You are the murderer. "+
+      "The murder is completely fictional. "+
+      "Follow your timeline, then leave the crime scene."
+  };
+
+
+  updates[
+    "rooms/"+roomCode+
+    "/private/"+innocent
+  ] = {
+
+    role:"innocent",
+
+    tasks:innocentTasks,
+
+    message:
+      "You are innocent. "+
+      "Complete your own secret tasks and create your own believable timeline."
+  };
+
+
+  await update(
+    ref(db),
+    updates
+  );
+};
+
+
+/* =========================================================
+   SHOW GAME
+   ========================================================= */
+
+async function showGame(){
+
+  document.getElementById("home")
+    .classList.add("hidden");
+
+  document.getElementById("lobby")
+    .classList.add("hidden");
+
+  document.getElementById("game")
+    .classList.remove("hidden");
+
+  document.getElementById("gameTitle")
+    .textContent="🏨 The Murder Happened";
+
+
+  const privateRef =
+    ref(
+      db,
+      "rooms/"+roomCode+
+      "/private/"+playerId
+    );
+
+  const snap =
+    await get(privateRef);
+
+  if(!snap.exists()){
+
+    document.getElementById("secretCard")
+      .innerHTML =
+      "<p>Loading your secret information...</p>";
+
+    return;
+  }
+
+  const secret =
+    snap.val();
+
+  renderSecret(secret);
+
+  if(secret.role === "detective"){
+
+    document.getElementById("detectivePanel")
+      .classList.remove("hidden");
+
+    startDetectiveTimer();
+
+  }else{
+
+    document.getElementById("detectivePanel")
+      .classList.add("hidden");
+  }
+}
+
+
+/* =========================================================
+   SECRET SCREEN
+   ========================================================= */
+
+function renderSecret(secret){
+
+  const card =
+    document.getElementById("secretCard");
+
+
+  if(secret.role === "detective"){
+
+    card.innerHTML=`
+
+      <div class="role detective">
+        🕵️ YOU ARE THE DETECTIVE
+      </div>
+
+      <h2>Your job</h2>
+
+      <p>
+        Leave the game area now.
+        Stay outside for the full 5 minutes.
+      </p>
+
+      <div class="warning">
+        Do NOT read the other players' phones.
+        When the timer ends, come back.
+      </div>
+
+      <h2>After you return</h2>
+
+      <p>
+        Question both suspects.
+        They are both allowed to lie.
+        Compare their stories and look for contradictions.
+      </p>
+
+    `;
+
+    return;
+  }
+
+
+  if(secret.role === "murderer"){
+
+    card.innerHTML=`
+
+      <div class="role murderer">
+        🔪 YOU ARE THE MURDERER
+      </div>
+
+      <p>
+        The murder is completely fictional.
+        Nobody is actually hurt.
+      </p>
+
+      <div class="warning">
+        Follow your secret timeline.
+        The Detective is outside for 5 minutes.
+      </div>
+
+      <h2>Your secret tasks</h2>
+
+      ${
+        secret.tasks.map(t=>`
+          <div class="task">
+            <b>${escapeHtml(t.time)}</b><br>
+            ${escapeHtml(t.text)}
+          </div>
+        `).join("")
+      }
+
+      <p>
+        You may lie during the investigation.
+        Keep your story consistent.
+      </p>
+
+    `;
+
+    return;
+  }
+
+
+  if(secret.role === "innocent"){
+
+    card.innerHTML=`
+
+      <div class="role innocent">
+        👤 YOU ARE INNOCENT
+      </div>
+
+      <p>
+        You did not commit the fictional murder.
+        But you have your own secret timeline.
+      </p>
+
+      <h2>Your secret tasks</h2>
+
+      ${
+        secret.tasks.map(t=>`
+          <div class="task">
+            <b>${escapeHtml(t.time)}</b><br>
+            ${escapeHtml(t.text)}
+          </div>
+        `).join("")
+      }
+
+      <p>
+        You may lie during the investigation.
+        The Detective does not know your tasks.
+      </p>
+
+    `;
+  }
+}
+
+
+/* =========================================================
+   DETECTIVE TIMER
+   ========================================================= */
+
+function startDetectiveTimer(){
+
+  clearInterval(timerInterval);
+
+  const start =
+    roomData.game.investigationStart;
+
+  function tick(){
+
+    const remaining =
+      Math.max(
+        0,
+        start-Date.now()
+      );
+
+    const seconds =
+      Math.ceil(
+        remaining/1000
+      );
+
+    const mins =
+      Math.floor(seconds/60);
+
+    const secs =
+      seconds%60;
+
+    document.getElementById("detectiveTimer")
+      .textContent =
+      String(mins).padStart(2,"0")+
+      ":"+
+      String(secs).padStart(2,"0");
+
+    if(seconds<=0){
+
+      clearInterval(timerInterval);
+
+      document.getElementById("gameStatus")
+        .textContent =
+        "⏰ Time is up. Return to the game.";
+
+      document.getElementById("returnButton")
+        .classList.remove("hidden");
+    }
+  }
+
+  tick();
+
+  timerInterval =
+    setInterval(tick,500);
+}
+
+
+/* =========================================================
+   DETECTIVE RETURNS
+   ========================================================= */
+
+window.detectiveReturned = function(){
+
+  document.getElementById("detectivePanel")
+    .classList.add("hidden");
+
+  document.getElementById("investigation")
+    .classList.remove("hidden");
+
+  renderCaseFile();
+};
+
+
+/* =========================================================
+   CASE FILE
+   ========================================================= */
+
+function renderCaseFile(){
+
+  const game =
+    roomData.game;
+
+  document.getElementById("caseFile")
+    .innerHTML=`
+
+    <div class="success">
+      The 5-minute waiting period is finished.
+      The investigation begins now.
+    </div>
+
+    <h3>CASE</h3>
+
+    <p>
+      ${escapeHtml(game.caseDescription)}
+    </p>
+
+    <p>
+      <b>Victim:</b>
+      ${escapeHtml(game.victim)}
+    </p>
+
+    <p>
+      <b>Fictional murder time:</b>
+      ${escapeHtml(game.murderTime)}
+    </p>
+
+    <p>
+      <b>Crime location:</b>
+      ${escapeHtml(game.crimeLocation)}
+    </p>
+
+    <p>
+      <b>You arrived:</b>
+      ${escapeHtml(game.detectiveArrival)}
+    </p>
+
+    <h3>YOUR SUSPECTS</h3>
+
+    <div class="player">
+      👤 ${escapeHtml(game.murdererName)}
+    </div>
+
+    <div class="player">
+      👤 ${escapeHtml(game.innocentName)}
+    </div>
+
+    <p>
+      Both suspects may lie.
+      Ask them about where they were and what they were doing.
+    </p>
+  `;
+
+
+  document.getElementById("accuse0")
+    .textContent =
+    "Accuse "+game.murdererName;
+
+  document.getElementById("accuse1")
+    .textContent =
+    "Accuse "+game.innocentName;
+}
+
+
+/* =========================================================
+   ACCUSATION
+   ========================================================= */
+
+window.accuse = async function(index){
+
+  const game =
+    roomData.game;
+
+  const accused =
+    index===0
+      ? game.murdererName
+      : game.innocentName;
+
+  const correct =
+    accused === game.murdererName;
+
+
+  document.getElementById("result")
+    .innerHTML = correct
+      ? `
+        <div class="success" style="margin-top:20px">
+          🎉 CORRECT!<br><br>
+          You caught the murderer: 
+          <b>${escapeHtml(game.murdererName)}</b>.
         </div>
-        
-        <nav class="app-nav-links">
-            <button class="nav-btn active" data-target-screen="dashboard"><i class="fa-solid fa-house"></i> Home</button>
-            <button class="nav-btn" data-target-screen="store"><i class="fa-solid fa-store"></i> Store</button>
-            <button class="nav-btn" data-target-screen="market"><i class="fa-solid fa-arrow-right-arrow-left"></i> Transfers</button>
-            <button class="nav-btn" data-target-screen="club"><i class="fa-solid fa-users"></i> Club</button>
-            <button class="nav-btn" data-target-screen="squad"><i class="fa-solid fa-people-group"></i> Squad</button>
-            <button class="nav-btn" data-target-screen="friends"><i class="fa-solid fa-user-group"></i> Friends</button>
-            <button class="nav-btn" data-target-screen="matchmaking"><i class="fa-solid fa-futbol"></i> Play</button>
-            <button class="nav-btn" data-target-screen="admin"><i class="fa-solid fa-cog"></i> Admin</button>
-        </nav>
-
-        <div class="user-hud">
-            <div class="hud-item badge">
-                <i class="fa-solid fa-shield"></i> <span class="user-club-name">Loading...</span>
-            </div>
-            <div class="hud-item coins">
-                <i class="fa-solid fa-coins gold-text"></i> <span class="user-coin-balance">0</span>
-            </div>
-            <button class="btn btn-outline logout-btn" title="Logout">
-                <i class="fa-solid fa-right-from-bracket"></i>
-            </button>
+      `
+      : `
+        <div class="warning" style="margin-top:20px">
+          ❌ WRONG!<br><br>
+          The murderer was
+          <b>${escapeHtml(game.murdererName)}</b>.
         </div>
-    </header>
+      `;
 
-    <!-- ==========================================================================
-       SCREEN 1: AUTHENTICATION
-       ========================================================================== -->
-    <main id="auth-screen" class="app-screen">
-        <div class="auth-wrapper">
-            <div class="auth-hero">
-                <h1>Build Your Dream Squad.</h1>
-                <p>Trade, open packs, and compete in the ultimate football ecosystem.</p>
-            </div>
-            <div class="auth-card">
-                <h2><i class="fa-solid fa-user-lock" style="color: var(--fc-neon);"></i> Manager Portal</h2>
-                
-                <!-- Login Form -->
-                <form id="login-form">
-                    <div class="form-group">
-                        <label for="login-email">Email Address</label>
-                        <div class="input-icon-wrap">
-                            <i class="fa-solid fa-envelope"></i>
-                            <input type="email" id="login-email" required placeholder="manager@fut.com" autocomplete="email">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="login-password">Password</label>
-                        <div class="input-icon-wrap">
-                            <i class="fa-solid fa-lock"></i>
-                            <input type="password" id="login-password" required placeholder="•••••••••" autocomplete="current-password">
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-large">
-                        <i class="fa-solid fa-right-to-bracket"></i> Secure Login
-                    </button>
-                </form>
+  await update(
+    ref(db,"rooms/"+roomCode),
+    {
+      result:{
+        accused,
+        correct,
+        finishedAt:Date.now()
+      }
+    }
+  );
+};
 
-                <!-- Register Form (Hidden by default) -->
-                <form id="register-form" class="hidden">
-                    <div class="form-group">
-                        <label for="reg-clubname">Club Name</label>
-                        <div class="input-icon-wrap">
-                            <i class="fa-solid fa-shield"></i>
-                            <input type="text" id="reg-clubname" required placeholder="e.g. FC Legends" maxlength="15">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="reg-email">Email Address</label>
-                        <div class="input-icon-wrap">
-                            <i class="fa-solid fa-envelope"></i>
-                            <input type="email" id="reg-email" required placeholder="manager@fut.com" autocomplete="email">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="reg-password">Password</label>
-                        <div class="input-icon-wrap">
-                            <i class="fa-solid fa-lock"></i>
-                            <input type="password" id="reg-password" required placeholder="Minimum 6 characters" minlength="6" autocomplete="new-password">
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-large">
-                        <i class="fa-solid fa-user-plus"></i> Establish Club
-                    </button>
-                </form>
 
-                <div class="auth-divider"><span>OR</span></div>
-                
-                <button type="button" id="toggle-auth-mode" class="btn btn-secondary" style="width: 100%;">
-                    Create New Club Instead
-                </button>
-            </div>
-        </div>
-    </main>
+/* =========================================================
+   AUTO LOAD FROM URL
+   ========================================================= */
 
-    <!-- ==========================================================================
-       SCREEN 2: DASHBOARD (Home)
-       ========================================================================== -->
-    <main id="dashboard-screen" class="app-screen hidden">
-        <section class="dashboard-header">
-            <div>
-                <h1 class="welcome-text">Welcome Back, <span class="user-club-name text-gold">Manager</span></h1>
-                <p class="text-muted">Season 1 is active. Daily objectives reset in 12 hours.</p>
-            </div>
-        </section>
-        
-        <div class="dashboard-grid">
-            <div class="dash-card store-promo" data-target-screen="store">
-                <div class="card-content">
-                    <h3><i class="fa-solid fa-bolt"></i> Promo Packs Available</h3>
-                    <p>New Team of the Week cards are in packs now. Test your luck!</p>
-                    <button class="btn btn-primary">Go to Store</button>
-                </div>
-            </div>
-            
-            <div class="dash-card match-promo" data-target-screen="matchmaking">
-                <div class="card-content">
-                    <h3><i class="fa-solid fa-futbol"></i> Ranked Matches</h3>
-                    <p>Climb the ladder and earn exclusive rewards. Matches are 4 minutes.</p>
-                    <button class="btn btn-primary">Play Ranked</button>
-                </div>
-            </div>
-            
-            <div class="dash-card squad-promo" data-target-screen="squad">
-                <div class="card-content">
-                    <h3><i class="fa-solid fa-users"></i> Build Your Squad</h3>
-                    <p>Your current squad rating: <span class="text-gold">75</span></p>
-                    <button class="btn btn-primary">Manage Squad</button>
-                </div>
-            </div>
-        </div>
-    </main>
+/*
+  You can optionally open:
 
-    <!-- ==========================================================================
-       SCREEN 3: STORE
-       ========================================================================== -->
-    <main id="store-screen" class="app-screen hidden">
-        <div class="store-container">
-            <div class="store-header">
-                <h2>Pack Store</h2>
-                <p class="text-muted">Open packs to build your dream squad</p>
-            </div>
-            
-            <div class="packs-grid" id="packs-grid">
-                <!-- Packs will be loaded dynamically -->
-            </div>
-        </div>
-    </main>
+  index.html?room=HOTEL123
 
-    <!-- ==========================================================================
-       SCREEN 4: MARKET
-       ========================================================================== -->
-    <main id="market-screen" class="app-screen hidden">
-        <div class="market-container">
-            <div class="market-header">
-                <h2>Transfer Market</h2>
-                <p class="text-muted">Buy and sell players with the community</p>
-            </div>
-            
-            <div class="market-search">
-                <input type="text" id="market-search-input" class="search-input" placeholder="Search players...">
-                <button id="market-search-btn" class="btn btn-primary">Search</button>
-            </div>
-            
-            <div class="market-tabs">
-                <button class="market-tab active" data-tab="buy">Buy Players</button>
-                <button class="market-tab" data-tab="sell">Sell Players</button>
-            </div>
-            
-            <div class="market-content" id="market-content">
-                <!-- Market listings will be loaded here -->
-            </div>
-        </div>
-    </main>
+  The room code will automatically fill in.
+*/
 
-    <!-- ==========================================================================
-       SCREEN 5: CLUB
-       ========================================================================== -->
-    <main id="club-screen" class="app-screen hidden">
-        <div class="club-container">
-            <div class="club-header">
-                <h2>My Club</h2>
-                <p class="text-muted">Manage your player collection</p>
-            </div>
-            
-            <div class="club-stats">
-                <div class="stat-item">
-                    <span class="stat-value" id="club-player-count">0</span>
-                    <span class="stat-label">Players</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-value" id="club-total-rating">0</span>
-                    <span class="stat-label">Avg Rating</span>
-                </div>
-            </div>
-            
-            <div class="club-grid" id="club-grid">
-                <!-- Players will be loaded here -->
-            </div>
-        </div>
-    </main>
+const params =
+  new URLSearchParams(
+    window.location.search
+  );
 
-    <!-- ==========================================================================
-       SCREEN 6: SQUAD
-       ========================================================================== -->
-    <main id="squad-screen" class="app-screen hidden">
-        <div class="squad-container">
-            <div class="squad-header">
-                <h2>Squad Builder</h2>
-                <p class="text-muted">Build your starting eleven</p>
-            </div>
-            
-            <div class="squad-info">
-                <div class="squad-stat">
-                    <span class="stat-label">Players:</span>
-                    <span class="stat-value" id="player-count">0/11</span>
-                </div>
-                <div class="squad-stat">
-                    <span class="stat-label">Rating:</span>
-                    <span class="stat-value" id="squad-rating">0</span>
-                </div>
-            </div>
-            
-            <div class="formation-selector">
-                <label>Formation:</label>
-                <select id="formation-select" class="search-input">
-                    <option value="4-3-3">4-3-3</option>
-                    <option value="4-4-2">4-4-2</option>
-                    <option value="4-5-1">4-5-1</option>
-                    <option value="3-5-2">3-5-2</option>
-                    <option value="3-4-3">3-4-3</option>
-                </select>
-            </div>
-            
-            <div class="pitch-container">
-                <div class="football-pitch" id="football-pitch">
-                    <!-- Formation positions will be rendered here -->
-                </div>
-            </div>
-        </div>
-    </main>
+if(params.get("room")){
 
-    <!-- ==========================================================================
-       SCREEN 7: FRIENDS
-       ========================================================================== -->
-    <main id="friends-screen" class="app-screen hidden">
-        <div class="friends-container">
-            <div class="friends-header">
-                <h2>Friends</h2>
-                <p class="text-muted">Add friends and play matches together</p>
-            </div>
-            
-            <div class="friends-sections">
-                <!-- Friend Requests -->
-                <div class="friends-section">
-                    <h3>Friend Requests</h3>
-                    <div id="friend-requests-list">
-                        <p class="text-muted">No pending friend requests</p>
-                    </div>
-                </div>
-                
-                <!-- Add Friend -->
-                <div class="friends-section">
-                    <h3>Add Friend</h3>
-                    <div class="add-friend-form">
-                        <input type="text" id="friend-email-input" class="search-input" placeholder="Enter friend's email" />
-                        <button id="send-friend-request-btn" class="btn btn-primary">Send Request</button>
-                    </div>
-                </div>
-                
-                <!-- Friends List -->
-                <div class="friends-section">
-                    <h3>My Friends</h3>
-                    <div id="friends-list">
-                        <p class="text-muted">No friends yet. Add some friends to play with!</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
+  document.getElementById("roomInput")
+    .value =
+    params.get("room").toUpperCase();
+}
 
-    <!-- ==========================================================================
-       SCREEN 8: MATCHMAKING (PLAY MENU)
-       ========================================================================== -->
-    <main id="matchmaking-screen" class="app-screen hidden">
-        <div class="play-menu-wrapper">
-            <!-- Play menu content will be injected by matchmaking.js -->
-            <div id="matchmaking-options" class="matchmaking-options">
-                <!-- Initial loading state -->
-                <div class="loading-container">
-                    <i class="fa-solid fa-spinner fa-spin text-gold"></i>
-                    <p class="text-muted mt-4">Loading play menu...</p>
-                </div>
-            </div>
-        </div>
-    </main>
 
-    <!-- ==========================================================================
-       SCREEN 9: MATCH PLAY
-       ========================================================================== -->
-    <main id="match-screen" class="app-screen hidden">
-        <div class="match-container">
-            <!-- Scoreboard -->
-            <div class="scoreboard">
-                <div class="scoreboard-team home">
-                    <div class="team-name" id="match-home-name">Home Team</div>
-                    <div class="team-score" id="match-home-score">0</div>
-                </div>
-                <div class="scoreboard-center">
-                    <div class="match-time" id="match-time">0'</div>
-                </div>
-                <div class="scoreboard-team away">
-                    <div class="team-name" id="match-away-name">Away Team</div>
-                    <div class="team-score" id="match-away-score">0</div>
-                </div>
-            </div>
+/* =========================================================
+   ERROR HANDLING
+   ========================================================= */
 
-            <!-- Football Field -->
-            <div class="field-container">
-                <div class="football-field" id="football-field">
-                    <!-- Field markings -->
-                    <div class="field-markings">
-                        <div class="halfway-line"></div>
-                        <div class="center-circle"></div>
-                        <div class="center-spot"></div>
-                        <div class="penalty-box-left"></div>
-                        <div class="penalty-box-right"></div>
-                        <div class="goal-area-left"></div>
-                        <div class="goal-area-right"></div>
-                        <div class="goal-left"></div>
-                        <div class="goal-right"></div>
-                    </div>
-                    
-                    <!-- Ball -->
-                    <div class="ball" id="ball"></div>
-                    
-                    <!-- Goal Indicators -->
-                    <div class="goal-indicator home-goal hidden" id="home-goal-indicator">
-                        <div class="goal-score" id="home-goal-score">0</div>
-                    </div>
-                    <div class="goal-indicator away-goal hidden" id="away-goal-indicator">
-                        <div class="goal-score" id="away-goal-score">0</div>
-                    </div>
-                    
-                    <!-- Attack Banner -->
-                    <div class="attack-banner hidden" id="attack-banner">
-                        <i class="fa-solid fa-bolt"></i>
-                        <span>Attack for <span id="attack-team">Team</span></span>
-                    </div>
-                    
-                    <!-- Goal Banner -->
-                    <div class="goal-banner hidden" id="goal-banner">
-                        <div class="goal-icon">⚽</div>
-                        <div class="goal-text">GOAL!</div>
-                        <div class="goal-scorer" id="goal-scorer">Player</div>
-                        <div class="goal-assist" id="goal-assist">Assist: Player</div>
-                        <div class="goal-minute" id="goal-minute">45'</div>
-                    </div>
-                    
-                    <!-- Half-Time Banner -->
-                    <div class="halftime-banner hidden" id="halftime-banner">
-                        <div class="halftime-text">HALF TIME</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
+window.addEventListener(
+  "unhandledrejection",
+  event=>{
+    console.error(event.reason);
 
-    <!-- ==========================================================================
-       SCREEN 10: ADMIN
-       ========================================================================== -->
-    <main id="admin-screen" class="app-screen hidden">
-        <div class="admin-container">
-            <div class="admin-header">
-                <h2>Admin Panel</h2>
-                <p class="text-muted">Manage database and settings</p>
-            </div>
-            
-            <div class="admin-nav">
-                <button class="admin-nav-item active" data-admin-section="players">Players</button>
-                <button class="admin-nav-item" data-admin-section="packs">Packs</button>
-                <button class="admin-nav-item" data-admin-section="settings">Settings</button>
-            </div>
-            
-            <div class="admin-content">
-                <!-- Players Section -->
-                <div id="admin-players" class="admin-section active">
-                    <h2 style="font-family: 'Oswald', sans-serif; color: var(--fc-neon); margin-bottom: 1.5rem;">PLAYER MANAGEMENT</h2>
-                    <div class="flex gap-4 mb-4">
-                        <input type="text" id="admin-player-search" class="search-input" placeholder="Search players...">
-                        <button id="admin-player-search-btn" class="btn btn-primary">Search</button>
-                    </div>
-                    <div id="admin-players-table">
-                        <table class="admin-table">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Name</th>
-                                    <th>Rating</th>
-                                    <th>Position</th>
-                                    <th>Rarity</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="admin-players-list">
-                                <!-- Player rows will be populated dynamically -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+    alert(
+      "Firebase error. Check your Realtime Database rules and Firebase config."
+    );
+  }
+);
 
-                <!-- Packs Section -->
-                <div id="admin-packs" class="admin-section">
-                    <h2 style="font-family: 'Oswald', sans-serif; color: var(--fc-neon); margin-bottom: 1.5rem;">PACK MANAGEMENT</h2>
-                    <div id="admin-packs-table">
-                        <table class="admin-table">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Name</th>
-                                    <th>Cost</th>
-                                    <th>Items</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="admin-packs-list">
-                                <!-- Pack rows will be populated dynamically -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+</script>
 
-                <!-- Settings Section -->
-                <div id="admin-settings" class="admin-section">
-                    <h2 style="font-family: 'Oswald', sans-serif; color: var(--fc-neon); margin-bottom: 1.5rem;">SETTINGS</h2>
-                    <div class="dash-card" style="padding: 1.5rem;">
-                        <h3>AI Settings</h3>
-                        <div class="form-group mt-4">
-                            <label>AI Market Activity</label>
-                            <select id="admin-ai-activity" class="filter-select">
-                                <option value="enabled">Enabled</option>
-                                <option value="disabled">Disabled</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>AI Listing Interval (minutes)</label>
-                            <input type="number" id="admin-ai-interval" class="search-input" value="5" min="1" max="60">
-                        </div>
-                        <button id="admin-save-ai-btn" class="btn btn-primary">Save AI Settings</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <!-- ==========================================================================
-       SCRIPTS
-       ========================================================================== -->
-    <script type="module" src="app.js"></script>
 </body>
 </html>
