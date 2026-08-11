@@ -1,9 +1,8 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
-
 <title>Hotel Murder</title>
 
 <link rel="manifest" href="./manifest.json">
@@ -14,95 +13,33 @@
 <meta name="apple-mobile-web-app-title" content="Hotel Murder">
 
 <style>
-
-*{
-  box-sizing:border-box;
-}
-
-html,
-body{
-  margin:0;
-  min-height:100%;
-}
-
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
 body{
   min-height:100vh;
-  background:
-    radial-gradient(
-      circle at top,
-      #202844 0%,
-      #0b0e16 48%,
-      #070910 100%
-    );
+  background:radial-gradient(circle at top,#202844 0%,#0b0e16 48%,#070910 100%);
   color:#fff;
-  font-family:
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    sans-serif;
-  padding:
-    env(safe-area-inset-top)
-    0
-    env(safe-area-inset-bottom);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
   overflow-x:hidden;
 }
-
-button,
-input,
-select,
-textarea{
-  font:inherit;
-}
-
-button{
-  border:0;
-  cursor:pointer;
-}
-
-.app{
-  width:100%;
-  max-width:900px;
-  margin:auto;
-  padding:18px;
-}
-
+button,input,select,textarea{font:inherit}
+button{border:0;cursor:pointer}
+.app{width:100%;max-width:900px;margin:auto;padding:18px}
 .card{
   background:rgba(22,27,42,.96);
   border:1px solid rgba(255,255,255,.09);
   border-radius:24px;
   padding:22px;
   margin-bottom:16px;
-  box-shadow:0 15px 40px rgba(0,0,0,.25);
+  box-shadow:0 15px 40px rgba(0,0,0,.25)
 }
-
-h1{
-  margin:0 0 8px;
-  font-size:38px;
-}
-
-h2{
-  margin-top:0;
-}
-
-h3{
-  margin-top:22px;
-}
-
-p{
-  color:#b2bad0;
-  line-height:1.55;
-}
-
-label{
-  display:block;
-  color:#9fa8c0;
-  font-size:14px;
-  margin-top:14px;
-}
-
-input,
-select,
-textarea{
+h1{margin:0 0 8px;font-size:38px}
+h2{margin-top:0}
+h3{margin-top:22px}
+p{color:#b2bad0;line-height:1.55}
+label{display:block;color:#9fa8c0;font-size:14px;margin-top:14px}
+input,select,textarea{
   width:100%;
   margin-top:7px;
   padding:14px;
@@ -110,1034 +47,309 @@ textarea{
   border:1px solid #343b50;
   background:#0e121d;
   color:#fff;
-  outline:none;
+  outline:none
 }
-
-textarea{
-  min-height:90px;
-  resize:vertical;
-}
-
+textarea{min-height:90px;resize:vertical}
 button{
-  width:100%;
-  padding:15px;
-  margin-top:10px;
-  border-radius:14px;
-  background:#718cff;
-  color:#fff;
-  font-weight:800;
+  width:100%;padding:15px;margin-top:10px;border-radius:14px;
+  background:#718cff;color:#fff;font-weight:800
 }
-
-button.secondary{
-  background:#272e40;
-}
-
-button.green{
-  background:#35a878;
-}
-
-button.red{
-  background:#d54d5d;
-}
-
-button.orange{
-  background:#c47d35;
-}
-
-button:disabled{
-  opacity:.45;
-  cursor:not-allowed;
-}
-
-.hidden{
-  display:none!important;
-}
-
-.center{
-  text-align:center;
-}
-
+button.secondary{background:#272e40}
+button.green{background:#35a878}
+button.red{background:#d54d5d}
+button.orange{background:#c47d35}
+button:disabled{opacity:.45;cursor:not-allowed}
+.hidden{display:none!important}
+.center{text-align:center}
 .room-code{
-  background:#0c1019;
-  padding:16px;
-  border-radius:15px;
-  font-size:30px;
-  font-weight:900;
-  letter-spacing:4px;
-  text-align:center;
-  margin:15px 0;
+  background:#0c1019;padding:16px;border-radius:15px;font-size:30px;
+  font-weight:900;letter-spacing:4px;text-align:center;margin:15px 0
 }
-
-.player{
-  background:#202638;
-  padding:13px;
-  border-radius:13px;
-  margin:7px 0;
-}
-
-.host{
-  color:#ffd36a;
-  margin-left:6px;
-}
-
-.role{
-  padding:18px;
-  border-radius:18px;
-  font-size:23px;
-  font-weight:900;
-  margin-bottom:18px;
-}
-
-.role.detective{
-  background:#26396e;
-}
-
-.role.murderer{
-  background:#672630;
-}
-
-.role.innocent{
-  background:#20543c;
-}
-
+.player{background:#202638;padding:13px;border-radius:13px;margin:7px 0}
+.host{color:#ffd36a;margin-left:6px}
+.role{padding:18px;border-radius:18px;font-size:23px;font-weight:900;margin-bottom:18px}
+.role.detective{background:#26396e}
+.role.murderer{background:#672630}
+.role.innocent{background:#20543c}
 .task{
-  background:#202638;
-  border:1px solid rgba(255,255,255,.07);
-  padding:15px;
-  border-radius:15px;
-  margin:9px 0;
+  background:#202638;border:1px solid rgba(255,255,255,.07);
+  padding:15px;border-radius:15px;margin:9px 0
 }
-
-.task.locked{
-  opacity:.65;
-}
-
-.task-row{
-  display:flex;
-  gap:12px;
-  align-items:flex-start;
-}
-
-.task-checkbox{
-  width:24px!important;
-  height:24px;
-  margin:0!important;
-  flex:none;
-  accent-color:#718cff;
-}
-
-.task-text{
-  flex:1;
-}
-
-.task-time{
-  font-size:13px;
-  color:#8fa3ff;
-  font-weight:800;
-  margin-bottom:5px;
-}
-
-.task-status{
-  margin-top:7px;
-  font-size:12px;
-  color:#9099ae;
-}
-
-.task.done{
-  opacity:.55;
-}
-
-.locked-text{
-  color:#8c95aa;
-  font-style:italic;
-}
-
-.warning{
-  background:#382c19;
-  color:#ffd88a;
-  padding:14px;
-  border-radius:14px;
-  margin:12px 0;
-}
-
-.success{
-  background:#163b2b;
-  color:#9bf0c4;
-  padding:14px;
-  border-radius:14px;
-  margin:12px 0;
-}
-
-.info{
-  background:#192842;
-  color:#b9d4ff;
-  padding:14px;
-  border-radius:14px;
-  margin:12px 0;
-}
-
-.timer{
-  font-size:58px;
-  font-weight:900;
-  text-align:center;
-  letter-spacing:2px;
-  margin:15px 0;
-}
-
-.phase{
-  font-size:14px;
-  font-weight:800;
-  color:#aab5d0;
-  text-transform:uppercase;
-  letter-spacing:1px;
-}
-
-.big{
-  font-size:20px;
-  line-height:1.5;
-}
-
-.small{
-  color:#858ea5;
-  font-size:13px;
-  line-height:1.5;
-}
-
-.row{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-}
-
+.task.locked{opacity:.65}
+.task-row{display:flex;gap:12px;align-items:flex-start}
+.task-checkbox{width:24px!important;height:24px;margin:0!important;flex:none;accent-color:#718cff}
+.task-text{flex:1}
+.task-time{font-size:13px;color:#8fa3ff;font-weight:800;margin-bottom:5px}
+.task-status{margin-top:7px;font-size:12px;color:#9099ae}
+.task.done{opacity:.55}
+.locked-text{color:#8c95aa;font-style:italic}
+.warning{background:#382c19;color:#ffd88a;padding:14px;border-radius:14px;margin:12px 0}
+.success{background:#163b2b;color:#9bf0c4;padding:14px;border-radius:14px;margin:12px 0}
+.info{background:#192842;color:#b9d4ff;padding:14px;border-radius:14px;margin:12px 0}
+.timer{font-size:58px;font-weight:900;text-align:center;letter-spacing:2px;margin:15px 0}
+.phase{font-size:14px;font-weight:800;color:#aab5d0;text-transform:uppercase;letter-spacing:1px}
+.big{font-size:20px;line-height:1.5}
+.small{color:#858ea5;font-size:13px;line-height:1.5}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .badge{
-  display:inline-block;
-  padding:7px 11px;
-  border-radius:999px;
-  background:#262d40;
-  color:#b7c0d8;
-  font-size:13px;
-  margin:3px;
+  display:inline-block;padding:7px 11px;border-radius:999px;
+  background:#262d40;color:#b7c0d8;font-size:13px;margin:3px
 }
-
-.divider{
-  height:1px;
-  background:#2c3345;
-  margin:20px 0;
-}
-
-.progress{
-  height:10px;
-  background:#0d111a;
-  border-radius:999px;
-  overflow:hidden;
-  margin-top:10px;
-}
-
-.progress-bar{
-  height:100%;
-  background:#718cff;
-  width:0%;
-}
-
-.count-card{
-  background:#202638;
-  padding:15px;
-  border-radius:15px;
-  margin:8px 0;
-}
-
-.count-number{
-  font-size:28px;
-  font-weight:900;
-}
-
+.divider{height:1px;background:#2c3345;margin:20px 0}
+.progress{height:10px;background:#0d111a;border-radius:999px;overflow:hidden;margin-top:10px}
+.progress-bar{height:100%;background:#718cff;width:0%}
+.count-card{background:#202638;padding:15px;border-radius:15px;margin:8px 0}
+.count-number{font-size:28px;font-weight:900}
 .reset-fixed{
-  position:fixed;
-  top:calc(12px + env(safe-area-inset-top));
-  right:12px;
-  z-index:9000;
-  width:auto;
-  padding:11px 15px;
-  font-size:13px;
-  box-shadow:0 8px 25px rgba(0,0,0,.35);
+  position:fixed;top:calc(12px + env(safe-area-inset-top));right:12px;
+  z-index:9000;width:auto;padding:11px 15px;font-size:13px;
+  box-shadow:0 8px 25px rgba(0,0,0,.35)
 }
-
 .call-stack{
-  position:fixed;
-  left:14px;
-  right:14px;
-  top:calc(14px + env(safe-area-inset-top));
-  z-index:99999;
-  pointer-events:none;
+  position:fixed;left:14px;right:14px;top:calc(14px + env(safe-area-inset-top));
+  z-index:99999;pointer-events:none
 }
-
 .call-banner{
-  background:#6f8cff;
-  border-radius:20px;
-  padding:20px;
-  margin-bottom:10px;
-  text-align:center;
-  box-shadow:0 15px 50px rgba(0,0,0,.5);
-  pointer-events:auto;
+  background:#6f8cff;border-radius:20px;padding:20px;margin-bottom:10px;
+  text-align:center;box-shadow:0 15px 50px rgba(0,0,0,.5);pointer-events:auto
 }
-
-.call-banner h2{
-  margin:0 0 5px;
-}
-
-.call-banner p{
-  color:#fff;
-  margin:0;
-}
-
-.call-banner button{
-  background:#111827;
-}
-
-/* =====================================================
-DETECTIVE NOTEBOOK
-===================================================== */
-
+.call-banner h2{margin:0 0 5px}
+.call-banner p{color:#fff;margin:0}
+.call-banner button{background:#111827}
 .detective-section{
-  background:#151b29;
-  border:1px solid rgba(113,140,255,.18);
-  border-radius:18px;
-  padding:15px;
-  margin-top:14px;
+  background:#151b29;border:1px solid rgba(113,140,255,.18);
+  border-radius:18px;padding:15px;margin-top:14px
 }
-
-.detective-title{
-  font-size:17px;
-  font-weight:900;
-  margin-bottom:8px;
-}
-
+.detective-title{font-size:17px;font-weight:900;margin-bottom:8px}
 .board-card{
-  background:#202638;
-  border-radius:15px;
-  padding:14px;
-  margin:9px 0;
+  background:#202638;border-radius:15px;padding:14px;margin:9px 0
 }
-
-.board-meta{
-  font-size:12px;
-  color:#8fa3ff;
-  font-weight:800;
-  margin-bottom:6px;
-}
-
+.board-meta{font-size:12px;color:#8fa3ff;font-weight:800;margin-bottom:6px}
 .board-small{
-  width:auto;
-  padding:9px 12px;
-  margin-top:8px;
-  font-size:12px;
-  background:#30384d;
+  width:auto;padding:9px 12px;margin-top:8px;font-size:12px;background:#30384d
 }
-
 .empty{
-  background:#101522;
-  padding:15px;
-  border-radius:14px;
-  color:#8791a6;
-  text-align:center;
+  background:#101522;padding:15px;border-radius:14px;
+  color:#8791a6;text-align:center
 }
-
 .answer-card{
-  background:#171d2d;
-  border:1px solid rgba(255,255,255,.07);
-  padding:15px;
-  border-radius:16px;
-  margin:10px 0;
+  background:#171d2d;border:1px solid rgba(255,255,255,.07);
+  padding:15px;border-radius:16px;margin:10px 0
 }
-
-.answer-head{
-  display:flex;
-  justify-content:space-between;
-  gap:8px;
-}
-
-.answer-name{
-  font-weight:900;
-}
-
-.answer-time{
-  font-size:12px;
-  color:#8fa3ff;
-}
-
+.answer-head{display:flex;justify-content:space-between;gap:8px}
+.answer-name{font-weight:900}
+.answer-time{font-size:12px;color:#8fa3ff}
 @media(max-width:600px){
-
-  .row{
-    grid-template-columns:1fr;
-  }
-
-  h1{
-    font-size:31px;
-  }
-
-  .timer{
-    font-size:48px;
-  }
-
+  .row{grid-template-columns:1fr}
+  h1{font-size:31px}
+  .timer{font-size:48px}
 }
-
 </style>
 </head>
 
-
 <body>
-
 <div id="callStack"></div>
 
 <div class="app">
 
-
-<!-- =================================================
-HOME
-================================================= -->
-
 <section id="home">
-
   <div class="card">
+    <h1>🕵️ Hotel Murder</h1>
+    <p>Real-time fictional mystery game for 2–4 players.</p>
 
-    <h1>
-      🕵️ Hotel Murder
-    </h1>
+    <label>Your name</label>
+    <input id="nameInput" placeholder="Your name" autocomplete="off">
 
-    <p>
-      Real-time fictional mystery game for 2–4 players.
-    </p>
+    <label>Room code</label>
+    <input id="roomInput" placeholder="Example: HOTEL123" autocomplete="off">
 
-    <label>
-      Your name
-    </label>
-
-    <input
-      id="nameInput"
-      placeholder="Your name"
-      autocomplete="off"
-    >
-
-    <label>
-      Room code
-    </label>
-
-    <input
-      id="roomInput"
-      placeholder="Example: HOTEL123"
-      autocomplete="off"
-    >
-
-    <button
-      onclick="createRoom()"
-    >
-      CREATE NEW ROOM
-    </button>
-
-    <button
-      class="secondary"
-      onclick="joinRoom()"
-    >
-      JOIN ROOM
-    </button>
-
+    <button onclick="createRoom()">CREATE NEW ROOM</button>
+    <button class="secondary" onclick="joinRoom()">JOIN ROOM</button>
   </div>
 
-
   <div class="card">
-
-    <h2>
-      🎮 Rules
-    </h2>
-
+    <h2>🎮 Rules</h2>
     <p>
       🕵️ 1 Detective<br>
       🔪 1 Murderer<br>
       👤 Everyone else = Innocent
     </p>
-
     <p>
-      The Detective waits outside,
-      prepares questions, then returns
-      for the investigation.
+      The Detective waits outside, prepares questions, then returns for the investigation.
     </p>
-
   </div>
-
 </section>
 
-
-<!-- =================================================
-CREATE
-================================================= -->
-
-<section
-  id="createScreen"
-  class="hidden"
->
-
+<section id="createScreen" class="hidden">
   <div class="card">
+    <h1>🏨 Create Room</h1>
 
-    <h1>
-      🏨 Create Room
-    </h1>
-
-    <label>
-      Players
-    </label>
-
+    <label>Players</label>
     <select id="playerLimit">
-
-      <option value="2">
-        2 Players
-      </option>
-
-      <option value="3">
-        3 Players
-      </option>
-
-      <option
-        value="4"
-        selected
-      >
-        4 Players
-      </option>
-
+      <option value="2">2 Players</option>
+      <option value="3">3 Players</option>
+      <option value="4" selected>4 Players</option>
     </select>
 
-
-    <button
-      onclick="finishCreateRoom()"
-    >
-      CREATE ROOM
-    </button>
-
-
-    <button
-      class="secondary"
-      onclick="backHome()"
-    >
-      BACK
-    </button>
-
+    <button onclick="finishCreateRoom()">CREATE ROOM</button>
+    <button class="secondary" onclick="backHome()">BACK</button>
   </div>
-
 </section>
 
-
-<!-- =================================================
-LOBBY
-================================================= -->
-
-<section
-  id="lobby"
-  class="hidden"
->
-
+<section id="lobby" class="hidden">
   <div class="card center">
-
-    <h1>
-      🏨 Lobby
-    </h1>
-
-    <p>
-      Give the room code to everyone.
-    </p>
-
-    <div
-      id="roomDisplay"
-      class="room-code"
-    ></div>
-
-    <div
-      id="lobbyPlayerCount"
-    ></div>
-
+    <h1>🏨 Lobby</h1>
+    <p>Give the room code to everyone.</p>
+    <div id="roomDisplay" class="room-code"></div>
+    <div id="lobbyPlayerCount"></div>
   </div>
-
 
   <div class="card">
-
-    <h2>
-      👥 Players
-    </h2>
-
-    <div
-      id="playersList"
-    ></div>
-
+    <h2>👥 Players</h2>
+    <div id="playersList"></div>
   </div>
 
-
-  <div
-    id="hostPanel"
-    class="card hidden"
-  >
-
-    <h2>
-      👑 Host
-    </h2>
-
-    <p
-      id="hostInfo"
-    ></p>
-
-    <button
-      id="startButton"
-      onclick="startRound()"
-      disabled
-    >
-      START ROUND
-    </button>
-
-    <button
-      class="red"
-      onclick="resetGame()"
-    >
-      🔄 RESET → LOBBY
-    </button>
-
+  <div id="hostPanel" class="card hidden">
+    <h2>👑 Host</h2>
+    <p id="hostInfo"></p>
+    <button id="startButton" onclick="startRound()" disabled>START ROUND</button>
+    <button class="red" onclick="resetGame()">🔄 RESET → LOBBY</button>
   </div>
-
 </section>
 
+<section id="game" class="hidden">
 
-<!-- =================================================
-GAME
-================================================= -->
-
-<section
-  id="game"
-  class="hidden"
->
-
-  <button
-    id="resetFixed"
-    class="red reset-fixed hidden"
-    onclick="resetGame()"
-  >
-    🔄 RESET
-  </button>
-
-
-  <!-- CLOCK -->
+  <button id="resetFixed" class="red reset-fixed hidden" onclick="resetGame()">🔄 RESET</button>
 
   <div class="card center">
+    <div id="phaseText" class="phase">ROUND</div>
 
-    <div
-      id="phaseText"
-      class="phase"
-    >
-      ROUND
+    <div id="detectiveClockArea" class="hidden">
+      <div id="globalTimer" class="timer">--:--</div>
+      <p>Detective countdown</p>
     </div>
 
-
-    <!-- ONLY DETECTIVE -->
-
-    <div
-      id="detectiveClockArea"
-      class="hidden"
-    >
-
-      <div
-        id="globalTimer"
-        class="timer"
-      >
-        --:--
-      </div>
-
-      <p>
-        Detective countdown
-      </p>
-
+    <div id="normalClockArea" class="hidden">
+      <div id="normalClock" class="big">--:--:--</div>
+      <p>Current game time</p>
     </div>
-
-
-    <!-- EVERYONE ELSE -->
-
-    <div
-      id="normalClockArea"
-      class="hidden"
-    >
-
-      <div
-        id="normalClock"
-        class="big"
-      >
-        --:--:--
-      </div>
-
-      <p>
-        Current game time
-      </p>
-
-    </div>
-
   </div>
 
-
-  <!-- CALLS -->
-
   <div class="card">
-
-    <h2>
-      📞 Call Everyone
-    </h2>
-
-    <p>
-      Everyone currently connected receives the call.
-    </p>
+    <h2>📞 Call Everyone</h2>
+    <p>Everyone currently connected gets the alert.</p>
 
     <div class="row">
-
-      <button
-        onclick="makeCall('Lobby')"
-      >
-        📍 CALL TO LOBBY
-      </button>
-
-      <button
-        class="orange"
-        onclick="makeCall('Cafe')"
-      >
-        ☕ CALL TO CAFE
-      </button>
-
+      <button onclick="makeCall('Lobby')">📍 CALL TO LOBBY</button>
+      <button class="orange" onclick="makeCall('Cafe')">☕ CALL TO CAFE</button>
     </div>
-
   </div>
 
+  <div id="secretCard" class="card">Loading your secret...</div>
 
-  <!-- SECRET -->
-
-  <div
-    id="secretCard"
-    class="card"
-  >
-    Loading your secret...
-  </div>
-
-
-  <!-- DETECTIVE WAITING -->
-
-  <div
-    id="detectiveWaiting"
-    class="card hidden center"
-  >
-
-    <h2>
-      🕵️ Detective Waiting
-    </h2>
-
-    <p>
-      Leave the game area.
-    </p>
-
-    <div
-      id="detectiveTimer"
-      class="timer"
-    >
-      05:00
-    </div>
-
+  <div id="detectiveWaiting" class="card hidden center">
+    <h2>🕵️ Detective Waiting</h2>
+    <p>Leave the game area.</p>
+    <div id="detectiveTimer" class="timer">05:00</div>
     <div class="success">
+      While you wait, prepare your questions in your private Detective Notebook below.
+    </div>
+  </div>
 
-      While you wait,
-      prepare your questions
-      in your Detective Notebook.
+  <div id="normalWaiting" class="card hidden">
+    <h2>🤫 Complete Your Tasks</h2>
+    <p>The Detective's murder countdown is hidden from you.</p>
+  </div>
 
+  <!-- Detective notebook -->
+  <div id="detectiveNotebook" class="card hidden">
+
+    <h2>🔎 Detective Notebook</h2>
+    <p>Prepare while outside. Use it again when questioning everyone.</p>
+
+    <div class="detective-section">
+      <div class="detective-title">❓ Questions</div>
+      <input id="prepQuestionInput" maxlength="180" placeholder="Example: Where were you at 12:30?">
+      <button class="green" onclick="addPrepQuestion()">➕ ADD QUESTION</button>
+      <div id="prepQuestionsList"></div>
+    </div>
+
+    <div class="detective-section">
+      <div class="detective-title">🗣️ Ask + Record Answer</div>
+
+      <label>Suspect</label>
+      <select id="interviewSuspect"></select>
+
+      <label>Question</label>
+      <select id="interviewQuestion"></select>
+
+      <label>Answer</label>
+      <textarea id="interviewAnswer" maxlength="500" placeholder="Write what they said..."></textarea>
+
+      <button onclick="saveInterview()">💾 SAVE ANSWER</button>
+
+      <div id="interviewList"></div>
+    </div>
+
+    <div class="detective-section">
+      <div class="detective-title">📍 Locations</div>
+
+      <input id="locationInput" maxlength="120" placeholder="Example: Reception">
+
+      <button onclick="addInvestigationLocation()">📍 ADD LOCATION</button>
+
+      <div id="locationsList"></div>
+    </div>
+
+    <div class="detective-section">
+      <div class="detective-title">🧩 Clues</div>
+
+      <textarea id="clueInput" maxlength="300" placeholder="Example: Lilly said she was at Reception."></textarea>
+
+      <button class="green" onclick="addInvestigationClue()">🔎 ADD CLUE</button>
+
+      <div id="cluesList"></div>
+    </div>
+
+    <div class="detective-section">
+      <div class="detective-title">🧠 Case Theory</div>
+
+      <textarea id="detectiveTheory" maxlength="800" placeholder="What do you think happened?"></textarea>
+
+      <button class="secondary" onclick="saveTheory()">💾 SAVE THEORY</button>
     </div>
 
   </div>
 
+  <div id="investigation" class="card hidden">
+    <h2>🔎 Investigation</h2>
 
-  <!-- NORMAL -->
-
-  <div
-    id="normalWaiting"
-    class="card hidden"
-  >
-
-    <h2>
-      🤫 Complete Your Tasks
-    </h2>
-
-    <p>
-      The Detective's countdown is hidden from you.
-    </p>
-
-  </div>
-
-
-  <!-- =================================================
-  DETECTIVE NOTEBOOK
-  ================================================= -->
-
-  <div
-    id="detectiveNotebook"
-    class="card hidden"
-  >
-
-    <h2>
-      🔎 Detective Notebook
-    </h2>
-
-    <p>
-      Prepare questions while outside.
-      Use the notebook again during the investigation.
-    </p>
-
-
-    <!-- QUESTIONS -->
-
-    <div class="detective-section">
-
-      <div class="detective-title">
-        ❓ Questions
-      </div>
-
-      <input
-        id="prepQuestionInput"
-        maxlength="180"
-        placeholder="Example: Where were you at 12:30?"
-      >
-
-      <button
-        class="green"
-        onclick="addPrepQuestion()"
-      >
-        ➕ ADD QUESTION
-      </button>
-
-      <div
-        id="prepQuestionsList"
-      ></div>
-
-    </div>
-
-
-    <!-- INTERVIEWS -->
-
-    <div class="detective-section">
-
-      <div class="detective-title">
-        🗣️ Ask + Record Answer
-      </div>
-
-      <label>
-        Suspect
-      </label>
-
-      <select
-        id="interviewSuspect"
-      ></select>
-
-
-      <label>
-        Question
-      </label>
-
-      <select
-        id="interviewQuestion"
-      ></select>
-
-
-      <label>
-        Answer
-      </label>
-
-      <textarea
-        id="interviewAnswer"
-        maxlength="500"
-        placeholder="Write what they said..."
-      ></textarea>
-
-
-      <button
-        onclick="saveInterview()"
-      >
-        💾 SAVE ANSWER
-      </button>
-
-      <div
-        id="interviewList"
-      ></div>
-
-    </div>
-
-
-    <!-- LOCATIONS -->
-
-    <div class="detective-section">
-
-      <div class="detective-title">
-        📍 Locations
-      </div>
-
-      <input
-        id="locationInput"
-        maxlength="120"
-        placeholder="Example: Reception"
-      >
-
-      <button
-        onclick="addInvestigationLocation()"
-      >
-        📍 ADD LOCATION
-      </button>
-
-      <div
-        id="locationsList"
-      ></div>
-
-    </div>
-
-
-    <!-- CLUES -->
-
-    <div class="detective-section">
-
-      <div class="detective-title">
-        🧩 Clues
-      </div>
-
-      <textarea
-        id="clueInput"
-        maxlength="300"
-        placeholder="Example: Lilly said she was at Reception."
-      ></textarea>
-
-      <button
-        class="green"
-        onclick="addInvestigationClue()"
-      >
-        🔎 ADD CLUE
-      </button>
-
-      <div
-        id="cluesList"
-      ></div>
-
-    </div>
-
-
-    <!-- THEORY -->
-
-    <div class="detective-section">
-
-      <div class="detective-title">
-        🧠 Case Theory
-      </div>
-
-      <textarea
-        id="detectiveTheory"
-        maxlength="800"
-        placeholder="What do you think happened?"
-      ></textarea>
-
-      <button
-        class="secondary"
-        onclick="saveTheory()"
-      >
-        💾 SAVE THEORY
-      </button>
-
-    </div>
-
-  </div>
-
-
-  <!-- =================================================
-  INVESTIGATION
-  ================================================= -->
-
-  <div
-    id="investigation"
-    class="card hidden"
-  >
-
-    <h2>
-      🔎 Investigation
-    </h2>
-
-
-    <div
-      id="caseFile"
-    ></div>
-
+    <div id="caseFile"></div>
 
     <div class="divider"></div>
 
-
-    <h3>
-      📊 Task Progress
-    </h3>
-
-
-    <div
-      id="taskProgress"
-    ></div>
-
+    <h3>📊 Task Progress</h3>
+    <div id="taskProgress"></div>
 
     <div class="divider"></div>
 
-
-    <h3>
-      📒 Notebook Summary
-    </h3>
-
-
-    <div
-      id="detectiveSummary"
-    ></div>
-
+    <h3>📒 Notebook Summary</h3>
+    <div id="detectiveSummary"></div>
 
     <div class="divider"></div>
 
-
-    <h3>
-      🗳️ Final Accusation
-    </h3>
-
-
-    <div
-      id="accusationButtons"
-    ></div>
-
-
-    <div
-      id="result"
-    ></div>
-
+    <h3>🗳️ Final Accusation</h3>
+    <div id="accusationButtons"></div>
+    <div id="result"></div>
   </div>
 
-
-  <!-- INVESTIGATION TIMER -->
-
-  <div
-    id="investigationTimerCard"
-    class="card hidden center"
-  >
-
-    <h2>
-      🔎 Investigation Time
-    </h2>
-
-    <div
-      id="investigationTimer"
-      class="timer"
-    >
-      05:30
-    </div>
-
-    <p>
-      Make your final accusation before time runs out.
-    </p>
-
+  <div id="investigationTimerCard" class="card hidden center">
+    <h2>🔎 Investigation Time</h2>
+    <div id="investigationTimer" class="timer">05:30</div>
+    <p>Make your final accusation before time runs out.</p>
   </div>
 
 </section>
-
 </div>
 
 
@@ -1145,9 +357,7 @@ GAME
 
 import {
   initializeApp
-}
-from
-"https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
 
 import {
   getDatabase,
@@ -1158,10 +368,9 @@ import {
   remove,
   push,
   onValue,
-  onDisconnect
-}
-from
-"https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
+  onDisconnect,
+  runTransaction
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
 
 
 /* =====================================================
@@ -1169,71 +378,32 @@ FIREBASE
 ===================================================== */
 
 const firebaseConfig = {
-
-  apiKey:
-    "AIzaSyCugS0qHKstGZAr5dvzm-DaLZAIDugo",
-
-  authDomain:
-    "money-e560a.firebaseapp.com",
-
-  databaseURL:
-    "https://money-e560a-default-rtdb.firebaseio.com",
-
-  projectId:
-    "money-e560a",
-
-  storageBucket:
-    "money-e560a.firebasestorage.app",
-
-  messagingSenderId:
-    "477551627159",
-
-  appId:
-    "1:477551627159:web:b19f853905331f71ee92d2",
-
-  measurementId:
-    "G-YYQD2E5J7J"
-
+  apiKey:"AIzaSyCugS0qHKstGZAr5dvzm-DaLZAIDugo",
+  authDomain:"money-e560a.firebaseapp.com",
+  databaseURL:"https://money-e560a-default-rtdb.firebaseio.com",
+  projectId:"money-e560a",
+  storageBucket:"money-e560a.firebasestorage.app",
+  messagingSenderId:"477551627159",
+  appId:"1:477551627159:web:b19f853905331f71ee92d2",
+  measurementId:"G-YYQD2E5J7J"
 };
 
-
-const app =
-  initializeApp(
-    firebaseConfig
-  );
-
-
-const db =
-  getDatabase(
-    app
-  );
+const app=initializeApp(firebaseConfig);
+const db=getDatabase(app);
 
 
 /* =====================================================
-PLAYER ID
+PLAYER
 ===================================================== */
 
-let playerId =
-  localStorage.getItem(
-    "hotelMurderPlayerId"
-  );
-
+let playerId=localStorage.getItem("hotelMurderPlayerId");
 
 if(!playerId){
+  playerId=
+    "p_"+Date.now().toString(36)+"_"+
+    Math.random().toString(36).substring(2,10);
 
-  playerId =
-    "p_" +
-    Date.now().toString(36) +
-    "_" +
-    Math.random()
-      .toString(36)
-      .substring(2,10);
-
-  localStorage.setItem(
-    "hotelMurderPlayerId",
-    playerId
-  );
-
+  localStorage.setItem("hotelMurderPlayerId",playerId);
 }
 
 
@@ -1241,38 +411,30 @@ if(!playerId){
 STATE
 ===================================================== */
 
-let roomCode = "";
-let myName = "";
-let roomData = null;
-let mySecret = null;
+let roomCode="";
+let myName="";
+let roomData=null;
+let mySecret=null;
 
-let globalInterval = null;
-let lastCallId = null;
+let globalInterval=null;
+let lastCallId=null;
 
-let roomListenerStarted = false;
-let taskListenerStarted = false;
-let boardListenerStarted = false;
+let roomListenerStarted=false;
+let taskListenerStarted=false;
+let boardListenerStarted=false;
 
-let serverTimeOffset = 0;
+let serverTimeOffset=0;
 
 
 /* =====================================================
 TIMINGS
 ===================================================== */
 
-const DETECTIVE_WAIT =
-  5 * 60 * 1000;
+const DETECTIVE_WAIT=5*60*1000;
+const INVESTIGATION_TIME=5*60*1000+30*1000;
 
-const INVESTIGATION_TIME =
-  5 * 60 * 1000 +
-  30 * 1000;
-
-const MIN_MURDER_DELAY =
-  2 * 60 * 1000;
-
-const MAX_MURDER_DELAY =
-  3 * 60 * 1000 +
-  30 * 1000;
+const MIN_MURDER_DELAY=2*60*1000;
+const MAX_MURDER_DELAY=3*60*1000+30*1000;
 
 
 /* =====================================================
@@ -1280,27 +442,14 @@ SERVER TIME
 ===================================================== */
 
 onValue(
-  ref(
-    db,
-    ".info/serverTimeOffset"
-  ),
-  snapshot=>{
-
-    serverTimeOffset =
-      Number(
-        snapshot.val() ||
-        0
-      );
-
+  ref(db,".info/serverTimeOffset"),
+  snap=>{
+    serverTimeOffset=Number(snap.val()||0);
   }
 );
 
-
 function serverNow(){
-
-  return Date.now() +
-    serverTimeOffset;
-
+  return Date.now()+serverTimeOffset;
 }
 
 
@@ -1308,8 +457,7 @@ function serverNow(){
 DATA
 ===================================================== */
 
-const locations = [
-
+const locations=[
   "Hotel Lobby Seating",
   "Hotel Reception",
   "Hotel Staircase",
@@ -1324,12 +472,9 @@ const locations = [
   "Hotel Elevator Area",
   "Hotel Corner Seating",
   "Hotel Side Hallway"
-
 ];
 
-
-const activityTemplates = [
-
+const activityTemplates=[
   "Sit quietly at {location}.",
   "Walk around {location}.",
   "Stand for a moment at {location}.",
@@ -1341,12 +486,9 @@ const activityTemplates = [
   "Stay around {location} for a short moment.",
   "Walk past {location}, then continue normally.",
   "Spend a moment near {location} before moving on."
-
 ];
 
-
-const actionTemplates = [
-
+const actionTemplates=[
   "Go to {location} and stay there briefly.",
   "Move to {location}, then continue normally.",
   "Visit {location} for a short moment.",
@@ -1355,45 +497,32 @@ const actionTemplates = [
   "Walk to {location} and look around briefly.",
   "Head toward {location}, pause, then continue.",
   "Spend a short moment at {location}, then leave."
-
 ];
 
-
-const murderTemplates = [
-
+const murderTemplates=[
   "Be at {location} at {time}. The fictional murder event happens there.",
   "Reach {location} when the clock reaches {time} for the fictional murder event.",
   "At {time}, go to {location}. This is the fictional murder point.",
   "Be near {location} at {time} for the fictional murder event."
-
 ];
 
-
-const afterMurderTemplates = [
-
+const afterMurderTemplates=[
   "Leave {location} and continue normally.",
   "Move away from {location} after the fictional event.",
   "After the fictional incident, leave {location}.",
   "Continue to another area after leaving {location}."
-
 ];
 
-
-const victims = [
-
+const victims=[
   "a fictional hotel guest",
   "a fictional visitor",
   "a fictional guest"
-
 ];
 
-
-const cases = [
-
+const cases=[
   "A fictional hotel guest was found dead in the story.",
   "A fictional visitor was found dead in the story.",
   "A fictional guest was discovered dead in the story."
-
 ];
 
 
@@ -1401,499 +530,232 @@ const cases = [
 HELPERS
 ===================================================== */
 
-function random(array){
-
-  return array[
-    Math.floor(
-      Math.random() *
-      array.length
-    )
-  ];
-
+function random(arr){
+  return arr[Math.floor(Math.random()*arr.length)];
 }
 
+function shuffle(arr){
+  const a=[...arr];
 
-function shuffle(array){
-
-  const result =
-    [...array];
-
-  for(
-    let i =
-      result.length - 1;
-    i > 0;
-    i--
-  ){
-
-    const j =
-      Math.floor(
-        Math.random() *
-        (i + 1)
-      );
-
-    [
-      result[i],
-      result[j]
-    ] =
-    [
-      result[j],
-      result[i]
-    ];
-
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
   }
 
-  return result;
-
+  return a;
 }
-
 
 function pad(n){
-
-  return String(n)
-    .padStart(2,"0");
-
+  return String(n).padStart(2,"0");
 }
-
 
 function clockText(date){
+  let h=date.getHours();
 
-  let h =
-    date.getHours();
+  const m=pad(date.getMinutes());
+  const s=pad(date.getSeconds());
 
-  const m =
-    pad(
-      date.getMinutes()
-    );
+  const period=h>=12?"PM":"AM";
 
-  const s =
-    pad(
-      date.getSeconds()
-    );
+  h=h%12;
 
-  const period =
-    h >= 12
-    ? "PM"
-    : "AM";
-
-  h =
-    h % 12;
-
-  if(h === 0){
-    h = 12;
-  }
+  if(h===0)h=12;
 
   return `${h}:${m}:${s} ${period}`;
-
 }
-
 
 function shortClock(date){
+  let h=date.getHours();
 
-  let h =
-    date.getHours();
+  const m=pad(date.getMinutes());
 
-  const m =
-    pad(
-      date.getMinutes()
-    );
+  const period=h>=12?"PM":"AM";
 
-  const period =
-    h >= 12
-    ? "PM"
-    : "AM";
+  h=h%12;
 
-  h =
-    h % 12;
-
-  if(h === 0){
-    h = 12;
-  }
+  if(h===0)h=12;
 
   return `${h}:${m} ${period}`;
-
 }
-
 
 function formatDuration(ms){
+  const s=Math.max(0,Math.ceil(ms/1000));
 
-  const s =
-    Math.max(
-      0,
-      Math.ceil(
-        ms / 1000
-      )
-    );
-
-  return (
-    pad(
-      Math.floor(
-        s / 60
-      )
-    ) +
-    ":" +
-    pad(
-      s % 60
-    )
+  return(
+    pad(Math.floor(s/60))+
+    ":"+
+    pad(s%60)
   );
-
 }
 
-
 function escapeHtml(value){
-
   return String(value)
     .replaceAll("&","&amp;")
     .replaceAll("<","&lt;")
     .replaceAll(">","&gt;")
     .replaceAll('"',"&quot;")
     .replaceAll("'","&#039;");
-
 }
 
-
 function gameRef(path=""){
-
-  return ref(
-    db,
-    "rooms/" +
-    roomCode +
-    (
-      path
-      ? "/" + path
-      : ""
-    )
-  );
-
+  return ref(db,"rooms/"+roomCode+(path?"/"+path:""));
 }
 
 
 /* =====================================================
-TASKS
+TASK CREATION
 ===================================================== */
 
-function createTask(
-  id,
-  unlockAt,
-  description
-){
-
-  return {
-
+function createTask(id,unlockAt,description){
+  return{
     id,
-
     unlockAt,
-
-    unlockText:
-      shortClock(
-        new Date(
-          unlockAt
-        )
-      ),
-
+    unlockText:shortClock(new Date(unlockAt)),
     description
-
   };
-
 }
 
-
-function uniqueLocation(
-  used,
-  forbidden
-){
+function uniqueLocation(used,forbidden){
 
   let location;
 
   do{
-
-    location =
-      random(
-        locations
-      );
-
-  }
-  while(
-    used.includes(location) ||
-    location === forbidden
+    location=random(locations);
+  }while(
+    used.includes(location)||
+    location===forbidden
   );
 
   used.push(location);
-
   return location;
-
 }
 
+function makeUnlockTimes(now,detectiveEnd,count){
 
-function makeUnlockTimes(
-  now,
-  detectiveEnd,
-  count
-){
+  const start=now+15000;
+  const end=Math.max(start+1000,detectiveEnd-20000);
 
-  const start =
-    now +
-    15000;
+  const values=[];
 
-  const end =
-    Math.max(
-      start +
-      1000,
-      detectiveEnd -
-      20000
-    );
+  for(let i=0;i<count;i++){
 
-  const values = [];
+    const fraction=(i+1)/(count+1);
 
-  for(
-    let i = 0;
-    i < count;
-    i++
-  ){
+    const spread=(Math.random()-.5)*40000;
 
-    const fraction =
-      (i + 1) /
-      (count + 1);
-
-    const spread =
-      (
-        Math.random() -
-        0.5
-      ) *
-      40000;
-
-    let time =
-      start +
-      (
-        end -
-        start
-      ) *
-      fraction +
+    let t=
+      start+
+      (end-start)*fraction+
       spread;
 
-    time =
-      Math.max(
-        start,
-        Math.min(
-          end,
-          time
-        )
-      );
+    t=Math.max(start,Math.min(end,t));
 
-    values.push(
-      time
-    );
-
+    values.push(t);
   }
 
-  values.sort(
-    (a,b)=>a-b
-  );
+  values.sort((a,b)=>a-b);
 
   return values;
-
 }
 
+function buildNormalTasks(id,now,detectiveEnd,crimeLocation,seed){
 
-function buildNormalTasks(
-  id,
-  now,
-  detectiveEnd,
-  crimeLocation,
-  seed
-){
+  const count=3+Math.floor(Math.random()*3);
 
-  const count =
-    3 +
-    Math.floor(
-      Math.random() * 3
-    );
-
-  const times =
+  const times=
     makeUnlockTimes(
       now,
       detectiveEnd,
       count
     );
 
-  const used = [];
-  const tasks = [];
+  const used=[];
+  const tasks=[];
 
-  for(
-    let i = 0;
-    i < count;
-    i++
-  ){
+  for(let i=0;i<count;i++){
 
-    const location =
+    const location=
       uniqueLocation(
         used,
         crimeLocation
       );
 
-    const pool =
-      Math.random() < 0.5
-      ?
-      activityTemplates
-      :
-      actionTemplates;
+    const pool=
+      Math.random()<.5
+      ?activityTemplates
+      :actionTemplates;
 
     tasks.push(
-
       createTask(
-
         `${seed}_${id}_N_${i}_${Math.random().toString(36).slice(2,7)}`,
-
         times[i],
-
-        random(
-          pool
-        )
-        .replace(
-          "{location}",
-          location
-        )
-
+        random(pool).replace("{location}",location)
       )
-
     );
-
   }
 
-  return shuffle(
-    tasks
-  );
-
+  return shuffle(tasks);
 }
 
+function buildMurdererTasks(id,now,detectiveEnd,murderAt,crimeLocation,seed){
 
-function buildMurdererTasks(
-  id,
-  now,
-  detectiveEnd,
-  murderAt,
-  crimeLocation,
-  seed
-){
+  const count=2+Math.floor(Math.random()*3);
 
-  const count =
-    2 +
-    Math.floor(
-      Math.random() * 3
-    );
-
-  const times =
+  const times=
     makeUnlockTimes(
       now,
-      Math.min(
-        detectiveEnd,
-        murderAt -
-        20000
-      ),
+      Math.min(detectiveEnd,murderAt-20000),
       count
     );
 
-  const used = [];
-  const tasks = [];
+  const used=[];
+  const tasks=[];
 
-  for(
-    let i = 0;
-    i < count;
-    i++
-  ){
+  for(let i=0;i<count;i++){
 
-    const location =
+    const location=
       uniqueLocation(
         used,
         crimeLocation
       );
 
-    const pool =
-      Math.random() < 0.5
-      ?
-      activityTemplates
-      :
-      actionTemplates;
+    const pool=
+      Math.random()<.5
+      ?activityTemplates
+      :actionTemplates;
 
     tasks.push(
-
       createTask(
-
         `${seed}_${id}_M_${i}_${Math.random().toString(36).slice(2,7)}`,
-
         times[i],
-
-        random(
-          pool
-        )
-        .replace(
-          "{location}",
-          location
-        )
-
+        random(pool).replace("{location}",location)
       )
-
     );
-
   }
 
   tasks.push(
-
     createTask(
-
       `${seed}_${id}_MURDER`,
-
       murderAt,
-
-      random(
-        murderTemplates
-      )
-      .replace(
-        "{location}",
-        crimeLocation
-      )
-      .replace(
-        "{time}",
-        shortClock(
-          new Date(
-            murderAt
-          )
+      random(murderTemplates)
+        .replace("{location}",crimeLocation)
+        .replace(
+          "{time}",
+          shortClock(new Date(murderAt))
         )
-      )
-
     )
-
   );
-
 
   tasks.push(
-
     createTask(
-
       `${seed}_${id}_AFTER`,
-
-      Math.min(
-        murderAt +
-        25000,
-        detectiveEnd -
-        20000
-      ),
-
-      random(
-        afterMurderTemplates
-      )
-      .replace(
-        "{location}",
-        crimeLocation
-      )
-
+      Math.min(murderAt+25000,detectiveEnd-20000),
+      random(afterMurderTemplates)
+        .replace("{location}",crimeLocation)
     )
-
   );
 
-  return shuffle(
-    tasks
-  );
-
+  return shuffle(tasks);
 }
 
 
@@ -1901,61 +763,23 @@ function buildMurdererTasks(
 HOME
 ===================================================== */
 
-window.createRoom =
-function(){
+window.createRoom=()=>{
 
-  myName =
-    document
-      .getElementById(
-        "nameInput"
-      )
-      .value
-      .trim();
+  myName=
+    document.getElementById("nameInput").value.trim();
 
   if(!myName){
-
-    alert(
-      "Enter your name first."
-    );
-
+    alert("Enter your name first.");
     return;
-
   }
 
-  document
-    .getElementById(
-      "home"
-    )
-    .classList
-    .add("hidden");
-
-  document
-    .getElementById(
-      "createScreen"
-    )
-    .classList
-    .remove("hidden");
-
+  document.getElementById("home").classList.add("hidden");
+  document.getElementById("createScreen").classList.remove("hidden");
 };
 
-
-window.backHome =
-function(){
-
-  document
-    .getElementById(
-      "createScreen"
-    )
-    .classList
-    .add("hidden");
-
-  document
-    .getElementById(
-      "home"
-    )
-    .classList
-    .remove("hidden");
-
+window.backHome=()=>{
+  document.getElementById("createScreen").classList.add("hidden");
+  document.getElementById("home").classList.remove("hidden");
 };
 
 
@@ -1963,122 +787,71 @@ function(){
 CREATE ROOM
 ===================================================== */
 
-window.finishCreateRoom =
-async function(){
+window.finishCreateRoom=async()=>{
 
   try{
 
-    roomCode =
+    roomCode=
       document
-        .getElementById(
-          "roomInput"
-        )
+        .getElementById("roomInput")
         .value
         .trim()
         .toUpperCase();
 
-    const limit =
+    const limit=
       Number(
         document
-          .getElementById(
-            "playerLimit"
-          )
+          .getElementById("playerLimit")
           .value
       );
 
     if(!roomCode){
-
-      alert(
-        "Enter a room code."
-      );
-
+      alert("Enter a room code.");
       return;
-
     }
 
-    if(
-      limit < 2 ||
-      limit > 4
-    ){
-
-      alert(
-        "Choose 2–4 players."
-      );
-
+    if(limit<2||limit>4){
+      alert("Choose 2–4 players.");
       return;
-
     }
 
-    const snapshot =
-      await get(
-        gameRef()
-      );
+    const roomSnapshot=
+      await get(gameRef());
 
-    if(
-      snapshot.exists()
-    ){
-
-      alert(
-        "That room already exists."
-      );
-
+    if(roomSnapshot.exists()){
+      alert("That room already exists.");
       return;
-
     }
 
     await set(
       gameRef(),
       {
-
         status:"lobby",
-
-        host:
-          playerId,
-
-        playerLimit:
-          limit,
-
-        roundNumber:
-          0,
-
-        createdAt:
-          serverNow(),
-
+        host:playerId,
+        playerLimit:limit,
+        roundNumber:0,
+        createdAt:serverNow(),
         players:{
-
           [playerId]:{
-
-            name:
-              myName,
-
-            joinedAt:
-              serverNow()
-
+            name:myName,
+            joinedAt:serverNow()
           }
-
         }
-
       }
     );
 
     setupDisconnectCleanup();
-
     enterLobby();
 
-  }
-  catch(error){
+  }catch(error){
 
-    console.error(
-      error
-    );
+    console.error(error);
 
     alert(
-      "Could not create the room.\n\n" +
+      "Could not create the room.\n\n"+
       error.message
     );
-
   }
-
 };
 
 
@@ -2086,137 +859,78 @@ async function(){
 JOIN ROOM
 ===================================================== */
 
-window.joinRoom =
-async function(){
+window.joinRoom=async()=>{
 
   try{
 
-    myName =
+    myName=
       document
-        .getElementById(
-          "nameInput"
-        )
+        .getElementById("nameInput")
         .value
         .trim();
 
-    roomCode =
+    roomCode=
       document
-        .getElementById(
-          "roomInput"
-        )
+        .getElementById("roomInput")
         .value
         .trim()
         .toUpperCase();
 
     if(!myName){
-
-      alert(
-        "Enter your name."
-      );
-
+      alert("Enter your name.");
       return;
-
     }
 
     if(!roomCode){
-
-      alert(
-        "Enter the room code."
-      );
-
+      alert("Enter the room code.");
       return;
-
     }
 
-    const snapshot =
-      await get(
-        gameRef()
-      );
+    const snapshot=
+      await get(gameRef());
 
-    if(
-      !snapshot.exists()
-    ){
-
-      alert(
-        "Room not found."
-      );
-
+    if(!snapshot.exists()){
+      alert("Room not found.");
       return;
-
     }
 
-    const data =
-      snapshot.val();
+    const data=snapshot.val();
 
-    if(
-      data.status !==
-      "lobby"
-    ){
-
-      alert(
-        "The game has already started."
-      );
-
+    if(data.status!=="lobby"){
+      alert("The game has already started.");
       return;
-
     }
 
-    const players =
-      data.players ||
-      {};
+    const players=data.players||{};
 
     if(
-      !players[playerId] &&
-      Object.keys(
-        players
-      ).length >=
-      Number(
-        data.playerLimit
-      )
+      !players[playerId]&&
+      Object.keys(players).length>=Number(data.playerLimit)
     ){
-
-      alert(
-        "Room is full."
-      );
-
+      alert("Room is full.");
       return;
-
     }
 
     await update(
-      gameRef(
-        "players/" +
-        playerId
-      ),
+      gameRef("players/"+playerId),
       {
-
-        name:
-          myName,
-
-        joinedAt:
-          serverNow()
-
+        name:myName,
+        joinedAt:serverNow()
       }
     );
 
     setupDisconnectCleanup();
-
     enterLobby();
 
-  }
-  catch(error){
+  }catch(error){
 
-    console.error(
-      error
-    );
+    console.error(error);
 
     alert(
-      "Could not join the room.\n\n" +
+      "Could not join the room.\n\n"+
       error.message
     );
-
   }
-
 };
 
 
@@ -2226,579 +940,255 @@ PRESENCE
 
 function setupDisconnectCleanup(){
 
-  if(!roomCode){
-    return;
-  }
+  if(!roomCode)return;
 
   onDisconnect(
-    gameRef(
-      "players/" +
-      playerId
-    )
+    gameRef("players/"+playerId)
   ).remove();
 
   onDisconnect(
-    gameRef(
-      "private/" +
-      playerId
-    )
+    gameRef("private/"+playerId)
   ).remove();
 
   onDisconnect(
-    gameRef(
-      "completed/" +
-      playerId
-    )
+    gameRef("completed/"+playerId)
   ).remove();
-
 }
 
 
 /* =====================================================
-LOBBY LISTENER
+LOBBY
 ===================================================== */
 
 function enterLobby(){
 
-  document
-    .getElementById(
-      "home"
-    )
-    .classList
-    .add("hidden");
+  document.getElementById("home").classList.add("hidden");
+  document.getElementById("createScreen").classList.add("hidden");
+  document.getElementById("game").classList.add("hidden");
+  document.getElementById("lobby").classList.remove("hidden");
 
-  document
-    .getElementById(
-      "createScreen"
-    )
-    .classList
-    .add("hidden");
-
-  document
-    .getElementById(
-      "game"
-    )
-    .classList
-    .add("hidden");
-
-  document
-    .getElementById(
-      "lobby"
-    )
-    .classList
-    .remove("hidden");
-
-  document
-    .getElementById(
-      "roomDisplay"
-    )
-    .textContent =
-    roomCode;
+  document.getElementById("roomDisplay").textContent=roomCode;
 
   startRoomListener();
-
 }
-
 
 function startRoomListener(){
 
-  if(
-    roomListenerStarted
-  ){
-    return;
-  }
+  if(roomListenerStarted)return;
 
-  roomListenerStarted =
-    true;
+  roomListenerStarted=true;
 
   onValue(
-
     gameRef(),
-
     snapshot=>{
 
-      if(
-        !snapshot.exists()
-      ){
+      if(!snapshot.exists()){
         return;
       }
 
-      roomData =
-        snapshot.val();
+      roomData=snapshot.val();
 
       renderLobby();
 
-
-      if(
-        roomData.status ===
-        "game"
-      ){
-
+      if(roomData.status==="game"){
         loadGame();
+      }else{
 
+        document.getElementById("game").classList.add("hidden");
+        document.getElementById("lobby").classList.remove("hidden");
+
+        mySecret=null;
       }
-      else{
-
-        document
-          .getElementById(
-            "game"
-          )
-          .classList
-          .add("hidden");
-
-        document
-          .getElementById(
-            "lobby"
-          )
-          .classList
-          .remove("hidden");
-
-        mySecret =
-          null;
-
-      }
-
     }
-
   );
-
 }
-
 
 function renderLobby(){
 
-  if(!roomData){
-    return;
-  }
+  if(!roomData)return;
 
-  const players =
-    roomData.players ||
-    {};
+  const players=roomData.players||{};
+  const ids=Object.keys(players);
 
-  const ids =
-    Object.keys(
-      players
-    );
+  document.getElementById("lobbyPlayerCount").innerHTML=`
+    <span class="badge">${ids.length}/${roomData.playerLimit}</span>
+    <span class="badge">🕵️ 1 Detective</span>
+    <span class="badge">🔪 1 Murderer</span>
+    <span class="badge">👤 ${Math.max(0,Number(roomData.playerLimit)-2)} Innocent</span>
+  `;
 
-  document
-    .getElementById(
-      "lobbyPlayerCount"
-    )
-    .innerHTML = `
+  document.getElementById("playersList").innerHTML=
+    ids.map(id=>`
+      <div class="player">
+        👤 ${escapeHtml(players[id]?.name||"Unknown")}
+        ${
+          id===roomData.host
+          ?`<span class="host">👑 HOST</span>`
+          :""
+        }
+      </div>
+    `).join("");
 
-      <span class="badge">
-        ${ids.length}/${roomData.playerLimit}
-      </span>
+  const hostPanel=document.getElementById("hostPanel");
 
-      <span class="badge">
-        🕵️ 1 Detective
-      </span>
+  if(roomData.host===playerId){
 
-      <span class="badge">
-        🔪 1 Murderer
-      </span>
+    hostPanel.classList.remove("hidden");
 
-      <span class="badge">
-        👤 ${Math.max(
-          0,
-          Number(
-            roomData.playerLimit
-          ) -
-          2
-        )} Innocent
-      </span>
-
-    `;
-
-  document
-    .getElementById(
-      "playersList"
-    )
-    .innerHTML =
-
-    ids
-      .map(
-        id=>`
-
-          <div class="player">
-
-            👤
-            ${escapeHtml(
-              players[id]
-                ?.name ||
-              "Unknown"
-            )}
-
-            ${
-              id ===
-              roomData.host
-              ?
-
-              `<span class="host">
-                👑 HOST
-              </span>`
-
-              :
-
-              ""
-            }
-
-          </div>
-
-        `
-      )
-      .join("");
-
-
-  const hostPanel =
-    document
-      .getElementById(
-        "hostPanel"
-      );
-
-
-  if(
-    roomData.host ===
-    playerId
-  ){
-
-    hostPanel
-      .classList
-      .remove("hidden");
-
-
-    document
-      .getElementById(
-        "hostInfo"
-      )
-      .textContent =
+    document.getElementById("hostInfo").textContent=
       `${ids.length}/${roomData.playerLimit} players joined.`;
 
+    const startButton=
+      document.getElementById("startButton");
 
-    const startButton =
-      document
-        .getElementById(
-          "startButton"
-        );
+    startButton.disabled=
+      ids.length!==Number(roomData.playerLimit);
 
+  }else{
 
-    startButton.disabled =
-      ids.length !==
-      Number(
-        roomData.playerLimit
-      );
-
+    hostPanel.classList.add("hidden");
   }
-  else{
-
-    hostPanel
-      .classList
-      .add("hidden");
-
-  }
-
 }
 
 
 /* =====================================================
-START ROUND — FIXED
+FIXED START ROUND
 ===================================================== */
 
-window.startRound =
-async function(){
+window.startRound=async()=>{
 
-  const button =
-    document
-      .getElementById(
-        "startButton"
-      );
-
+  const button=
+    document.getElementById("startButton");
 
   if(
-    !roomData ||
-    roomData.host !==
-    playerId
+    !roomData||
+    roomData.host!==playerId
   ){
-
-    alert(
-      "Only the host can start the round."
-    );
-
+    alert("Only the host can start the round.");
     return;
-
   }
 
-
-  button.disabled =
-    true;
-
-  button.textContent =
-    "STARTING...";
-
+  button.disabled=true;
+  button.textContent="STARTING...";
 
   try{
 
     /*
-      Always fetch the newest copy
-      from Firebase before starting.
+      IMPORTANT:
+      Read the latest room directly from Firebase.
+      This fixes the old start-button sync problem.
     */
 
-    const freshSnapshot =
-      await get(
-        gameRef()
-      );
+    const freshSnapshot=
+      await get(gameRef());
 
-
-    if(
-      !freshSnapshot.exists()
-    ){
-
-      throw new Error(
-        "Room no longer exists."
-      );
-
+    if(!freshSnapshot.exists()){
+      throw new Error("Room no longer exists.");
     }
 
+    const freshRoom=freshSnapshot.val();
 
-    const freshRoom =
-      freshSnapshot.val();
+    const players=freshRoom.players||{};
+    const ids=Object.keys(players);
 
+    const limit=Number(freshRoom.playerLimit);
 
-    const players =
-      freshRoom.players ||
-      {};
-
-    const ids =
-      Object.keys(
-        players
-      );
-
-
-    const limit =
-      Number(
-        freshRoom.playerLimit
-      );
-
-
-    if(
-      limit < 2 ||
-      limit > 4
-    ){
-
-      throw new Error(
-        "Invalid room size. The game supports 2–4 players."
-      );
-
+    if(limit<2||limit>4){
+      throw new Error("Invalid player limit. The game supports 2–4 players.");
     }
 
-
-    if(
-      ids.length !==
-      limit
-    ){
-
+    if(ids.length!==limit){
       throw new Error(
         `Need ${limit} players. Currently ${ids.length} are in the room.`
       );
-
     }
 
-
-    if(
-      freshRoom.status !==
-      "lobby"
-    ){
-
-      throw new Error(
-        "The round has already started."
-      );
-
+    if(freshRoom.status!=="lobby"){
+      throw new Error("The round has already started.");
     }
-
 
     /*
-      Assign roles.
+      Assign roles once.
     */
 
-    const shuffled =
-      shuffle(
-        ids
-      );
+    const shuffled=shuffle(ids);
 
+    const detective=shuffled[0];
+    const murderer=shuffled[1];
+    const innocents=shuffled.slice(2);
 
-    const detective =
-      shuffled[0];
+    const now=serverNow();
 
-
-    const murderer =
-      shuffled[1];
-
-
-    const innocents =
-      shuffled.slice(2);
-
-
-    const now =
-      serverNow();
-
-
-    const murderAt =
-      now +
-      MIN_MURDER_DELAY +
+    const murderAt=
+      now+
+      MIN_MURDER_DELAY+
       Math.floor(
-        Math.random() *
+        Math.random()*
         (
-          MAX_MURDER_DELAY -
+          MAX_MURDER_DELAY-
           MIN_MURDER_DELAY
         )
       );
 
-
-    const detectiveEnd =
-      now +
+    const detectiveEnd=
+      now+
       DETECTIVE_WAIT;
 
-
-    const investigationEnd =
-      detectiveEnd +
+    const investigationEnd=
+      detectiveEnd+
       INVESTIGATION_TIME;
 
-
-    const crimeLocation =
-      random(
-        locations
-      );
-
-
-    const victim =
-      random(
-        victims
-      );
+    const crimeLocation=random(locations);
+    const victim=random(victims);
+    const caseDescription=random(cases);
+    const roundSeed=
+      freshRoundSeed();
 
 
-    const caseDescription =
-      random(
-        cases
-      );
+    const privateData={};
 
-
-    const roundSeed =
-      Date.now()
-        .toString(36) +
-      "_" +
-      Math.random()
-        .toString(36)
-        .substring(2,10);
-
-
-    const privateData =
-      {};
-
-
-    /*
-      Detective
-    */
-
-    privateData[detective] = {
-
-      role:
-        "detective",
-
+    privateData[detective]={
+      role:"detective",
       tasks:[]
-
     };
 
-
-    /*
-      Murderer
-    */
-
-    privateData[murderer] = {
-
-      role:
-        "murderer",
-
+    privateData[murderer]={
+      role:"murderer",
       tasks:
         buildMurdererTasks(
-
           murderer,
-
           now,
-
           detectiveEnd,
-
           murderAt,
-
           crimeLocation,
-
           roundSeed
-
         )
-
     };
 
+    innocents.forEach(id=>{
 
-    /*
-      Innocents
-    */
+      privateData[id]={
+        role:"innocent",
+        tasks:
+          buildNormalTasks(
+            id,
+            now,
+            detectiveEnd,
+            crimeLocation,
+            roundSeed
+          )
+      };
 
-    innocents.forEach(
-      id=>{
-
-        privateData[id] = {
-
-          role:
-            "innocent",
-
-          tasks:
-            buildNormalTasks(
-
-              id,
-
-              now,
-
-              detectiveEnd,
-
-              crimeLocation,
-
-              roundSeed
-
-            )
-
-        };
-
-      }
-    );
+    });
 
 
-    for(
-      const id of
-      Object.keys(
-        privateData
-      )
-    ){
-
-      privateData[id].tasks =
-        shuffle(
-          privateData[id].tasks
-        );
-
-    }
-
-
-    const game = {
-
+    const game={
       roundNumber:
-        Number(
-          freshRoom.roundNumber ||
-          0
-        ) +
-        1,
+        Number(freshRoom.roundNumber||0)+1,
 
       roundSeed,
 
-      startedAt:
-        now,
+      startedAt:now,
 
       murderAt,
 
@@ -2820,78 +1210,57 @@ async function(){
         murderer,
         ...innocents
       ]
-
     };
 
 
     /*
-      ONE atomic Firebase update.
+      Build one update object.
+      Do not update pieces separately.
     */
 
-    const updates =
-      {};
-
+    const updates={};
 
     updates[
       `rooms/${roomCode}/status`
-    ] =
-      "game";
-
+    ]="game";
 
     updates[
       `rooms/${roomCode}/roundNumber`
-    ] =
-      game.roundNumber;
-
+    ]=game.roundNumber;
 
     updates[
       `rooms/${roomCode}/game`
-    ] =
-      game;
-
-
-    updates[
-      `rooms/${roomCode}/completed`
-    ] =
-      {};
-
+    ]=game;
+    /* /completed is NOT written here. Child paths are written below. */
 
     updates[
       `rooms/${roomCode}/detectiveBoard`
-    ] =
-    {
-
+    ]={
       questions:{},
-
       interviews:{},
-
       locations:{},
-
       clues:{},
-
       theory:""
-
     };
 
 
-    for(
-      const id of
-      ids
-    ){
+    for(const id of ids){
 
       updates[
         `rooms/${roomCode}/private/${id}`
-      ] =
-      privateData[id];
-
+      ]=
+        privateData[id];
 
       updates[
         `rooms/${roomCode}/completed/${id}`
-      ] =
-      {};
+      ]={};
 
     }
 
+
+    /*
+      This is the actual atomic database write.
+    */
 
     await update(
       ref(db),
@@ -2900,274 +1269,164 @@ async function(){
 
 
     /*
-      Immediately update this device.
+      Update local room state immediately.
     */
 
-    roomData = {
-
+    roomData={
       ...freshRoom,
-
-      status:
-        "game",
-
-      roundNumber:
-        game.roundNumber,
-
-      game,
-
-      completed:{},
-
-      detectiveBoard:{
-
-        questions:{},
-
-        interviews:{},
-
-        locations:{},
-
-        clues:{},
-
-        theory:""
-
+      ...{
+        status:"game",
+        game,
+        roundNumber:game.roundNumber,
+        completed:{},
+        detectiveBoard:{
+          questions:{},
+          interviews:{},
+          locations:{},
+          clues:{},
+          theory:""
+        }
       }
-
     };
 
 
-    mySecret =
-      privateData[playerId] ||
+    mySecret=
+      privateData[playerId]||
       null;
 
 
     if(!mySecret){
-
       throw new Error(
-        "Your private role data was not created."
+        "Your private game data was not created."
       );
-
     }
-
-
-    document
-      .getElementById(
-        "lobby"
-      )
-      .classList
-      .add("hidden");
-
-
-    document
-      .getElementById(
-        "game"
-      )
-      .classList
-      .remove("hidden");
 
 
     renderSecret();
 
-    startGameListeners();
+    document
+      .getElementById("lobby")
+      .classList
+      .add("hidden");
 
+    document
+      .getElementById("game")
+      .classList
+      .remove("hidden");
+
+
+    startGameListeners();
     startGlobalClock();
 
 
-  }
-  catch(error){
+  }catch(error){
 
     console.error(
       "START ROUND ERROR:",
       error
     );
 
-
     alert(
-      "❌ START ROUND FAILED\n\n" +
+      "❌ START ROUND FAILED\n\n"+
       error.message
     );
 
-
-    button.disabled =
-      false;
-
-    button.textContent =
-      "START ROUND";
-
+    button.disabled=false;
+    button.textContent="START ROUND";
   }
-
 };
 
 
 /* =====================================================
-LOAD GAME
+GAME LOAD
 ===================================================== */
 
 async function loadGame(){
 
-  if(
-    !roomData?.game
-  ){
-    return;
-  }
+  if(!roomData?.game)return;
 
-
-  document
-    .getElementById(
-      "lobby"
-    )
-    .classList
-    .add("hidden");
-
-
-  document
-    .getElementById(
-      "game"
-    )
-    .classList
-    .remove("hidden");
+  document.getElementById("lobby").classList.add("hidden");
+  document.getElementById("game").classList.remove("hidden");
 
 
   if(!mySecret){
 
-    const snapshot =
+    const snapshot=
       await get(
-        gameRef(
-          "private/" +
-          playerId
-        )
+        gameRef("private/"+playerId)
       );
 
-
-    if(
-      snapshot.exists()
-    ){
-
-      mySecret =
-        snapshot.val();
-
+    if(snapshot.exists()){
+      mySecret=snapshot.val();
     }
-
   }
 
 
-  if(!mySecret){
-
-    return;
-
-  }
-
+  if(!mySecret)return;
 
   renderSecret();
-
   startGameListeners();
-
   startGlobalClock();
-
 }
-
 
 function startGameListeners(){
 
-  if(
-    !taskListenerStarted
-  ){
+  if(!taskListenerStarted){
 
-    taskListenerStarted =
-      true;
-
+    taskListenerStarted=true;
 
     onValue(
-
-      gameRef(
-        "completed/" +
-        playerId
-      ),
-
+      gameRef("completed/"+playerId),
       snapshot=>{
 
-        if(!roomData){
-          return;
-        }
+        if(!roomData)return;
 
+        roomData.completed=
+          roomData.completed||{};
 
-        roomData.completed =
-          roomData.completed ||
-          {};
-
-
-        roomData.completed[
-          playerId
-        ] =
-          snapshot.val() ||
-          {};
-
+        roomData.completed[playerId]=
+          snapshot.val()||{};
 
         renderTasks();
-
       }
-
     );
-
   }
 
 
   if(
-    mySecret?.role ===
-    "detective" &&
+    mySecret.role==="detective"&&
     !boardListenerStarted
   ){
 
-    boardListenerStarted =
-      true;
-
+    boardListenerStarted=true;
 
     onValue(
-
-      gameRef(
-        "detectiveBoard"
-      ),
-
+      gameRef("detectiveBoard"),
       snapshot=>{
 
-        roomData.detectiveBoard =
-          snapshot.val() ||
-
+        roomData.detectiveBoard=
+          snapshot.val()||
           {
-
             questions:{},
-
             interviews:{},
-
             locations:{},
-
             clues:{},
-
             theory:""
-
           };
 
-
         renderDetectiveBoard();
-
         renderDetectiveSummary();
-
       }
-
     );
-
   }
 
 
-  if(
-    !listenersStarted
-  ){
+  if(!listenersStarted){
 
-    listenersStarted =
-      true;
+    listenersStarted=true;
 
     listenForCalls();
-
   }
-
 }
 
 
@@ -3177,379 +1436,237 @@ GLOBAL CLOCK
 
 function startGlobalClock(){
 
-  clearInterval(
-    globalInterval
-  );
-
+  clearInterval(globalInterval);
 
   function tick(){
 
-    if(
-      !roomData?.game
-    ){
-      return;
-    }
+    if(!roomData?.game)return;
+
+    const game=roomData.game;
+    const now=serverNow();
 
 
-    const game =
-      roomData.game;
-
-
-    const now =
-      serverNow();
-
-
-    /*
-      ONLY the Detective sees a countdown.
-    */
-
-    if(
-      mySecret?.role ===
-      "detective"
-    ){
+    if(mySecret?.role==="detective"){
 
       document
-        .getElementById(
-          "detectiveClockArea"
-        )
+        .getElementById("detectiveClockArea")
         .classList
         .remove("hidden");
 
-
       document
-        .getElementById(
-          "normalClockArea"
-        )
+        .getElementById("normalClockArea")
         .classList
         .add("hidden");
 
 
-      let target =
-        now;
+      let target=now;
 
-
-      if(
-        now <
-        game.murderAt
-      ){
-
-        target =
-          game.murderAt;
-
-      }
-      else if(
-        now <
-        game.detectiveEnd
-      ){
-
-        target =
-          game.detectiveEnd;
-
-      }
-      else if(
-        now <
-        game.investigationEnd
-      ){
-
-        target =
-          game.investigationEnd;
-
+      if(now<game.murderAt){
+        target=game.murderAt;
+      }else if(now<game.detectiveEnd){
+        target=game.detectiveEnd;
+      }else if(now<game.investigationEnd){
+        target=game.investigationEnd;
       }
 
 
       document
-        .getElementById(
-          "globalTimer"
-        )
-        .textContent =
-        formatDuration(
-          target -
-          now
-        );
+        .getElementById("globalTimer")
+        .textContent=
+        formatDuration(target-now);
 
 
       document
-        .getElementById(
-          "detectiveTimer"
-        )
-        .textContent =
+        .getElementById("detectiveTimer")
+        .textContent=
         formatDuration(
           Math.max(
             0,
-            game.detectiveEnd -
-            now
+            game.detectiveEnd-now
           )
         );
 
 
-      if(
-        now >=
-        game.detectiveEnd
-      ){
-
+      if(now>=game.detectiveEnd){
         showInvestigation();
-
       }
 
 
-      const investigationTimerCard =
-        document
-          .getElementById(
-            "investigationTimerCard"
-          );
-
+      const timerCard=
+        document.getElementById(
+          "investigationTimerCard"
+        );
 
       if(
-        now >=
-        game.detectiveEnd &&
-        now <
-        game.investigationEnd
+        now>=game.detectiveEnd&&
+        now<game.investigationEnd
       ){
 
-        investigationTimerCard
+        timerCard
           .classList
           .remove("hidden");
-
 
         document
           .getElementById(
             "investigationTimer"
           )
-          .textContent =
+          .textContent=
           formatDuration(
-            game.investigationEnd -
-            now
+            game.investigationEnd-now
           );
 
-      }
-      else{
+      }else{
 
-        investigationTimerCard
+        timerCard
           .classList
           .add("hidden");
 
       }
 
-    }
-    else{
+    }else{
 
       /*
-        Normal players only see the real clock.
+        Normal players do NOT see the murder countdown.
       */
 
       document
-        .getElementById(
-          "detectiveClockArea"
-        )
+        .getElementById("detectiveClockArea")
         .classList
         .add("hidden");
 
-
       document
-        .getElementById(
-          "normalClockArea"
-        )
+        .getElementById("normalClockArea")
         .classList
         .remove("hidden");
 
-
       document
-        .getElementById(
-          "normalClock"
-        )
-        .textContent =
+        .getElementById("normalClock")
+        .textContent=
         clockText(
-          new Date(
-            now
-          )
+          new Date(now)
         );
-
     }
 
   }
 
-
   tick();
 
-
-  globalInterval =
+  globalInterval=
     setInterval(
       tick,
       500
     );
-
 }
 
 
 /* =====================================================
-SECRET
+SECRET RENDER
 ===================================================== */
 
 function renderSecret(){
 
-  if(!mySecret){
-    return;
-  }
+  if(!mySecret)return;
+
+  const card=
+    document.getElementById(
+      "secretCard"
+    );
 
 
-  const card =
-    document
-      .getElementById(
-        "secretCard"
-      );
+  if(mySecret.role==="detective"){
 
-
-  if(
-    mySecret.role ===
-    "detective"
-  ){
-
-    card.innerHTML = `
-
+    card.innerHTML=`
       <div class="role detective">
-
         🕵️ YOU ARE THE DETECTIVE
-
       </div>
 
       <div class="big">
-
         Leave the game area.
-
       </div>
 
       <p>
-
-        Prepare questions
-        in your Detective Notebook.
-
+        Prepare your questions in the Detective Notebook.
       </p>
 
       <div class="success">
-
-        Only you can see
-        the Detective countdown.
-
+        Only you can see your detective countdown.
       </div>
-
     `;
 
 
     document
-      .getElementById(
-        "detectiveWaiting"
-      )
+      .getElementById("detectiveWaiting")
       .classList
       .remove("hidden");
 
-
     document
-      .getElementById(
-        "normalWaiting"
-      )
+      .getElementById("normalWaiting")
       .classList
       .add("hidden");
 
-
     document
-      .getElementById(
-        "detectiveNotebook"
-      )
+      .getElementById("detectiveNotebook")
       .classList
       .remove("hidden");
-
 
     renderDetectiveBoard();
 
     return;
-
   }
 
 
-  const murderer =
-    mySecret.role ===
-    "murderer";
+  const murderer=
+    mySecret.role==="murderer";
 
 
-  card.innerHTML = `
-
+  card.innerHTML=`
     <div class="role ${
       murderer
-      ?
-      "murderer"
-      :
-      "innocent"
+      ?"murderer"
+      :"innocent"
     }">
-
       ${
         murderer
-        ?
-        "🔪 YOU ARE THE MURDERER"
-        :
-        "👤 YOU ARE INNOCENT"
+        ?"🔪 YOU ARE THE MURDERER"
+        :"👤 YOU ARE INNOCENT"
       }
-
     </div>
-
 
     <p>
-
       ${
         murderer
-        ?
-        "The murder is fictional. Follow your secret timeline."
-        :
-        "You are innocent. Follow your secret timeline."
+        ?"The murder is fictional. Follow your secret timeline."
+        :"You are innocent. Follow your secret timeline."
       }
-
     </p>
 
-
     <div class="warning">
-
       🔒 The Detective's countdown is hidden from you.
-
     </div>
 
+    <h2>✅ Your Tasks</h2>
 
-    <h2>
-      ✅ Your Tasks
-    </h2>
-
-
-    <div
-      id="myTasks"
-    ></div>
-
+    <div id="myTasks"></div>
   `;
 
 
   document
-    .getElementById(
-      "detectiveWaiting"
-    )
+    .getElementById("detectiveWaiting")
     .classList
     .add("hidden");
 
-
   document
-    .getElementById(
-      "normalWaiting"
-    )
+    .getElementById("normalWaiting")
     .classList
     .remove("hidden");
 
-
   document
-    .getElementById(
-      "detectiveNotebook"
-    )
+    .getElementById("detectiveNotebook")
     .classList
     .add("hidden");
 
 
   renderTasks();
-
 }
 
 
@@ -3560,157 +1677,53 @@ TASKS
 function renderTasks(){
 
   if(
-    !mySecret ||
+    !mySecret||
     !mySecret.tasks
-  ){
-    return;
-  }
+  )return;
 
 
-  const container =
-    document
-      .getElementById(
-        "myTasks"
-      );
+  const container=
+    document.getElementById("myTasks");
+
+  if(!container)return;
 
 
-  if(!container){
-    return;
-  }
+  const now=serverNow();
 
-
-  const now =
-    serverNow();
-
-
-  const completed =
+  const completed=
     roomData
       ?.completed
-      ?.[playerId] ||
+      ?.[playerId]||
     {};
 
 
-  container.innerHTML =
-
+  container.innerHTML=
     mySecret.tasks
-      .map(
-        task=>{
+      .map(task=>{
 
-          const unlocked =
-            now >=
-            task.unlockAt;
+        const unlocked=
+          now>=task.unlockAt;
 
-
-          const done =
-            completed[
-              task.id
-            ] === true;
+        const done=
+          completed[task.id]===true;
 
 
-          if(
-            !unlocked
-          ){
+        if(!unlocked){
 
-            return `
-
-              <div class="task locked">
-
-                <div class="task-row">
-
-                  <div class="task-text">
-
-                    <div class="task-time">
-
-                      🔒 Unlocks at
-                      ${escapeHtml(
-                        task.unlockText
-                      )}
-
-                    </div>
-
-
-                    <div class="locked-text">
-
-                      Secret task —
-                      not available yet.
-
-                    </div>
-
-                  </div>
-
-                </div>
-
-              </div>
-
-            `;
-
-          }
-
-
-          return `
-
-            <div
-              class="task ${
-                done
-                ?
-                "done"
-                :
-                ""
-              }"
-            >
+          return`
+            <div class="task locked">
 
               <div class="task-row">
-
-                <input
-                  class="task-checkbox"
-                  type="checkbox"
-                  ${
-                    done
-                    ?
-                    "checked"
-                    :
-                    ""
-                  }
-                  onchange="
-                    toggleTask(
-                      '${task.id}',
-                      this.checked
-                    )
-                  "
-                >
-
 
                 <div class="task-text">
 
                   <div class="task-time">
-
-                    ⏰
-                    ${escapeHtml(
-                      task.unlockText
-                    )}
-
+                    🔒 Unlocks at
+                    ${escapeHtml(task.unlockText)}
                   </div>
 
-
-                  <div>
-
-                    ${escapeHtml(
-                      task.description
-                    )}
-
-                  </div>
-
-
-                  <div class="task-status">
-
-                    ${
-                      done
-                      ?
-                      "✅ Completed"
-                      :
-                      "⬜ Not completed"
-                    }
-
+                  <div class="locked-text">
+                    Secret task — not available yet.
                   </div>
 
                 </div>
@@ -3718,296 +1731,223 @@ function renderTasks(){
               </div>
 
             </div>
-
           `;
-
         }
-      )
-      .join("");
 
+
+        return`
+          <div class="task ${done?"done":""}">
+
+            <div class="task-row">
+
+              <input
+                class="task-checkbox"
+                type="checkbox"
+                ${done?"checked":""}
+                onchange="
+                  toggleTask(
+                    '${task.id}',
+                    this.checked
+                  )
+                "
+              >
+
+              <div class="task-text">
+
+                <div class="task-time">
+                  ⏰ ${escapeHtml(task.unlockText)}
+                </div>
+
+                <div>
+                  ${escapeHtml(task.description)}
+                </div>
+
+                <div class="task-status">
+                  ${
+                    done
+                    ?"✅ Completed"
+                    :"⬜ Not completed"
+                  }
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+        `;
+      })
+      .join("");
 }
 
 
-window.toggleTask =
-async function(
-  taskId,
-  checked
-){
+window.toggleTask=async(taskId,checked)=>{
 
-  const task =
-    mySecret
-      ?.tasks
-      ?.find(
-        t =>
-        t.id ===
-        taskId
-      );
+  const task=
+    mySecret?.tasks?.find(
+      t=>t.id===taskId
+    );
 
+  if(!task)return;
 
-  if(!task){
-    return;
-  }
-
-
-  if(
-    serverNow() <
-    task.unlockAt
-  ){
+  if(serverNow()<task.unlockAt){
 
     alert(
       "🔒 This task is not unlocked yet."
     );
 
     renderTasks();
-
     return;
-
   }
 
 
   try{
 
     await update(
-
-      gameRef(
-        "completed/" +
-        playerId
-      ),
-
+      gameRef("completed/"+playerId),
       {
-
-        [taskId]:
-          checked
-
+        [taskId]:checked
       }
-
     );
 
-  }
-  catch(error){
+  }catch(error){
 
-    console.error(
-      error
-    );
+    console.error(error);
 
     alert(
-      "Could not update task.\n\n" +
+      "Could not update task.\n\n"+
       error.message
     );
 
     renderTasks();
-
   }
-
 };
 
 
 /* =====================================================
-DETECTIVE BOARD
+DETECTIVE NOTEBOOK
 ===================================================== */
 
 function getBoard(){
 
-  return roomData
-    ?.detectiveBoard ||
-
+  return roomData?.detectiveBoard||
   {
-
     questions:{},
-
     interviews:{},
-
     locations:{},
-
     clues:{},
-
     theory:""
-
   };
-
 }
 
 
 function renderDetectiveBoard(){
 
-  if(
-    mySecret?.role !==
-    "detective"
-  ){
-    return;
-  }
+  if(mySecret?.role!=="detective")return;
 
+  const board=getBoard();
 
-  const board =
-    getBoard();
+  renderQuestions(board);
+  renderInterviewForm(board);
+  renderInterviews(board);
+  renderLocations(board);
+  renderClues(board);
 
-
-  renderQuestions(
-    board
-  );
-
-  renderInterviewForm(
-    board
-  );
-
-  renderInterviews(
-    board
-  );
-
-  renderLocations(
-    board
-  );
-
-  renderClues(
-    board
-  );
-
-
-  const theory =
-    document
-      .getElementById(
-        "detectiveTheory"
-      );
-
+  const theory=
+    document.getElementById(
+      "detectiveTheory"
+    );
 
   if(
-    theory &&
-    document.activeElement !==
-    theory
+    theory&&
+    document.activeElement!==theory
   ){
 
-    theory.value =
-      board.theory ||
-      "";
-
+    theory.value=
+      board.theory||"";
   }
-
 }
 
 
-/* =====================================================
-QUESTIONS
-===================================================== */
+/* ---------------- QUESTIONS ---------------- */
 
-function renderQuestions(
-  board
-){
+function renderQuestions(board){
 
-  const box =
-    document
-      .getElementById(
-        "prepQuestionsList"
-      );
+  const box=
+    document.getElementById(
+      "prepQuestionsList"
+    );
+
+  if(!box)return;
 
 
-  if(!box){
-    return;
-  }
-
-
-  const entries =
+  const entries=
     Object.entries(
-      board.questions ||
-      {}
+      board.questions||{}
     );
 
 
-  if(
-    entries.length ===
-    0
-  ){
+  if(!entries.length){
 
-    box.innerHTML =
-      `<div class="empty">
-        No questions yet.
-      </div>`;
+    box.innerHTML=
+      `<div class="empty">No questions yet.</div>`;
 
-  }
-  else{
+  }else{
 
-    box.innerHTML =
+    box.innerHTML=
+      entries.map(
+        ([id,q],index)=>`
 
-      entries
-        .map(
-          ([id,q],index)=>`
+          <div class="board-card">
 
-            <div class="board-card">
-
-              <div class="board-meta">
-
-                QUESTION ${index+1}
-
-              </div>
-
-
-              ${escapeHtml(
-                q.text
-              )}
-
-
-              <button
-                class="board-small"
-                onclick="
-                  deleteQuestion('${id}')
-                "
-              >
-
-                🗑️ DELETE
-
-              </button>
-
+            <div class="board-meta">
+              QUESTION ${index+1}
             </div>
 
-          `
-        )
-        .join("");
+            ${escapeHtml(q.text)}
 
+            <button
+              class="board-small"
+              onclick="
+                deleteQuestion('${id}')
+              "
+            >
+              🗑️ DELETE
+            </button>
+
+          </div>
+        `
+      ).join("");
   }
 
-
-  renderInterviewQuestionOptions(
-    board
-  );
-
+  renderInterviewQuestionOptions(board);
 }
 
 
-window.addPrepQuestion =
-async function(){
+window.addPrepQuestion=async()=>{
 
-  if(
-    mySecret?.role !==
-    "detective"
-  ){
-    return;
-  }
+  if(mySecret?.role!=="detective")return;
 
 
-  const input =
-    document
-      .getElementById(
-        "prepQuestionInput"
-      );
+  const input=
+    document.getElementById(
+      "prepQuestionInput"
+    );
 
-
-  const text =
+  const text=
     input.value.trim();
 
 
   if(!text){
 
-    alert(
-      "Write a question first."
-    );
-
+    alert("Write a question first.");
     return;
-
   }
 
 
   try{
 
-    const newRef =
+    const newRef=
       push(
         gameRef(
           "detectiveBoard/questions"
@@ -4018,221 +1958,153 @@ async function(){
     await set(
       newRef,
       {
-
         text,
-
-        createdAt:
-          serverNow()
-
+        createdAt:serverNow()
       }
     );
 
 
-    input.value = "";
+    input.value="";
 
-  }
-  catch(error){
+  }catch(error){
 
     alert(
-      "Could not save question.\n\n" +
+      "Could not save question.\n\n"+
       error.message
     );
-
   }
-
 };
 
 
-window.deleteQuestion =
-async function(
-  id
-){
+window.deleteQuestion=async(id)=>{
 
-  if(
-    mySecret?.role !==
-    "detective"
-  ){
-    return;
-  }
-
+  if(mySecret?.role!=="detective")return;
 
   await remove(
-
     gameRef(
-      "detectiveBoard/questions/" +
-      id
+      "detectiveBoard/questions/"+id
     )
-
   );
-
 };
 
 
-/* =====================================================
-INTERVIEWS
-===================================================== */
+/* ---------------- INTERVIEWS ---------------- */
 
-function renderInterviewForm(
-  board
-){
+function renderInterviewForm(board){
 
-  const suspectSelect =
-    document
-      .getElementById(
-        "interviewSuspect"
-      );
+  const suspectSelect=
+    document.getElementById(
+      "interviewSuspect"
+    );
 
-
-  if(!suspectSelect){
-    return;
-  }
+  const questionSelect=
+    document.getElementById(
+      "interviewQuestion"
+    );
 
 
-  const suspects =
+  if(!suspectSelect||!questionSelect)return;
+
+
+  const suspects=
     roomData
       ?.game
-      ?.suspects ||
+      ?.suspects||
     [];
 
 
-  const oldValue =
+  const oldSuspect=
     suspectSelect.value;
 
 
-  suspectSelect.innerHTML =
-
-    suspects
-      .map(
-        id=>`
-
-          <option
-            value="${id}"
-          >
-
-            ${escapeHtml(
-              roomData
-                .players[id]
-                ?.name ||
-              "Unknown"
-            )}
-
-          </option>
-
-        `
-      )
-      .join("");
+  suspectSelect.innerHTML=
+    suspects.map(
+      id=>`
+        <option value="${id}">
+          ${escapeHtml(
+            roomData
+              .players[id]
+              ?.name||
+            "Unknown"
+          )}
+        </option>
+      `
+    ).join("");
 
 
   if(
     suspects.includes(
-      oldValue
+      oldSuspect
     )
   ){
 
-    suspectSelect.value =
-      oldValue;
-
+    suspectSelect.value=
+      oldSuspect;
   }
 
 
   renderInterviewQuestionOptions(
     board
   );
-
 }
 
 
-function renderInterviewQuestionOptions(
-  board
-){
+function renderInterviewQuestionOptions(board){
 
-  const select =
-    document
-      .getElementById(
-        "interviewQuestion"
-      );
+  const select=
+    document.getElementById(
+      "interviewQuestion"
+    );
 
-
-  if(!select){
-    return;
-  }
+  if(!select)return;
 
 
-  const questions =
+  const questions=
     Object.entries(
-      board.questions ||
-      {}
+      board.questions||{}
     );
 
 
-  if(
-    questions.length ===
-    0
-  ){
+  if(!questions.length){
 
-    select.innerHTML =
-      `<option value="">
-        Add a question first
-      </option>`;
+    select.innerHTML=
+      `<option value="">Add a question first</option>`;
 
     return;
-
   }
 
 
-  const oldValue =
+  const old=
     select.value;
 
 
-  select.innerHTML =
-
-    questions
-      .map(
-        ([id,q])=>`
-
-          <option
-            value="${id}"
-          >
-
-            ${escapeHtml(
-              q.text
-            )}
-
-          </option>
-
-        `
-      )
-      .join("");
+  select.innerHTML=
+    questions.map(
+      ([id,q])=>`
+        <option value="${id}">
+          ${escapeHtml(q.text)}
+        </option>
+      `
+    ).join("");
 
 
   if(
     questions.some(
-      ([id]) =>
-        id ===
-        oldValue
+      ([id])=>id===old
     )
   ){
 
-    select.value =
-      oldValue;
-
+    select.value=old;
   }
-
 }
 
 
-window.saveInterview =
-async function(){
+window.saveInterview=async()=>{
 
-  if(
-    mySecret?.role !==
-    "detective"
-  ){
-    return;
-  }
+  if(mySecret?.role!=="detective")return;
 
 
-  const suspect =
+  const suspect=
     document
       .getElementById(
         "interviewSuspect"
@@ -4240,7 +2112,7 @@ async function(){
       .value;
 
 
-  const questionId =
+  const questionId=
     document
       .getElementById(
         "interviewQuestion"
@@ -4248,65 +2120,44 @@ async function(){
       .value;
 
 
-  const answerInput =
-    document
-      .getElementById(
-        "interviewAnswer"
-      );
+  const answerInput=
+    document.getElementById(
+      "interviewAnswer"
+    );
 
 
-  const answer =
-    answerInput
-      .value
-      .trim();
+  const answer=
+    answerInput.value.trim();
 
 
-  const board =
-    getBoard();
+  const board=getBoard();
 
 
-  const question =
+  const question=
     board
       .questions
       ?.[questionId];
 
 
   if(!suspect){
-
-    alert(
-      "Choose a suspect."
-    );
-
+    alert("Choose a suspect.");
     return;
-
   }
-
 
   if(!question){
-
-    alert(
-      "Add a question first."
-    );
-
+    alert("Add a question first.");
     return;
-
   }
 
-
   if(!answer){
-
-    alert(
-      "Write the answer."
-    );
-
+    alert("Write the answer.");
     return;
-
   }
 
 
   try{
 
-    const newRef =
+    const newRef=
       push(
         gameRef(
           "detectiveBoard/interviews"
@@ -4317,142 +2168,93 @@ async function(){
     await set(
       newRef,
       {
-
         suspect,
-
         suspectName:
-          roomData
-            .players[suspect]
-            ?.name ||
+          roomData.players[suspect]?.name||
           "Unknown",
-
-        question:
-          question.text,
-
+        question:question.text,
         answer,
-
-        time:
-          serverNow()
-
+        time:serverNow()
       }
     );
 
 
-    answerInput.value =
-      "";
+    answerInput.value="";
 
-  }
-  catch(error){
+  }catch(error){
 
     alert(
-      "Could not save answer.\n\n" +
+      "Could not save answer.\n\n"+
       error.message
     );
-
   }
-
 };
 
 
-function renderInterviews(
-  board
-){
+function renderInterviews(board){
 
-  const box =
-    document
-      .getElementById(
-        "interviewList"
-      );
+  const box=
+    document.getElementById(
+      "interviewList"
+    );
 
-
-  if(!box){
-    return;
-  }
+  if(!box)return;
 
 
-  const entries =
+  const entries=
     Object.entries(
-      board.interviews ||
-      {}
+      board.interviews||{}
     );
 
 
-  if(
-    entries.length ===
-    0
-  ){
+  if(!entries.length){
 
-    box.innerHTML =
-      `<div class="empty">
-        No answers recorded yet.
-      </div>`;
+    box.innerHTML=
+      `<div class="empty">No answers recorded yet.</div>`;
 
     return;
-
   }
 
 
-  box.innerHTML =
-
+  box.innerHTML=
     entries
       .map(
         ([id,item])=>`
-
           <div class="answer-card">
 
             <div class="answer-head">
 
               <div class="answer-name">
-
-                ${escapeHtml(
-                  item.suspectName
-                )}
-
+                ${escapeHtml(item.suspectName)}
               </div>
 
               <div class="answer-time">
-
                 ${escapeHtml(
                   shortClock(
                     new Date(
-                      Number(
-                        item.time
-                      )
+                      Number(item.time)
                     )
                   )
                 )}
-
               </div>
 
             </div>
-
 
             <div class="board-meta">
               QUESTION
             </div>
 
-
             <div>
-              ${escapeHtml(
-                item.question
-              )}
+              ${escapeHtml(item.question)}
             </div>
 
-
-            <div
-              class="board-meta"
-              style="margin-top:10px"
-            >
+            <div class="board-meta" style="margin-top:10px">
               ANSWER
             </div>
 
-
             <div>
-              ${escapeHtml(
-                item.answer
-              )}
+              ${escapeHtml(item.answer)}
             </div>
-
 
             <button
               class="board-small"
@@ -4464,77 +2266,51 @@ function renderInterviews(
             </button>
 
           </div>
-
         `
       )
       .join("");
-
 }
 
 
-window.deleteInterview =
-async function(
-  id
-){
+window.deleteInterview=async(id)=>{
 
-  if(
-    mySecret?.role !==
-    "detective"
-  ){
-    return;
-  }
-
+  if(mySecret?.role!=="detective")return;
 
   await remove(
     gameRef(
-      "detectiveBoard/interviews/" +
-      id
+      "detectiveBoard/interviews/"+id
     )
   );
-
 };
 
 
-/* =====================================================
-LOCATIONS
-===================================================== */
+/* ---------------- LOCATIONS ---------------- */
 
-window.addInvestigationLocation =
-async function(){
+window.addInvestigationLocation=async()=>{
 
-  if(
-    mySecret?.role !==
-    "detective"
-  ){
-    return;
-  }
+  if(mySecret?.role!=="detective")return;
 
 
-  const input =
-    document
-      .getElementById(
-        "locationInput"
-      );
+  const input=
+    document.getElementById(
+      "locationInput"
+    );
 
 
-  const text =
+  const text=
     input.value.trim();
 
 
   if(!text){
 
-    alert(
-      "Enter a location."
-    );
-
+    alert("Enter a location.");
     return;
-
   }
 
 
   try{
 
-    const newRef =
+    const newRef=
       push(
         gameRef(
           "detectiveBoard/locations"
@@ -4545,72 +2321,50 @@ async function(){
     await set(
       newRef,
       {
-
         text,
-
-        time:
-          serverNow()
-
+        time:serverNow()
       }
     );
 
 
-    input.value =
-      "";
+    input.value="";
 
-  }
-  catch(error){
+  }catch(error){
 
     alert(
-      "Could not save location.\n\n" +
+      "Could not save location.\n\n"+
       error.message
     );
-
   }
-
 };
 
 
-function renderLocations(
-  board
-){
+function renderLocations(board){
 
-  const box =
-    document
-      .getElementById(
-        "locationsList"
-      );
+  const box=
+    document.getElementById(
+      "locationsList"
+    );
 
-
-  if(!box){
-    return;
-  }
+  if(!box)return;
 
 
-  const entries =
+  const entries=
     Object.entries(
-      board.locations ||
-      {}
+      board.locations||{}
     );
 
 
-  if(
-    entries.length ===
-    0
-  ){
+  if(!entries.length){
 
-    box.innerHTML =
-      `<div class="empty">
-        No locations logged yet.
-      </div>`;
+    box.innerHTML=
+      `<div class="empty">No locations logged yet.</div>`;
 
     return;
-
   }
 
 
-  box.innerHTML =
-
+  box.innerHTML=
     entries
       .map(
         ([id,item])=>`
@@ -4619,26 +2373,20 @@ function renderLocations(
 
             📍
             <b>
-              ${escapeHtml(
-                item.text
-              )}
+              ${escapeHtml(item.text)}
             </b>
-
 
             <div class="board-meta">
 
               ${escapeHtml(
                 shortClock(
                   new Date(
-                    Number(
-                      item.time
-                    )
+                    Number(item.time)
                   )
                 )
               )}
 
             </div>
-
 
             <button
               class="board-small"
@@ -4650,77 +2398,51 @@ function renderLocations(
             </button>
 
           </div>
-
         `
       )
       .join("");
-
 }
 
 
-window.deleteLocation =
-async function(
-  id
-){
+window.deleteLocation=async(id)=>{
 
-  if(
-    mySecret?.role !==
-    "detective"
-  ){
-    return;
-  }
-
+  if(mySecret?.role!=="detective")return;
 
   await remove(
     gameRef(
-      "detectiveBoard/locations/" +
-      id
+      "detectiveBoard/locations/"+id
     )
   );
-
 };
 
 
-/* =====================================================
-CLUES
-===================================================== */
+/* ---------------- CLUES ---------------- */
 
-window.addInvestigationClue =
-async function(){
+window.addInvestigationClue=async()=>{
 
-  if(
-    mySecret?.role !==
-    "detective"
-  ){
-    return;
-  }
+  if(mySecret?.role!=="detective")return;
 
 
-  const input =
-    document
-      .getElementById(
-        "clueInput"
-      );
+  const input=
+    document.getElementById(
+      "clueInput"
+    );
 
 
-  const text =
+  const text=
     input.value.trim();
 
 
   if(!text){
 
-    alert(
-      "Write a clue."
-    );
-
+    alert("Write a clue.");
     return;
-
   }
 
 
   try{
 
-    const newRef =
+    const newRef=
       push(
         gameRef(
           "detectiveBoard/clues"
@@ -4731,72 +2453,50 @@ async function(){
     await set(
       newRef,
       {
-
         text,
-
-        time:
-          serverNow()
-
+        time:serverNow()
       }
     );
 
 
-    input.value =
-      "";
+    input.value="";
 
-  }
-  catch(error){
+  }catch(error){
 
     alert(
-      "Could not save clue.\n\n" +
+      "Could not save clue.\n\n"+
       error.message
     );
-
   }
-
 };
 
 
-function renderClues(
-  board
-){
+function renderClues(board){
 
-  const box =
-    document
-      .getElementById(
-        "cluesList"
-      );
+  const box=
+    document.getElementById(
+      "cluesList"
+    );
 
-
-  if(!box){
-    return;
-  }
+  if(!box)return;
 
 
-  const entries =
+  const entries=
     Object.entries(
-      board.clues ||
-      {}
+      board.clues||{}
     );
 
 
-  if(
-    entries.length ===
-    0
-  ){
+  if(!entries.length){
 
-    box.innerHTML =
-      `<div class="empty">
-        No clues saved yet.
-      </div>`;
+    box.innerHTML=
+      `<div class="empty">No clues saved yet.</div>`;
 
     return;
-
   }
 
 
-  box.innerHTML =
-
+  box.innerHTML=
     entries
       .map(
         ([id,item])=>`
@@ -4804,24 +2504,19 @@ function renderClues(
           <div class="board-card">
 
             🧩
-            ${escapeHtml(
-              item.text
-            )}
+            ${escapeHtml(item.text)}
 
             <div class="board-meta">
 
               ${escapeHtml(
                 shortClock(
                   new Date(
-                    Number(
-                      item.time
-                    )
+                    Number(item.time)
                   )
                 )
               )}
 
             </div>
-
 
             <button
               class="board-small"
@@ -4829,9 +2524,7 @@ function renderClues(
                 deleteClue('${id}')
               "
             >
-
               🗑️ DELETE
-
             </button>
 
           </div>
@@ -4839,49 +2532,29 @@ function renderClues(
         `
       )
       .join("");
-
 }
 
 
-window.deleteClue =
-async function(
-  id
-){
+window.deleteClue=async(id)=>{
 
-  if(
-    mySecret?.role !==
-    "detective"
-  ){
-    return;
-  }
-
+  if(mySecret?.role!=="detective")return;
 
   await remove(
     gameRef(
-      "detectiveBoard/clues/" +
-      id
+      "detectiveBoard/clues/"+id
     )
   );
-
 };
 
 
-/* =====================================================
-THEORY
-===================================================== */
+/* ---------------- THEORY ---------------- */
 
-window.saveTheory =
-async function(){
+window.saveTheory=async()=>{
 
-  if(
-    mySecret?.role !==
-    "detective"
-  ){
-    return;
-  }
+  if(mySecret?.role!=="detective")return;
 
 
-  const theory =
+  const theory=
     document
       .getElementById(
         "detectiveTheory"
@@ -4890,24 +2563,16 @@ async function(){
 
 
   await update(
-
     gameRef(
       "detectiveBoard"
     ),
-
     {
-
       theory
-
     }
-
   );
 
 
-  alert(
-    "✅ Theory saved."
-  );
-
+  alert("✅ Theory saved.");
 };
 
 
@@ -4917,50 +2582,35 @@ INVESTIGATION
 
 function showInvestigation(){
 
-  if(
-    mySecret?.role !==
-    "detective"
-  ){
-    return;
-  }
+  if(mySecret?.role!=="detective")return;
 
 
   document
-    .getElementById(
-      "detectiveWaiting"
-    )
+    .getElementById("detectiveWaiting")
     .classList
     .add("hidden");
 
 
   document
-    .getElementById(
-      "normalWaiting"
-    )
+    .getElementById("normalWaiting")
     .classList
     .add("hidden");
 
 
   document
-    .getElementById(
-      "detectiveNotebook"
-    )
+    .getElementById("detectiveNotebook")
     .classList
     .remove("hidden");
 
 
   document
-    .getElementById(
-      "investigation"
-    )
+    .getElementById("investigation")
     .classList
     .remove("hidden");
 
 
   renderCase();
-
   renderDetectiveSummary();
-
 }
 
 
@@ -4970,102 +2620,56 @@ CASE
 
 function renderCase(){
 
-  const game =
-    roomData?.game;
+  const game=roomData?.game;
+
+  if(!game)return;
 
 
-  if(!game){
-    return;
-  }
-
-
-  const suspects =
-    game.suspects ||
-    [];
+  const suspects=game.suspects||[];
 
 
   document
-    .getElementById(
-      "caseFile"
-    )
-    .innerHTML = `
+    .getElementById("caseFile")
+    .innerHTML=`
 
       <div class="success">
-
         🔎 Investigation started.
-
       </div>
 
-
       <p>
-
-        <b>
-          Victim:
-        </b>
-
-        ${escapeHtml(
-          game.victim
-        )}
-
+        <b>Victim:</b>
+        ${escapeHtml(game.victim)}
       </p>
 
-
       <p>
-
-        <b>
-          Crime location:
-        </b>
-
-        ${escapeHtml(
-          game.crimeLocation
-        )}
-
+        <b>Crime location:</b>
+        ${escapeHtml(game.crimeLocation)}
       </p>
 
-
       <p>
-
-        <b>
-          Current time:
-        </b>
-
-        ${clockText(
-          new Date(
-            serverNow()
-          )
-        )}
-
+        <b>Current time:</b>
+        ${clockText(new Date(serverNow()))}
       </p>
 
-
-      <h3>
-        👥 SUSPECTS
-      </h3>
-
+      <h3>👥 SUSPECTS</h3>
 
       ${
         suspects
           .map(
             id=>`
-
               <div class="player">
-
                 👤
-
                 ${escapeHtml(
                   roomData
                     .players[id]
-                    ?.name ||
+                    ?.name||
                   "Unknown"
                 )}
-
               </div>
-
             `
           )
           .join("")
       }
-
     `;
 
 
@@ -5076,94 +2680,69 @@ function renderCase(){
     .getElementById(
       "accusationButtons"
     )
-    .innerHTML =
-
-    suspects
-      .map(
+    .innerHTML=
+      suspects.map(
         id=>`
-
           <button
             onclick="
               accuse('${id}')
             "
           >
-
             Accuse
             ${escapeHtml(
               roomData
                 .players[id]
-                ?.name ||
+                ?.name||
               "Unknown"
             )}
-
           </button>
-
         `
-      )
-      .join("");
-
+      ).join("");
 }
 
 
 /* =====================================================
-SUMMARY
+DETECTIVE SUMMARY
 ===================================================== */
 
 function renderDetectiveSummary(){
 
-  if(
-    mySecret?.role !==
-    "detective"
-  ){
-    return;
-  }
+  if(mySecret?.role!=="detective")return;
 
 
-  const box =
-    document
-      .getElementById(
-        "detectiveSummary"
-      );
+  const box=
+    document.getElementById(
+      "detectiveSummary"
+    );
+
+  if(!box)return;
 
 
-  if(!box){
-    return;
-  }
+  const board=getBoard();
 
 
-  const board =
-    getBoard();
-
-
-  const questionCount =
+  const questionCount=
     Object.keys(
-      board.questions ||
-      {}
+      board.questions||{}
+    ).length;
+
+  const interviewCount=
+    Object.keys(
+      board.interviews||{}
+    ).length;
+
+  const locationCount=
+    Object.keys(
+      board.locations||{}
+    ).length;
+
+  const clueCount=
+    Object.keys(
+      board.clues||{}
     ).length;
 
 
-  const interviewCount =
-    Object.keys(
-      board.interviews ||
-      {}
-    ).length;
-
-
-  const locationCount =
-    Object.keys(
-      board.locations ||
-      {}
-    ).length;
-
-
-  const clueCount =
-    Object.keys(
-      board.clues ||
-      {}
-    ).length;
-
-
-  box.innerHTML = `
+  box.innerHTML=`
 
     <div class="count-card">
 
@@ -5185,39 +2764,24 @@ function renderDetectiveSummary(){
 
     </div>
 
-
     ${
       board.theory
       ?
-
       `
-
         <div class="info">
 
-          <b>
-            🧠 Theory
-          </b>
+          <b>🧠 Theory</b>
 
           <p>
-
-            ${escapeHtml(
-              board.theory
-            )}
-
+            ${escapeHtml(board.theory)}
           </p>
 
         </div>
-
       `
-
       :
-
       ""
-
     }
-
   `;
-
 }
 
 
@@ -5227,176 +2791,128 @@ TASK PROGRESS
 
 async function renderTaskProgress(){
 
-  const suspects =
+  const suspects=
     roomData
       ?.game
-      ?.suspects ||
+      ?.suspects||
     [];
 
 
-  const box =
-    document
-      .getElementById(
-        "taskProgress"
-      );
+  const box=
+    document.getElementById(
+      "taskProgress"
+    );
 
 
-  if(!box){
-    return;
-  }
+  if(!box)return;
 
 
-  box.innerHTML =
-    "";
+  box.innerHTML="";
 
 
   for(
     const id of suspects
   ){
 
-    const completed =
+    const completed=
       roomData
         ?.completed
-        ?.[id] ||
+        ?.[id]||
       {};
 
 
-    const count =
+    const count=
       Object
         .values(
           completed
         )
         .filter(
-          value =>
-            value ===
-            true
+          value=>value===true
         )
         .length;
 
 
-    const total =
-      await getPrivateTaskCount(
-        id
-      );
+    const total=
+      await getPrivateTaskCount(id);
 
 
-    const percent =
+    const percent=
       total
       ?
       Math.min(
         100,
-        count /
-        total *
-        100
+        count/total*100
       )
       :
       0;
 
 
-    const name =
+    const name=
       roomData
         .players[id]
-        ?.name ||
+        ?.name||
       "Unknown";
 
 
-    box.innerHTML += `
+    box.innerHTML+=`
 
       <div class="count-card">
 
         <b>
-
-          👤
-          ${escapeHtml(name)}
-
+          👤 ${escapeHtml(name)}
         </b>
 
-
         <div class="count-number">
-
           ${count}/${total}
-
         </div>
-
 
         <div class="progress">
 
           <div
             class="progress-bar"
-            style="
-              width:${percent}%
-            "
+            style="width:${percent}%"
           ></div>
 
         </div>
 
-
         <div class="small">
 
           ${
-            count ===
-            total
-
+            count===total
             ?
-
             "✅ All tasks completed"
-
             :
-
             `${total-count} unfinished`
-
           }
 
         </div>
 
       </div>
-
     `;
-
   }
-
 }
 
 
-async function getPrivateTaskCount(
-  player
-){
+async function getPrivateTaskCount(player){
 
-  const snapshot =
+  const snapshot=
     await get(
-
       gameRef(
-        "private/" +
-        player +
-        "/tasks"
+        "private/"+player+"/tasks"
       )
-
     );
 
 
-  if(
-    !snapshot.exists()
-  ){
-
+  if(!snapshot.exists()){
     return 0;
-
   }
 
 
-  const tasks =
-    snapshot.val();
+  const tasks=snapshot.val();
 
-
-  return Array.isArray(
-    tasks
-  )
-  ?
-  tasks.length
-  :
-  Object.keys(
-    tasks
-  ).length;
-
+  return Array.isArray(tasks)
+    ?tasks.length
+    :Object.keys(tasks).length;
 }
 
 
@@ -5404,55 +2920,39 @@ async function getPrivateTaskCount(
 ACCUSE
 ===================================================== */
 
-window.accuse =
-async function(
-  accusedId
-){
+window.accuse=async(accusedId)=>{
 
-  if(
-    mySecret?.role !==
-    "detective"
-  ){
-
+  if(mySecret?.role!=="detective"){
     return;
-
   }
 
 
   if(
-    roomData?.game?.detective !==
-    playerId
+    roomData?.game?.detective !== playerId
   ){
-
     return;
-
   }
 
 
-  const correct =
-    accusedId ===
+  const correct=
+    accusedId===
     roomData.game.murderer;
 
 
-  const name =
+  const name=
     roomData
       .players[accusedId]
-      ?.name ||
+      ?.name||
     "Unknown";
 
 
   document
-    .getElementById(
-      "result"
-    )
-    .innerHTML =
+    .getElementById("result")
+    .innerHTML=
 
     correct
-
     ?
-
     `
-
       <div class="success">
 
         🎉 CORRECT!
@@ -5460,19 +2960,12 @@ async function(
         <br><br>
 
         You caught:
-
-        <b>
-          ${escapeHtml(name)}
-        </b>
+        <b>${escapeHtml(name)}</b>
 
       </div>
-
     `
-
     :
-
     `
-
       <div class="warning">
 
         ❌ WRONG!
@@ -5480,35 +2973,20 @@ async function(
         <br><br>
 
         You accused:
-
-        <b>
-          ${escapeHtml(name)}
-        </b>
+        <b>${escapeHtml(name)}</b>
 
       </div>
-
     `;
 
 
   await set(
-
-    gameRef(
-      "result"
-    ),
-
+    gameRef("result"),
     {
-
       accusedId,
-
       correct,
-
-      finishedAt:
-        serverNow()
-
+      finishedAt:serverNow()
     }
-
   );
-
 };
 
 
@@ -5516,38 +2994,16 @@ async function(
 CALLS
 ===================================================== */
 
-window.makeCall =
-async function(
-  destination
-){
-
-  if(!roomCode){
-    return;
-  }
-
+window.makeCall=async(destination)=>{
 
   await set(
-
-    gameRef(
-      "call"
-    ),
-
+    gameRef("call"),
     {
-
       destination,
-
-      caller:
-        myName,
-
-      time:
-        serverNow(),
-
-      id:
-        Date.now()
-          .toString()
-
+      caller:myName,
+      time:serverNow(),
+      id:Date.now().toString()
     }
-
   );
 
 };
@@ -5556,74 +3012,50 @@ async function(
 function listenForCalls(){
 
   onValue(
-
-    gameRef(
-      "call"
-    ),
-
+    gameRef("call"),
     snapshot=>{
 
-      if(
-        !snapshot.exists()
-      ){
+      if(!snapshot.exists())return;
 
-        return;
-
-      }
-
-
-      const call =
-        snapshot.val();
-
+      const call=snapshot.val();
 
       if(
-        call.id ===
+        call.id===
         lastCallId
       ){
-
         return;
-
       }
 
-
-      lastCallId =
-        call.id;
-
+      lastCallId=call.id;
 
       showCall(
         call.destination,
         call.caller
       );
-
     }
-
   );
-
 }
 
 
-function showCall(
-  destination,
-  caller
-){
+function showCall(destination,caller){
 
-  const stack =
+  const stack=
     document.getElementById(
       "callStack"
     );
 
 
-  const banner =
+  const banner=
     document.createElement(
       "div"
     );
 
 
-  banner.className =
+  banner.className=
     "call-banner";
 
 
-  banner.innerHTML = `
+  banner.innerHTML=`
 
     <h2>
       📞 GROUP CALL
@@ -5632,12 +3064,8 @@ function showCall(
     <p>
 
       ${escapeHtml(caller)}
-
       is calling everyone to
-
-      <b>
-        ${escapeHtml(destination)}
-      </b>!
+      <b>${escapeHtml(destination)}</b>!
 
     </p>
 
@@ -5649,10 +3077,8 @@ function showCall(
 
 
   banner
-    .querySelector(
-      "button"
-    )
-    .onclick =
+    .querySelector("button")
+    .onclick=
     ()=>{
       banner.remove();
     };
@@ -5669,7 +3095,6 @@ function showCall(
     },
     10000
   );
-
 }
 
 
@@ -5677,11 +3102,10 @@ function showCall(
 RESET
 ===================================================== */
 
-window.resetGame =
-async function(){
+window.resetGame=async()=>{
 
   if(
-    roomData?.host !==
+    roomData?.host!==
     playerId
   ){
 
@@ -5690,7 +3114,6 @@ async function(){
     );
 
     return;
-
   }
 
 
@@ -5699,18 +3122,12 @@ async function(){
       "Reset the current game?"
     )
   ){
-
     return;
-
   }
 
 
   await update(
-
-    ref(
-      db
-    ),
-
+    ref(db),
     {
 
       [`rooms/${roomCode}/status`]:
@@ -5735,41 +3152,29 @@ async function(){
         null
 
     }
-
   );
 
 
-  mySecret =
-    null;
-
+  mySecret=null;
 
   clearInterval(
     globalInterval
   );
 
 
-  taskListenerStarted =
-    false;
-
-  boardListenerStarted =
-    false;
-
-  listenersStarted =
-    false;
+  taskListenerStarted=false;
+  boardListenerStarted=false;
+  listenersStarted=false;
 
 
   document
-    .getElementById(
-      "game"
-    )
+    .getElementById("game")
     .classList
     .add("hidden");
 
 
   document
-    .getElementById(
-      "lobby"
-    )
+    .getElementById("lobby")
     .classList
     .remove("hidden");
 
@@ -5780,21 +3185,17 @@ async function(){
 ROOM FROM URL
 ===================================================== */
 
-const params =
+const params=
   new URLSearchParams(
     location.search
   );
 
 
-if(
-  params.get("room")
-){
+if(params.get("room")){
 
   document
-    .getElementById(
-      "roomInput"
-    )
-    .value =
+    .getElementById("roomInput")
+    .value=
     params
       .get("room")
       .toUpperCase();
@@ -5813,20 +3214,16 @@ if(
   window.addEventListener(
     "load",
     ()=>{
-
       navigator
         .serviceWorker
-        .register(
-          "./sw.js"
-        )
+        .register("./sw.js")
         .catch(
-          error =>
+          error=>
             console.log(
               "Service worker:",
               error
             )
         );
-
     }
   );
 
