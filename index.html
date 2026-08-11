@@ -6,9 +6,7 @@
 <title>Hotel Murder</title>
 
 <style>
-*{
-  box-sizing:border-box;
-}
+*{box-sizing:border-box}
 
 body{
   margin:0;
@@ -48,13 +46,8 @@ h1{
   font-size:38px;
 }
 
-h2{
-  margin-top:0;
-}
-
-h3{
-  margin-top:24px;
-}
+h2{margin-top:0}
+h3{margin-top:24px}
 
 p{
   color:#b2bad0;
@@ -89,34 +82,18 @@ button{
   font-weight:800;
 }
 
-button.secondary{
-  background:#272e40;
-}
-
-button.green{
-  background:#35a878;
-}
-
-button.red{
-  background:#d54d5d;
-}
-
-button.orange{
-  background:#c47d35;
-}
+button.secondary{background:#272e40}
+button.green{background:#35a878}
+button.red{background:#d54d5d}
+button.orange{background:#c47d35}
 
 button:disabled{
   opacity:.45;
   cursor:not-allowed;
 }
 
-.hidden{
-  display:none!important;
-}
-
-.center{
-  text-align:center;
-}
+.hidden{display:none!important}
+.center{text-align:center}
 
 .room-code{
   background:#0c1019;
@@ -149,17 +126,9 @@ button:disabled{
   margin-bottom:18px;
 }
 
-.role.detective{
-  background:#26396e;
-}
-
-.role.murderer{
-  background:#672630;
-}
-
-.role.innocent{
-  background:#20543c;
-}
+.role.detective{background:#26396e}
+.role.murderer{background:#672630}
+.role.innocent{background:#20543c}
 
 .task{
   background:#202638;
@@ -167,15 +136,22 @@ button:disabled{
   padding:15px;
   border-radius:15px;
   margin:9px 0;
+}
+
+.task.locked{
+  opacity:.65;
+}
+
+.task-row{
   display:flex;
   gap:12px;
   align-items:flex-start;
 }
 
-.task input{
-  width:24px;
+.task-checkbox{
+  width:24px!important;
   height:24px;
-  margin:0;
+  margin:0!important;
   flex:none;
   accent-color:#718cff;
 }
@@ -191,8 +167,19 @@ button:disabled{
   margin-bottom:5px;
 }
 
+.task-status{
+  margin-top:7px;
+  font-size:12px;
+  color:#9099ae;
+}
+
 .task.done{
   opacity:.55;
+}
+
+.locked-text{
+  color:#8c95aa;
+  font-style:italic;
 }
 
 .warning{
@@ -291,6 +278,10 @@ button:disabled{
   margin:0;
 }
 
+.call-banner button{
+  background:#111827;
+}
+
 @keyframes pop{
   from{
     transform:translateY(-30px);
@@ -330,19 +321,9 @@ button:disabled{
 }
 
 @media(max-width:600px){
-
-  .row{
-    grid-template-columns:1fr;
-  }
-
-  h1{
-    font-size:31px;
-  }
-
-  .timer{
-    font-size:48px;
-  }
-
+  .row{grid-template-columns:1fr}
+  h1{font-size:31px}
+  .timer{font-size:48px}
 }
 </style>
 </head>
@@ -352,14 +333,12 @@ button:disabled{
 <div id="callBanner" class="call-banner hidden">
   <h2>📞 GROUP CALL</h2>
   <p id="callText"></p>
+  <button onclick="dismissCall()">Dismiss</button>
 </div>
 
 <div class="app">
 
-<!-- =====================================================
-HOME
-====================================================== -->
-
+<!-- HOME -->
 <section id="home">
 
   <div class="card">
@@ -373,31 +352,13 @@ HOME
     </p>
 
     <label>Your name</label>
-
-    <input
-      id="nameInput"
-      placeholder="Your name"
-      autocomplete="off"
-    >
+    <input id="nameInput" placeholder="Your name" autocomplete="off">
 
     <label>Room code</label>
+    <input id="roomInput" placeholder="Example: HOTEL123" autocomplete="off">
 
-    <input
-      id="roomInput"
-      placeholder="Example: HOTEL123"
-      autocomplete="off"
-    >
-
-    <button onclick="createRoom()">
-      CREATE NEW ROOM
-    </button>
-
-    <button
-      class="secondary"
-      onclick="joinRoom()"
-    >
-      JOIN ROOM
-    </button>
+    <button onclick="createRoom()">CREATE NEW ROOM</button>
+    <button class="secondary" onclick="joinRoom()">JOIN ROOM</button>
 
   </div>
 
@@ -416,10 +377,10 @@ HOME
     </p>
 
     <p>
-      The website uses the real clock. A fictional
-      murder is scheduled a few minutes into the round.
-      The Detective has 5 minutes 30 seconds before
-      the investigation begins.
+      The Detective waits outside for exactly
+      <b>5 minutes</b>.
+      Every player's tasks unlock at specific real
+      times and must be completed before the Detective returns.
     </p>
 
   </div>
@@ -427,24 +388,18 @@ HOME
 </section>
 
 
-<!-- =====================================================
-CREATE ROOM
-====================================================== -->
-
+<!-- CREATE ROOM -->
 <section id="createScreen" class="hidden">
 
   <div class="card">
 
     <h1>🏨 Create Room</h1>
 
-    <p>
-      Choose the exact number of players.
-    </p>
+    <p>Choose the exact number of players.</p>
 
     <label>Players</label>
 
     <select id="playerLimit">
-
       <option value="2">2 Players</option>
       <option value="3" selected>3 Players</option>
       <option value="4">4 Players</option>
@@ -454,29 +409,17 @@ CREATE ROOM
       <option value="8">8 Players</option>
       <option value="9">9 Players</option>
       <option value="10">10 Players</option>
-
     </select>
 
-    <button onclick="finishCreateRoom()">
-      CREATE ROOM
-    </button>
-
-    <button
-      class="secondary"
-      onclick="backHome()"
-    >
-      BACK
-    </button>
+    <button onclick="finishCreateRoom()">CREATE ROOM</button>
+    <button class="secondary" onclick="backHome()">BACK</button>
 
   </div>
 
 </section>
 
 
-<!-- =====================================================
-LOBBY
-====================================================== -->
-
+<!-- LOBBY -->
 <section id="lobby" class="hidden">
 
   <div class="card center">
@@ -485,10 +428,7 @@ LOBBY
 
     <p>Give the room code to the other players.</p>
 
-    <div
-      id="roomDisplay"
-      class="room-code"
-    ></div>
+    <div id="roomDisplay" class="room-code"></div>
 
     <div id="lobbyPlayerCount"></div>
 
@@ -502,20 +442,13 @@ LOBBY
 
   </div>
 
-  <div
-    id="hostPanel"
-    class="card hidden"
-  >
+  <div id="hostPanel" class="card hidden">
 
     <h2>👑 Host</h2>
 
     <p id="hostInfo"></p>
 
-    <button
-      id="startButton"
-      onclick="startRound()"
-      disabled
-    >
+    <button id="startButton" onclick="startRound()" disabled>
       START ROUND
     </button>
 
@@ -524,24 +457,17 @@ LOBBY
 </section>
 
 
-<!-- =====================================================
-GAME
-====================================================== -->
-
+<!-- GAME -->
 <section id="game" class="hidden">
 
-  <!-- GLOBAL LIVE CLOCK -->
-
+  <!-- GLOBAL CLOCK -->
   <div class="card center">
 
     <div class="phase" id="phaseText">
       ROUND
     </div>
 
-    <div
-      id="globalTimer"
-      class="timer"
-    >
+    <div id="globalTimer" class="timer">
       --:--
     </div>
 
@@ -550,29 +476,23 @@ GAME
   </div>
 
 
-  <!-- GLOBAL CALL BUTTON -->
-
+  <!-- CALL -->
   <div class="card">
 
     <h2>📞 Call Everyone</h2>
 
     <p>
-      Choose a meeting location. Everyone currently
-      playing will immediately see the call.
+      Choose a meeting location.
+      Everyone gets the message immediately.
     </p>
 
     <div class="row">
 
-      <button
-        onclick="makeCall('Lobby')"
-      >
+      <button onclick="makeCall('Lobby')">
         📍 CALL TO LOBBY
       </button>
 
-      <button
-        class="orange"
-        onclick="makeCall('Cafe')"
-      >
+      <button class="orange" onclick="makeCall('Cafe')">
         ☕ CALL TO CAFE
       </button>
 
@@ -581,22 +501,14 @@ GAME
   </div>
 
 
-  <!-- SECRET INFORMATION -->
-
-  <div
-    id="secretCard"
-    class="card"
-  >
+  <!-- SECRET -->
+  <div id="secretCard" class="card">
     Loading your secret...
   </div>
 
 
   <!-- DETECTIVE WAITING -->
-
-  <div
-    id="detectiveWaiting"
-    class="card hidden center"
-  >
+  <div id="detectiveWaiting" class="card hidden center">
 
     <h2>🕵️ Detective Waiting</h2>
 
@@ -605,45 +517,32 @@ GAME
       The other players are completing their tasks.
     </p>
 
-    <div
-      id="detectiveTimer"
-      class="timer"
-    >
-      05:30
+    <div id="detectiveTimer" class="timer">
+      05:00
     </div>
 
     <div class="warning">
-
       Do not return until the timer reaches zero.
-
     </div>
 
   </div>
 
 
-  <!-- NON-DETECTIVE WAIT -->
-
-  <div
-    id="normalWaiting"
-    class="card hidden"
-  >
+  <!-- NORMAL PLAYERS -->
+  <div id="normalWaiting" class="card hidden">
 
     <h2>🤫 Complete Your Tasks</h2>
 
     <p>
-      Follow your secret timeline.
-      Mark each task when you finish it.
+      Future tasks stay locked until their real unlock time.
+      Finish every task before the Detective returns.
     </p>
 
   </div>
 
 
-  <!-- DETECTIVE INVESTIGATION -->
-
-  <div
-    id="investigation"
-    class="card hidden"
-  >
+  <!-- INVESTIGATION -->
+  <div id="investigation" class="card hidden">
 
     <h2>🔎 Investigation</h2>
 
@@ -654,8 +553,8 @@ GAME
     <h3>📊 Task Progress</h3>
 
     <p>
-      You can see how many tasks each player completed.
-      You cannot see their secret tasks.
+      The Detective can see how many tasks each player
+      completed, but not the actual task descriptions.
     </p>
 
     <div id="taskProgress"></div>
@@ -672,11 +571,7 @@ GAME
 
 
   <!-- INVESTIGATION TIMER -->
-
-  <div
-    id="investigationTimerCard"
-    class="card hidden center"
-  >
+  <div id="investigationTimerCard" class="card hidden center">
 
     <h2>🔎 Investigation Time</h2>
 
@@ -684,10 +579,7 @@ GAME
       You have 5 minutes 30 seconds to decide.
     </p>
 
-    <div
-      id="investigationTimer"
-      class="timer"
-    >
+    <div id="investigationTimer" class="timer">
       05:30
     </div>
 
@@ -706,8 +598,7 @@ FIREBASE
 
 import {
   initializeApp
-}
-from
+} from
 "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
 
 import {
@@ -717,13 +608,11 @@ import {
   set,
   update,
   onValue
-}
-from
+} from
 "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
 
 
 const firebaseConfig = {
-
   apiKey:
   "AIzaSyCugS0qHKstXGZAr5dvzm-DaLZAIDugo",
 
@@ -794,33 +683,29 @@ let roomData = null;
 let mySecret = null;
 
 let globalInterval = null;
-let investigationInterval = null;
+let lastCallId = null;
+let listenersStarted = false;
 
 
 /* =====================================================
-GAME SETTINGS
+TIMING
 ====================================================== */
 
 const DETECTIVE_WAIT =
-  5 * 60 * 1000 + 30 * 1000;
+  5 * 60 * 1000; // EXACTLY 5 MINUTES
 
 const INVESTIGATION_TIME =
-  5 * 60 * 1000 + 30 * 1000;
-
+  5 * 60 * 1000 + 30 * 1000; // 5:30
 
 /*
-  Murder will happen 2–4 minutes after
-  the round starts.
-
-  That guarantees it happens before
-  the Detective's 5:30 wait ends.
+  Murder happens during the first
+  part of the 5-minute Detective wait.
 */
-
 const MIN_MURDER_DELAY =
   2 * 60 * 1000;
 
 const MAX_MURDER_DELAY =
-  4 * 60 * 1000;
+  3 * 60 * 1000 + 30 * 1000;
 
 
 /* =====================================================
@@ -829,15 +714,23 @@ LOCATIONS
 
 const locations = [
 
-  "Lobby seating",
-  "Reception area",
-  "Staircase",
-  "Floor 1 hallway",
-  "Lobby entrance",
-  "Lobby window",
-  "Lobby table",
-  "Area beside reception",
-  "Hallway near the staircase"
+  // HOTEL
+  "Hotel Lobby Seating",
+  "Hotel Reception",
+  "Hotel Staircase",
+  "Hotel Floor 1 Hallway",
+  "Hotel Lobby Entrance",
+  "Hotel Lobby Window",
+  "Hotel Lobby Table",
+  "Hotel Area Beside Reception",
+  "Hotel Hallway Near Staircase",
+
+  // NEARBY MALL
+  "Green Plaza Mall Entrance",
+  "Green Plaza Mall Door 2",
+  "Green Plaza Mall Hallway",
+  "Green Plaza Mall Seating",
+  "Green Plaza Mall Entrance Area"
 
 ];
 
@@ -869,11 +762,8 @@ const victims = [
 const cases = [
 
   "A fictional hotel guest was found dead in the story.",
-
   "A fictional visitor was found dead in the story.",
-
   "A fictional guest was discovered dead in the story.",
-
   "A fictional incident happened inside the hotel."
 
 ];
@@ -887,7 +777,7 @@ function random(array){
 
   return array[
     Math.floor(
-      Math.random()*array.length
+      Math.random() * array.length
     )
   ];
 
@@ -896,18 +786,17 @@ function random(array){
 
 function shuffle(array){
 
-  const result =
-    [...array];
+  const result = [...array];
 
   for(
-    let i=result.length-1;
-    i>0;
+    let i = result.length - 1;
+    i > 0;
     i--
   ){
 
     const j =
       Math.floor(
-        Math.random()*(i+1)
+        Math.random() * (i + 1)
       );
 
     [
@@ -934,25 +823,79 @@ function pad(n){
 }
 
 
+/*
+  12-hour clock
+*/
+
 function clockText(date){
 
-  return (
-    pad(date.getHours()) +
-    ":" +
-    pad(date.getMinutes()) +
-    ":" +
-    pad(date.getSeconds())
-  );
+  let h =
+    date.getHours();
+
+  const minutes =
+    pad(date.getMinutes());
+
+  const seconds =
+    pad(date.getSeconds());
+
+  const period =
+    h >= 12 ? "PM" : "AM";
+
+  h =
+    h % 12;
+
+  if(h === 0){
+    h = 12;
+  }
+
+  return `${h}:${minutes}:${seconds} ${period}`;
 
 }
 
 
 function shortClock(date){
 
+  let h =
+    date.getHours();
+
+  const minutes =
+    pad(date.getMinutes());
+
+  const period =
+    h >= 12 ? "PM" : "AM";
+
+  h =
+    h % 12;
+
+  if(h === 0){
+    h = 12;
+  }
+
+  return `${h}:${minutes} ${period}`;
+
+}
+
+
+function formatDuration(ms){
+
+  const seconds =
+    Math.max(
+      0,
+      Math.ceil(ms / 1000)
+    );
+
+  const minutes =
+    Math.floor(
+      seconds / 60
+    );
+
+  const secs =
+    seconds % 60;
+
   return (
-    pad(date.getHours()) +
+    pad(minutes) +
     ":" +
-    pad(date.getMinutes())
+    pad(secs)
   );
 
 }
@@ -985,12 +928,45 @@ function makeUniqueLocation(
   }
   while(
     used.includes(x) ||
-    x===forbidden
+    x === forbidden
   );
 
   used.push(x);
 
   return x;
+
+}
+
+
+/* =====================================================
+TASK CREATOR
+====================================================== */
+
+/*
+  Every task gets:
+  - unlockAt = real timestamp
+  - id
+  - description
+  - timeText
+
+  Nobody can mark a task until unlockAt.
+*/
+
+function createTask(
+  id,
+  unlockAt,
+  timeText,
+  description
+){
+
+  return {
+
+    id,
+    unlockAt,
+    timeText,
+    description
+
+  };
 
 }
 
@@ -1094,7 +1070,7 @@ async function(){
   const roomRef =
     ref(
       db,
-      "rooms/"+roomCode
+      "rooms/" + roomCode
     );
 
 
@@ -1151,7 +1127,7 @@ async function(){
 
 
 /* =====================================================
-JOIN
+JOIN ROOM
 ====================================================== */
 
 window.joinRoom =
@@ -1196,7 +1172,7 @@ async function(){
   const roomRef =
     ref(
       db,
-      "rooms/"+roomCode
+      "rooms/" + roomCode
     );
 
 
@@ -1219,7 +1195,7 @@ async function(){
     snapshot.val();
 
 
-  if(data.status!=="lobby"){
+  if(data.status !== "lobby"){
 
     alert(
       "The game has already started."
@@ -1253,8 +1229,10 @@ async function(){
 
     ref(
       db,
-      "rooms/"+roomCode+
-      "/players/"+playerId
+      "rooms/" +
+      roomCode +
+      "/players/" +
+      playerId
     ),
 
     {
@@ -1317,7 +1295,7 @@ function listenToRoom(){
 
     ref(
       db,
-      "rooms/"+roomCode
+      "rooms/" + roomCode
     ),
 
     snapshot=>{
@@ -1343,7 +1321,7 @@ function listenToRoom(){
 
 
       if(
-        roomData.status==="game"
+        roomData.status === "game"
       ){
 
         loadGame();
@@ -1358,7 +1336,7 @@ function listenToRoom(){
 
 
 /* =====================================================
-LOBBY RENDER
+LOBBY
 ====================================================== */
 
 function renderLobby(){
@@ -1389,7 +1367,7 @@ function renderLobby(){
       <span class="badge">
         👤 ${Math.max(
           0,
-          roomData.playerLimit-2
+          roomData.playerLimit - 2
         )} Innocent
       </span>
 
@@ -1412,7 +1390,7 @@ function renderLobby(){
             )}
 
             ${
-              id===roomData.host
+              id === roomData.host
               ?
               `<span class="host">
                 👑 HOST
@@ -1428,12 +1406,9 @@ function renderLobby(){
       .join("");
 
 
-  const host =
-    roomData.host ===
-    playerId;
-
-
-  if(host){
+  if(
+    roomData.host === playerId
+  ){
 
     document
       .getElementById("hostPanel")
@@ -1444,7 +1419,6 @@ function renderLobby(){
     document
       .getElementById("hostInfo")
       .textContent =
-
       `${ids.length}/${roomData.playerLimit} players joined.`;
 
 
@@ -1468,8 +1442,7 @@ async function(){
 
   if(
     !roomData ||
-    roomData.host !==
-    playerId
+    roomData.host !== playerId
   ){
 
     return;
@@ -1517,7 +1490,9 @@ async function(){
 
 
   /*
-    ACTUAL REAL-WORLD MURDER TIME
+    REAL MURDER TIME
+
+    2:00–3:30 after the round starts.
   */
 
   const murderDelay =
@@ -1537,8 +1512,7 @@ async function(){
 
 
   /*
-    Detective waiting ends 5:30
-    after round starts.
+    Detective returns after exactly 5:00.
   */
 
   const detectiveEnd =
@@ -1547,8 +1521,7 @@ async function(){
 
 
   /*
-    Investigation ends another
-    5:30 after Detective returns.
+    Investigation is 5:30.
   */
 
   const investigationEnd =
@@ -1559,26 +1532,19 @@ async function(){
   const crimeLocation =
     random(locations);
 
-
   const victim =
     random(victims);
-
 
   const caseDescription =
     random(cases);
 
 
-  /*
-    Secret data
-  */
-
-  const privateData =
-    {};
+  const privateData = {};
 
 
-  /* ---------------------------------------------
+  /* =====================================================
      DETECTIVE
-  --------------------------------------------- */
+  ===================================================== */
 
   privateData[detective] = {
 
@@ -1592,94 +1558,145 @@ async function(){
   };
 
 
-  /* ---------------------------------------------
-     MURDERER
-  --------------------------------------------- */
+  /* =====================================================
+     MURDERER TASKS
+  ===================================================== */
 
-  const murdererTasks =
-    [];
+  const murdererUsed = [];
 
-  const usedMurderer =
-    [];
+  const murdererTasks = [];
 
 
-  murdererTasks.push({
+  /*
+    Task 1 unlocks after 20 seconds.
+  */
 
-    id:"m1",
+  murdererTasks.push(
 
-    timeText:
-      "Now",
+    createTask(
 
-    description:
-      "Go to "+
+      "m1",
+
+      now + 20 * 1000,
+
+      shortClock(
+        new Date(
+          now + 20 * 1000
+        )
+      ),
+
+      "Go to " +
       makeUniqueLocation(
-        usedMurderer,
+        murdererUsed,
         crimeLocation
-      )+
+      ) +
       " and stay there briefly."
 
-  });
+    )
+
+  );
 
 
-  murdererTasks.push({
+  /*
+    Task 2 unlocks after 70 seconds.
+  */
 
-    id:"m2",
+  murdererTasks.push(
 
-    timeText:
-      "Before the murder",
+    createTask(
 
-    description:
-      random(activities)+
-      " near "+
+      "m2",
+
+      now + 70 * 1000,
+
+      shortClock(
+        new Date(
+          now + 70 * 1000
+        )
+      ),
+
+      random(activities) +
+      " near " +
       makeUniqueLocation(
-        usedMurderer,
+        murdererUsed,
         crimeLocation
-      )+
+      ) +
       "."
 
-  });
+    )
+
+  );
 
 
-  murdererTasks.push({
+  /*
+    Murder task unlocks at the actual murder time.
+  */
 
-    id:"m3",
+  murdererTasks.push(
 
-    timeText:
-      "MURDER — "+
+    createTask(
+
+      "m3",
+
+      murderAt,
+
+      "MURDER — " +
       shortClock(
         new Date(murderAt)
       ),
 
-    description:
-      "Go to "+
-      crimeLocation+
-      ". The fictional murder happens here at "+
+      "Go to " +
+      crimeLocation +
+      ". The fictional murder happens here at " +
       shortClock(
         new Date(murderAt)
-      )+
+      ) +
       "."
 
-  });
+    )
+
+  );
 
 
-  murdererTasks.push({
+  /*
+    Final murderer task unlocks 25 seconds
+    after the fictional murder and is still
+    safely before Detective returns.
+  */
 
-    id:"m4",
+  const murdererFinalTime =
+    Math.min(
+      murderAt + 25 * 1000,
+      detectiveEnd - 20 * 1000
+    );
 
-    timeText:
-      "After the murder",
 
-    description:
-      "Leave "+
-      crimeLocation+
-      " and go to "+
+  murdererTasks.push(
+
+    createTask(
+
+      "m4",
+
+      murdererFinalTime,
+
+      shortClock(
+        new Date(
+          murdererFinalTime
+        )
+      ),
+
+      "Leave " +
+      crimeLocation +
+      " and go to " +
       makeUniqueLocation(
-        usedMurderer,
+        murdererUsed,
         crimeLocation
-      )+
+      ) +
       "."
 
-  });
+    )
+
+  );
 
 
   privateData[murderer] = {
@@ -1694,100 +1711,139 @@ async function(){
   };
 
 
-  /* ---------------------------------------------
-     INNOCENTS
-  --------------------------------------------- */
+  /* =====================================================
+     INNOCENT TASKS
+  ===================================================== */
 
   innocents.forEach(
     (id,index)=>{
 
-      const tasks =
-        [];
-
-      const used =
-        [];
+      const used = [];
+      const tasks = [];
 
 
-      tasks.push({
+      /*
+        All innocent tasks are unlocked before
+        Detective returns.
+      */
 
-        id:"i"+index+"a",
+      const unlockTimes = [
 
-        timeText:
-          "Now",
+        now + 25 * 1000,
 
-        description:
-          random(activities)+
-          " at "+
-          makeUniqueLocation(
-            used,
-            crimeLocation
-          )+
-          "."
+        now + 85 * 1000,
 
-      });
+        now + 145 * 1000,
+
+        now + 205 * 1000
+
+      ];
 
 
-      tasks.push({
+      tasks.push(
 
-        id:"i"+index+"b",
+        createTask(
 
-        timeText:
-          "Before "+
+          `i${index}a`,
+
+          unlockTimes[0],
+
           shortClock(
-            new Date(murderAt)
+            new Date(
+              unlockTimes[0]
+            )
           ),
 
-        description:
-          "Go to "+
+          random(activities) +
+          " at " +
           makeUniqueLocation(
             used,
             crimeLocation
-          )+
+          ) +
+          "."
+
+        )
+
+      );
+
+
+      tasks.push(
+
+        createTask(
+
+          `i${index}b`,
+
+          unlockTimes[1],
+
+          shortClock(
+            new Date(
+              unlockTimes[1]
+            )
+          ),
+
+          "Go to " +
+          makeUniqueLocation(
+            used,
+            crimeLocation
+          ) +
           " and stay there briefly."
 
-      });
+        )
+
+      );
 
 
-      tasks.push({
+      tasks.push(
 
-        id:"i"+index+"c",
+        createTask(
 
-        timeText:
+          `i${index}c`,
+
+          unlockTimes[2],
+
           shortClock(
-            new Date(murderAt)
+            new Date(
+              unlockTimes[2]
+            )
           ),
 
-        description:
-          random(activities)+
-          " near "+
+          random(activities) +
+          " near " +
           makeUniqueLocation(
             used,
             crimeLocation
-          )+
+          ) +
           "."
 
-      });
+        )
+
+      );
 
 
-      tasks.push({
+      tasks.push(
 
-        id:"i"+index+"d",
+        createTask(
 
-        timeText:
-          "After "+
+          `i${index}d`,
+
+          unlockTimes[3],
+
           shortClock(
-            new Date(murderAt)
+            new Date(
+              unlockTimes[3]
+            )
           ),
 
-        description:
-          "Move to "+
+          "Move to " +
           makeUniqueLocation(
             used,
             crimeLocation
-          )+
+          ) +
           " and continue your timeline."
 
-      });
+        )
+
+      );
 
 
       privateData[id] = {
@@ -1806,15 +1862,15 @@ async function(){
 
 
   /*
-    Shared game information.
     IMPORTANT:
-    Roles are NOT stored in this shared object.
+    All task unlock times are earlier than
+    detectiveEnd.
   */
 
   const game = {
 
     roundNumber:
-      (roomData.roundNumber || 0)+1,
+      (roomData.roundNumber || 0) + 1,
 
     startedAt:
       now,
@@ -1843,50 +1899,53 @@ async function(){
   };
 
 
-  const updates =
-    {};
+  const updates = {};
 
 
   updates[
-    "rooms/"+roomCode+
+    "rooms/" +
+    roomCode +
     "/status"
   ] =
-    "game";
+  "game";
 
 
   updates[
-    "rooms/"+roomCode+
+    "rooms/" +
+    roomCode +
     "/roundNumber"
   ] =
-    game.roundNumber;
+  game.roundNumber;
 
 
   updates[
-    "rooms/"+roomCode+
+    "rooms/" +
+    roomCode +
     "/game"
   ] =
-    game;
+  game;
 
-
-  /*
-    Task completion records
-  */
 
   Object.entries(
     privateData
-  ).forEach(
+  )
+  .forEach(
     ([id,data])=>{
 
       updates[
-        "rooms/"+roomCode+
-        "/private/"+id
+        "rooms/" +
+        roomCode +
+        "/private/" +
+        id
       ] =
       data;
 
 
       updates[
-        "rooms/"+roomCode+
-        "/completed/"+id
+        "rooms/" +
+        roomCode +
+        "/completed/" +
+        id
       ] =
       {};
 
@@ -1920,10 +1979,6 @@ async function loadGame(){
     .remove("hidden");
 
 
-  /*
-    Only load secret once.
-  */
-
   if(!mySecret){
 
     const secretSnapshot =
@@ -1931,8 +1986,10 @@ async function loadGame(){
 
         ref(
           db,
-          "rooms/"+roomCode+
-          "/private/"+playerId
+          "rooms/" +
+          roomCode +
+          "/private/" +
+          playerId
         )
 
       );
@@ -1943,11 +2000,22 @@ async function loadGame(){
     ){
 
       mySecret =
-        secretSnapshot.val();
+      secretSnapshot.val();
 
       renderSecret();
 
     }
+
+  }
+
+
+  if(!listenersStarted){
+
+    listenersStarted = true;
+
+    listenForCalls();
+
+    listenToMyTasks();
 
   }
 
@@ -1981,20 +2049,16 @@ function startGlobalClock(){
 
 
     const game =
-      roomData.game;
+    roomData.game;
 
     const now =
-      Date.now();
+    Date.now();
 
-
-    /*
-      REAL TIME SHOWN TO EVERYONE
-    */
 
     document
       .getElementById("globalTimeText")
       .textContent =
-      "Actual time: "+
+      "Actual time: " +
       clockText(
         new Date(now)
       );
@@ -2045,10 +2109,7 @@ function startGlobalClock(){
 
 
     /*
-      MAIN GLOBAL TIMER
-
-      Everyone sees the same current
-      phase countdown.
+      GLOBAL TIMER
     */
 
     let target;
@@ -2058,7 +2119,7 @@ function startGlobalClock(){
     ){
 
       target =
-        game.murderAt;
+      game.murderAt;
 
     }
     else if(
@@ -2066,7 +2127,7 @@ function startGlobalClock(){
     ){
 
       target =
-        game.detectiveEnd;
+      game.detectiveEnd;
 
     }
     else if(
@@ -2074,34 +2135,27 @@ function startGlobalClock(){
     ){
 
       target =
-        game.investigationEnd;
+      game.investigationEnd;
 
     }
     else{
 
       target =
-        now;
+      now;
 
     }
-
-
-    const remaining =
-      Math.max(
-        0,
-        target-now
-      );
 
 
     document
       .getElementById("globalTimer")
       .textContent =
       formatDuration(
-        remaining
+        target - now
       );
 
 
     /*
-      Detective-specific timer
+      Detective timer
     */
 
     if(
@@ -2110,24 +2164,27 @@ function startGlobalClock(){
       "detective"
     ){
 
+      document
+        .getElementById("detectiveTimer")
+        .textContent =
+        formatDuration(
+          Math.max(
+            0,
+            game.detectiveEnd - now
+          )
+        );
+
+
+      /*
+        Automatically enter investigation.
+      */
+
       if(
-        now < game.detectiveEnd
+        now >=
+        game.detectiveEnd
       ){
 
-        document
-          .getElementById("detectiveTimer")
-          .textContent =
-          formatDuration(
-            game.detectiveEnd-now
-          );
-
-      }
-      else{
-
-        document
-          .getElementById("detectiveTimer")
-          .textContent =
-          "00:00";
+        showInvestigation();
 
       }
 
@@ -2144,15 +2201,19 @@ function startGlobalClock(){
       "detective"
     ){
 
+      const card =
+        document
+          .getElementById(
+            "investigationTimerCard"
+          );
+
+
       if(
         now >= game.detectiveEnd &&
         now < game.investigationEnd
       ){
 
-        document
-          .getElementById(
-            "investigationTimerCard"
-          )
+        card
           .classList
           .remove("hidden");
 
@@ -2163,16 +2224,13 @@ function startGlobalClock(){
           )
           .textContent =
           formatDuration(
-            game.investigationEnd-now
+            game.investigationEnd - now
           );
 
       }
       else{
 
-        document
-          .getElementById(
-            "investigationTimerCard"
-          )
+        card
           .classList
           .add("hidden");
 
@@ -2182,62 +2240,21 @@ function startGlobalClock(){
 
 
     /*
-      Automatically show investigation
-      when Detective's 5:30 ends.
+      Update task locks every half second.
     */
 
-    if(
-      mySecret &&
-      mySecret.role ===
-      "detective" &&
-      now >= game.detectiveEnd
-    ){
-
-      showInvestigation();
-
-    }
+    renderTasks();
 
   }
 
 
   tick();
 
+
   globalInterval =
-    setInterval(
-      tick,
-      500
-    );
-
-}
-
-
-/* =====================================================
-FORMAT TIMER
-====================================================== */
-
-function formatDuration(ms){
-
-  const seconds =
-    Math.max(
-      0,
-      Math.ceil(ms/1000)
-    );
-
-
-  const minutes =
-    Math.floor(
-      seconds/60
-    );
-
-
-  const secs =
-    seconds%60;
-
-
-  return (
-    pad(minutes)+
-    ":"+
-    pad(secs)
+  setInterval(
+    tick,
+    500
   );
 
 }
@@ -2250,8 +2267,10 @@ SECRET SCREEN
 function renderSecret(){
 
   const card =
-    document
-      .getElementById("secretCard");
+  document
+    .getElementById(
+      "secretCard"
+    );
 
 
   if(
@@ -2270,25 +2289,24 @@ function renderSecret(){
       </div>
 
       <p>
-        Your waiting timer is 5 minutes 30 seconds.
-        The other players are completing their
-        secret tasks.
+        You have exactly 5 minutes before
+        the investigation starts.
       </p>
 
       <div class="warning">
-        Do not return until your timer reaches 00:00.
+        Do not return until the timer reaches 00:00.
       </div>
 
       <h3>When you return</h3>
 
       <p>
-        You will get the case information,
-        the suspects, and their task completion counts.
+        You will see the case, suspects,
+        and how many tasks each player completed.
       </p>
 
       <p>
-        You must then investigate and decide
-        who the murderer is.
+        You will then have 5 minutes 30 seconds
+        to figure out the murderer.
       </p>
 
     `;
@@ -2307,10 +2325,6 @@ function renderSecret(){
   }
 
 
-  /*
-    MURDERER / INNOCENT
-  */
-
   document
     .getElementById(
       "normalWaiting"
@@ -2320,21 +2334,19 @@ function renderSecret(){
 
 
   const roleClass =
-    mySecret.role ===
-    "murderer"
-    ?
-    "murderer"
-    :
-    "innocent";
+  mySecret.role === "murderer"
+  ?
+  "murderer"
+  :
+  "innocent";
 
 
   const roleText =
-    mySecret.role ===
-    "murderer"
-    ?
-    "🔪 YOU ARE THE MURDERER"
-    :
-    "👤 YOU ARE INNOCENT";
+  mySecret.role === "murderer"
+  ?
+  "🔪 YOU ARE THE MURDERER"
+  :
+  "👤 YOU ARE INNOCENT";
 
 
   card.innerHTML = `
@@ -2354,7 +2366,7 @@ function renderSecret(){
     </p>
 
     <div class="warning">
-      Do not show your secret tasks to other players.
+      Future tasks remain hidden until their unlock time.
     </div>
 
     <h2>✅ Your Tasks</h2>
@@ -2370,7 +2382,7 @@ function renderSecret(){
 
 
 /* =====================================================
-RENDER TASKS
+TASK RENDERING
 ====================================================== */
 
 function renderTasks(){
@@ -2385,18 +2397,11 @@ function renderTasks(){
   }
 
 
-  const completed =
-    roomData.completed &&
-    roomData.completed[playerId]
-    ?
-    roomData.completed[playerId]
-    :
-    {};
-
-
   const container =
-    document
-      .getElementById("myTasks");
+  document
+    .getElementById(
+      "myTasks"
+    );
 
 
   if(!container){
@@ -2406,23 +2411,91 @@ function renderTasks(){
   }
 
 
+  const now =
+  Date.now();
+
+
+  const completed =
+  roomData &&
+  roomData.completed &&
+  roomData.completed[playerId]
+  ?
+  roomData.completed[playerId]
+  :
+  {};
+
+
   container.innerHTML =
 
-    mySecret.tasks
-      .map(
-        task=>{
+  mySecret.tasks
+    .map(
+      task=>{
 
-          const done =
-            completed[task.id] === true;
+        const unlocked =
+          now >= task.unlockAt;
 
+
+        const done =
+          completed[task.id] === true;
+
+
+        /*
+          Future task:
+          show ONLY the unlock time.
+          Do not reveal the description.
+        */
+
+        if(!unlocked){
 
           return `
 
-            <div
-              class="task ${done ? "done":""}"
-            >
+            <div class="task locked">
+
+              <div class="task-row">
+
+                <div class="task-text">
+
+                  <div class="task-time">
+                    🔒 Unlocks at
+                    ${escapeHtml(
+                      task.timeText
+                    )}
+                  </div>
+
+                  <div class="locked-text">
+                    This task is still secret.
+                    Come back at the unlock time.
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          `;
+
+        }
+
+
+        /*
+          Unlocked task
+        */
+
+        return `
+
+          <div class="task ${
+            done
+            ?
+            "done"
+            :
+            ""
+          }">
+
+            <div class="task-row">
 
               <input
+                class="task-checkbox"
                 type="checkbox"
                 ${
                   done
@@ -2442,24 +2515,38 @@ function renderTasks(){
               <div class="task-text">
 
                 <div class="task-time">
-                  ${escapeHtml(
+                  ⏰ ${escapeHtml(
                     task.timeText
                   )}
                 </div>
 
-                ${escapeHtml(
-                  task.description
-                )}
+                <div>
+                  ${escapeHtml(
+                    task.description
+                  )}
+                </div>
+
+                <div class="task-status">
+                  ${
+                    done
+                    ?
+                    "✅ Completed"
+                    :
+                    "⬜ Not completed"
+                  }
+                </div>
 
               </div>
 
             </div>
 
-          `;
+          </div>
 
-        }
-      )
-      .join("");
+        `;
+
+      }
+    )
+    .join("");
 
 }
 
@@ -2474,18 +2561,69 @@ async function(
   checked
 ){
 
+  if(
+    !mySecret ||
+    !mySecret.tasks
+  ){
+
+    return;
+
+  }
+
+
+  const task =
+    mySecret.tasks.find(
+      t=>t.id === taskId
+    );
+
+
+  if(!task){
+
+    return;
+
+  }
+
+
+  /*
+    SECURITY/UI CHECK:
+    Cannot check a task before
+    its real unlock time.
+  */
+
+  if(
+    Date.now() <
+    task.unlockAt
+  ){
+
+    alert(
+      "🔒 This task is not unlocked yet."
+    );
+
+    renderTasks();
+
+    return;
+
+  }
+
+
+  /*
+    Save completion.
+  */
+
   await update(
 
     ref(
       db,
-      "rooms/"+roomCode+
-      "/completed/"+playerId
+      "rooms/" +
+      roomCode +
+      "/completed/" +
+      playerId
     ),
 
     {
 
       [taskId]:
-        checked
+      checked
 
     }
 
@@ -2495,7 +2633,7 @@ async function(
 
 
 /* =====================================================
-WATCH TASK CHANGES
+TASK LISTENER
 ====================================================== */
 
 function listenToMyTasks(){
@@ -2504,26 +2642,32 @@ function listenToMyTasks(){
 
     ref(
       db,
-      "rooms/"+roomCode+
-      "/completed/"+playerId
+      "rooms/" +
+      roomCode +
+      "/completed/" +
+      playerId
     ),
 
     snapshot=>{
 
-      if(
-        roomData
-      ){
+      if(!roomData){
 
-        roomData.completed =
-          roomData.completed ||
-          {};
-
-        roomData.completed[playerId] =
-          snapshot.val() || {};
-
-        renderTasks();
+        return;
 
       }
+
+
+      roomData.completed =
+      roomData.completed ||
+      {};
+
+
+      roomData.completed[playerId] =
+      snapshot.val() ||
+      {};
+
+
+      renderTasks();
 
     }
 
@@ -2539,6 +2683,7 @@ INVESTIGATION
 function showInvestigation(){
 
   if(
+    !mySecret ||
     mySecret.role !==
     "detective"
   ){
@@ -2594,24 +2739,27 @@ function renderCase(){
 
 
   const game =
-    roomData.game;
+  roomData.game;
 
 
   const suspects =
-    game.suspects || [];
+  game.suspects ||
+  [];
 
 
   document
-    .getElementById("caseFile")
+    .getElementById(
+      "caseFile"
+    )
     .innerHTML = `
 
       <div class="success">
 
-        ⏰ The 5:30 waiting period is over.
+        ⏰ Detective timer finished.
 
         <br><br>
 
-        Investigation has started.
+        Investigation started.
 
       </div>
 
@@ -2663,39 +2811,31 @@ function renderCase(){
 
       ${
         suspects
-          .map(
-            id=>`
+        .map(
+          id=>`
 
-              <div class="player">
+            <div class="player">
 
-                👤
-                ${escapeHtml(
-                  roomData
-                    .players[id]
-                    ?.name ||
-                  "Unknown"
-                )}
+              👤
+              ${escapeHtml(
+                roomData
+                  .players[id]
+                  ?.name ||
+                "Unknown"
+              )}
 
-              </div>
+            </div>
 
-            `
-          )
-          .join("")
+          `
+        )
+        .join("")
       }
 
     `;
 
 
-  /*
-    Task completion
-  */
-
   renderTaskProgress();
 
-
-  /*
-    Accusation buttons
-  */
 
   document
     .getElementById(
@@ -2734,127 +2874,126 @@ function renderCase(){
 TASK PROGRESS
 ====================================================== */
 
-function renderTaskProgress(){
+async function renderTaskProgress(){
 
   const game =
-    roomData.game;
+  roomData.game;
 
 
   const suspects =
-    game.suspects || [];
+  game.suspects ||
+  [];
 
 
   const container =
-    document
-      .getElementById(
-        "taskProgress"
-      );
+  document
+    .getElementById(
+      "taskProgress"
+    );
 
 
-  container.innerHTML =
-    suspects
-      .map(
-        id=>{
-
-          const completed =
-            roomData.completed &&
-            roomData.completed[id]
-            ?
-            roomData.completed[id]
-            :
-            {};
+  container.innerHTML = "";
 
 
-          const count =
-            Object.values(
-              completed
-            )
-            .filter(
-              value=>value===true
-            )
-            .length;
+  for(
+    const id of suspects
+  ){
+
+    const completed =
+      roomData.completed &&
+      roomData.completed[id]
+      ?
+      roomData.completed[id]
+      :
+      {};
 
 
-          /*
-            Get total tasks from the private
-            data only for counting.
-            The task descriptions are never
-            inserted into the Detective UI.
-          */
-
-          return getPrivateTaskCount(id)
-            .then(
-              total=>{
-
-                const percent =
-                  total
-                  ?
-                  Math.min(
-                    100,
-                    count/total*100
-                  )
-                  :
-                  0;
+    const count =
+      Object.values(
+        completed
+      )
+      .filter(
+        value =>
+        value === true
+      )
+      .length;
 
 
-                const name =
-                  roomData
-                    .players[id]
-                    ?.name ||
-                  "Unknown";
+    const total =
+      await getPrivateTaskCount(id);
 
 
-                const div =
-                  document.createElement(
-                    "div"
-                  );
+    const percent =
+      total
+      ?
+      Math.min(
+        100,
+        count / total * 100
+      )
+      :
+      0;
 
 
-                div.className =
-                  "count-card";
+    const name =
+      roomData
+        .players[id]
+        ?.name ||
+      "Unknown";
 
 
-                div.innerHTML = `
-
-                  <b>
-                    👤 ${escapeHtml(name)}
-                  </b>
-
-                  <div
-                    class="count-number"
-                  >
-                    ${count}/${total}
-                  </div>
-
-                  <div class="progress">
-
-                    <div
-                      class="progress-bar"
-                      style="width:${percent}%"
-                    ></div>
-
-                  </div>
-
-                `;
+    const div =
+      document
+        .createElement(
+          "div"
+        );
 
 
-                container.appendChild(
-                  div
-                );
+    div.className =
+      "count-card";
 
-              }
-            );
 
+    div.innerHTML = `
+
+      <b>
+        👤 ${escapeHtml(name)}
+      </b>
+
+      <div class="count-number">
+        ${count}/${total}
+      </div>
+
+      <div class="progress">
+
+        <div
+          class="progress-bar"
+          style="width:${percent}%"
+        ></div>
+
+      </div>
+
+      <div class="small">
+        ${
+          count === total
+          ?
+          "✅ All tasks completed"
+          :
+          `${total-count} task(s) unfinished`
         }
-      );
+      </div>
+
+    `;
+
+
+    container.appendChild(div);
+
+  }
 
 }
 
 
-/*
-  This fetches only the number of tasks.
-  The Detective UI never displays their text.
-*/
+/* =====================================================
+GET TASK COUNT ONLY
+====================================================== */
 
 async function getPrivateTaskCount(
   player
@@ -2865,24 +3004,34 @@ async function getPrivateTaskCount(
 
       ref(
         db,
-        "rooms/"+roomCode+
-        "/private/"+player+
+        "rooms/" +
+        roomCode +
+        "/private/" +
+        player +
         "/tasks"
       )
 
     );
 
 
-  if(!snapshot.exists()){
+  if(
+    !snapshot.exists()
+  ){
 
     return 0;
 
   }
 
 
-  return Object.keys(
-    snapshot.val()
-  ).length;
+  const tasks =
+  snapshot.val();
+
+
+  return Array.isArray(tasks)
+    ?
+    tasks.length
+    :
+    Object.keys(tasks).length;
 
 }
 
@@ -2917,23 +3066,25 @@ async function(
 
 
   const game =
-    roomData.game;
+  roomData.game;
 
 
   const correct =
-    accusedId ===
-    game.murderer;
+  accusedId ===
+  game.murderer;
 
 
   const accusedName =
-    roomData
-      .players[accusedId]
-      ?.name ||
-    "Unknown";
+  roomData
+    .players[accusedId]
+    ?.name ||
+  "Unknown";
 
 
   document
-    .getElementById("result")
+    .getElementById(
+      "result"
+    )
     .innerHTML =
 
     correct
@@ -3002,7 +3153,8 @@ async function(
 
     ref(
       db,
-      "rooms/"+roomCode+
+      "rooms/" +
+      roomCode +
       "/result"
     ),
 
@@ -3044,7 +3196,8 @@ async function(
 
     ref(
       db,
-      "rooms/"+roomCode+
+      "rooms/" +
+      roomCode +
       "/call"
     ),
 
@@ -3068,17 +3221,14 @@ async function(
 };
 
 
-/* =====================================================
-LISTEN FOR CALLS
-====================================================== */
-
 function listenForCalls(){
 
   onValue(
 
     ref(
       db,
-      "rooms/"+roomCode+
+      "rooms/" +
+      roomCode +
       "/call"
     ),
 
@@ -3094,13 +3244,30 @@ function listenForCalls(){
 
 
       const call =
-        snapshot.val();
+      snapshot.val();
+
+
+      if(
+        call.id ===
+        lastCallId
+      ){
+
+        return;
+
+      }
+
+
+      lastCallId =
+      call.id;
 
 
       showCall(
         call.destination,
         call.caller
       );
+
+
+      vibrateAndSound();
 
     }
 
@@ -3109,20 +3276,16 @@ function listenForCalls(){
 }
 
 
-/* =====================================================
-SHOW CALL
-====================================================== */
-
 function showCall(
   destination,
   caller
 ){
 
   const banner =
-    document
-      .getElementById(
-        "callBanner"
-      );
+  document
+    .getElementById(
+      "callBanner"
+    );
 
 
   document
@@ -3131,9 +3294,9 @@ function showCall(
     )
     .textContent =
 
-    caller+
-    " is calling everyone to "+
-    destination+
+    caller +
+    " is calling everyone to " +
+    destination +
     "!";
 
 
@@ -3156,81 +3319,136 @@ function showCall(
 }
 
 
-/* =====================================================
-START GLOBAL LISTENERS
-====================================================== */
+window.dismissCall =
+function(){
 
-function setupGameListeners(){
+  document
+    .getElementById(
+      "callBanner"
+    )
+    .classList
+    .add("hidden");
 
-  listenForCalls();
-
-  listenToMyTasks();
-
-}
-
-
-/*
-  We need these listeners as soon as
-  the room is entered.
-*/
-
-function startRoomListeners(){
-
-  listenForCalls();
-
-  listenToMyTasks();
-
-}
+};
 
 
 /* =====================================================
-CALL LISTENERS WHEN LOBBY ENTERS
+CALL SOUND + VIBRATION
 ====================================================== */
 
-const originalEnterLobby =
-  enterLobby;
+function vibrateAndSound(){
 
-
-/*
-  Re-wrap lobby entry so listeners
-  are started exactly once.
-*/
-
-let listenersStarted = false;
-
-
-/*
-  Use a small observer after entering.
-*/
-
-function ensureListeners(){
+  /*
+    Vibration where browser supports it.
+  */
 
   if(
-    listenersStarted ||
-    !roomCode
+    "vibrate" in navigator
   ){
 
-    return;
+    try{
+
+      navigator.vibrate(
+        [
+          250,
+          120,
+          250,
+          120,
+          500
+        ]
+      );
+
+    }
+    catch(e){}
 
   }
 
-  listenersStarted = true;
 
-  listenForCalls();
+  /*
+    Browser-generated sound.
+    No audio file required.
+  */
 
-  listenToMyTasks();
+  try{
+
+    const AudioContext =
+      window.AudioContext ||
+      window.webkitAudioContext;
+
+
+    if(!AudioContext){
+
+      return;
+
+    }
+
+
+    const ctx =
+      new AudioContext();
+
+
+    const osc =
+      ctx.createOscillator();
+
+    const gain =
+      ctx.createGain();
+
+
+    osc.type =
+      "sine";
+
+
+    osc.frequency.value =
+      880;
+
+
+    gain.gain.value =
+      0.0001;
+
+
+    osc.connect(gain);
+
+    gain.connect(
+      ctx.destination
+    );
+
+
+    const t =
+      ctx.currentTime;
+
+
+    gain.gain.exponentialRampToValueAtTime(
+      0.3,
+      t + 0.03
+    );
+
+
+    gain.gain.exponentialRampToValueAtTime(
+      0.0001,
+      t + 0.5
+    );
+
+
+    osc.start(t);
+
+    osc.stop(
+      t + 0.55
+    );
+
+
+    setTimeout(
+      ()=>{
+        try{
+          ctx.close();
+        }catch(e){}
+      },
+      1000
+    );
+
+  }
+  catch(e){}
 
 }
-
-
-/* =====================================================
-PERIODIC LISTENER CHECK
-====================================================== */
-
-setInterval(
-  ensureListeners,
-  1000
-);
 
 
 /* =====================================================
@@ -3261,6 +3479,7 @@ const urlParams =
 new URLSearchParams(
   location.search
 );
+
 
 if(
   urlParams.get("room")
