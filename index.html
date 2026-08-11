@@ -853,7 +853,7 @@ ALERT MODAL
 
 
 <!-- =====================================================
-SHARED SUSPENSE REVEAL
+SUSPENSE REVEAL
 ===================================================== -->
 
 <div
@@ -918,8 +918,10 @@ SHARED SUSPENSE REVEAL
 
     </div>
 
-
-    <div id="alertBox" class="info">
+    <div
+      id="alertBox"
+      class="info"
+    >
 
       <b>🔔 Call Alerts</b>
 
@@ -937,7 +939,6 @@ SHARED SUSPENSE REVEAL
 
     </div>
 
-
     <label>
       Your name
     </label>
@@ -949,7 +950,6 @@ SHARED SUSPENSE REVEAL
       maxlength="30"
     >
 
-
     <label>
       Room code
     </label>
@@ -960,7 +960,6 @@ SHARED SUSPENSE REVEAL
       autocomplete="off"
       maxlength="20"
     >
-
 
     <button onclick="createRoom()">
       CREATE NEW ROOM
@@ -1065,13 +1064,11 @@ SHARED SUSPENSE REVEAL
 
     </select>
 
-
     <button
       onclick="finishCreateRoom()"
     >
       CREATE ROOM
     </button>
-
 
     <button
       class="secondary"
@@ -1141,7 +1138,7 @@ SHARED SUSPENSE REVEAL
       onclick="startRound()"
       disabled
     >
-      START ROUND
+      ▶️ START ROUND
     </button>
 
     <button
@@ -1188,9 +1185,7 @@ SHARED SUSPENSE REVEAL
       --:--
     </div>
 
-    <p
-      id="globalTimeText"
-    ></p>
+    <p id="globalTimeText"></p>
 
   </div>
 
@@ -1591,7 +1586,6 @@ import {
 from
 "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
 
-
 import {
   getDatabase,
   ref,
@@ -1605,6 +1599,10 @@ import {
 from
 "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
 
+
+/* =====================================================
+FIREBASE
+===================================================== */
 
 const firebaseConfig = {
 
@@ -1634,20 +1632,21 @@ const firebaseConfig = {
 
 };
 
-
 const app =
   initializeApp(firebaseConfig);
-
 
 const db =
   getDatabase(app);
 
 
+/* =====================================================
+PLAYER ID
+===================================================== */
+
 let playerId =
   localStorage.getItem(
     "hotelMurderPlayerId"
   );
-
 
 if(!playerId){
 
@@ -1667,17 +1666,24 @@ if(!playerId){
 }
 
 
+/* =====================================================
+STATE
+===================================================== */
+
 let roomCode = "";
 let myName = "";
 let roomData = null;
 let mySecret = null;
 
 let globalInterval = null;
+let roomExpiryInterval = null;
+
 let lastCallId = null;
 
 let listenersStarted = false;
 let notesListenerStarted = false;
 let detectiveNotesListenerStarted = false;
+let gameResultListenerStarted = false;
 
 let selectedDetectivePlayerId = null;
 
@@ -1688,13 +1694,300 @@ let alertsEnabled =
     "hotelMurderAlerts"
   ) === "1";
 
-
-/* =====================================================
-REVEAL STATE
-===================================================== */
-
 let revealRunning = false;
 let lastRevealId = null;
+
+
+/* =====================================================
+ROOM EXPIRY
+===================================================== */
+
+const ROOM_STALE_TIME =
+  15 * 60 * 1000;
+
+
+/*
+  Lobby rooms that have had no activity for 15 minutes
+  are considered stale and can be deleted.
+*/
+
+function roomActivityTime(data){
+
+  return Number(
+    data?.lastActivityAt ||
+    data?.createdAt ||
+    0
+  );
+
+}
+
+
+function isRoomStale(data){
+
+  if(!data){
+    return false;
+  }
+
+  /*
+    Don't delete an active game automatically.
+    The 15-minute cleanup is primarily for old lobby rooms.
+  */
+
+  if(
+    data.status &&
+    data.status !== "lobby"
+  ){
+
+    return false;
+
+  }
+
+  const activity =
+    roomActivityTime(data);
+
+  if(!activity){
+    return false;
+  }
+
+  return (
+    Date.now() -
+    activity >=
+    ROOM_STALE_TIME
+  );
+
+}
+
+
+async function deleteStaleRoom(
+  code
+){
+
+  if(!code){
+    return false;
+  }
+
+  const roomRef =
+    ref(
+      db,
+      "rooms/" +
+      code
+    );
+
+  const snapshot =
+    await get(roomRef);
+
+  if(
+    !snapshot.exists()
+  ){
+
+    return false;
+
+  }
+
+  const data =
+    snapshot.val();
+
+  if(
+    isRoomStale(data)
+  ){
+
+    await remove(roomRef);
+
+    return true;
+
+  }
+
+  return false;
+
+}
+
+
+async function touchRoom(){
+
+  if(!roomCode){
+    return;
+  }
+
+  try{
+
+    await update(
+      ref(
+        db,
+        "rooms/" +
+        roomCode
+      ),
+      {
+        lastActivityAt:
+          Date.now()
+      }
+    );
+
+  }
+  catch(error){
+
+    console.error(
+      "Could not update room activity:",
+      error
+    );
+
+  }
+
+}
+
+
+function startRoomExpiryWatcher(){
+
+  clearInterval(
+    roomExpiryInterval
+  );
+
+  if(!roomCode){
+    return;
+  }
+
+  roomExpiryInterval =
+    setInterval(
+      async ()=>{
+
+        try{
+
+          const snapshot =
+            await get(
+              ref(
+                db,
+                "rooms/" +
+                roomCode
+              )
+            );
+
+          if(
+            !snapshot.exists()
+          ){
+
+            stopRoomExpiryWatcher();
+
+            return;
+
+          }
+
+          const data =
+            snapshot.val();
+
+          /*
+            Only expire stale lobby rooms.
+          */
+
+          if(
+            isRoomStale(data)
+          ){
+
+            await remove(
+              ref(
+                db,
+                "rooms/" +
+                roomCode
+              )
+            );
+
+            stopRoomExpiryWatcher();
+
+            leaveRoomToHome(
+              "This room expired after 15 minutes of inactivity."
+            );
+
+          }
+
+        }
+        catch(error){
+
+          console.error(
+            "Room expiry watcher:",
+            error
+          );
+
+        }
+
+      },
+      30 * 1000
+    );
+
+}
+
+
+function stopRoomExpiryWatcher(){
+
+  clearInterval(
+    roomExpiryInterval
+  );
+
+  roomExpiryInterval =
+    null;
+
+}
+
+
+function leaveRoomToHome(
+  message = ""
+){
+
+  stopRoomExpiryWatcher();
+
+  clearInterval(
+    globalInterval
+  );
+
+  roomData =
+    null;
+
+  mySecret =
+    null;
+
+  roomCode =
+    "";
+
+  selectedDetectivePlayerId =
+    null;
+
+  document
+    .getElementById(
+      "home"
+    )
+    .classList
+    .remove("hidden");
+
+  document
+    .getElementById(
+      "createScreen"
+    )
+    .classList
+    .add("hidden");
+
+  document
+    .getElementById(
+      "lobby"
+    )
+    .classList
+    .add("hidden");
+
+  document
+    .getElementById(
+      "game"
+    )
+    .classList
+    .add("hidden");
+
+  document
+    .getElementById(
+      "revealOverlay"
+    )
+    .classList
+    .add("hidden");
+
+  if(message){
+    alert(message);
+  }
+
+}
 
 
 /* =====================================================
@@ -1744,7 +2037,7 @@ const locations = [
 
 
 /* =====================================================
-RANDOM TASK WORDING
+TASK TEXT
 ===================================================== */
 
 const activityTemplates = [
@@ -2058,7 +2351,7 @@ function createTask(
 
 
 /* =====================================================
-RANDOM TASK GENERATOR
+TASK GENERATORS
 ===================================================== */
 
 function freshRoundSeed(){
@@ -2109,18 +2402,15 @@ function buildRandomNormalTask(
     :
     actionTemplates;
 
-  const description =
+  return createTask(
+    id,
+    unlockAt,
     fillLocationTemplate(
       random(
         templatePool
       ),
       location
-    );
-
-  return createTask(
-    id,
-    unlockAt,
-    description
+    )
   );
 
 }
@@ -2326,7 +2616,6 @@ function buildRandomMurdererTasks(
 
   }
 
-
   const murderTaskId =
     roundSeed +
     "_" +
@@ -2335,7 +2624,6 @@ function buildRandomMurdererTasks(
     Math.random()
       .toString(36)
       .substring(2,8);
-
 
   const murderDescription =
     fillLocationTemplate(
@@ -2353,7 +2641,6 @@ function buildRandomMurdererTasks(
       )
     );
 
-
   tasks.push(
 
     createTask(
@@ -2364,7 +2651,6 @@ function buildRandomMurdererTasks(
 
   );
 
-
   const afterTime =
     Math.min(
       murderAt +
@@ -2372,7 +2658,6 @@ function buildRandomMurdererTasks(
       detectiveEnd -
       20 * 1000
     );
-
 
   const afterTaskId =
     roundSeed +
@@ -2383,26 +2668,20 @@ function buildRandomMurdererTasks(
       .toString(36)
       .substring(2,8);
 
-
-  const afterDescription =
-    fillLocationTemplate(
-      random(
-        afterMurderTemplates
-      ),
-      crimeLocation
-    );
-
-
   tasks.push(
 
     createTask(
       afterTaskId,
       afterTime,
-      afterDescription
+      fillLocationTemplate(
+        random(
+          afterMurderTemplates
+        ),
+        crimeLocation
+      )
     )
 
   );
-
 
   return shuffle(
     tasks
@@ -2484,9 +2763,7 @@ async function(){
     ){
 
       try{
-
         await Notification.requestPermission();
-
       }
       catch(e){}
 
@@ -2506,10 +2783,8 @@ async function(){
       );
 
     if(status){
-
       status.textContent =
         "✅ Call alerts enabled.";
-
     }
 
     const enableButton =
@@ -2518,10 +2793,8 @@ async function(){
       );
 
     if(enableButton){
-
       enableButton.textContent =
         "✅ CALL ALERTS ENABLED";
-
     }
 
     playCallSound();
@@ -2536,6 +2809,19 @@ async function(){
     );
 
   }
+
+};
+
+
+window.closeAlertModal =
+function(){
+
+  document
+    .getElementById(
+      "alertModal"
+    )
+    .classList
+    .add("hidden");
 
 };
 
@@ -2636,9 +2922,7 @@ function playCallSound(){
   }
   catch(error){
 
-    console.error(
-      error
-    );
+    console.error(error);
 
   }
 
@@ -2679,9 +2963,7 @@ function systemNotification(
   if(
     !alertsEnabled
   ){
-
     return;
-
   }
 
   if(
@@ -2783,6 +3065,14 @@ CREATE ROOM
 window.finishCreateRoom =
 async function(){
 
+  myName =
+    document
+      .getElementById(
+        "nameInput"
+      )
+      .value
+      .trim();
+
   roomCode =
     document
       .getElementById(
@@ -2801,6 +3091,16 @@ async function(){
         .value
     );
 
+  if(!myName){
+
+    alert(
+      "Enter your name first."
+    );
+
+    return;
+
+  }
+
   if(!roomCode){
 
     alert(
@@ -2811,6 +3111,7 @@ async function(){
 
   }
 
+
   const roomRef =
     ref(
       db,
@@ -2818,19 +3119,52 @@ async function(){
       roomCode
     );
 
-  if(
-    (
-      await get(roomRef)
-    ).exists()
-  ){
 
-    alert(
-      "That room already exists."
+  /*
+    FIRST:
+    If the room exists, check whether it is stale.
+    Old unused lobby rooms are deleted automatically.
+  */
+
+  const existing =
+    await get(
+      roomRef
     );
 
-    return;
+  if(
+    existing.exists()
+  ){
+
+    const existingData =
+      existing.val();
+
+    if(
+      isRoomStale(
+        existingData
+      )
+    ){
+
+      await remove(
+        roomRef
+      );
+
+    }
+    else{
+
+      alert(
+        "That room already exists and is still active."
+      );
+
+      return;
+
+    }
 
   }
+
+
+  const now =
+    Date.now();
+
 
   await set(
     roomRef,
@@ -2846,7 +3180,10 @@ async function(){
         limit,
 
       createdAt:
-        Date.now(),
+        now,
+
+      lastActivityAt:
+        now,
 
       roundNumber:
         0,
@@ -2858,7 +3195,7 @@ async function(){
             myName,
 
           joinedAt:
-            Date.now()
+            now
 
         }
       }
@@ -2866,7 +3203,10 @@ async function(){
     }
   );
 
+
   setupDisconnectCleanup();
+
+  startRoomExpiryWatcher();
 
   enterLobby();
 
@@ -2917,6 +3257,7 @@ async function(){
 
   }
 
+
   const snapshot =
     await get(
       ref(
@@ -2925,6 +3266,7 @@ async function(){
         roomCode
       )
     );
+
 
   if(
     !snapshot.exists()
@@ -2938,8 +3280,39 @@ async function(){
 
   }
 
+
   const data =
     snapshot.val();
+
+
+  /*
+    A room that has been sitting unused for
+    15 minutes is deleted when somebody tries
+    to join it.
+  */
+
+  if(
+    isRoomStale(
+      data
+    )
+  ){
+
+    await remove(
+      ref(
+        db,
+        "rooms/" +
+        roomCode
+      )
+    );
+
+    alert(
+      "That room was older than 15 minutes and has been deleted."
+    );
+
+    return;
+
+  }
+
 
   if(
     data.status !==
@@ -2954,9 +3327,11 @@ async function(){
 
   }
 
+
   const players =
     data.players ||
     {};
+
 
   if(
     !players[playerId] &&
@@ -2974,26 +3349,39 @@ async function(){
 
   }
 
+
+  const now =
+    Date.now();
+
+
   await update(
     ref(
       db,
       "rooms/" +
-      roomCode +
-      "/players/" +
-      playerId
+      roomCode
     ),
     {
 
-      name:
-        myName,
+      lastActivityAt:
+        now,
 
-      joinedAt:
-        Date.now()
+      ["players/" +
+       playerId +
+       "/name"]:
+       myName,
+
+      ["players/" +
+       playerId +
+       "/joinedAt"]:
+       now
 
     }
   );
 
+
   setupDisconnectCleanup();
+
+  startRoomExpiryWatcher();
 
   enterLobby();
 
@@ -3049,51 +3437,6 @@ function setupDisconnectCleanup(){
       playerId
     )
   ).remove();
-
-}
-
-
-async function deleteRoomIfEmpty(){
-
-  if(!roomCode){
-    return;
-  }
-
-  const roomRef =
-    ref(
-      db,
-      "rooms/" +
-      roomCode
-    );
-
-  const snapshot =
-    await get(roomRef);
-
-  if(
-    !snapshot.exists()
-  ){
-
-    return;
-
-  }
-
-  const players =
-    snapshot.val()
-      .players ||
-    {};
-
-  if(
-    Object.keys(
-      players
-    ).length ===
-    0
-  ){
-
-    await remove(
-      roomRef
-    );
-
-  }
 
 }
 
@@ -3166,6 +3509,8 @@ function enterLobby(){
     .textContent =
     roomCode;
 
+  startRoomExpiryWatcher();
+
   listenToRoom();
 
 }
@@ -3186,16 +3531,50 @@ function listenToRoom(){
         !snapshot.exists()
       ){
 
+        leaveRoomToHome(
+          "This room no longer exists."
+        );
+
         return;
 
       }
 
+
       roomData =
         snapshot.val();
+
+
+      /*
+        Extra safety check for stale lobby rooms.
+      */
+
+      if(
+        isRoomStale(
+          roomData
+        )
+      ){
+
+        await remove(
+          ref(
+            db,
+            "rooms/" +
+            roomCode
+          )
+        );
+
+        leaveRoomToHome(
+          "This room expired after 15 minutes of inactivity."
+        );
+
+        return;
+
+      }
+
 
       const players =
         roomData.players ||
         {};
+
 
       if(
         Object.keys(
@@ -3204,13 +3583,23 @@ function listenToRoom(){
         0
       ){
 
-        await deleteRoomIfEmpty();
+        await remove(
+          ref(
+            db,
+            "rooms/" +
+            roomCode
+          )
+        );
+
+        leaveRoomToHome();
 
         return;
 
       }
 
+
       renderLobby();
+
 
       if(
         roomData.status ===
@@ -3239,6 +3628,19 @@ function listenToRoom(){
         mySecret =
           null;
 
+
+        clearInterval(
+          globalInterval
+        );
+
+
+        /*
+          When everybody has returned to the lobby,
+          the host's START ROUND button is shown again.
+        */
+
+        renderLobby();
+
       }
 
     }
@@ -3249,6 +3651,14 @@ function listenToRoom(){
 
 function renderLobby(){
 
+  if(
+    !roomData
+  ){
+
+    return;
+
+  }
+
   const players =
     roomData.players ||
     {};
@@ -3257,6 +3667,15 @@ function renderLobby(){
     Object.keys(
       players
     );
+
+
+  document
+    .getElementById(
+      "roomDisplay"
+    )
+    .textContent =
+    roomCode;
+
 
   document
     .getElementById(
@@ -3285,6 +3704,7 @@ function renderLobby(){
       </span>
 
     `;
+
 
   document
     .getElementById(
@@ -3321,17 +3741,22 @@ function renderLobby(){
       )
       .join("");
 
+
+  const hostPanel =
+    document.getElementById(
+      "hostPanel"
+    );
+
+
   if(
     roomData.host ===
     playerId
   ){
 
-    document
-      .getElementById(
-        "hostPanel"
-      )
+    hostPanel
       .classList
       .remove("hidden");
+
 
     document
       .getElementById(
@@ -3340,13 +3765,142 @@ function renderLobby(){
       .textContent =
       `${ids.length}/${roomData.playerLimit} players joined.`;
 
-    document
-      .getElementById(
+
+    const startButton =
+      document.getElementById(
         "startButton"
-      )
-      .disabled =
+      );
+
+
+    startButton.disabled =
       ids.length !==
       roomData.playerLimit;
+
+
+    startButton.textContent =
+      ids.length ===
+      roomData.playerLimit
+      ?
+      "▶️ START ROUND"
+      :
+      "⏳ WAITING FOR PLAYERS";
+
+  }
+  else{
+
+    hostPanel
+      .classList
+      .add("hidden");
+
+  }
+
+}
+
+
+/* =====================================================
+RETURN EVERYONE TO LOBBY
+===================================================== */
+
+let returnToLobbyRunning =
+  false;
+
+
+async function returnEveryoneToLobby(){
+
+  if(
+    returnToLobbyRunning
+  ){
+
+    return;
+
+  }
+
+
+  returnToLobbyRunning =
+    true;
+
+
+  try{
+
+    const now =
+      Date.now();
+
+
+    await update(
+      ref(db),
+      {
+
+        ["rooms/" +
+         roomCode +
+         "/status"]:
+         "lobby",
+
+        ["rooms/" +
+         roomCode +
+         "/game"]:
+         null,
+
+        ["rooms/" +
+         roomCode +
+         "/private"]:
+         null,
+
+        ["rooms/" +
+         roomCode +
+         "/completed"]:
+         null,
+
+        ["rooms/" +
+         roomCode +
+         "/notes"]:
+         null,
+
+        ["rooms/" +
+         roomCode +
+         "/detectiveNotes"]:
+         null,
+
+        ["rooms/" +
+         roomCode +
+         "/call"]:
+         null,
+
+        ["rooms/" +
+         roomCode +
+         "/result"]:
+         null,
+
+        /*
+          Refresh room age so the new lobby
+          gets a fresh 15-minute lifetime.
+        */
+
+        ["rooms/" +
+         roomCode +
+         "/createdAt"]:
+         now,
+
+        ["rooms/" +
+         roomCode +
+         "/lastActivityAt"]:
+         now
+
+      }
+    );
+
+  }
+  catch(error){
+
+    console.error(
+      "Return to lobby failed:",
+      error
+    );
+
+  }
+  finally{
+
+    returnToLobbyRunning =
+      false;
 
   }
 
@@ -3383,6 +3937,10 @@ async function(){
     return;
 
   }
+
+  const now =
+    Date.now();
+
 
   await update(
     ref(db),
@@ -3426,10 +3984,21 @@ async function(){
       ["rooms/" +
        roomCode +
        "/result"]:
-       null
+       null,
+
+      ["rooms/" +
+       roomCode +
+       "/createdAt"]:
+       now,
+
+      ["rooms/" +
+       roomCode +
+       "/lastActivityAt"]:
+       now
 
     }
   );
+
 
   mySecret =
     null;
@@ -3446,6 +4015,7 @@ async function(){
   lastRevealId =
     null;
 
+
   document
     .getElementById(
       "revealOverlay"
@@ -3453,9 +4023,14 @@ async function(){
     .classList
     .add("hidden");
 
+
   clearInterval(
     globalInterval
   );
+
+
+  renderLobby();
+
 
   document
     .getElementById(
@@ -3464,12 +4039,16 @@ async function(){
     .classList
     .add("hidden");
 
+
   document
     .getElementById(
       "lobby"
     )
     .classList
     .remove("hidden");
+
+
+  startRoomExpiryWatcher();
 
 };
 
@@ -3491,14 +4070,17 @@ async function(){
 
   }
 
+
   const players =
     roomData.players ||
     {};
+
 
   const ids =
     Object.keys(
       players
     );
+
 
   if(
     ids.length !==
@@ -3513,6 +4095,7 @@ async function(){
 
   }
 
+
   if(
     ids.length <
     2
@@ -3526,25 +4109,32 @@ async function(){
 
   }
 
+
   const roundSeed =
     freshRoundSeed();
+
 
   const shuffled =
     shuffle(
       ids
     );
 
+
   const detective =
     shuffled[0];
+
 
   const murderer =
     shuffled[1];
 
+
   const innocents =
     shuffled.slice(2);
 
+
   const now =
     Date.now();
+
 
   const murderAt =
     now +
@@ -3557,31 +4147,38 @@ async function(){
       )
     );
 
+
   const detectiveEnd =
     now +
     DETECTIVE_WAIT;
 
+
   const investigationEnd =
     detectiveEnd +
     INVESTIGATION_TIME;
+
 
   const crimeLocation =
     random(
       locations
     );
 
+
   const victim =
     random(
       victims
     );
+
 
   const caseDescription =
     random(
       cases
     );
 
+
   const privateData =
     {};
+
 
   privateData[detective] = {
 
@@ -3592,6 +4189,7 @@ async function(){
       []
 
   };
+
 
   privateData[murderer] = {
 
@@ -3609,6 +4207,7 @@ async function(){
       )
 
   };
+
 
   innocents.forEach(
     id=>{
@@ -3632,6 +4231,7 @@ async function(){
     }
   );
 
+
   for(
     const id of
     Object.keys(
@@ -3645,6 +4245,7 @@ async function(){
       );
 
   }
+
 
   const game = {
 
@@ -3683,8 +4284,10 @@ async function(){
 
   };
 
+
   const updates =
     {};
+
 
   updates[
     "rooms/" +
@@ -3693,12 +4296,14 @@ async function(){
   ] =
     "game";
 
+
   updates[
     "rooms/" +
     roomCode +
     "/roundNumber"
   ] =
     game.roundNumber;
+
 
   updates[
     "rooms/" +
@@ -3707,12 +4312,14 @@ async function(){
   ] =
     game;
 
+
   updates[
     "rooms/" +
     roomCode +
     "/notes"
   ] =
     null;
+
 
   updates[
     "rooms/" +
@@ -3721,12 +4328,22 @@ async function(){
   ] =
     null;
 
+
   updates[
     "rooms/" +
     roomCode +
     "/result"
   ] =
     null;
+
+
+  updates[
+    "rooms/" +
+    roomCode +
+    "/lastActivityAt"
+  ] =
+    now;
+
 
   for(
     const [
@@ -3757,11 +4374,13 @@ async function(){
 
   }
 
+
   revealRunning =
     false;
 
   lastRevealId =
     null;
+
 
   document
     .getElementById(
@@ -3769,6 +4388,7 @@ async function(){
     )
     .classList
     .add("hidden");
+
 
   await update(
     ref(db),
@@ -3798,6 +4418,7 @@ async function loadGame(){
     .classList
     .remove("hidden");
 
+
   if(
     roomData.host ===
     playerId
@@ -3822,10 +4443,12 @@ async function loadGame(){
 
   }
 
+
   if(!mySecret){
 
     const snapshot =
       await get(
+
         ref(
           db,
           "rooms/" +
@@ -3833,7 +4456,9 @@ async function loadGame(){
           "/private/" +
           playerId
         )
+
       );
+
 
     if(
       snapshot.exists()
@@ -3848,18 +4473,18 @@ async function loadGame(){
 
   }
 
+
   if(!listenersStarted){
 
     listenersStarted =
       true;
 
     listenForCalls();
-
     listenToMyTasks();
-
     listenForGameResult();
 
   }
+
 
   if(!notesListenerStarted){
 
@@ -3869,6 +4494,7 @@ async function loadGame(){
     listenForPlayerNotes();
 
   }
+
 
   if(
     mySecret?.role ===
@@ -3895,6 +4521,7 @@ async function loadGame(){
 
   }
 
+
   updateMyNoteUI();
 
   startGlobalClock();
@@ -3912,6 +4539,7 @@ function startGlobalClock(){
     globalInterval
   );
 
+
   function tick(){
 
     if(
@@ -3923,11 +4551,14 @@ function startGlobalClock(){
 
     }
 
+
     const game =
       roomData.game;
 
+
     const now =
       Date.now();
+
 
     document
       .getElementById(
@@ -3940,6 +4571,7 @@ function startGlobalClock(){
           now
         )
       );
+
 
     if(
       now <
@@ -3991,8 +4623,10 @@ function startGlobalClock(){
 
     }
 
+
     let target =
       now;
+
 
     if(
       now <
@@ -4022,6 +4656,7 @@ function startGlobalClock(){
 
     }
 
+
     document
       .getElementById(
         "globalTimer"
@@ -4031,6 +4666,7 @@ function startGlobalClock(){
         target -
         now
       );
+
 
     if(
       mySecret &&
@@ -4051,6 +4687,7 @@ function startGlobalClock(){
         )
       );
 
+
       if(
         now >=
         game.detectiveEnd
@@ -4060,11 +4697,13 @@ function startGlobalClock(){
 
       }
 
+
       const timerCard =
         document
           .getElementById(
             "investigationTimerCard"
           );
+
 
       if(
         now >=
@@ -4076,6 +4715,7 @@ function startGlobalClock(){
         timerCard
           .classList
           .remove("hidden");
+
 
         document
           .getElementById(
@@ -4098,11 +4738,14 @@ function startGlobalClock(){
 
     }
 
+
     renderTasks();
 
   }
 
+
   tick();
+
 
   globalInterval =
     setInterval(
@@ -4114,16 +4757,16 @@ function startGlobalClock(){
 
 
 /* =====================================================
-SECRET SCREEN
+SECRET
 ===================================================== */
 
 function renderSecret(){
 
   const card =
-    document
-      .getElementById(
-        "secretCard"
-      );
+    document.getElementById(
+      "secretCard"
+    );
+
 
   if(
     mySecret.role ===
@@ -4156,12 +4799,14 @@ function renderSecret(){
 
     `;
 
+
     document
       .getElementById(
         "detectiveWaiting"
       )
       .classList
       .remove("hidden");
+
 
     document
       .getElementById(
@@ -4170,11 +4815,13 @@ function renderSecret(){
       .classList
       .add("hidden");
 
+
     showDetectiveTools();
 
     return;
 
   }
+
 
   document
     .getElementById(
@@ -4183,11 +4830,14 @@ function renderSecret(){
     .classList
     .remove("hidden");
 
+
   hideDetectiveTools();
+
 
   const murderer =
     mySecret.role ===
     "murderer";
+
 
   card.innerHTML = `
 
@@ -4227,13 +4877,14 @@ function renderSecret(){
 
   `;
 
+
   renderTasks();
 
 }
 
 
 /* =====================================================
-TASK RENDER
+TASKS
 ===================================================== */
 
 function renderTasks(){
@@ -4247,26 +4898,26 @@ function renderTasks(){
 
   }
 
+
   const container =
     document.getElementById(
       "myTasks"
     );
 
+
   if(!container){
     return;
   }
 
+
   const now =
     Date.now();
 
+
   const completed =
-    roomData &&
-    roomData.completed &&
-    roomData.completed[playerId]
-    ?
-    roomData.completed[playerId]
-    :
+    roomData?.completed?.[playerId] ||
     {};
+
 
   container.innerHTML =
 
@@ -4278,10 +4929,12 @@ function renderTasks(){
             now >=
             task.unlockAt;
 
+
           const done =
             completed[
               task.id
             ] === true;
+
 
           if(
             !unlocked
@@ -4315,6 +4968,7 @@ function renderTasks(){
             `;
 
           }
+
 
           return `
 
@@ -4404,6 +5058,7 @@ async function(
 
   }
 
+
   const task =
     mySecret.tasks.find(
       t =>
@@ -4411,9 +5066,11 @@ async function(
       taskId
     );
 
+
   if(!task){
     return;
   }
+
 
   if(
     Date.now() <
@@ -4430,7 +5087,9 @@ async function(
 
   }
 
+
   await update(
+
     ref(
       db,
       "rooms/" +
@@ -4438,13 +5097,17 @@ async function(
       "/completed/" +
       playerId
     ),
+
     {
 
       [taskId]:
         checked
 
     }
+
   );
+
+  await touchRoom();
 
 };
 
@@ -4452,6 +5115,7 @@ async function(
 function listenToMyTasks(){
 
   onValue(
+
     ref(
       db,
       "rooms/" +
@@ -4459,6 +5123,7 @@ function listenToMyTasks(){
       "/completed/" +
       playerId
     ),
+
     snapshot=>{
 
       if(!roomData){
@@ -4476,6 +5141,7 @@ function listenToMyTasks(){
       renderTasks();
 
     }
+
   );
 
 }
@@ -4530,6 +5196,7 @@ function updatePlayerNoteCounter(){
 
   }
 
+
   counter.textContent =
     `${input.value.length} / ${MAX_PLAYER_NOTE_LENGTH}`;
 
@@ -4537,22 +5204,6 @@ function updatePlayerNoteCounter(){
 
 
 async function submitPlayerNote(){
-
-  if(!roomCode){
-    return;
-  }
-
-  if(
-    !mySecret
-  ){
-
-    alert(
-      "Wait until the round has loaded."
-    );
-
-    return;
-
-  }
 
   const input =
     document.getElementById(
@@ -4572,6 +5223,7 @@ async function submitPlayerNote(){
   const text =
     input.value.trim();
 
+
   if(!text){
 
     alert(
@@ -4581,6 +5233,7 @@ async function submitPlayerNote(){
     return;
 
   }
+
 
   if(
     text.length >
@@ -4595,11 +5248,13 @@ async function submitPlayerNote(){
 
   }
 
+
   button.disabled =
     true;
 
   button.textContent =
     "⏳ SENDING...";
+
 
   try{
 
@@ -4609,10 +5264,12 @@ async function submitPlayerNote(){
         playerNotePath()
       );
 
+
     const existing =
       await get(
         noteRef
       );
+
 
     if(
       existing.exists()
@@ -4627,6 +5284,7 @@ async function submitPlayerNote(){
       return;
 
     }
+
 
     await set(
       noteRef,
@@ -4645,10 +5303,15 @@ async function submitPlayerNote(){
       }
     );
 
+
     input.value =
       "";
 
     updatePlayerNoteCounter();
+
+
+    await touchRoom();
+
 
     if(status){
 
@@ -4687,15 +5350,6 @@ async function submitPlayerNote(){
 
 function updateMyNoteUI(){
 
-  const area =
-    document.getElementById(
-      "myNoteArea"
-    );
-
-  if(!area){
-    return;
-  }
-
   const input =
     document.getElementById(
       "playerNoteInput"
@@ -4711,80 +5365,73 @@ function updateMyNoteUI(){
       "myNoteStatus"
     );
 
-  const note =
-    getPlayerNoteData();
-
   if(
-    note
+    !input ||
+    !button ||
+    !status
   ){
-
-    if(input){
-
-      input.value =
-        note.text ||
-        "";
-
-      input.disabled =
-        true;
-
-    }
-
-    updatePlayerNoteCounter();
-
-    if(button){
-
-      button.disabled =
-        true;
-
-      button.textContent =
-        "✅ NOTE SENT";
-
-    }
-
-    if(status){
-
-      status.innerHTML = `
-
-        ✅ Your note was sent.
-
-        <br>
-
-        <span class="note-limit">
-
-          Sent at
-          ${escapeHtml(
-            clockText(
-              new Date(
-                note.timestamp ||
-                Date.now()
-              )
-            )
-          )}
-
-        </span>
-
-      `;
-
-    }
 
     return;
 
   }
 
-  if(input){
-    input.disabled = false;
+
+  const note =
+    getPlayerNoteData();
+
+
+  if(note){
+
+    input.value =
+      note.text ||
+      "";
+
+    input.disabled =
+      true;
+
+    updatePlayerNoteCounter();
+
+    button.disabled =
+      true;
+
+    button.textContent =
+      "✅ NOTE SENT";
+
+    status.innerHTML = `
+
+      ✅ Your note was sent.
+
+      <br>
+
+      <span class="note-limit">
+
+        Sent at
+        ${escapeHtml(
+          clockText(
+            new Date(
+              note.timestamp ||
+              Date.now()
+            )
+          )
+        )}
+
+      </span>
+
+    `;
+
+    return;
+
   }
 
-  if(button){
-    button.disabled = false;
-  }
 
-  if(status){
+  input.disabled =
+    false;
 
-    status.textContent =
-      "You have 1 note available.";
+  button.disabled =
+    false;
 
-  }
+  status.textContent =
+    "You have 1 note available.";
 
 }
 
@@ -4792,12 +5439,14 @@ function updateMyNoteUI(){
 function listenForPlayerNotes(){
 
   onValue(
+
     ref(
       db,
       "rooms/" +
       roomCode +
       "/notes"
     ),
+
     snapshot=>{
 
       if(!roomData){
@@ -4824,6 +5473,7 @@ function listenForPlayerNotes(){
       }
 
     }
+
   );
 
 }
@@ -4840,18 +5490,22 @@ function renderLivePlayerNotes(){
 
   }
 
+
   const container =
     document.getElementById(
       "liveNotesList"
     );
 
+
   if(!container){
     return;
   }
 
+
   const notes =
     roomData?.notes ||
     {};
+
 
   const entries =
     Object.values(
@@ -4862,6 +5516,7 @@ function renderLivePlayerNotes(){
         (b.timestamp || 0) -
         (a.timestamp || 0)
     );
+
 
   if(
     entries.length ===
@@ -4879,6 +5534,7 @@ function renderLivePlayerNotes(){
     return;
 
   }
+
 
   container.innerHTML =
 
@@ -5008,12 +5664,14 @@ function detectivePlayerPath(
 function listenForDetectiveNotes(){
 
   onValue(
+
     ref(
       db,
       "rooms/" +
       roomCode +
       "/detectiveNotes"
     ),
+
     snapshot=>{
 
       if(
@@ -5063,6 +5721,7 @@ function listenForDetectiveNotes(){
       }
 
     }
+
   );
 
 }
@@ -5089,17 +5748,21 @@ async function saveDetectiveGeneralNotes(){
       "detectiveGeneralSaveStatus"
     );
 
+
   if(!input){
     return;
   }
 
+
   try{
 
     await set(
+
       ref(
         db,
         detectiveGeneralPath()
       ),
+
       {
 
         text:
@@ -5109,7 +5772,12 @@ async function saveDetectiveGeneralNotes(){
           Date.now()
 
       }
+
     );
+
+
+    await touchRoom();
+
 
     if(status){
 
@@ -5124,7 +5792,9 @@ async function saveDetectiveGeneralNotes(){
   }
   catch(error){
 
-    console.error(error);
+    console.error(
+      error
+    );
 
     if(status){
 
@@ -5321,6 +5991,7 @@ async function loadSelectedDossier(
   const playerNote =
     roomData?.notes?.[player];
 
+
   if(
     playerNote
   ){
@@ -5375,16 +6046,19 @@ async function loadSelectedDossier(
 
   }
 
+
   try{
 
     const snapshot =
       await get(
+
         ref(
           db,
           detectivePlayerPath(
             player
           )
         )
+
       );
 
     const data =
@@ -5464,6 +6138,7 @@ async function loadSelectedDossier(
 
   }
 
+
   if(scroll){
 
     dossier.scrollIntoView({
@@ -5486,6 +6161,7 @@ function refreshSelectedDossierNote(){
 
   }
 
+
   const noteBox =
     document.getElementById(
       "selectedPlayerSubmittedNote"
@@ -5495,10 +6171,12 @@ function refreshSelectedDossierNote(){
     return;
   }
 
+
   const playerNote =
     roomData?.notes?.[
       selectedDetectivePlayerId
     ];
+
 
   if(
     playerNote
@@ -5584,15 +6262,18 @@ async function(){
       "dossierSaveStatus"
     );
 
+
   try{
 
     await set(
+
       ref(
         db,
         detectivePlayerPath(
           selectedDetectivePlayerId
         )
       ),
+
       {
 
         claim:
@@ -5611,7 +6292,12 @@ async function(){
           Date.now()
 
       }
+
     );
+
+
+    await touchRoom();
+
 
     if(status){
 
@@ -5940,6 +6626,7 @@ async function getPrivateTaskCount(
 
   const snapshot =
     await get(
+
       ref(
         db,
         "rooms/" +
@@ -5948,7 +6635,9 @@ async function getPrivateTaskCount(
         player +
         "/tasks"
       )
+
     );
+
 
   if(
     !snapshot.exists()
@@ -5958,8 +6647,10 @@ async function getPrivateTaskCount(
 
   }
 
+
   const tasks =
     snapshot.val();
+
 
   return Array.isArray(
     tasks
@@ -6016,18 +6707,16 @@ async function(
       ?.name ||
     "Unknown";
 
-  /*
-    The result gets written once to Firebase.
-    Every connected screen is listening to it.
-  */
 
   await set(
+
     ref(
       db,
       "rooms/" +
       roomCode +
       "/result"
     ),
+
     {
 
       accusedId,
@@ -6038,16 +6727,33 @@ async function(
         Date.now()
 
     }
+
   );
+
+
+  await touchRoom();
 
 };
 
 
 /* =====================================================
-SHARED RESULT LISTENER
+RESULT LISTENER
 ===================================================== */
 
 function listenForGameResult(){
+
+  if(
+    gameResultListenerStarted
+  ){
+
+    return;
+
+  }
+
+
+  gameResultListenerStarted =
+    true;
+
 
   onValue(
 
@@ -6109,7 +6815,7 @@ function listenForGameResult(){
 
 
 /* =====================================================
-SUSPENSE REVEAL
+REVEAL
 ===================================================== */
 
 function setReveal(
@@ -6248,9 +6954,7 @@ async function runSuspenseReveal(
     );
 
 
-  /*
-    Step 1
-  */
+  /* STEP 1 */
 
   setReveal(
     "THE DETECTIVE HAS MADE A DECISION",
@@ -6261,10 +6965,7 @@ async function runSuspenseReveal(
   await sleep(1800);
 
 
-  /*
-    Step 2
-    Show the name alone.
-  */
+  /* STEP 2 */
 
   setReveal(
     "THE ACCUSED PLAYER",
@@ -6275,10 +6976,7 @@ async function runSuspenseReveal(
   await sleep(1700);
 
 
-  /*
-    Step 3
-    The exact suspense sentence the user requested.
-  */
+  /* STEP 3 */
 
   setReveal(
     "THE REVEAL",
@@ -6289,10 +6987,7 @@ async function runSuspenseReveal(
   await sleep(1000);
 
 
-  /*
-    Step 4
-    Reveal murderer / innocent.
-  */
+  /* STEP 4 */
 
   if(
     wasMurderer
@@ -6324,10 +7019,7 @@ async function runSuspenseReveal(
   }
 
 
-  /*
-    Step 5
-    Show ALL roles.
-  */
+  /* STEP 5: ALL ROLES */
 
   const detectiveName =
     players[
@@ -6435,10 +7127,7 @@ async function runSuspenseReveal(
   await sleep(3500);
 
 
-  /*
-    Step 6
-    Winner.
-  */
+  /* STEP 6: WINNER */
 
   if(
     wasMurderer
@@ -6474,12 +7163,27 @@ async function runSuspenseReveal(
   }
 
 
+  /*
+    Keep the final winner on screen long enough
+    for everybody to see it.
+  */
+
   await sleep(4000);
 
+
+  /*
+    IMPORTANT:
+    Everyone now returns to the same lobby.
+    We do not navigate away.
+    We simply clear the completed round.
+  */
 
   overlay
     .classList
     .add("hidden");
+
+
+  await returnEveryoneToLobby();
 
 
   revealRunning =
@@ -6504,6 +7208,7 @@ async function(
     return;
 
   }
+
 
   await set(
 
@@ -6532,6 +7237,9 @@ async function(
 
   );
 
+
+  await touchRoom();
+
 };
 
 
@@ -6556,8 +7264,10 @@ function listenForCalls(){
 
       }
 
+
       const call =
         snapshot.val();
+
 
       if(
         call.id ===
@@ -6568,13 +7278,16 @@ function listenForCalls(){
 
       }
 
+
       lastCallId =
         call.id;
+
 
       showCall(
         call.destination,
         call.caller
       );
+
 
       if(
         alertsEnabled
@@ -6585,6 +7298,7 @@ function listenForCalls(){
         vibrate();
 
       }
+
 
       systemNotification(
         call.destination,
@@ -6608,6 +7322,7 @@ function showCall(
       "callStack"
     );
 
+
   for(
     let i = 0;
     i < 3;
@@ -6623,8 +7338,10 @@ function showCall(
             "div"
           );
 
+
         banner.className =
           "call-banner";
+
 
         banner.innerHTML = `
 
@@ -6648,6 +7365,7 @@ function showCall(
 
         `;
 
+
         banner
           .querySelector(
             "button"
@@ -6657,9 +7375,11 @@ function showCall(
             banner.remove();
           };
 
+
         stack.appendChild(
           banner
         );
+
 
         setTimeout(
           ()=>{
@@ -6718,6 +7438,7 @@ const params =
     location.search
   );
 
+
 if(
   params.get("room")
 ){
@@ -6735,13 +7456,14 @@ if(
 
 
 /* =====================================================
-NOTE INPUT COUNTER
+NOTE COUNTER
 ===================================================== */
 
 const playerNoteInput =
   document.getElementById(
     "playerNoteInput"
   );
+
 
 if(
   playerNoteInput
@@ -6756,7 +7478,7 @@ if(
 
 
 /* =====================================================
-INITIAL ALERT UI
+ALERT UI
 ===================================================== */
 
 if(
