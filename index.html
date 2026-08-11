@@ -463,6 +463,7 @@ button:disabled{
   margin-top:15px;
 }
 
+
 /* =====================================================
 NOTES
 ===================================================== */
@@ -571,13 +572,6 @@ NOTES
   margin-top:8px;
 }
 
-.question-box{
-  background:#202638;
-  border-radius:14px;
-  padding:12px;
-  margin-top:10px;
-}
-
 .player-note-highlight{
   background:#24345a;
   border:1px solid rgba(113,140,255,.25);
@@ -593,6 +587,190 @@ NOTES
   text-transform:uppercase;
   margin-bottom:5px;
 }
+
+
+/* =====================================================
+SUSPENSE REVEAL
+===================================================== */
+
+.reveal-overlay{
+  position:fixed;
+  inset:0;
+  z-index:200000;
+  background:
+    radial-gradient(
+      circle at center,
+      #202844 0%,
+      #0c101b 44%,
+      #020307 100%
+    );
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  overflow:hidden;
+}
+
+.reveal-overlay.hidden{
+  display:none!important;
+}
+
+.reveal-inner{
+  width:100%;
+  max-width:700px;
+  text-align:center;
+  padding:20px;
+}
+
+.reveal-small{
+  color:#8c96ae;
+  font-size:13px;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:3px;
+  margin-bottom:18px;
+}
+
+.reveal-main{
+  font-size:clamp(40px,10vw,82px);
+  line-height:1.05;
+  font-weight:1000;
+  letter-spacing:-3px;
+  text-shadow:0 10px 50px rgba(0,0,0,.5);
+  min-height:1.1em;
+}
+
+.reveal-sub{
+  margin-top:18px;
+  color:#b8c1d6;
+  font-size:18px;
+  min-height:28px;
+}
+
+.reveal-details{
+  margin-top:30px;
+  background:rgba(21,26,42,.94);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:24px;
+  padding:18px;
+  box-shadow:0 20px 70px rgba(0,0,0,.45);
+  text-align:left;
+}
+
+.reveal-role{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  background:#202638;
+  border-radius:14px;
+  padding:14px 16px;
+  margin:9px 0;
+}
+
+.reveal-role-name{
+  font-weight:900;
+  font-size:17px;
+}
+
+.reveal-role-value{
+  color:#aeb8cf;
+  font-size:12px;
+  font-weight:900;
+}
+
+.reveal-winner{
+  margin-top:20px;
+  border-radius:18px;
+  padding:17px;
+  font-size:21px;
+  font-weight:900;
+  text-align:center;
+}
+
+.reveal-winner.detective-win{
+  background:#26396e;
+}
+
+.reveal-winner.murderer-win{
+  background:#672630;
+}
+
+.reveal-pop{
+  animation:
+    revealPop
+    .55s
+    cubic-bezier(.2,.8,.2,1);
+}
+
+.reveal-fade{
+  animation:
+    revealFade
+    .4s
+    ease;
+}
+
+.reveal-shake{
+  animation:
+    revealShake
+    .55s
+    ease;
+}
+
+@keyframes revealPop{
+
+  0%{
+    opacity:0;
+    transform:scale(.72);
+  }
+
+  100%{
+    opacity:1;
+    transform:scale(1);
+  }
+
+}
+
+@keyframes revealFade{
+
+  0%{
+    opacity:0;
+  }
+
+  100%{
+    opacity:1;
+  }
+
+}
+
+@keyframes revealShake{
+
+  0%,100%{
+    transform:translateX(0);
+  }
+
+  20%{
+    transform:translateX(-8px);
+  }
+
+  40%{
+    transform:translateX(8px);
+  }
+
+  60%{
+    transform:translateX(-5px);
+  }
+
+  80%{
+    transform:translateX(5px);
+  }
+
+}
+
+
+/* =====================================================
+MOBILE
+===================================================== */
 
 @media(max-width:600px){
 
@@ -612,6 +790,15 @@ NOTES
     font-size:48px;
   }
 
+  .reveal-main{
+    font-size:clamp(37px,12vw,65px);
+    letter-spacing:-2px;
+  }
+
+  .reveal-sub{
+    font-size:16px;
+  }
+
 }
 
 </style>
@@ -620,6 +807,11 @@ NOTES
 <body>
 
 <div id="callStack"></div>
+
+
+<!-- =====================================================
+ALERT MODAL
+===================================================== -->
 
 <div
   id="alertModal"
@@ -660,6 +852,42 @@ NOTES
 </div>
 
 
+<!-- =====================================================
+SHARED SUSPENSE REVEAL
+===================================================== -->
+
+<div
+  id="revealOverlay"
+  class="reveal-overlay hidden"
+>
+
+  <div class="reveal-inner">
+
+    <div
+      id="revealSmall"
+      class="reveal-small"
+    ></div>
+
+    <div
+      id="revealMain"
+      class="reveal-main"
+    ></div>
+
+    <div
+      id="revealSub"
+      class="reveal-sub"
+    ></div>
+
+    <div
+      id="revealDetails"
+      class="reveal-details hidden"
+    ></div>
+
+  </div>
+
+</div>
+
+
 <div class="app">
 
 
@@ -690,10 +918,8 @@ NOTES
 
     </div>
 
-    <div
-      id="alertBox"
-      class="info"
-    >
+
+    <div id="alertBox" class="info">
 
       <b>🔔 Call Alerts</b>
 
@@ -711,6 +937,7 @@ NOTES
 
     </div>
 
+
     <label>
       Your name
     </label>
@@ -722,6 +949,7 @@ NOTES
       maxlength="30"
     >
 
+
     <label>
       Room code
     </label>
@@ -732,6 +960,7 @@ NOTES
       autocomplete="off"
       maxlength="20"
     >
+
 
     <button onclick="createRoom()">
       CREATE NEW ROOM
@@ -745,6 +974,7 @@ NOTES
     </button>
 
   </div>
+
 
   <div class="card">
 
@@ -835,9 +1065,13 @@ NOTES
 
     </select>
 
-    <button onclick="finishCreateRoom()">
+
+    <button
+      onclick="finishCreateRoom()"
+    >
       CREATE ROOM
     </button>
+
 
     <button
       class="secondary"
@@ -873,9 +1107,12 @@ NOTES
       class="room-code"
     ></div>
 
-    <div id="lobbyPlayerCount"></div>
+    <div
+      id="lobbyPlayerCount"
+    ></div>
 
   </div>
+
 
   <div class="card">
 
@@ -886,6 +1123,7 @@ NOTES
     <div id="playersList"></div>
 
   </div>
+
 
   <div
     id="hostPanel"
@@ -933,6 +1171,7 @@ NOTES
     🔄 RESET
   </button>
 
+
   <div class="card center">
 
     <div
@@ -949,9 +1188,12 @@ NOTES
       --:--
     </div>
 
-    <p id="globalTimeText"></p>
+    <p
+      id="globalTimeText"
+    ></p>
 
   </div>
+
 
   <div class="card">
 
@@ -1431,13 +1673,10 @@ let roomData = null;
 let mySecret = null;
 
 let globalInterval = null;
-
 let lastCallId = null;
 
 let listenersStarted = false;
-
 let notesListenerStarted = false;
-
 let detectiveNotesListenerStarted = false;
 
 let selectedDetectivePlayerId = null;
@@ -1450,23 +1689,31 @@ let alertsEnabled =
   ) === "1";
 
 
+/* =====================================================
+REVEAL STATE
+===================================================== */
+
+let revealRunning = false;
+let lastRevealId = null;
+
+
+/* =====================================================
+TIMING
+===================================================== */
+
 const DETECTIVE_WAIT =
   5 * 60 * 1000;
-
 
 const INVESTIGATION_TIME =
   5 * 60 * 1000 +
   30 * 1000;
 
-
 const MIN_MURDER_DELAY =
   2 * 60 * 1000;
-
 
 const MAX_MURDER_DELAY =
   3 * 60 * 1000 +
   30 * 1000;
-
 
 const MAX_PLAYER_NOTE_LENGTH =
   240;
@@ -1503,33 +1750,19 @@ RANDOM TASK WORDING
 const activityTemplates = [
 
   "Sit quietly at {location}.",
-
   "Walk around {location}.",
-
   "Stand for a moment at {location}.",
-
   "Look around {location}.",
-
   "Wait nearby {location}.",
-
   "Walk through {location}.",
-
   "Sit at a nearby seat around {location}.",
-
   "Check your phone near {location}.",
-
   "Pause briefly at {location}.",
-
   "Stay around {location} for a short moment.",
-
   "Walk past {location}, then continue normally.",
-
   "Spend a moment near {location} before moving on.",
-
   "Look toward {location}, then continue.",
-
   "Stay near {location} for a little while.",
-
   "Take a short pause around {location}."
 
 ];
@@ -1538,23 +1771,14 @@ const activityTemplates = [
 const actionTemplates = [
 
   "Go to {location} and stay there briefly.",
-
   "Move to {location}, then continue normally.",
-
   "Visit {location} for a short moment.",
-
   "Pass through {location} before continuing.",
-
   "Wait near {location}, then move on.",
-
   "Walk to {location} and look around briefly.",
-
   "Head toward {location}, pause, then continue.",
-
   "Go through {location} before moving elsewhere.",
-
   "Spend a short moment at {location}, then leave.",
-
   "Move through {location} and continue your route."
 
 ];
@@ -1563,15 +1787,10 @@ const actionTemplates = [
 const murderTemplates = [
 
   "Be at {location} at {time}. The fictional murder event happens there.",
-
   "Reach {location} when the clock reaches {time} for the fictional murder event.",
-
   "At {time}, go to {location}. This is the fictional murder point.",
-
   "Be near {location} at {time} for the fictional murder event.",
-
   "Go to {location} around {time}. The fictional incident happens there.",
-
   "At exactly {time}, be at {location} for the fictional event."
 
 ];
@@ -1580,15 +1799,10 @@ const murderTemplates = [
 const afterMurderTemplates = [
 
   "Leave {location} and continue normally.",
-
   "Move away from {location} after the fictional event.",
-
   "After the fictional incident, leave {location}.",
-
   "Continue to another area after leaving {location}.",
-
   "Move on from {location} and continue your timeline.",
-
   "Leave {location} and go somewhere else."
 
 ];
@@ -1607,11 +1821,8 @@ const victims = [
 const cases = [
 
   "A fictional hotel guest was found dead in the story.",
-
   "A fictional visitor was found dead in the story.",
-
   "A fictional guest was discovered dead in the story.",
-
   "A fictional incident happened inside the hotel."
 
 ];
@@ -1780,6 +1991,19 @@ function escapeHtml(value){
 }
 
 
+function sleep(ms){
+
+  return new Promise(
+    resolve =>
+      setTimeout(
+        resolve,
+        ms
+      )
+  );
+
+}
+
+
 function uniqueLocation(
   used,
   forbidden
@@ -1878,14 +2102,12 @@ function buildRandomNormalTask(
       forbiddenLocation
     );
 
-
   const templatePool =
     Math.random() < 0.5
     ?
     activityTemplates
     :
     actionTemplates;
-
 
   const description =
     fillLocationTemplate(
@@ -1894,7 +2116,6 @@ function buildRandomNormalTask(
       ),
       location
     );
-
 
   return createTask(
     id,
@@ -1914,7 +2135,6 @@ function makeRandomUnlockTimes(
   const startOffset =
     15 * 1000;
 
-
   const endOffset =
     Math.max(
       startOffset + 1000,
@@ -1923,9 +2143,7 @@ function makeRandomUnlockTimes(
       20 * 1000
     );
 
-
   const values = [];
-
 
   for(
     let i = 0;
@@ -1937,7 +2155,6 @@ function makeRandomUnlockTimes(
       (i + 1) /
       (count + 1);
 
-
     const spread =
       (
         Math.random() -
@@ -1945,7 +2162,6 @@ function makeRandomUnlockTimes(
       ) *
       40 *
       1000;
-
 
     let offset =
       startOffset +
@@ -1956,7 +2172,6 @@ function makeRandomUnlockTimes(
       percentage +
       spread;
 
-
     offset =
       Math.max(
         startOffset,
@@ -1966,19 +2181,16 @@ function makeRandomUnlockTimes(
         )
       );
 
-
     values.push(
       offset
     );
 
   }
 
-
   values.sort(
     (a,b) =>
-      a - b
+      a-b
   );
-
 
   return values.map(
     offset =>
@@ -2002,7 +2214,6 @@ function buildRandomNormalTasks(
       Math.random() * 3
     );
 
-
   const unlockTimes =
     makeRandomUnlockTimes(
       now,
@@ -2010,14 +2221,11 @@ function buildRandomNormalTasks(
       count
     );
 
-
   const usedLocations =
     [];
 
-
   const tasks =
     [];
-
 
   for(
     let i = 0;
@@ -2036,25 +2244,18 @@ function buildRandomNormalTasks(
         .toString(36)
         .substring(2,8);
 
-
     tasks.push(
 
       buildRandomNormalTask(
-
         taskId,
-
         unlockTimes[i],
-
         usedLocations,
-
         crimeLocation
-
       )
 
     );
 
   }
-
 
   return shuffle(
     tasks
@@ -2078,30 +2279,22 @@ function buildRandomMurdererTasks(
       Math.random() * 3
     );
 
-
   const normalTimes =
     makeRandomUnlockTimes(
-
       now,
-
       Math.min(
         detectiveEnd,
         murderAt -
         20 * 1000
       ),
-
       normalCount
-
     );
-
 
   const usedLocations =
     [];
 
-
   const tasks =
     [];
-
 
   for(
     let i = 0;
@@ -2120,19 +2313,13 @@ function buildRandomMurdererTasks(
         .toString(36)
         .substring(2,8);
 
-
     tasks.push(
 
       buildRandomNormalTask(
-
         taskId,
-
         normalTimes[i],
-
         usedLocations,
-
         crimeLocation
-
       )
 
     );
@@ -2170,13 +2357,9 @@ function buildRandomMurdererTasks(
   tasks.push(
 
     createTask(
-
       murderTaskId,
-
       murderAt,
-
       murderDescription
-
     )
 
   );
@@ -2213,13 +2396,9 @@ function buildRandomMurdererTasks(
   tasks.push(
 
     createTask(
-
       afterTaskId,
-
       afterTime,
-
       afterDescription
-
     )
 
   );
@@ -2245,13 +2424,11 @@ async function(){
       window.AudioContext ||
       window.webkitAudioContext;
 
-
     if(AudioContext){
 
       audioContext =
         audioContext ||
         new AudioContext();
-
 
       if(
         audioContext.state ===
@@ -2262,44 +2439,35 @@ async function(){
 
       }
 
-
       const osc =
         audioContext.createOscillator();
 
       const gain =
         audioContext.createGain();
 
-
       osc.frequency.value =
         660;
-
 
       gain.gain.value =
         0.1;
 
-
       osc.connect(gain);
-
       gain.connect(
         audioContext.destination
       );
 
-
       const t =
         audioContext.currentTime;
-
 
       gain.gain.exponentialRampToValueAtTime(
         0.12,
         t + 0.02
       );
 
-
       gain.gain.exponentialRampToValueAtTime(
         0.0001,
         t + 0.20
       );
-
 
       osc.start(t);
 
@@ -2308,7 +2476,6 @@ async function(){
       );
 
     }
-
 
     if(
       "Notification" in window &&
@@ -2325,15 +2492,13 @@ async function(){
 
     }
 
-
-    alertsEnabled = true;
-
+    alertsEnabled =
+      true;
 
     localStorage.setItem(
       "hotelMurderAlerts",
       "1"
     );
-
 
     const status =
       document.getElementById(
@@ -2341,10 +2506,11 @@ async function(){
       );
 
     if(status){
+
       status.textContent =
         "✅ Call alerts enabled.";
-    }
 
+    }
 
     const enableButton =
       document.getElementById(
@@ -2357,7 +2523,6 @@ async function(){
         "✅ CALL ALERTS ENABLED";
 
     }
-
 
     playCallSound();
 
@@ -2383,16 +2548,13 @@ function playCallSound(){
       window.AudioContext ||
       window.webkitAudioContext;
 
-
     if(!AudioContext){
       return;
     }
 
-
     audioContext =
       audioContext ||
       new AudioContext();
-
 
     if(
       audioContext.state ===
@@ -2404,10 +2566,8 @@ function playCallSound(){
 
     }
 
-
     const start =
       audioContext.currentTime;
-
 
     for(
       let group = 0;
@@ -2419,7 +2579,6 @@ function playCallSound(){
         start +
         group * 3.1;
 
-
       for(
         let i = 0;
         i < 2;
@@ -2429,50 +2588,40 @@ function playCallSound(){
         const osc =
           audioContext.createOscillator();
 
-
         const gain =
           audioContext.createGain();
 
-
         osc.type =
           "sine";
-
 
         osc.frequency.value =
           i === 0
           ? 880
           : 660;
 
-
         const t =
           base +
           i * 0.65;
-
 
         gain.gain.setValueAtTime(
           0.0001,
           t
         );
 
-
         gain.gain.exponentialRampToValueAtTime(
           0.28,
           t + 0.03
         );
-
 
         gain.gain.exponentialRampToValueAtTime(
           0.0001,
           t + 0.50
         );
 
-
         osc.connect(gain);
-
         gain.connect(
           audioContext.destination
         );
-
 
         osc.start(t);
 
@@ -2535,7 +2684,6 @@ function systemNotification(
 
   }
 
-
   if(
     "Notification" in window &&
     Notification.permission ===
@@ -2581,7 +2729,6 @@ function(){
       .value
       .trim();
 
-
   if(!myName){
 
     alert(
@@ -2592,14 +2739,12 @@ function(){
 
   }
 
-
   document
     .getElementById(
       "home"
     )
     .classList
     .add("hidden");
-
 
   document
     .getElementById(
@@ -2620,7 +2765,6 @@ function(){
     )
     .classList
     .add("hidden");
-
 
   document
     .getElementById(
@@ -2648,7 +2792,6 @@ async function(){
       .trim()
       .toUpperCase();
 
-
   const limit =
     Number(
       document
@@ -2657,7 +2800,6 @@ async function(){
         )
         .value
     );
-
 
   if(!roomCode){
 
@@ -2669,14 +2811,12 @@ async function(){
 
   }
 
-
   const roomRef =
     ref(
       db,
       "rooms/" +
       roomCode
     );
-
 
   if(
     (
@@ -2691,7 +2831,6 @@ async function(){
     return;
 
   }
-
 
   await set(
     roomRef,
@@ -2727,7 +2866,6 @@ async function(){
     }
   );
 
-
   setupDisconnectCleanup();
 
   enterLobby();
@@ -2750,7 +2888,6 @@ async function(){
       .value
       .trim();
 
-
   roomCode =
     document
       .getElementById(
@@ -2759,7 +2896,6 @@ async function(){
       .value
       .trim()
       .toUpperCase();
-
 
   if(!myName){
 
@@ -2771,7 +2907,6 @@ async function(){
 
   }
 
-
   if(!roomCode){
 
     alert(
@@ -2782,18 +2917,14 @@ async function(){
 
   }
 
-
   const snapshot =
     await get(
-
       ref(
         db,
         "rooms/" +
         roomCode
       )
-
     );
-
 
   if(
     !snapshot.exists()
@@ -2807,10 +2938,8 @@ async function(){
 
   }
 
-
   const data =
     snapshot.val();
-
 
   if(
     data.status !==
@@ -2825,11 +2954,9 @@ async function(){
 
   }
 
-
   const players =
     data.players ||
     {};
-
 
   if(
     !players[playerId] &&
@@ -2847,9 +2974,7 @@ async function(){
 
   }
 
-
   await update(
-
     ref(
       db,
       "rooms/" +
@@ -2857,7 +2982,6 @@ async function(){
       "/players/" +
       playerId
     ),
-
     {
 
       name:
@@ -2867,9 +2991,7 @@ async function(){
         Date.now()
 
     }
-
   );
-
 
   setupDisconnectCleanup();
 
@@ -2888,9 +3010,7 @@ function setupDisconnectCleanup(){
     return;
   }
 
-
   onDisconnect(
-
     ref(
       db,
       "rooms/" +
@@ -2898,12 +3018,9 @@ function setupDisconnectCleanup(){
       "/players/" +
       playerId
     )
-
   ).remove();
 
-
   onDisconnect(
-
     ref(
       db,
       "rooms/" +
@@ -2911,12 +3028,9 @@ function setupDisconnectCleanup(){
       "/private/" +
       playerId
     )
-
   ).remove();
 
-
   onDisconnect(
-
     ref(
       db,
       "rooms/" +
@@ -2924,12 +3038,9 @@ function setupDisconnectCleanup(){
       "/completed/" +
       playerId
     )
-
   ).remove();
 
-
   onDisconnect(
-
     ref(
       db,
       "rooms/" +
@@ -2937,7 +3048,6 @@ function setupDisconnectCleanup(){
       "/notes/" +
       playerId
     )
-
   ).remove();
 
 }
@@ -2949,7 +3059,6 @@ async function deleteRoomIfEmpty(){
     return;
   }
 
-
   const roomRef =
     ref(
       db,
@@ -2957,10 +3066,8 @@ async function deleteRoomIfEmpty(){
       roomCode
     );
 
-
   const snapshot =
     await get(roomRef);
-
 
   if(
     !snapshot.exists()
@@ -2970,12 +3077,10 @@ async function deleteRoomIfEmpty(){
 
   }
 
-
   const players =
     snapshot.val()
       .players ||
     {};
-
 
   if(
     Object.keys(
@@ -3033,14 +3138,12 @@ function enterLobby(){
     .classList
     .add("hidden");
 
-
   document
     .getElementById(
       "createScreen"
     )
     .classList
     .add("hidden");
-
 
   document
     .getElementById(
@@ -3049,7 +3152,6 @@ function enterLobby(){
     .classList
     .add("hidden");
 
-
   document
     .getElementById(
       "lobby"
@@ -3057,14 +3159,12 @@ function enterLobby(){
     .classList
     .remove("hidden");
 
-
   document
     .getElementById(
       "roomDisplay"
     )
     .textContent =
     roomCode;
-
 
   listenToRoom();
 
@@ -3074,7 +3174,6 @@ function enterLobby(){
 function listenToRoom(){
 
   onValue(
-
     ref(
       db,
       "rooms/" +
@@ -3091,15 +3190,12 @@ function listenToRoom(){
 
       }
 
-
       roomData =
         snapshot.val();
-
 
       const players =
         roomData.players ||
         {};
-
 
       if(
         Object.keys(
@@ -3114,9 +3210,7 @@ function listenToRoom(){
 
       }
 
-
       renderLobby();
-
 
       if(
         roomData.status ===
@@ -3135,7 +3229,6 @@ function listenToRoom(){
           .classList
           .add("hidden");
 
-
         document
           .getElementById(
             "lobby"
@@ -3143,14 +3236,12 @@ function listenToRoom(){
           .classList
           .remove("hidden");
 
-
         mySecret =
           null;
 
       }
 
     }
-
   );
 
 }
@@ -3162,12 +3253,10 @@ function renderLobby(){
     roomData.players ||
     {};
 
-
   const ids =
     Object.keys(
       players
     );
-
 
   document
     .getElementById(
@@ -3196,7 +3285,6 @@ function renderLobby(){
       </span>
 
     `;
-
 
   document
     .getElementById(
@@ -3233,7 +3321,6 @@ function renderLobby(){
       )
       .join("");
 
-
   if(
     roomData.host ===
     playerId
@@ -3246,14 +3333,12 @@ function renderLobby(){
       .classList
       .remove("hidden");
 
-
     document
       .getElementById(
         "hostInfo"
       )
       .textContent =
       `${ids.length}/${roomData.playerLimit} players joined.`;
-
 
     document
       .getElementById(
@@ -3289,7 +3374,6 @@ async function(){
 
   }
 
-
   if(
     !confirm(
       "Reset the current game and send everyone back to the lobby?"
@@ -3299,7 +3383,6 @@ async function(){
     return;
 
   }
-
 
   await update(
     ref(db),
@@ -3348,31 +3431,31 @@ async function(){
     }
   );
 
-
   mySecret =
     null;
-
 
   lastCallId =
     null;
 
-
   selectedDetectivePlayerId =
     null;
 
-
-  notesListenerStarted =
+  revealRunning =
     false;
 
+  lastRevealId =
+    null;
 
-  detectiveNotesListenerStarted =
-    false;
-
+  document
+    .getElementById(
+      "revealOverlay"
+    )
+    .classList
+    .add("hidden");
 
   clearInterval(
     globalInterval
   );
-
 
   document
     .getElementById(
@@ -3380,7 +3463,6 @@ async function(){
     )
     .classList
     .add("hidden");
-
 
   document
     .getElementById(
@@ -3409,17 +3491,14 @@ async function(){
 
   }
 
-
   const players =
     roomData.players ||
     {};
-
 
   const ids =
     Object.keys(
       players
     );
-
 
   if(
     ids.length !==
@@ -3434,7 +3513,6 @@ async function(){
 
   }
 
-
   if(
     ids.length <
     2
@@ -3448,32 +3526,25 @@ async function(){
 
   }
 
-
   const roundSeed =
     freshRoundSeed();
-
 
   const shuffled =
     shuffle(
       ids
     );
 
-
   const detective =
     shuffled[0];
-
 
   const murderer =
     shuffled[1];
 
-
   const innocents =
     shuffled.slice(2);
 
-
   const now =
     Date.now();
-
 
   const murderAt =
     now +
@@ -3486,38 +3557,31 @@ async function(){
       )
     );
 
-
   const detectiveEnd =
     now +
     DETECTIVE_WAIT;
 
-
   const investigationEnd =
     detectiveEnd +
     INVESTIGATION_TIME;
-
 
   const crimeLocation =
     random(
       locations
     );
 
-
   const victim =
     random(
       victims
     );
-
 
   const caseDescription =
     random(
       cases
     );
 
-
   const privateData =
     {};
-
 
   privateData[detective] = {
 
@@ -3529,7 +3593,6 @@ async function(){
 
   };
 
-
   privateData[murderer] = {
 
     role:
@@ -3537,26 +3600,17 @@ async function(){
 
     tasks:
       buildRandomMurdererTasks(
-
         murderer,
-
         now,
-
         detectiveEnd,
-
         murderAt,
-
         crimeLocation,
-
         roundSeed
-
       )
 
   };
 
-
   innocents.forEach(
-
     id=>{
 
       privateData[id] = {
@@ -3566,25 +3620,17 @@ async function(){
 
         tasks:
           buildRandomNormalTasks(
-
             id,
-
             now,
-
             detectiveEnd,
-
             crimeLocation,
-
             roundSeed
-
           )
 
       };
 
     }
-
   );
-
 
   for(
     const id of
@@ -3599,7 +3645,6 @@ async function(){
       );
 
   }
-
 
   const game = {
 
@@ -3638,10 +3683,8 @@ async function(){
 
   };
 
-
   const updates =
     {};
-
 
   updates[
     "rooms/" +
@@ -3650,14 +3693,12 @@ async function(){
   ] =
     "game";
 
-
   updates[
     "rooms/" +
     roomCode +
     "/roundNumber"
   ] =
     game.roundNumber;
-
 
   updates[
     "rooms/" +
@@ -3666,14 +3707,12 @@ async function(){
   ] =
     game;
 
-
   updates[
     "rooms/" +
     roomCode +
     "/notes"
   ] =
     null;
-
 
   updates[
     "rooms/" +
@@ -3682,6 +3721,12 @@ async function(){
   ] =
     null;
 
+  updates[
+    "rooms/" +
+    roomCode +
+    "/result"
+  ] =
+    null;
 
   for(
     const [
@@ -3702,7 +3747,6 @@ async function(){
     ] =
       data;
 
-
     updates[
       "rooms/" +
       roomCode +
@@ -3713,6 +3757,18 @@ async function(){
 
   }
 
+  revealRunning =
+    false;
+
+  lastRevealId =
+    null;
+
+  document
+    .getElementById(
+      "revealOverlay"
+    )
+    .classList
+    .add("hidden");
 
   await update(
     ref(db),
@@ -3735,14 +3791,12 @@ async function loadGame(){
     .classList
     .add("hidden");
 
-
   document
     .getElementById(
       "game"
     )
     .classList
     .remove("hidden");
-
 
   if(
     roomData.host ===
@@ -3768,12 +3822,10 @@ async function loadGame(){
 
   }
 
-
   if(!mySecret){
 
     const snapshot =
       await get(
-
         ref(
           db,
           "rooms/" +
@@ -3781,9 +3833,7 @@ async function loadGame(){
           "/private/" +
           playerId
         )
-
       );
-
 
     if(
       snapshot.exists()
@@ -3792,13 +3842,11 @@ async function loadGame(){
       mySecret =
         snapshot.val();
 
-
       renderSecret();
 
     }
 
   }
-
 
   if(!listenersStarted){
 
@@ -3809,8 +3857,9 @@ async function loadGame(){
 
     listenToMyTasks();
 
-  }
+    listenForGameResult();
 
+  }
 
   if(!notesListenerStarted){
 
@@ -3821,13 +3870,14 @@ async function loadGame(){
 
   }
 
-
   if(
     mySecret?.role ===
     "detective"
   ){
 
-    if(!detectiveNotesListenerStarted){
+    if(
+      !detectiveNotesListenerStarted
+    ){
 
       detectiveNotesListenerStarted =
         true;
@@ -3844,7 +3894,6 @@ async function loadGame(){
     hideDetectiveTools();
 
   }
-
 
   updateMyNoteUI();
 
@@ -3863,7 +3912,6 @@ function startGlobalClock(){
     globalInterval
   );
 
-
   function tick(){
 
     if(
@@ -3875,14 +3923,11 @@ function startGlobalClock(){
 
     }
 
-
     const game =
       roomData.game;
 
-
     const now =
       Date.now();
-
 
     document
       .getElementById(
@@ -3895,7 +3940,6 @@ function startGlobalClock(){
           now
         )
       );
-
 
     if(
       now <
@@ -3947,10 +3991,8 @@ function startGlobalClock(){
 
     }
 
-
     let target =
       now;
-
 
     if(
       now <
@@ -3980,7 +4022,6 @@ function startGlobalClock(){
 
     }
 
-
     document
       .getElementById(
         "globalTimer"
@@ -3990,7 +4031,6 @@ function startGlobalClock(){
         target -
         now
       );
-
 
     if(
       mySecret &&
@@ -4003,14 +4043,13 @@ function startGlobalClock(){
           "detectiveTimer"
         )
         .textContent =
-        formatDuration(
-          Math.max(
-            0,
-            game.detectiveEnd -
-            now
-          )
-        );
-
+      formatDuration(
+        Math.max(
+          0,
+          game.detectiveEnd -
+          now
+        )
+      );
 
       if(
         now >=
@@ -4021,13 +4060,11 @@ function startGlobalClock(){
 
       }
 
-
       const timerCard =
         document
           .getElementById(
             "investigationTimerCard"
           );
-
 
       if(
         now >=
@@ -4039,7 +4076,6 @@ function startGlobalClock(){
         timerCard
           .classList
           .remove("hidden");
-
 
         document
           .getElementById(
@@ -4062,14 +4098,11 @@ function startGlobalClock(){
 
     }
 
-
     renderTasks();
 
   }
 
-
   tick();
-
 
   globalInterval =
     setInterval(
@@ -4091,7 +4124,6 @@ function renderSecret(){
       .getElementById(
         "secretCard"
       );
-
 
   if(
     mySecret.role ===
@@ -4124,14 +4156,12 @@ function renderSecret(){
 
     `;
 
-
     document
       .getElementById(
         "detectiveWaiting"
       )
       .classList
       .remove("hidden");
-
 
     document
       .getElementById(
@@ -4140,13 +4170,11 @@ function renderSecret(){
       .classList
       .add("hidden");
 
-
     showDetectiveTools();
 
     return;
 
   }
-
 
   document
     .getElementById(
@@ -4155,14 +4183,11 @@ function renderSecret(){
     .classList
     .remove("hidden");
 
-
   hideDetectiveTools();
-
 
   const murderer =
     mySecret.role ===
     "murderer";
-
 
   card.innerHTML = `
 
@@ -4202,7 +4227,6 @@ function renderSecret(){
 
   `;
 
-
   renderTasks();
 
 }
@@ -4223,21 +4247,17 @@ function renderTasks(){
 
   }
 
-
   const container =
     document.getElementById(
       "myTasks"
     );
 
-
   if(!container){
     return;
   }
 
-
   const now =
     Date.now();
-
 
   const completed =
     roomData &&
@@ -4247,7 +4267,6 @@ function renderTasks(){
     roomData.completed[playerId]
     :
     {};
-
 
   container.innerHTML =
 
@@ -4259,12 +4278,10 @@ function renderTasks(){
             now >=
             task.unlockAt;
 
-
           const done =
             completed[
               task.id
             ] === true;
-
 
           if(
             !unlocked
@@ -4298,7 +4315,6 @@ function renderTasks(){
             `;
 
           }
-
 
           return `
 
@@ -4388,7 +4404,6 @@ async function(
 
   }
 
-
   const task =
     mySecret.tasks.find(
       t =>
@@ -4396,11 +4411,9 @@ async function(
       taskId
     );
 
-
   if(!task){
     return;
   }
-
 
   if(
     Date.now() <
@@ -4417,9 +4430,7 @@ async function(
 
   }
 
-
   await update(
-
     ref(
       db,
       "rooms/" +
@@ -4427,14 +4438,12 @@ async function(
       "/completed/" +
       playerId
     ),
-
     {
 
       [taskId]:
         checked
 
     }
-
   );
 
 };
@@ -4443,7 +4452,6 @@ async function(
 function listenToMyTasks(){
 
   onValue(
-
     ref(
       db,
       "rooms/" +
@@ -4451,28 +4459,23 @@ function listenToMyTasks(){
       "/completed/" +
       playerId
     ),
-
     snapshot=>{
 
       if(!roomData){
         return;
       }
 
-
       roomData.completed =
         roomData.completed ||
         {};
-
 
       roomData.completed[playerId] =
         snapshot.val() ||
         {};
 
-
       renderTasks();
 
     }
-
   );
 
 }
@@ -4498,7 +4501,10 @@ function playerNotePath(
 
 function getPlayerNoteData(){
 
-  return roomData?.notes?.[playerId] || null;
+  return (
+    roomData?.notes?.[playerId] ||
+    null
+  );
 
 }
 
@@ -4510,12 +4516,10 @@ function updatePlayerNoteCounter(){
       "playerNoteInput"
     );
 
-
   const counter =
     document.getElementById(
       "playerNoteCounter"
     );
-
 
   if(
     !input ||
@@ -4525,7 +4529,6 @@ function updatePlayerNoteCounter(){
     return;
 
   }
-
 
   counter.textContent =
     `${input.value.length} / ${MAX_PLAYER_NOTE_LENGTH}`;
@@ -4539,7 +4542,6 @@ async function submitPlayerNote(){
     return;
   }
 
-
   if(
     !mySecret
   ){
@@ -4552,28 +4554,23 @@ async function submitPlayerNote(){
 
   }
 
-
   const input =
     document.getElementById(
       "playerNoteInput"
     );
-
 
   const button =
     document.getElementById(
       "submitPlayerNoteButton"
     );
 
-
   const status =
     document.getElementById(
       "myNoteStatus"
     );
 
-
   const text =
     input.value.trim();
-
 
   if(!text){
 
@@ -4584,7 +4581,6 @@ async function submitPlayerNote(){
     return;
 
   }
-
 
   if(
     text.length >
@@ -4599,14 +4595,11 @@ async function submitPlayerNote(){
 
   }
 
-
   button.disabled =
     true;
 
-
   button.textContent =
     "⏳ SENDING...";
-
 
   try{
 
@@ -4616,12 +4609,10 @@ async function submitPlayerNote(){
         playerNotePath()
       );
 
-
     const existing =
       await get(
         noteRef
       );
-
 
     if(
       existing.exists()
@@ -4636,7 +4627,6 @@ async function submitPlayerNote(){
       return;
 
     }
-
 
     await set(
       noteRef,
@@ -4655,13 +4645,10 @@ async function submitPlayerNote(){
       }
     );
 
-
     input.value =
       "";
 
-
     updatePlayerNoteCounter();
-
 
     if(status){
 
@@ -4677,7 +4664,6 @@ async function submitPlayerNote(){
       "Player note error:",
       error
     );
-
 
     alert(
       "The note could not be sent."
@@ -4706,33 +4692,27 @@ function updateMyNoteUI(){
       "myNoteArea"
     );
 
-
   if(!area){
     return;
   }
-
 
   const input =
     document.getElementById(
       "playerNoteInput"
     );
 
-
   const button =
     document.getElementById(
       "submitPlayerNoteButton"
     );
-
 
   const status =
     document.getElementById(
       "myNoteStatus"
     );
 
-
   const note =
     getPlayerNoteData();
-
 
   if(
     note
@@ -4741,16 +4721,15 @@ function updateMyNoteUI(){
     if(input){
 
       input.value =
-        note.text || "";
+        note.text ||
+        "";
 
       input.disabled =
         true;
 
     }
 
-
     updatePlayerNoteCounter();
-
 
     if(button){
 
@@ -4762,7 +4741,6 @@ function updateMyNoteUI(){
 
     }
 
-
     if(status){
 
       status.innerHTML = `
@@ -4772,6 +4750,7 @@ function updateMyNoteUI(){
         <br>
 
         <span class="note-limit">
+
           Sent at
           ${escapeHtml(
             clockText(
@@ -4781,6 +4760,7 @@ function updateMyNoteUI(){
               )
             )
           )}
+
         </span>
 
       `;
@@ -4791,22 +4771,13 @@ function updateMyNoteUI(){
 
   }
 
-
   if(input){
-
-    input.disabled =
-      false;
-
+    input.disabled = false;
   }
-
 
   if(button){
-
-    button.disabled =
-      false;
-
+    button.disabled = false;
   }
-
 
   if(status){
 
@@ -4821,28 +4792,23 @@ function updateMyNoteUI(){
 function listenForPlayerNotes(){
 
   onValue(
-
     ref(
       db,
       "rooms/" +
       roomCode +
       "/notes"
     ),
-
     snapshot=>{
 
       if(!roomData){
         return;
       }
 
-
       roomData.notes =
         snapshot.val() ||
         {};
 
-
       updateMyNoteUI();
-
 
       if(
         mySecret?.role ===
@@ -4858,7 +4824,6 @@ function listenForPlayerNotes(){
       }
 
     }
-
   );
 
 }
@@ -4875,21 +4840,18 @@ function renderLivePlayerNotes(){
 
   }
 
-
   const container =
     document.getElementById(
       "liveNotesList"
     );
 
-
   if(!container){
     return;
   }
 
-
   const notes =
-    roomData?.notes || {};
-
+    roomData?.notes ||
+    {};
 
   const entries =
     Object.values(
@@ -4900,7 +4862,6 @@ function renderLivePlayerNotes(){
         (b.timestamp || 0) -
         (a.timestamp || 0)
     );
-
 
   if(
     entries.length ===
@@ -4918,7 +4879,6 @@ function renderLivePlayerNotes(){
     return;
 
   }
-
 
   container.innerHTML =
 
@@ -4982,14 +4942,12 @@ function showDetectiveTools(){
     .classList
     .remove("hidden");
 
-
   document
     .getElementById(
       "detectiveLiveNotes"
     )
     .classList
     .remove("hidden");
-
 
   renderDetectivePlayerButtons();
 
@@ -5005,14 +4963,12 @@ function hideDetectiveTools(){
     .classList
     .add("hidden");
 
-
   document
     .getElementById(
       "detectiveLiveNotes"
     )
     .classList
     .add("hidden");
-
 
   document
     .getElementById(
@@ -5052,14 +5008,12 @@ function detectivePlayerPath(
 function listenForDetectiveNotes(){
 
   onValue(
-
     ref(
       db,
       "rooms/" +
       roomCode +
       "/detectiveNotes"
     ),
-
     snapshot=>{
 
       if(
@@ -5071,22 +5025,18 @@ function listenForDetectiveNotes(){
 
       }
 
-
       const data =
         snapshot.val() ||
         {};
-
 
       const general =
         data.general?.text ||
         "";
 
-
       const generalInput =
         document.getElementById(
           "detectiveGeneralNotes"
         );
-
 
       if(
         generalInput &&
@@ -5099,9 +5049,7 @@ function listenForDetectiveNotes(){
 
       }
 
-
       renderDetectivePlayerButtons();
-
 
       if(
         selectedDetectivePlayerId
@@ -5115,7 +5063,6 @@ function listenForDetectiveNotes(){
       }
 
     }
-
   );
 
 }
@@ -5132,33 +5079,27 @@ async function saveDetectiveGeneralNotes(){
 
   }
 
-
   const input =
     document.getElementById(
       "detectiveGeneralNotes"
     );
-
 
   const status =
     document.getElementById(
       "detectiveGeneralSaveStatus"
     );
 
-
   if(!input){
     return;
   }
 
-
   try{
 
     await set(
-
       ref(
         db,
         detectiveGeneralPath()
       ),
-
       {
 
         text:
@@ -5168,9 +5109,7 @@ async function saveDetectiveGeneralNotes(){
           Date.now()
 
       }
-
     );
-
 
     if(status){
 
@@ -5185,10 +5124,7 @@ async function saveDetectiveGeneralNotes(){
   }
   catch(error){
 
-    console.error(
-      error
-    );
-
+    console.error(error);
 
     if(status){
 
@@ -5213,27 +5149,22 @@ function renderDetectivePlayerButtons(){
 
   }
 
-
   const container =
     document.getElementById(
       "detectivePlayerButtons"
     );
 
-
   if(!container){
     return;
   }
-
 
   const suspects =
     roomData?.game?.suspects ||
     [];
 
-
   const players =
     roomData?.players ||
     {};
-
 
   if(
     suspects.length ===
@@ -5247,7 +5178,6 @@ function renderDetectivePlayerButtons(){
 
   }
 
-
   container.innerHTML =
 
     suspects
@@ -5258,15 +5188,12 @@ function renderDetectivePlayerButtons(){
             players[id]?.name ||
             "Unknown";
 
-
           const active =
             id ===
             selectedDetectivePlayerId;
 
-
           const note =
             roomData?.notes?.[id];
-
 
           return `
 
@@ -5317,10 +5244,8 @@ function(
 
   }
 
-
   selectedDetectivePlayerId =
     player;
-
 
   document
     .getElementById(
@@ -5329,9 +5254,7 @@ function(
     .classList
     .remove("hidden");
 
-
   renderDetectivePlayerButtons();
-
 
   loadSelectedDossier(
     player,
@@ -5355,31 +5278,25 @@ async function loadSelectedDossier(
 
   }
 
-
   selectedDetectivePlayerId =
     player;
-
 
   const dossier =
     document.getElementById(
       "selectedDossier"
     );
 
-
   if(!dossier){
     return;
   }
-
 
   const players =
     roomData?.players ||
     {};
 
-
   const playerName =
     players[player]?.name ||
     "Unknown";
-
 
   document
     .getElementById(
@@ -5388,39 +5305,21 @@ async function loadSelectedDossier(
     .textContent =
     playerName;
 
-
   const roleBadge =
     document.getElementById(
       "selectedDossierRoleBadge"
     );
 
-
-  if(
-    roomData?.game?.murderer ===
-    player
-  ){
-
-    roleBadge.textContent =
-      "UNKNOWN TO YOU";
-
-  }
-  else{
-
-    roleBadge.textContent =
-      "SUSPECT";
-
-  }
-
+  roleBadge.textContent =
+    "SUSPECT";
 
   const noteBox =
     document.getElementById(
       "selectedPlayerSubmittedNote"
     );
 
-
   const playerNote =
     roomData?.notes?.[player];
-
 
   if(
     playerNote
@@ -5433,10 +5332,12 @@ async function loadSelectedDossier(
       </div>
 
       <div class="note-text">
+
         ${escapeHtml(
           playerNote.text ||
           ""
         )}
+
       </div>
 
       <div class="note-time">
@@ -5465,28 +5366,26 @@ async function loadSelectedDossier(
       </div>
 
       <div class="note-text">
+
         📭 This player has not submitted a note yet.
+
       </div>
 
     `;
 
   }
 
-
   try{
 
     const snapshot =
       await get(
-
         ref(
           db,
           detectivePlayerPath(
             player
           )
         )
-
       );
-
 
     const data =
       snapshot.exists()
@@ -5495,51 +5394,49 @@ async function loadSelectedDossier(
       :
       {};
 
-
     const claim =
       document.getElementById(
         "dossierClaim"
       );
-
 
     const important =
       document.getElementById(
         "dossierImportant"
       );
 
-
     const questions =
       document.getElementById(
         "dossierQuestions"
       );
 
-
     if(claim){
+
       claim.value =
         data.claim ||
         "";
+
     }
 
-
     if(important){
+
       important.value =
         data.important ||
         "";
+
     }
 
-
     if(questions){
+
       questions.value =
         data.questions ||
         "";
-    }
 
+    }
 
     const status =
       document.getElementById(
         "dossierSaveStatus"
       );
-
 
     if(status){
 
@@ -5567,7 +5464,6 @@ async function loadSelectedDossier(
 
   }
 
-
   if(scroll){
 
     dossier.scrollIntoView({
@@ -5590,23 +5486,19 @@ function refreshSelectedDossierNote(){
 
   }
 
-
   const noteBox =
     document.getElementById(
       "selectedPlayerSubmittedNote"
     );
 
-
   if(!noteBox){
     return;
   }
-
 
   const playerNote =
     roomData?.notes?.[
       selectedDetectivePlayerId
     ];
-
 
   if(
     playerNote
@@ -5619,10 +5511,12 @@ function refreshSelectedDossierNote(){
       </div>
 
       <div class="note-text">
+
         ${escapeHtml(
           playerNote.text ||
           ""
         )}
+
       </div>
 
       <div class="note-time">
@@ -5658,7 +5552,6 @@ async function(){
 
   }
 
-
   if(
     !selectedDetectivePlayerId
   ){
@@ -5671,42 +5564,35 @@ async function(){
 
   }
 
-
   const claim =
     document.getElementById(
       "dossierClaim"
     );
-
 
   const important =
     document.getElementById(
       "dossierImportant"
     );
 
-
   const questions =
     document.getElementById(
       "dossierQuestions"
     );
-
 
   const status =
     document.getElementById(
       "dossierSaveStatus"
     );
 
-
   try{
 
     await set(
-
       ref(
         db,
         detectivePlayerPath(
           selectedDetectivePlayerId
         )
       ),
-
       {
 
         claim:
@@ -5725,9 +5611,7 @@ async function(){
           Date.now()
 
       }
-
     );
-
 
     if(status){
 
@@ -5746,7 +5630,6 @@ async function(){
       "Dossier save error:",
       error
     );
-
 
     if(status){
 
@@ -5776,14 +5659,12 @@ function showInvestigation(){
 
   }
 
-
   document
     .getElementById(
       "detectiveWaiting"
     )
     .classList
     .add("hidden");
-
 
   document
     .getElementById(
@@ -5792,7 +5673,6 @@ function showInvestigation(){
     .classList
     .add("hidden");
 
-
   document
     .getElementById(
       "investigation"
@@ -5800,9 +5680,7 @@ function showInvestigation(){
     .classList
     .remove("hidden");
 
-
   showDetectiveTools();
-
 
   renderCase();
 
@@ -5820,15 +5698,12 @@ function renderCase(){
 
   }
 
-
   const game =
     roomData.game;
-
 
   const suspects =
     game.suspects ||
     [];
-
 
   document
     .getElementById(
@@ -5846,11 +5721,9 @@ function renderCase(){
 
       </div>
 
-
       <h3>
         CASE
       </h3>
-
 
       <p>
         ${escapeHtml(
@@ -5858,14 +5731,12 @@ function renderCase(){
         )}
       </p>
 
-
       <p>
         <b>Victim:</b>
         ${escapeHtml(
           game.victim
         )}
       </p>
-
 
       <p>
         <b>Fictional murder time:</b>
@@ -5876,14 +5747,12 @@ function renderCase(){
         )}
       </p>
 
-
       <p>
         <b>Crime location:</b>
         ${escapeHtml(
           game.crimeLocation
         )}
       </p>
-
 
       <p>
         <b>Current real time:</b>
@@ -5892,11 +5761,9 @@ function renderCase(){
         )}
       </p>
 
-
       <h3>
         👥 SUSPECTS
       </h3>
-
 
       ${
         suspects
@@ -5922,9 +5789,7 @@ function renderCase(){
 
     `;
 
-
   renderTaskProgress();
-
 
   document
     .getElementById(
@@ -5942,7 +5807,7 @@ function renderCase(){
             "
           >
 
-            Accuse
+            🔎 ACCUSE
             ${escapeHtml(
               roomData
                 .players[id]
@@ -5965,22 +5830,18 @@ async function renderTaskProgress(){
     roomData?.game?.suspects ||
     [];
 
-
   const container =
     document
       .getElementById(
         "taskProgress"
       );
 
-
   if(!container){
     return;
   }
 
-
   container.innerHTML =
     "";
-
 
   for(
     const id of suspects
@@ -5989,7 +5850,6 @@ async function renderTaskProgress(){
     const completed =
       roomData.completed?.[id] ||
       {};
-
 
     const count =
       Object.values(
@@ -6001,12 +5861,10 @@ async function renderTaskProgress(){
       )
       .length;
 
-
     const total =
       await getPrivateTaskCount(
         id
       );
-
 
     const percent =
       total
@@ -6020,23 +5878,19 @@ async function renderTaskProgress(){
       :
       0;
 
-
     const name =
       roomData
         .players[id]
         ?.name ||
       "Unknown";
 
-
     const div =
       document.createElement(
         "div"
       );
 
-
     div.className =
       "count-card";
-
 
     div.innerHTML = `
 
@@ -6071,7 +5925,6 @@ async function renderTaskProgress(){
 
     `;
 
-
     container.appendChild(
       div
     );
@@ -6087,7 +5940,6 @@ async function getPrivateTaskCount(
 
   const snapshot =
     await get(
-
       ref(
         db,
         "rooms/" +
@@ -6096,9 +5948,7 @@ async function getPrivateTaskCount(
         player +
         "/tasks"
       )
-
     );
-
 
   if(
     !snapshot.exists()
@@ -6108,10 +5958,8 @@ async function getPrivateTaskCount(
 
   }
 
-
   const tasks =
     snapshot.val();
-
 
   return Array.isArray(
     tasks
@@ -6125,6 +5973,10 @@ async function getPrivateTaskCount(
 
 }
 
+
+/* =====================================================
+ACCUSE
+===================================================== */
 
 window.accuse =
 async function(
@@ -6140,7 +5992,6 @@ async function(
 
   }
 
-
   if(
     playerId !==
     roomData.game.detective
@@ -6150,84 +6001,55 @@ async function(
 
   }
 
+  if(
+    roomData.result &&
+    roomData.result.accusedId
+  ){
 
-  const correct =
-    accusedId ===
-    roomData.game.murderer;
+    return;
 
+  }
 
-  const name =
+  const accusedName =
     roomData
       .players[accusedId]
       ?.name ||
     "Unknown";
 
+  /*
+    The result gets written once to Firebase.
+    Every connected screen is listening to it.
+  */
 
-  document
-    .getElementById(
-      "result"
-    )
-    .innerHTML =
+  await set(
+    ref(
+      db,
+      "rooms/" +
+      roomCode +
+      "/result"
+    ),
+    {
 
-    correct
+      accusedId,
 
-    ?
+      accusedName,
 
-    `
+      votedAt:
+        Date.now()
 
-      <div class="success">
+    }
+  );
 
-        🎉 CORRECT!
-
-        <br><br>
-
-        You caught the murderer:
-
-        <b>
-          ${escapeHtml(name)}
-        </b>
-
-      </div>
-
-    `
-
-    :
-
-    `
-
-      <div class="warning">
-
-        ❌ WRONG!
-
-        <br><br>
-
-        You accused:
-
-        <b>
-          ${escapeHtml(name)}
-        </b>
-
-        <br><br>
-
-        The murderer was:
-
-        <b>
-          ${escapeHtml(
-            roomData
-              .players[
-                roomData.game.murderer
-              ]
-              ?.name ||
-            "Unknown"
-          )}
-        </b>
-
-      </div>
-
-    `;
+};
 
 
-  await update(
+/* =====================================================
+SHARED RESULT LISTENER
+===================================================== */
+
+function listenForGameResult(){
+
+  onValue(
 
     ref(
       db,
@@ -6236,20 +6058,434 @@ async function(
       "/result"
     ),
 
-    {
+    snapshot=>{
 
-      accusedId,
+      if(
+        !snapshot.exists()
+      ){
 
-      correct,
+        return;
 
-      finishedAt:
-        Date.now()
+      }
+
+      const result =
+        snapshot.val();
+
+      if(
+        !result.accusedId ||
+        !result.votedAt
+      ){
+
+        return;
+
+      }
+
+      const revealId =
+        String(
+          result.votedAt
+        );
+
+      if(
+        revealId ===
+        lastRevealId
+      ){
+
+        return;
+
+      }
+
+      lastRevealId =
+        revealId;
+
+      runSuspenseReveal(
+        result
+      );
 
     }
 
   );
 
-};
+}
+
+
+/* =====================================================
+SUSPENSE REVEAL
+===================================================== */
+
+function setReveal(
+  small,
+  main,
+  sub = "",
+  details = null,
+  animation = "reveal-pop"
+){
+
+  const smallEl =
+    document.getElementById(
+      "revealSmall"
+    );
+
+  const mainEl =
+    document.getElementById(
+      "revealMain"
+    );
+
+  const subEl =
+    document.getElementById(
+      "revealSub"
+    );
+
+  const detailsEl =
+    document.getElementById(
+      "revealDetails"
+    );
+
+
+  smallEl.textContent =
+    small;
+
+  mainEl.textContent =
+    main;
+
+  subEl.textContent =
+    sub;
+
+
+  detailsEl.innerHTML =
+    "";
+
+  detailsEl.classList.add(
+    "hidden"
+  );
+
+
+  if(details){
+
+    detailsEl.innerHTML =
+      details;
+
+    detailsEl.classList.remove(
+      "hidden"
+    );
+
+  }
+
+
+  mainEl.classList.remove(
+    "reveal-pop",
+    "reveal-fade",
+    "reveal-shake"
+  );
+
+  void mainEl.offsetWidth;
+
+  mainEl.classList.add(
+    animation
+  );
+
+}
+
+
+async function runSuspenseReveal(
+  result
+){
+
+  if(
+    revealRunning
+  ){
+
+    return;
+
+  }
+
+  if(
+    !roomData ||
+    !roomData.game
+  ){
+
+    return;
+
+  }
+
+  revealRunning =
+    true;
+
+
+  const overlay =
+    document.getElementById(
+      "revealOverlay"
+    );
+
+
+  const game =
+    roomData.game;
+
+
+  const players =
+    roomData.players ||
+    {};
+
+
+  const accusedId =
+    result.accusedId;
+
+
+  const accusedName =
+    players[accusedId]?.name ||
+    result.accusedName ||
+    "Unknown";
+
+
+  const wasMurderer =
+    accusedId ===
+    game.murderer;
+
+
+  overlay
+    .classList
+    .remove(
+      "hidden"
+    );
+
+
+  /*
+    Step 1
+  */
+
+  setReveal(
+    "THE DETECTIVE HAS MADE A DECISION",
+    "🔎",
+    "Everyone stay quiet..."
+  );
+
+  await sleep(1800);
+
+
+  /*
+    Step 2
+    Show the name alone.
+  */
+
+  setReveal(
+    "THE ACCUSED PLAYER",
+    accusedName,
+    "The Detective has chosen..."
+  );
+
+  await sleep(1700);
+
+
+  /*
+    Step 3
+    The exact suspense sentence the user requested.
+  */
+
+  setReveal(
+    "THE REVEAL",
+    `${accusedName} WAS...`,
+    "..."
+  );
+
+  await sleep(1000);
+
+
+  /*
+    Step 4
+    Reveal murderer / innocent.
+  */
+
+  if(
+    wasMurderer
+  ){
+
+    setReveal(
+      "ROLE REVEALED",
+      "🔪 THE MURDERER",
+      `${accusedName} was the Murderer.`,
+      null,
+      "reveal-shake"
+    );
+
+    await sleep(2400);
+
+  }
+  else{
+
+    setReveal(
+      "ROLE REVEALED",
+      "👤 INNOCENT",
+      `${accusedName} was innocent.`,
+      null,
+      "reveal-pop"
+    );
+
+    await sleep(2400);
+
+  }
+
+
+  /*
+    Step 5
+    Show ALL roles.
+  */
+
+  const detectiveName =
+    players[
+      game.detective
+    ]?.name ||
+    "Unknown";
+
+
+  const murdererName =
+    players[
+      game.murderer
+    ]?.name ||
+    "Unknown";
+
+
+  const innocentIds =
+    (game.suspects || [])
+      .filter(
+        id =>
+          id !==
+          game.murderer
+      );
+
+
+  const innocentRows =
+    innocentIds
+      .map(
+        id=>`
+
+          <div class="reveal-role">
+
+            <div class="reveal-role-name">
+
+              👤
+              ${escapeHtml(
+                players[id]?.name ||
+                "Unknown"
+              )}
+
+            </div>
+
+            <div class="reveal-role-value">
+              INNOCENT
+            </div>
+
+          </div>
+
+        `
+      )
+      .join("");
+
+
+  const rolesHtml = `
+
+    <div class="reveal-role">
+
+      <div class="reveal-role-name">
+
+        🔪
+        ${escapeHtml(
+          murdererName
+        )}
+
+      </div>
+
+      <div class="reveal-role-value">
+        MURDERER
+      </div>
+
+    </div>
+
+
+    <div class="reveal-role">
+
+      <div class="reveal-role-name">
+
+        🕵️
+        ${escapeHtml(
+          detectiveName
+        )}
+
+      </div>
+
+      <div class="reveal-role-value">
+        DETECTIVE
+      </div>
+
+    </div>
+
+
+    ${innocentRows}
+
+  `;
+
+
+  setReveal(
+    "EVERY ROLE REVEALED",
+    "🎭 THE TRUTH",
+    "Now everyone knows who had each role.",
+    rolesHtml,
+    "reveal-fade"
+  );
+
+
+  await sleep(3500);
+
+
+  /*
+    Step 6
+    Winner.
+  */
+
+  if(
+    wasMurderer
+  ){
+
+    setReveal(
+      "GAME OVER",
+      "🎉 DETECTIVE WINS!",
+      "The Detective correctly identified the murderer.",
+      `
+        <div class="reveal-winner detective-win">
+          🔎 GREAT DETECTIVE WORK
+        </div>
+      `,
+      "reveal-pop"
+    );
+
+  }
+  else{
+
+    setReveal(
+      "GAME OVER",
+      "🔪 MURDERER WINS!",
+      "The Detective accused an innocent player.",
+      `
+        <div class="reveal-winner murderer-win">
+          😈 THE MURDERER GOT AWAY
+        </div>
+      `,
+      "reveal-shake"
+    );
+
+  }
+
+
+  await sleep(4000);
+
+
+  overlay
+    .classList
+    .add("hidden");
+
+
+  revealRunning =
+    false;
+
+}
 
 
 /* =====================================================
@@ -6268,7 +6504,6 @@ async function(
     return;
 
   }
-
 
   await set(
 
@@ -6321,10 +6556,8 @@ function listenForCalls(){
 
       }
 
-
       const call =
         snapshot.val();
-
 
       if(
         call.id ===
@@ -6335,16 +6568,13 @@ function listenForCalls(){
 
       }
 
-
       lastCallId =
         call.id;
-
 
       showCall(
         call.destination,
         call.caller
       );
-
 
       if(
         alertsEnabled
@@ -6355,7 +6585,6 @@ function listenForCalls(){
         vibrate();
 
       }
-
 
       systemNotification(
         call.destination,
@@ -6379,7 +6608,6 @@ function showCall(
       "callStack"
     );
 
-
   for(
     let i = 0;
     i < 3;
@@ -6395,10 +6623,8 @@ function showCall(
             "div"
           );
 
-
         banner.className =
           "call-banner";
-
 
         banner.innerHTML = `
 
@@ -6422,7 +6648,6 @@ function showCall(
 
         `;
 
-
         banner
           .querySelector(
             "button"
@@ -6432,11 +6657,9 @@ function showCall(
             banner.remove();
           };
 
-
         stack.appendChild(
           banner
         );
-
 
         setTimeout(
           ()=>{
@@ -6495,7 +6718,6 @@ const params =
     location.search
   );
 
-
 if(
   params.get("room")
 ){
@@ -6520,7 +6742,6 @@ const playerNoteInput =
   document.getElementById(
     "playerNoteInput"
   );
-
 
 if(
   playerNoteInput
@@ -6547,7 +6768,6 @@ if(
       "alertStatus"
     );
 
-
   if(status){
 
     status.textContent =
@@ -6555,12 +6775,10 @@ if(
 
   }
 
-
   const button =
     document.getElementById(
       "enableAlertsButton"
     );
-
 
   if(button){
 
