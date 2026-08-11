@@ -406,6 +406,7 @@ button:disabled{
 }
 
 @media(max-width:600px){
+
   .row{
     grid-template-columns:1fr;
   }
@@ -417,6 +418,7 @@ button:disabled{
   .timer{
     font-size:48px;
   }
+
 }
 </style>
 </head>
@@ -426,6 +428,7 @@ button:disabled{
 <div id="callStack"></div>
 
 <div id="alertModal" class="alert-modal hidden">
+
   <div class="alert-inner">
 
     <div style="font-size:55px">
@@ -456,6 +459,7 @@ button:disabled{
     </button>
 
   </div>
+
 </div>
 
 
@@ -559,7 +563,7 @@ button:disabled{
     <p>
       Detective waits outside for exactly
       5 minutes while the other players
-      complete their tasks.
+      complete their randomized tasks.
     </p>
 
   </div>
@@ -833,8 +837,8 @@ button:disabled{
     </h2>
 
     <p>
-      Future tasks stay locked until
-      their actual unlock time.
+      Every new match gives you a fresh randomized task set.
+      Future tasks stay locked until their actual unlock time.
     </p>
 
   </div>
@@ -923,7 +927,7 @@ from
 const firebaseConfig = {
 
   apiKey:
-    "AIzaSyCugS0qHKstXGZAr5dvzm-DaLZAIDugo",
+    "AIzaSyCugS0qHKstGZAr5dvzm-DaLZAIDugo",
 
   authDomain:
     "money-e560a.firebaseapp.com",
@@ -1016,6 +1020,10 @@ const MAX_MURDER_DELAY =
   30 * 1000;
 
 
+/* =====================================================
+HOTEL LOCATIONS ONLY
+===================================================== */
+
 const locations = [
 
   "Hotel Lobby Seating",
@@ -1029,21 +1037,107 @@ const locations = [
   "Hotel Hallway Near Staircase",
   "Hotel Main Hallway",
   "Hotel Waiting Area",
-  "Hotel Elevator Area"
+  "Hotel Elevator Area",
+  "Hotel Corner Seating",
+  "Hotel Side Hallway"
 
 ];
 
 
-const activities = [
+/* =====================================================
+RANDOM TASK WORDING
+===================================================== */
 
-  "sit quietly",
-  "walk around",
-  "stand for a moment",
-  "look around",
-  "wait in the area",
-  "walk through the area",
-  "sit at a nearby seat",
-  "check your phone"
+const activityTemplates = [
+
+  "Sit quietly at {location}.",
+
+  "Walk around {location}.",
+
+  "Stand for a moment at {location}.",
+
+  "Look around {location}.",
+
+  "Wait nearby {location}.",
+
+  "Walk through {location}.",
+
+  "Sit at a nearby seat around {location}.",
+
+  "Check your phone near {location}.",
+
+  "Pause briefly at {location}.",
+
+  "Stay around {location} for a short moment.",
+
+  "Walk past {location}, then continue normally.",
+
+  "Spend a moment near {location} before moving on.",
+
+  "Look toward {location}, then continue.",
+
+  "Stay near {location} for a little while.",
+
+  "Take a short pause around {location}."
+
+];
+
+
+const actionTemplates = [
+
+  "Go to {location} and stay there briefly.",
+
+  "Move to {location}, then continue normally.",
+
+  "Visit {location} for a short moment.",
+
+  "Pass through {location} before continuing.",
+
+  "Wait near {location}, then move on.",
+
+  "Walk to {location} and look around briefly.",
+
+  "Head toward {location}, pause, then continue.",
+
+  "Go through {location} before moving elsewhere.",
+
+  "Spend a short moment at {location}, then leave.",
+
+  "Move through {location} and continue your route."
+
+];
+
+
+const murderTemplates = [
+
+  "Be at {location} at {time}. The fictional murder event happens there.",
+
+  "Reach {location} when the clock reaches {time} for the fictional murder event.",
+
+  "At {time}, go to {location}. This is the fictional murder point.",
+
+  "Be near {location} at {time} for the fictional murder event.",
+
+  "Go to {location} around {time}. The fictional incident happens there.",
+
+  "At exactly {time}, be at {location} for the fictional event."
+
+];
+
+
+const afterMurderTemplates = [
+
+  "Leave {location} and continue normally.",
+
+  "Move away from {location} after the fictional event.",
+
+  "After the fictional incident, leave {location}.",
+
+  "Continue to another area after leaving {location}.",
+
+  "Move on from {location} and continue your timeline.",
+
+  "Leave {location} and go somewhere else."
 
 ];
 
@@ -1061,18 +1155,26 @@ const victims = [
 const cases = [
 
   "A fictional hotel guest was found dead in the story.",
+
   "A fictional visitor was found dead in the story.",
+
   "A fictional guest was discovered dead in the story.",
+
   "A fictional incident happened inside the hotel."
 
 ];
 
 
+/* =====================================================
+HELPERS
+===================================================== */
+
 function random(array){
 
   return array[
     Math.floor(
-      Math.random() * array.length
+      Math.random() *
+      array.length
     )
   ];
 
@@ -1280,7 +1382,441 @@ function createTask(
 
 
 /* =====================================================
-   ALERTS
+RANDOM TASK GENERATOR
+===================================================== */
+
+function freshRoundSeed(){
+
+  return (
+    Date.now()
+      .toString(36) +
+    "_" +
+    Math.random()
+      .toString(36)
+      .substring(2,12)
+  );
+
+}
+
+
+function fillLocationTemplate(
+  template,
+  location
+){
+
+  return template
+    .replace(
+      "{location}",
+      location
+    );
+
+}
+
+
+function buildRandomNormalTask(
+  id,
+  unlockAt,
+  usedLocations,
+  forbiddenLocation
+){
+
+  const location =
+    uniqueLocation(
+      usedLocations,
+      forbiddenLocation
+    );
+
+
+  const templatePool =
+    Math.random() < 0.5
+    ?
+    activityTemplates
+    :
+    actionTemplates;
+
+
+  const description =
+    fillLocationTemplate(
+      random(
+        templatePool
+      ),
+      location
+    );
+
+
+  return createTask(
+    id,
+    unlockAt,
+    description
+  );
+
+}
+
+
+function makeRandomUnlockTimes(
+  now,
+  detectiveEnd,
+  count
+){
+
+  const startOffset =
+    15 * 1000;
+
+
+  const endOffset =
+    Math.max(
+      startOffset + 1000,
+      detectiveEnd -
+      now -
+      20 * 1000
+    );
+
+
+  const values = [];
+
+
+  for(
+    let i = 0;
+    i < count;
+    i++
+  ){
+
+    const percentage =
+      (i + 1) /
+      (count + 1);
+
+
+    const spread =
+      (
+        Math.random() -
+        0.5
+      ) *
+      40 *
+      1000;
+
+
+    let offset =
+      startOffset +
+      (
+        endOffset -
+        startOffset
+      ) *
+      percentage +
+      spread;
+
+
+    offset =
+      Math.max(
+        startOffset,
+        Math.min(
+          endOffset,
+          offset
+        )
+      );
+
+
+    values.push(
+      offset
+    );
+
+  }
+
+
+  /*
+    Sort times, but every player's times
+    are generated independently.
+  */
+
+  values.sort(
+    (a,b) =>
+      a - b
+  );
+
+
+  return values.map(
+    offset =>
+      now + offset
+  );
+
+}
+
+
+function buildRandomNormalTasks(
+  playerIdForSeed,
+  now,
+  detectiveEnd,
+  crimeLocation,
+  roundSeed
+){
+
+  /*
+    Every player gets 3–5 tasks.
+  */
+
+  const count =
+    3 +
+    Math.floor(
+      Math.random() * 3
+    );
+
+
+  const unlockTimes =
+    makeRandomUnlockTimes(
+      now,
+      detectiveEnd,
+      count
+    );
+
+
+  const usedLocations =
+    [];
+
+
+  const tasks =
+    [];
+
+
+  for(
+    let i = 0;
+    i < count;
+    i++
+  ){
+
+    const taskId =
+      roundSeed +
+      "_" +
+      playerIdForSeed +
+      "_N_" +
+      i +
+      "_" +
+      Math.random()
+        .toString(36)
+        .substring(2,8);
+
+
+    tasks.push(
+
+      buildRandomNormalTask(
+
+        taskId,
+
+        unlockTimes[i],
+
+        usedLocations,
+
+        crimeLocation
+
+      )
+
+    );
+
+  }
+
+
+  /*
+    Shuffle so players cannot even rely on
+    the task order matching the unlock order.
+  */
+
+  return shuffle(
+    tasks
+  );
+
+}
+
+
+function buildRandomMurdererTasks(
+  playerIdForSeed,
+  now,
+  detectiveEnd,
+  murderAt,
+  crimeLocation,
+  roundSeed
+){
+
+  /*
+    Murderer receives 2–4 normal tasks,
+    just like ordinary players.
+  */
+
+  const normalCount =
+    2 +
+    Math.floor(
+      Math.random() * 3
+    );
+
+
+  const normalTimes =
+    makeRandomUnlockTimes(
+
+      now,
+
+      Math.min(
+        detectiveEnd,
+        murderAt -
+        20 * 1000
+      ),
+
+      normalCount
+
+    );
+
+
+  const usedLocations =
+    [];
+
+
+  const tasks =
+    [];
+
+
+  for(
+    let i = 0;
+    i < normalCount;
+    i++
+  ){
+
+    const taskId =
+      roundSeed +
+      "_" +
+      playerIdForSeed +
+      "_M_" +
+      i +
+      "_" +
+      Math.random()
+        .toString(36)
+        .substring(2,8);
+
+
+    tasks.push(
+
+      buildRandomNormalTask(
+
+        taskId,
+
+        normalTimes[i],
+
+        usedLocations,
+
+        crimeLocation
+
+      )
+
+    );
+
+  }
+
+
+  /*
+    The murder task itself is randomized in wording.
+  */
+
+  const murderTaskId =
+    roundSeed +
+    "_" +
+    playerIdForSeed +
+    "_KILL_" +
+    Math.random()
+      .toString(36)
+      .substring(2,8);
+
+
+  const murderDescription =
+    fillLocationTemplate(
+      random(
+        murderTemplates
+      ),
+      crimeLocation
+    )
+    .replace(
+      "{time}",
+      shortClock(
+        new Date(
+          murderAt
+        )
+      )
+    );
+
+
+  tasks.push(
+
+    createTask(
+
+      murderTaskId,
+
+      murderAt,
+
+      murderDescription
+
+    )
+
+  );
+
+
+  /*
+    Post-murder task.
+  */
+
+  const afterTime =
+    Math.min(
+      murderAt +
+      25 * 1000,
+      detectiveEnd -
+      20 * 1000
+    );
+
+
+  const afterLocation =
+    crimeLocation;
+
+
+  const afterTaskId =
+    roundSeed +
+    "_" +
+    playerIdForSeed +
+    "_A_" +
+    Math.random()
+      .toString(36)
+      .substring(2,8);
+
+
+  const afterDescription =
+    fillLocationTemplate(
+      random(
+        afterMurderTemplates
+      ),
+      afterLocation
+    );
+
+
+  tasks.push(
+
+    createTask(
+
+      afterTaskId,
+
+      afterTime,
+
+      afterDescription
+
+    )
+
+  );
+
+
+  /*
+    Shuffle the murderer tasks too.
+  */
+
+  return shuffle(
+    tasks
+  );
+
+}
+
+
+/* =====================================================
+ALERTS
 ===================================================== */
 
 window.enableAlerts =
@@ -1586,11 +2122,14 @@ function systemNotification(
       new Notification(
         "📞 Hotel Murder Call",
         {
+
           body:
             `${caller} is calling everyone to ${destination}!`,
+
           tag:
             "hotel-murder-" +
             Date.now()
+
         }
       );
 
@@ -1603,7 +2142,7 @@ function systemNotification(
 
 
 /* =====================================================
-   HOME
+HOME
 ===================================================== */
 
 window.createRoom =
@@ -1669,7 +2208,7 @@ function(){
 
 
 /* =====================================================
-   CREATE
+CREATE ROOM
 ===================================================== */
 
 window.finishCreateRoom =
@@ -1772,7 +2311,7 @@ async function(){
 
 
 /* =====================================================
-   JOIN
+JOIN ROOM
 ===================================================== */
 
 window.joinRoom =
@@ -1915,7 +2454,7 @@ async function(){
 
 
 /* =====================================================
-   PRESENCE
+PRESENCE
 ===================================================== */
 
 function setupDisconnectCleanup(){
@@ -2044,7 +2583,7 @@ window.addEventListener(
 
 
 /* =====================================================
-   LOBBY
+LOBBY
 ===================================================== */
 
 function enterLobby(){
@@ -2292,7 +2831,7 @@ function renderLobby(){
 
 
 /* =====================================================
-   RESET
+RESET
 ===================================================== */
 
 window.resetGame =
@@ -2394,7 +2933,7 @@ async function(){
 
 
 /* =====================================================
-   START ROUND
+START ROUND
 ===================================================== */
 
 window.startRound =
@@ -2450,8 +2989,22 @@ async function(){
   }
 
 
+  /*
+    NEW RANDOM SEED FOR EVERY MATCH
+  */
+
+  const roundSeed =
+    freshRoundSeed();
+
+
+  /*
+    RANDOMLY ASSIGN ROLES
+  */
+
   const shuffled =
-    shuffle(ids);
+    shuffle(
+      ids
+    );
 
 
   const detective =
@@ -2470,6 +3023,10 @@ async function(){
     Date.now();
 
 
+  /*
+    RANDOM FICTIONAL MURDER TIME
+  */
+
   const murderAt =
     now +
     MIN_MURDER_DELAY +
@@ -2481,6 +3038,10 @@ async function(){
       )
     );
 
+
+  /*
+    Detective returns after 5 minutes.
+  */
 
   const detectiveEnd =
     now +
@@ -2514,6 +3075,10 @@ async function(){
     {};
 
 
+  /*
+    Detective
+  */
+
   privateData[detective] = {
 
     role:
@@ -2525,112 +3090,10 @@ async function(){
   };
 
 
-  const murdererUsed =
-    [];
-
-
-  const murdererTasks =
-    [];
-
-
-  murdererTasks.push(
-
-    createTask(
-
-      "m1",
-
-      now +
-      20 * 1000,
-
-      "Go to " +
-      uniqueLocation(
-        murdererUsed,
-        crimeLocation
-      ) +
-      " and stay there briefly."
-
-    )
-
-  );
-
-
-  murdererTasks.push(
-
-    createTask(
-
-      "m2",
-
-      now +
-      70 * 1000,
-
-      random(
-        activities
-      ) +
-      " near " +
-      uniqueLocation(
-        murdererUsed,
-        crimeLocation
-      ) +
-      "."
-
-    )
-
-  );
-
-
-  murdererTasks.push(
-
-    createTask(
-
-      "m3",
-
-      murderAt,
-
-      "Go to " +
-      crimeLocation +
-      ". The fictional murder happens here at " +
-      shortClock(
-        new Date(
-          murderAt
-        )
-      ) +
-      "."
-
-    )
-
-  );
-
-
-  const murdererFinalTime =
-    Math.min(
-      murderAt +
-      25 * 1000,
-      detectiveEnd -
-      20 * 1000
-    );
-
-
-  murdererTasks.push(
-
-    createTask(
-
-      "m4",
-
-      murdererFinalTime,
-
-      "Leave " +
-      crimeLocation +
-      " and go to " +
-      uniqueLocation(
-        murdererUsed,
-        crimeLocation
-      ) +
-      "."
-
-    )
-
-  );
-
+  /*
+    Murderer gets a RANDOM set
+    of ordinary tasks plus the murder.
+  */
 
   privateData[murderer] = {
 
@@ -2638,117 +3101,79 @@ async function(){
       "murderer",
 
     tasks:
-      murdererTasks
+      buildRandomMurdererTasks(
+
+        murderer,
+
+        now,
+
+        detectiveEnd,
+
+        murderAt,
+
+        crimeLocation,
+
+        roundSeed
+
+      )
 
   };
 
 
+  /*
+    Every innocent gets a separate
+    independently randomized task set.
+  */
+
   innocents.forEach(
-    (
-      id,
-      index
-    )=>{
 
-      const used =
-        [];
-
-
-      const times = [
-
-        now +
-        30 * 1000,
-
-        now +
-        90 * 1000,
-
-        now +
-        150 * 1000,
-
-        now +
-        210 * 1000
-
-      ];
-
+    id=>{
 
       privateData[id] = {
 
         role:
           "innocent",
 
-        tasks:[
+        tasks:
+          buildRandomNormalTasks(
 
-          createTask(
+            id,
 
-            `i${index}a`,
+            now,
 
-            times[0],
+            detectiveEnd,
 
-            random(
-              activities
-            ) +
-            " at " +
-            uniqueLocation(
-              used,
-              crimeLocation
-            ) +
-            "."
+            crimeLocation,
 
-          ),
-
-          createTask(
-
-            `i${index}b`,
-
-            times[1],
-
-            "Go to " +
-            uniqueLocation(
-              used,
-              crimeLocation
-            ) +
-            " and stay there briefly."
-
-          ),
-
-          createTask(
-
-            `i${index}c`,
-
-            times[2],
-
-            random(
-              activities
-            ) +
-            " near " +
-            uniqueLocation(
-              used,
-              crimeLocation
-            ) +
-            "."
-
-          ),
-
-          createTask(
-
-            `i${index}d`,
-
-            times[3],
-
-            "Move to " +
-            uniqueLocation(
-              used,
-              crimeLocation
-            ) +
-            " and continue your timeline."
+            roundSeed
 
           )
-
-        ]
 
       };
 
     }
+
   );
+
+
+  /*
+    Shuffle each player's final
+    visible order AGAIN.
+  */
+
+  for(
+    const id of
+    Object.keys(
+      privateData
+    )
+  ){
+
+    privateData[id].tasks =
+      shuffle(
+        privateData[id].tasks
+      );
+
+  }
 
 
   const game = {
@@ -2759,6 +3184,12 @@ async function(){
         0
       ) +
       1,
+
+    /*
+      Save seed only for this round.
+    */
+
+    roundSeed,
 
     startedAt:
       now,
@@ -2855,7 +3286,7 @@ async function(){
 
 
 /* =====================================================
-   LOAD GAME
+LOAD GAME
 ===================================================== */
 
 async function loadGame(){
@@ -2950,7 +3381,7 @@ async function loadGame(){
 
 
 /* =====================================================
-   GLOBAL CLOCK
+GLOBAL CLOCK
 ===================================================== */
 
 function startGlobalClock(){
@@ -3177,7 +3608,7 @@ function startGlobalClock(){
 
 
 /* =====================================================
-   SECRET
+SECRET SCREEN
 ===================================================== */
 
 function renderSecret(){
@@ -3291,7 +3722,7 @@ function renderSecret(){
 
 
 /* =====================================================
-   TASKS
+TASK RENDER
 ===================================================== */
 
 function renderTasks(){
@@ -3451,6 +3882,10 @@ function renderTasks(){
 }
 
 
+/* =====================================================
+TASK CHECKING
+===================================================== */
+
 window.toggleTask =
 async function(
   taskId,
@@ -3557,7 +3992,7 @@ function listenToMyTasks(){
 
 
 /* =====================================================
-   INVESTIGATION
+INVESTIGATION
 ===================================================== */
 
 function showInvestigation(){
@@ -3639,9 +4074,11 @@ function renderCase(){
 
       </div>
 
+
       <h3>
         CASE
       </h3>
+
 
       <p>
         ${escapeHtml(
@@ -3649,12 +4086,14 @@ function renderCase(){
         )}
       </p>
 
+
       <p>
         <b>Victim:</b>
         ${escapeHtml(
           game.victim
         )}
       </p>
+
 
       <p>
         <b>Fictional murder time:</b>
@@ -3665,12 +4104,14 @@ function renderCase(){
         )}
       </p>
 
+
       <p>
         <b>Crime location:</b>
         ${escapeHtml(
           game.crimeLocation
         )}
       </p>
+
 
       <p>
         <b>Current real time:</b>
@@ -3679,9 +4120,11 @@ function renderCase(){
         )}
       </p>
 
+
       <h3>
         👥 SUSPECTS
       </h3>
+
 
       ${
         suspects
@@ -4038,7 +4481,7 @@ async function(
 
 
 /* =====================================================
-   CALLS
+CALLS
 ===================================================== */
 
 window.makeCall =
@@ -4242,7 +4685,7 @@ function showCall(
 
 
 /* =====================================================
-   SERVICE WORKER
+SERVICE WORKER
 ===================================================== */
 
 if(
@@ -4272,7 +4715,7 @@ if(
 
 
 /* =====================================================
-   ROOM FROM URL
+ROOM FROM URL
 ===================================================== */
 
 const params =
