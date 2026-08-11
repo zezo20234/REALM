@@ -1,42 +1,90 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+
+<meta
+  name="viewport"
+  content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"
+>
 
 <title>Hotel Murder</title>
 
-<link rel="manifest" href="./manifest.json">
+<link
+  rel="manifest"
+  href="./manifest.json"
+>
 
-<meta name="theme-color" content="#0b0e16">
-<meta name="mobile-web-app-capable" content="yes">
+<meta
+  name="theme-color"
+  content="#0b0e16"
+>
 
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Hotel Murder">
+<meta
+  name="mobile-web-app-capable"
+  content="yes"
+>
+
+<meta
+  name="apple-mobile-web-app-capable"
+  content="yes"
+>
+
+<meta
+  name="apple-mobile-web-app-status-bar-style"
+  content="black-translucent"
+>
+
+<meta
+  name="apple-mobile-web-app-title"
+  content="Hotel Murder"
+>
+
 
 <style>
+
 *{
   box-sizing:border-box;
 }
 
-html,body{
+html,
+body{
   margin:0;
   min-height:100%;
 }
 
 body{
   min-height:100vh;
+
   background:
-    radial-gradient(circle at top,#202844 0%,#0b0e16 48%,#070910 100%);
-  color:white;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+    radial-gradient(
+      circle at top,
+      #202844 0%,
+      #0b0e16 48%,
+      #070910 100%
+    );
+
+  color:#fff;
+
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+
+  padding:
+    env(safe-area-inset-top)
+    0
+    env(safe-area-inset-bottom);
+
+  overflow-x:hidden;
 }
 
 button,
 input,
-select{
+select,
+textarea{
   font:inherit;
 }
 
@@ -54,11 +102,20 @@ button{
 
 .card{
   background:rgba(22,27,42,.96);
-  border:1px solid rgba(255,255,255,.09);
+
+  border:
+    1px solid
+    rgba(255,255,255,.09);
+
   border-radius:24px;
+
   padding:22px;
+
   margin-bottom:16px;
-  box-shadow:0 15px 40px rgba(0,0,0,.25);
+
+  box-shadow:
+    0 15px 40px
+    rgba(0,0,0,.25);
 }
 
 h1{
@@ -81,31 +138,59 @@ p{
 
 label{
   display:block;
+
   color:#9fa8c0;
+
   font-size:14px;
+
   margin-top:14px;
 }
 
 input,
-select{
+select,
+textarea{
+
   width:100%;
+
   margin-top:7px;
+
   padding:14px;
+
   border-radius:14px;
-  border:1px solid #343b50;
+
+  border:
+    1px solid
+    #343b50;
+
   background:#0e121d;
-  color:white;
+
+  color:#fff;
+
   outline:none;
+
+}
+
+textarea{
+  min-height:90px;
+  resize:vertical;
 }
 
 button{
+
   width:100%;
+
   padding:15px;
+
   margin-top:10px;
+
   border-radius:14px;
+
   background:#718cff;
-  color:white;
+
+  color:#fff;
+
   font-weight:800;
+
 }
 
 button.secondary{
@@ -124,6 +209,10 @@ button.orange{
   background:#c47d35;
 }
 
+button.dark{
+  background:#151b29;
+}
+
 button:disabled{
   opacity:.45;
   cursor:not-allowed;
@@ -138,34 +227,57 @@ button:disabled{
 }
 
 .room-code{
+
   background:#0c1019;
+
   padding:16px;
+
   border-radius:15px;
+
   font-size:30px;
+
   font-weight:900;
+
   letter-spacing:4px;
+
   text-align:center;
+
   margin:15px 0;
+
 }
 
 .player{
+
   background:#202638;
+
   padding:13px;
+
   border-radius:13px;
+
   margin:7px 0;
+
 }
 
 .host{
+
   color:#ffd36a;
+
   margin-left:6px;
+
 }
 
 .role{
+
   padding:18px;
+
   border-radius:18px;
+
   font-size:23px;
+
   font-weight:900;
+
   margin-bottom:18px;
+
 }
 
 .role.detective{
@@ -181,11 +293,19 @@ button:disabled{
 }
 
 .task{
+
   background:#202638;
-  border:1px solid rgba(255,255,255,.07);
+
+  border:
+    1px solid
+    rgba(255,255,255,.07);
+
   padding:15px;
+
   border-radius:15px;
+
   margin:9px 0;
+
 }
 
 .task.locked{
@@ -193,17 +313,27 @@ button:disabled{
 }
 
 .task-row{
+
   display:flex;
+
   gap:12px;
+
   align-items:flex-start;
+
 }
 
 .task-checkbox{
+
   width:24px!important;
+
   height:24px;
+
   margin:0!important;
+
   flex:none;
+
   accent-color:#718cff;
+
 }
 
 .task-text{
@@ -211,16 +341,25 @@ button:disabled{
 }
 
 .task-time{
+
   font-size:13px;
+
   color:#8fa3ff;
+
   font-weight:800;
+
   margin-bottom:5px;
+
 }
 
 .task-status{
+
   margin-top:7px;
+
   font-size:12px;
+
   color:#9099ae;
+
 }
 
 .task.done{
@@ -228,138 +367,248 @@ button:disabled{
 }
 
 .locked-text{
+
   color:#8c95aa;
+
   font-style:italic;
+
 }
 
 .warning{
+
   background:#382c19;
+
   color:#ffd88a;
+
   padding:14px;
+
   border-radius:14px;
+
   margin:12px 0;
+
 }
 
 .success{
+
   background:#163b2b;
+
   color:#9bf0c4;
+
   padding:14px;
+
   border-radius:14px;
+
   margin:12px 0;
+
 }
 
 .info{
+
   background:#192842;
+
   color:#b9d4ff;
+
   padding:14px;
+
   border-radius:14px;
+
   margin:12px 0;
+
 }
 
 .timer{
+
   font-size:58px;
+
   font-weight:900;
+
   text-align:center;
+
   letter-spacing:2px;
+
   margin:15px 0;
+
 }
 
 .phase{
+
   font-size:14px;
+
   font-weight:800;
+
   color:#aab5d0;
+
   text-transform:uppercase;
+
   letter-spacing:1px;
+
 }
 
 .big{
+
   font-size:20px;
+
   line-height:1.5;
+
 }
 
 .small{
+
   color:#858ea5;
+
   font-size:13px;
+
   line-height:1.5;
+
 }
 
 .row{
+
   display:grid;
-  grid-template-columns:1fr 1fr;
+
+  grid-template-columns:
+    1fr 1fr;
+
   gap:10px;
+
 }
 
 .badge{
+
   display:inline-block;
+
   padding:7px 11px;
+
   border-radius:999px;
+
   background:#262d40;
+
   color:#b7c0d8;
+
   font-size:13px;
+
   margin:3px;
+
 }
 
 .divider{
+
   height:1px;
+
   background:#2c3345;
+
   margin:20px 0;
+
 }
 
 .progress{
+
   height:10px;
+
   background:#0d111a;
+
   border-radius:999px;
+
   overflow:hidden;
+
   margin-top:10px;
+
 }
 
 .progress-bar{
+
   height:100%;
+
   background:#718cff;
+
   width:0%;
-  transition:width .3s;
+
 }
 
 .count-card{
+
   background:#202638;
+
   padding:15px;
+
   border-radius:15px;
+
   margin:8px 0;
+
 }
 
 .count-number{
+
   font-size:28px;
+
   font-weight:900;
+
 }
 
 .reset-fixed{
+
   position:fixed;
-  top:calc(12px + env(safe-area-inset-top));
+
+  top:
+    calc(
+      12px +
+      env(safe-area-inset-top)
+    );
+
   right:12px;
+
   z-index:9000;
+
   width:auto;
+
   padding:11px 15px;
+
   font-size:13px;
-  box-shadow:0 8px 25px rgba(0,0,0,.35);
+
+  box-shadow:
+    0 8px 25px
+    rgba(0,0,0,.35);
+
 }
 
 .call-stack{
+
   position:fixed;
+
   left:14px;
+
   right:14px;
-  top:calc(14px + env(safe-area-inset-top));
+
+  top:
+    calc(
+      14px +
+      env(safe-area-inset-top)
+    );
+
   z-index:99999;
+
   pointer-events:none;
+
 }
 
 .call-banner{
+
   background:#6f8cff;
+
   border-radius:20px;
+
   padding:20px;
+
   margin-bottom:10px;
+
   text-align:center;
-  box-shadow:0 15px 50px rgba(0,0,0,.5);
+
+  box-shadow:
+    0 15px 50px
+    rgba(0,0,0,.5);
+
   pointer-events:auto;
+
 }
 
 .call-banner h2{
@@ -367,7 +616,7 @@ button:disabled{
 }
 
 .call-banner p{
-  color:white;
+  color:#fff;
   margin:0;
 }
 
@@ -375,119 +624,198 @@ button:disabled{
   background:#111827;
 }
 
-.alert-modal{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.76);
-  z-index:10000;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:20px;
-}
-
-.alert-inner{
-  width:100%;
-  max-width:450px;
-  background:#171b2a;
-  border:1px solid #343b50;
-  border-radius:25px;
-  padding:25px;
-  text-align:center;
-  box-shadow:0 20px 60px rgba(0,0,0,.5);
-}
-
-.install-box{
-  background:#172038;
-  border:1px solid rgba(113,140,255,.25);
-  padding:15px;
-  border-radius:16px;
-  margin-top:15px;
-}
-
 /* =====================================================
-EVIDENCE
+DETECTIVE NOTEBOOK
 ===================================================== */
 
-.evidence-box{
-  background:#202638;
-  border:1px solid rgba(255,255,255,.08);
-  padding:16px;
+.detective-section{
+
+  background:#151b29;
+
+  border:
+    1px solid
+    rgba(113,140,255,.18);
+
   border-radius:18px;
-  margin-top:14px;
-}
 
-.evidence-preview{
-  width:100%;
-  max-height:360px;
-  object-fit:contain;
-  border-radius:15px;
-  background:#0b0e16;
-  display:block;
-  margin-top:12px;
-}
-
-.evidence-player{
-  background:#171c2b;
-  border:1px solid rgba(255,255,255,.08);
   padding:15px;
-  border-radius:17px;
-  margin:10px 0;
+
+  margin-top:14px;
+
 }
 
-.evidence-player-name{
+.detective-section-title{
+
+  font-size:17px;
+
   font-weight:900;
-  font-size:18px;
+
+  margin-bottom:9px;
+
 }
 
-.evidence-photo{
-  width:100%;
-  max-height:420px;
-  object-fit:contain;
-  border-radius:16px;
-  background:#0b0e16;
-  display:block;
-  margin-top:12px;
-}
+.question-card,
+.answer-card,
+.location-card,
+.clue-card{
 
-.evidence-empty{
-  padding:18px;
+  background:#202638;
+
   border-radius:15px;
-  background:#101522;
-  color:#8d97ae;
-  text-align:center;
+
+  padding:14px;
+
+  margin:9px 0;
+
 }
 
-.evidence-count{
-  display:inline-block;
-  background:#2b3550;
-  padding:7px 11px;
-  border-radius:999px;
-  font-size:13px;
-  margin-top:8px;
-}
+.question-number{
 
-.evidence-time{
-  margin-top:7px;
-  font-size:13px;
-  color:#9eabd0;
-}
+  color:#8fa3ff;
 
-.evidence-stamp{
-  display:inline-block;
-  margin-top:8px;
-  background:#0c1019;
-  border:1px solid #343b50;
-  border-radius:10px;
-  padding:8px 10px;
-  color:#d7ddf0;
   font-size:12px;
-  font-weight:700;
+
+  font-weight:900;
+
+  margin-bottom:5px;
+
+  text-transform:uppercase;
+
+}
+
+.answer-label{
+
+  color:#8d98af;
+
+  font-size:12px;
+
+  margin-top:8px;
+
+}
+
+.case-pill{
+
+  display:inline-block;
+
+  background:#29334c;
+
+  color:#c8d1e8;
+
+  border-radius:999px;
+
+  padding:7px 10px;
+
+  font-size:12px;
+
+  margin:3px;
+
+}
+
+.empty-board{
+
+  background:#101522;
+
+  padding:15px;
+
+  border-radius:14px;
+
+  color:#8791a6;
+
+  text-align:center;
+
+}
+
+.board-row{
+
+  display:grid;
+
+  grid-template-columns:
+    1fr auto;
+
+  gap:8px;
+
+  align-items:end;
+
+}
+
+.board-small-button{
+
+  width:auto;
+
+  margin:7px 0 0 0;
+
+  padding:
+    10px 13px;
+
+  font-size:12px;
+
+}
+
+.interview-card{
+
+  background:#171d2d;
+
+  border:
+    1px solid
+    rgba(255,255,255,.07);
+
+  padding:15px;
+
+  border-radius:17px;
+
+  margin:10px 0;
+
+}
+
+.interview-header{
+
+  display:flex;
+
+  justify-content:space-between;
+
+  gap:10px;
+
+  align-items:center;
+
+}
+
+.interview-name{
+
+  font-weight:900;
+}
+
+.interview-time{
+
+  color:#8fa3ff;
+
+  font-size:12px;
+
+}
+
+.location-icon{
+
+  font-size:20px;
+}
+
+.clue-icon{
+
+  font-size:20px;
 }
 
 @media(max-width:600px){
+
   .row{
-    grid-template-columns:1fr;
+
+    grid-template-columns:
+      1fr;
+
+  }
+
+  .board-row{
+
+    grid-template-columns:
+      1fr;
+
   }
 
   h1{
@@ -497,90 +825,58 @@ EVIDENCE
   .timer{
     font-size:48px;
   }
+
 }
+
 </style>
 </head>
 
+
 <body>
 
+
 <div id="callStack"></div>
-
-<div id="alertModal" class="alert-modal hidden">
-  <div class="alert-inner">
-
-    <div style="font-size:55px">🔔</div>
-
-    <h2>Enable Call Alerts</h2>
-
-    <p>
-      Tap this once so the game can use
-      notifications and unlock its ringtone.
-    </p>
-
-    <button
-      class="green"
-      onclick="enableAlerts()"
-    >
-      🔔 ENABLE CALL ALERTS
-    </button>
-
-    <button
-      class="secondary"
-      onclick="closeAlertModal()"
-    >
-      Not now
-    </button>
-
-  </div>
-</div>
 
 
 <div class="app">
 
-<!-- HOME -->
+
+<!-- =================================================
+HOME
+================================================= -->
 
 <section id="home">
 
   <div class="card">
 
-    <h1>🕵️ Hotel Murder</h1>
+    <h1>
+      🕵️ Hotel Murder
+    </h1>
 
     <p>
       A real-time fictional mystery game.
-      Exactly one Detective, one Murderer,
-      and everyone else is Innocent.
+      1 Detective, 1 Murderer,
+      and up to 2 other players.
     </p>
 
-    <div class="install-box">
 
-      <b>📱 iPhone App Mode</b>
+    <div class="info">
 
-      <p class="small">
-        Open this website in Safari,
-        tap Share → Add to Home Screen.
+      <b>
+        👥 Maximum players: 4
+      </b>
+
+      <p>
+        The Detective investigates while
+        everyone else follows their secret timeline.
       </p>
 
     </div>
 
-    <div id="alertBox" class="info">
 
-      <b>🔔 Call Alerts</b>
-
-      <p id="alertStatus">
-        Enable this before playing.
-      </p>
-
-      <button
-        id="enableAlertsButton"
-        class="green"
-        onclick="enableAlerts()"
-      >
-        🔔 ENABLE CALL ALERTS
-      </button>
-
-    </div>
-
-    <label>Your name</label>
+    <label>
+      Your name
+    </label>
 
     <input
       id="nameInput"
@@ -588,7 +884,10 @@ EVIDENCE
       autocomplete="off"
     >
 
-    <label>Room code</label>
+
+    <label>
+      Room code
+    </label>
 
     <input
       id="roomInput"
@@ -596,9 +895,13 @@ EVIDENCE
       autocomplete="off"
     >
 
-    <button onclick="createRoom()">
+
+    <button
+      onclick="createRoom()"
+    >
       CREATE NEW ROOM
     </button>
+
 
     <button
       class="secondary"
@@ -612,23 +915,20 @@ EVIDENCE
 
   <div class="card">
 
-    <h2>🎮 Rules</h2>
+    <h2>
+      🎮 Rules
+    </h2>
 
     <p>
       🕵️ 1 Detective<br>
       🔪 1 Murderer<br>
-      👤 Everyone else = Innocent
+      👤 Up to 2 Innocent players
     </p>
 
     <p>
-      Detective waits outside for exactly
-      5 minutes while the other players
-      complete their randomized tasks.
-    </p>
-
-    <p>
-      📸 Every player can submit exactly
-      one evidence photo.
+      The Detective waits outside,
+      prepares their investigation,
+      then returns when the waiting period ends.
     </p>
 
   </div>
@@ -636,15 +936,33 @@ EVIDENCE
 </section>
 
 
-<!-- CREATE -->
+<!-- =================================================
+CREATE ROOM
+================================================= -->
 
-<section id="createScreen" class="hidden">
+<section
+  id="createScreen"
+  class="hidden"
+>
 
   <div class="card">
 
-    <h1>🏨 Create Room</h1>
+    <h1>
+      🏨 Create Room
+    </h1>
 
-    <label>Players</label>
+    <div class="info">
+
+      Maximum:
+      <b>4 players</b>
+
+    </div>
+
+
+    <label>
+      Players
+    </label>
+
 
     <select id="playerLimit">
 
@@ -652,23 +970,26 @@ EVIDENCE
         2 Players
       </option>
 
-      <option value="3" selected>
+      <option value="3">
         3 Players
       </option>
 
-      <option value="4">4 Players</option>
-      <option value="5">5 Players</option>
-      <option value="6">6 Players</option>
-      <option value="7">7 Players</option>
-      <option value="8">8 Players</option>
-      <option value="9">9 Players</option>
-      <option value="10">10 Players</option>
+      <option
+        value="4"
+        selected
+      >
+        4 Players
+      </option>
 
     </select>
 
-    <button onclick="finishCreateRoom()">
+
+    <button
+      onclick="finishCreateRoom()"
+    >
       CREATE ROOM
     </button>
+
 
     <button
       class="secondary"
@@ -682,13 +1003,20 @@ EVIDENCE
 </section>
 
 
-<!-- LOBBY -->
+<!-- =================================================
+LOBBY
+================================================= -->
 
-<section id="lobby" class="hidden">
+<section
+  id="lobby"
+  class="hidden"
+>
 
   <div class="card center">
 
-    <h1>🏨 Lobby</h1>
+    <h1>
+      🏨 Lobby
+    </h1>
 
     <p>
       Give the room code to everyone.
@@ -699,25 +1027,38 @@ EVIDENCE
       class="room-code"
     ></div>
 
-    <div id="lobbyPlayerCount"></div>
+    <div
+      id="lobbyPlayerCount"
+    ></div>
 
   </div>
 
 
   <div class="card">
 
-    <h2>👥 Players</h2>
+    <h2>
+      👥 Players
+    </h2>
 
-    <div id="playersList"></div>
+    <div
+      id="playersList"
+    ></div>
 
   </div>
 
 
-  <div id="hostPanel" class="card hidden">
+  <div
+    id="hostPanel"
+    class="card hidden"
+  >
 
-    <h2>👑 Host</h2>
+    <h2>
+      👑 Host
+    </h2>
 
-    <p id="hostInfo"></p>
+    <p
+      id="hostInfo"
+    ></p>
 
     <button
       id="startButton"
@@ -739,9 +1080,15 @@ EVIDENCE
 </section>
 
 
-<!-- GAME -->
+<!-- =================================================
+GAME
+================================================= -->
 
-<section id="game" class="hidden">
+<section
+  id="game"
+  class="hidden"
+>
+
 
   <button
     id="resetFixed"
@@ -752,6 +1099,8 @@ EVIDENCE
   </button>
 
 
+  <!-- GAME CLOCK -->
+
   <div class="card center">
 
     <div
@@ -761,32 +1110,68 @@ EVIDENCE
       ROUND
     </div>
 
+
     <div
-      id="globalTimer"
-      class="timer"
+      id="detectiveTimerArea"
+      class="hidden"
     >
-      --:--
+
+      <div
+        id="globalTimer"
+        class="timer"
+      >
+        --:--
+      </div>
+
+      <p>
+        ⏱️ Detective timer
+      </p>
+
     </div>
 
-    <p id="globalTimeText"></p>
+
+    <div
+      id="normalClockArea"
+      class="hidden"
+    >
+
+      <div
+        id="normalClock"
+        class="big"
+      >
+        --:--:--
+      </div>
+
+      <p>
+        Current game time
+      </p>
+
+    </div>
 
   </div>
 
 
+  <!-- CALLS -->
+
   <div class="card">
 
-    <h2>📞 Call Everyone</h2>
+    <h2>
+      📞 Call Everyone
+    </h2>
 
     <p>
       Everyone currently connected
-      gets the alert.
+      receives the call.
     </p>
 
     <div class="row">
 
-      <button onclick="makeCall('Lobby')">
+      <button
+        onclick="makeCall('Lobby')"
+      >
         📍 CALL TO LOBBY
       </button>
+
 
       <button
         class="orange"
@@ -800,17 +1185,26 @@ EVIDENCE
   </div>
 
 
-  <div id="secretCard" class="card">
+  <!-- SECRET -->
+
+  <div
+    id="secretCard"
+    class="card"
+  >
     Loading your secret...
   </div>
 
+
+  <!-- DETECTIVE WAITING -->
 
   <div
     id="detectiveWaiting"
     class="card hidden center"
   >
 
-    <h2>🕵️ Detective Waiting</h2>
+    <h2>
+      🕵️ Detective Waiting
+    </h2>
 
     <p>
       Leave the game area.
@@ -824,136 +1218,323 @@ EVIDENCE
     </div>
 
     <div class="warning">
-      Do not return until the timer reaches zero.
+
+      You can prepare your investigation
+      while you wait.
+
     </div>
 
   </div>
 
 
-  <div id="normalWaiting" class="card hidden">
+  <!-- NORMAL PLAYER -->
 
-    <h2>🤫 Complete Your Tasks</h2>
+  <div
+    id="normalWaiting"
+    class="card hidden"
+  >
+
+    <h2>
+      🤫 Complete Your Tasks
+    </h2>
 
     <p>
-      Every new match gives you a fresh randomized task set.
-      Future tasks stay locked until their actual unlock time.
+      Follow your secret timeline.
+      The Detective's countdown is hidden from you.
     </p>
 
   </div>
 
 
-  <div id="investigation" class="card hidden">
+  <!-- =================================================
+  DETECTIVE NOTEBOOK
+  ================================================= -->
 
-    <h2>🔎 Investigation</h2>
+  <div
+    id="detectiveNotebook"
+    class="card hidden"
+  >
 
-    <div id="caseFile"></div>
-
-    <div class="divider"></div>
-
-    <h3>📊 Task Progress</h3>
-
-    <div id="taskProgress"></div>
-
-    <div class="divider"></div>
-
-    <h3>Who is the murderer?</h3>
-
-    <div id="accusationButtons"></div>
-
-    <div id="result"></div>
-
-  </div>
-
-
-  <!-- EVIDENCE -->
-
-  <div id="evidenceCard" class="card">
-
-    <h2>📸 Evidence Photo</h2>
+    <h2>
+      🔎 Detective Notebook
+    </h2>
 
     <p>
-      Everyone may submit exactly
-      <b>1 photo</b> as evidence.
+      Prepare your investigation while
+      you're outside. Then use the same
+      notebook during questioning.
     </p>
 
-    <div id="evidencePlayerPanel">
 
-      <div class="evidence-box">
+    <!-- QUESTIONS -->
 
-        <b>📱 Take your evidence photo</b>
+    <div class="detective-section">
 
-        <p class="small">
-          Use your camera or choose a photo.
-          Once submitted, it cannot be replaced
-          during this round.
-        </p>
+      <div class="detective-section-title">
+        ❓ Questions
+      </div>
+
+      <p class="small">
+        Add questions before returning.
+        They stay saved for the investigation.
+      </p>
+
+
+      <input
+        id="prepQuestionInput"
+        placeholder="Example: Where were you at 12:30?"
+        maxlength="180"
+      >
+
+
+      <button
+        class="green"
+        onclick="addPrepQuestion()"
+      >
+        ➕ ADD QUESTION
+      </button>
+
+
+      <div
+        id="prepQuestionsList"
+      ></div>
+
+    </div>
+
+
+    <!-- INTERVIEWS -->
+
+    <div
+      id="interviewSection"
+      class="detective-section"
+    >
+
+      <div class="detective-section-title">
+        🗣️ Interviews
+      </div>
+
+      <div
+        id="interviewForm"
+      >
+
+        <label>
+          Suspect
+        </label>
+
+        <select
+          id="interviewSuspect"
+        ></select>
+
+
+        <label>
+          Question
+        </label>
+
+        <select
+          id="interviewQuestion"
+        ></select>
+
+
+        <label>
+          Answer
+        </label>
+
+        <textarea
+          id="interviewAnswer"
+          placeholder="Write exactly what they said..."
+          maxlength="500"
+        ></textarea>
+
+
+        <button
+          onclick="saveInterview()"
+        >
+          💾 SAVE ANSWER
+        </button>
+
+      </div>
+
+
+      <div
+        id="interviewList"
+      ></div>
+
+    </div>
+
+
+    <!-- LOCATIONS -->
+
+    <div class="detective-section">
+
+      <div class="detective-section-title">
+        📍 Locations
+      </div>
+
+      <p class="small">
+        Record places you investigated.
+      </p>
+
+
+      <div class="board-row">
 
         <input
-          id="evidenceInput"
-          type="file"
-          accept="image/*"
-          capture="environment"
-        >
-
-        <img
-          id="evidencePreview"
-          class="evidence-preview hidden"
-          alt="Evidence preview"
+          id="locationInput"
+          placeholder="Example: Reception"
+          maxlength="100"
         >
 
         <button
-          id="uploadEvidenceButton"
-          class="green"
-          onclick="uploadEvidence()"
-          disabled
+          class="board-small-button"
+          onclick="addInvestigationLocation()"
         >
-          📤 SUBMIT EVIDENCE
+          ADD
         </button>
 
-        <div
-          id="evidencePlayerStatus"
-          class="small"
-          style="margin-top:10px"
-        >
-          No photo submitted yet.
-        </div>
-
       </div>
+
+
+      <div
+        id="locationsList"
+      ></div>
 
     </div>
 
 
-    <div
-      id="detectiveEvidencePanel"
-      class="hidden"
-    >
+    <!-- CLUES -->
 
-      <div class="success">
+    <div class="detective-section">
 
-        🕵️ Detective evidence board
-
-        <br><br>
-
-        Only the Detective sees
-        everyone's submitted photos.
-
+      <div class="detective-section-title">
+        🧩 Clues
       </div>
 
-      <div id="evidenceList">
-        Loading evidence...
+      <p class="small">
+        Save anything important you discover.
+      </p>
+
+
+      <textarea
+        id="clueInput"
+        placeholder="Example: Lilly said she was at Reception."
+        maxlength="300"
+      ></textarea>
+
+
+      <button
+        class="green"
+        onclick="addInvestigationClue()"
+      >
+        🔎 ADD CLUE
+      </button>
+
+
+      <div
+        id="cluesList"
+      ></div>
+
+    </div>
+
+
+    <!-- THEORY -->
+
+    <div class="detective-section">
+
+      <div class="detective-section-title">
+        🧠 Case Theory
       </div>
+
+      <textarea
+        id="detectiveTheory"
+        placeholder="What do you think happened?"
+        maxlength="800"
+      ></textarea>
+
+
+      <button
+        class="secondary"
+        onclick="saveTheory()"
+      >
+        💾 SAVE THEORY
+      </button>
 
     </div>
 
   </div>
 
+
+  <!-- =================================================
+  INVESTIGATION
+  ================================================= -->
+
+  <div
+    id="investigation"
+    class="card hidden"
+  >
+
+    <h2>
+      🔎 Investigation
+    </h2>
+
+
+    <div id="caseFile"></div>
+
+
+    <div class="divider"></div>
+
+
+    <h3>
+      📊 Task Progress
+    </h3>
+
+
+    <div
+      id="taskProgress"
+    ></div>
+
+
+    <div class="divider"></div>
+
+
+    <h3>
+      📝 Detective Notes
+    </h3>
+
+
+    <div
+      id="detectiveSummary"
+    ></div>
+
+
+    <div class="divider"></div>
+
+
+    <h3>
+      🗣️ Accusation
+    </h3>
+
+
+    <div
+      id="accusationButtons"
+    ></div>
+
+
+    <div
+      id="result"
+    ></div>
+
+  </div>
+
+
+  <!-- INVESTIGATION TIMER -->
 
   <div
     id="investigationTimerCard"
     class="card hidden center"
   >
 
-    <h2>🔎 Investigation Time</h2>
+    <h2>
+      🔎 Investigation Time
+    </h2>
 
     <div
       id="investigationTimer"
@@ -961,6 +1542,10 @@ EVIDENCE
     >
       05:30
     </div>
+
+    <p>
+      Make your final accusation before time runs out.
+    </p>
 
   </div>
 
@@ -985,13 +1570,17 @@ import {
   set,
   update,
   remove,
+  push,
   onValue,
-  onDisconnect,
-  serverTimestamp
+  onDisconnect
 }
 from
 "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
 
+
+/* =====================================================
+FIREBASE
+===================================================== */
 
 const firebaseConfig = {
 
@@ -1023,11 +1612,20 @@ const firebaseConfig = {
 
 
 const app =
-  initializeApp(firebaseConfig);
+  initializeApp(
+    firebaseConfig
+  );
+
 
 const db =
-  getDatabase(app);
+  getDatabase(
+    app
+  );
 
+
+/* =====================================================
+PLAYER ID
+===================================================== */
 
 let playerId =
   localStorage.getItem(
@@ -1053,36 +1651,45 @@ if(!playerId){
 }
 
 
+/* =====================================================
+STATE
+===================================================== */
+
 let roomCode = "";
+
 let myName = "";
+
 let roomData = null;
+
 let mySecret = null;
 
 let globalInterval = null;
+
 let lastCallId = null;
+
 let listenersStarted = false;
-let evidenceListenerStarted = false;
 
-let audioContext = null;
+let boardListenerStarted = false;
 
-let selectedEvidenceFile = null;
-let evidencePreviewUrl = null;
+let serverTimeOffset = 0;
 
-let alertsEnabled =
-  localStorage.getItem(
-    "hotelMurderAlerts"
-  ) === "1";
 
+/* =====================================================
+TIMINGS
+===================================================== */
 
 const DETECTIVE_WAIT =
   5 * 60 * 1000;
+
 
 const INVESTIGATION_TIME =
   5 * 60 * 1000 +
   30 * 1000;
 
+
 const MIN_MURDER_DELAY =
   2 * 60 * 1000;
+
 
 const MAX_MURDER_DELAY =
   3 * 60 * 1000 +
@@ -1090,10 +1697,43 @@ const MAX_MURDER_DELAY =
 
 
 /* =====================================================
+SERVER CLOCK
+===================================================== */
+
+onValue(
+
+  ref(
+    db,
+    ".info/serverTimeOffset"
+  ),
+
+  snapshot=>{
+
+    serverTimeOffset =
+      Number(
+        snapshot.val() ||
+        0
+      );
+
+  }
+
+);
+
+
+function serverNow(){
+
+  return Date.now() +
+    serverTimeOffset;
+
+}
+
+
+/* =====================================================
 LOCATIONS
 ===================================================== */
 
 const locations = [
+
   "Hotel Lobby Seating",
   "Hotel Reception",
   "Hotel Staircase",
@@ -1108,25 +1748,44 @@ const locations = [
   "Hotel Elevator Area",
   "Hotel Corner Seating",
   "Hotel Side Hallway"
+
 ];
 
+
+/* =====================================================
+TASK TEMPLATES
+===================================================== */
 
 const activityTemplates = [
 
   "Sit quietly at {location}.",
+
   "Walk around {location}.",
+
   "Stand for a moment at {location}.",
+
   "Look around {location}.",
+
   "Wait nearby {location}.",
+
   "Walk through {location}.",
+
   "Sit at a nearby seat around {location}.",
+
   "Check your phone near {location}.",
+
   "Pause briefly at {location}.",
+
   "Stay around {location} for a short moment.",
+
   "Walk past {location}, then continue normally.",
+
   "Spend a moment near {location} before moving on.",
+
   "Look toward {location}, then continue.",
+
   "Stay near {location} for a little while.",
+
   "Take a short pause around {location}."
 
 ];
@@ -1135,14 +1794,23 @@ const activityTemplates = [
 const actionTemplates = [
 
   "Go to {location} and stay there briefly.",
+
   "Move to {location}, then continue normally.",
+
   "Visit {location} for a short moment.",
+
   "Pass through {location} before continuing.",
+
   "Wait near {location}, then move on.",
+
   "Walk to {location} and look around briefly.",
+
   "Head toward {location}, pause, then continue.",
+
   "Go through {location} before moving elsewhere.",
+
   "Spend a short moment at {location}, then leave.",
+
   "Move through {location} and continue your route."
 
 ];
@@ -1151,10 +1819,15 @@ const actionTemplates = [
 const murderTemplates = [
 
   "Be at {location} at {time}. The fictional murder event happens there.",
+
   "Reach {location} when the clock reaches {time} for the fictional murder event.",
+
   "At {time}, go to {location}. This is the fictional murder point.",
+
   "Be near {location} at {time} for the fictional murder event.",
+
   "Go to {location} around {time}. The fictional incident happens there.",
+
   "At exactly {time}, be at {location} for the fictional event."
 
 ];
@@ -1163,10 +1836,15 @@ const murderTemplates = [
 const afterMurderTemplates = [
 
   "Leave {location} and continue normally.",
+
   "Move away from {location} after the fictional event.",
+
   "After the fictional incident, leave {location}.",
+
   "Continue to another area after leaving {location}.",
+
   "Move on from {location} and continue your timeline.",
+
   "Leave {location} and go somewhere else."
 
 ];
@@ -1185,8 +1863,11 @@ const victims = [
 const cases = [
 
   "A fictional hotel guest was found dead in the story.",
+
   "A fictional visitor was found dead in the story.",
+
   "A fictional guest was discovered dead in the story.",
+
   "A fictional incident happened inside the hotel."
 
 ];
@@ -1214,15 +1895,16 @@ function shuffle(array){
     [...array];
 
   for(
-    let i=result.length-1;
-    i>0;
+    let i =
+      result.length - 1;
+    i > 0;
     i--
   ){
 
     const j =
       Math.floor(
         Math.random() *
-        (i+1)
+        (i + 1)
       );
 
     [
@@ -1255,19 +1937,25 @@ function clockText(date){
     date.getHours();
 
   const m =
-    pad(date.getMinutes());
+    pad(
+      date.getMinutes()
+    );
 
   const s =
-    pad(date.getSeconds());
+    pad(
+      date.getSeconds()
+    );
 
   const period =
-    h>=12 ? "PM" : "AM";
+    h >= 12
+    ? "PM"
+    : "AM";
 
   h =
-    h%12;
+    h % 12;
 
-  if(h===0){
-    h=12;
+  if(h === 0){
+    h = 12;
   }
 
   return `${h}:${m}:${s} ${period}`;
@@ -1281,16 +1969,20 @@ function shortClock(date){
     date.getHours();
 
   const m =
-    pad(date.getMinutes());
+    pad(
+      date.getMinutes()
+    );
 
   const period =
-    h>=12 ? "PM" : "AM";
+    h >= 12
+    ? "PM"
+    : "AM";
 
   h =
-    h%12;
+    h % 12;
 
-  if(h===0){
-    h=12;
+  if(h === 0){
+    h = 12;
   }
 
   return `${h}:${m} ${period}`;
@@ -1304,19 +1996,19 @@ function formatDuration(ms){
     Math.max(
       0,
       Math.ceil(
-        ms/1000
+        ms / 1000
       )
     );
 
   return (
     pad(
       Math.floor(
-        s/60
+        s / 60
       )
     ) +
     ":" +
     pad(
-      s%60
+      s % 60
     )
   );
 
@@ -1335,6 +2027,32 @@ function escapeHtml(value){
 }
 
 
+function createTask(
+  id,
+  unlockAt,
+  description
+){
+
+  return {
+
+    id,
+
+    unlockAt,
+
+    unlockText:
+      shortClock(
+        new Date(
+          unlockAt
+        )
+      ),
+
+    description
+
+  };
+
+}
+
+
 function uniqueLocation(
   used,
   forbidden
@@ -1345,12 +2063,14 @@ function uniqueLocation(
   do{
 
     x =
-      random(locations);
+      random(
+        locations
+      );
 
   }
   while(
     used.includes(x) ||
-    x===forbidden
+    x === forbidden
   );
 
   used.push(x);
@@ -1360,29 +2080,8 @@ function uniqueLocation(
 }
 
 
-function createTask(
-  id,
-  unlockAt,
-  description
-){
-
-  return {
-    id,
-    unlockAt,
-    unlockText:
-      shortClock(
-        new Date(
-          unlockAt
-        )
-      ),
-    description
-  };
-
-}
-
-
 /* =====================================================
-TASK GENERATION
+TASK GENERATOR
 ===================================================== */
 
 function freshRoundSeed(){
@@ -1395,20 +2094,6 @@ function freshRoundSeed(){
       .toString(36)
       .substring(2,12)
   );
-
-}
-
-
-function fillLocationTemplate(
-  template,
-  location
-){
-
-  return template
-    .replace(
-      "{location}",
-      location
-    );
 
 }
 
@@ -1427,19 +2112,24 @@ function buildRandomNormalTask(
     );
 
   const pool =
-    Math.random()<0.5
+    Math.random() < 0.5
     ?
     activityTemplates
     :
     actionTemplates;
 
   return createTask(
+
     id,
+
     unlockAt,
-    fillLocationTemplate(
-      random(pool),
-      location
-    )
+
+    random(pool)
+      .replace(
+        "{location}",
+        location
+      )
+
   );
 
 }
@@ -1452,36 +2142,43 @@ function makeRandomUnlockTimes(
 ){
 
   const startOffset =
-    15*1000;
+    15 * 1000;
 
   const endOffset =
     Math.max(
-      startOffset+1000,
-      detectiveEnd-now-20000
+      startOffset + 1000,
+      detectiveEnd -
+      now -
+      20 * 1000
     );
 
-  const values=[];
+  const values = [];
 
   for(
-    let i=0;
-    i<count;
+    let i = 0;
+    i < count;
     i++
   ){
 
     const percentage =
-      (i+1)/(count+1);
+      (i + 1) /
+      (count + 1);
 
     const spread =
       (
-        Math.random()-0.5
-      )*40000;
+        Math.random() -
+        0.5
+      ) *
+      40 *
+      1000;
 
     let offset =
-      startOffset+
+      startOffset +
       (
-        endOffset-startOffset
-      )*
-      percentage+
+        endOffset -
+        startOffset
+      ) *
+      percentage +
       spread;
 
     offset =
@@ -1493,7 +2190,9 @@ function makeRandomUnlockTimes(
         )
       );
 
-    values.push(offset);
+    values.push(
+      offset
+    );
 
   }
 
@@ -1502,14 +2201,15 @@ function makeRandomUnlockTimes(
   );
 
   return values.map(
-    offset=>now+offset
+    offset=>
+      now + offset
   );
 
 }
 
 
 function buildRandomNormalTasks(
-  playerIdForSeed,
+  id,
   now,
   detectiveEnd,
   crimeLocation,
@@ -1517,9 +2217,9 @@ function buildRandomNormalTasks(
 ){
 
   const count =
-    3+
+    3 +
     Math.floor(
-      Math.random()*3
+      Math.random() * 3
     );
 
   const unlockTimes =
@@ -1529,33 +2229,34 @@ function buildRandomNormalTasks(
       count
     );
 
-  const usedLocations=[];
-  const tasks=[];
+  const usedLocations = [];
+
+  const tasks = [];
 
   for(
-    let i=0;
-    i<count;
+    let i = 0;
+    i < count;
     i++
   ){
 
-    const taskId =
-      roundSeed+
-      "_"+
-      playerIdForSeed+
-      "_N_"+
-      i+
-      "_"+
-      Math.random()
-        .toString(36)
-        .substring(2,8);
-
     tasks.push(
+
       buildRandomNormalTask(
-        taskId,
+
+        roundSeed +
+        "_" +
+        id +
+        "_N_" +
+        i,
+
         unlockTimes[i],
+
         usedLocations,
+
         crimeLocation
+
       )
+
     );
 
   }
@@ -1566,7 +2267,7 @@ function buildRandomNormalTasks(
 
 
 function buildRandomMurdererTasks(
-  playerIdForSeed,
+  id,
   now,
   detectiveEnd,
   murderAt,
@@ -1574,360 +2275,126 @@ function buildRandomMurdererTasks(
   roundSeed
 ){
 
-  const normalCount =
-    2+
+  const count =
+    2 +
     Math.floor(
-      Math.random()*3
+      Math.random() * 3
     );
 
-  const normalTimes =
+  const unlockTimes =
     makeRandomUnlockTimes(
+
       now,
+
       Math.min(
         detectiveEnd,
-        murderAt-20000
+        murderAt -
+        20 * 1000
       ),
-      normalCount
+
+      count
+
     );
 
-  const usedLocations=[];
-  const tasks=[];
+  const usedLocations = [];
+
+  const tasks = [];
+
 
   for(
-    let i=0;
-    i<normalCount;
+    let i = 0;
+    i < count;
     i++
   ){
 
-    const taskId =
-      roundSeed+
-      "_"+
-      playerIdForSeed+
-      "_M_"+
-      i+
-      "_"+
-      Math.random()
-        .toString(36)
-        .substring(2,8);
-
     tasks.push(
+
       buildRandomNormalTask(
-        taskId,
-        normalTimes[i],
+
+        roundSeed +
+        "_" +
+        id +
+        "_M_" +
+        i,
+
+        unlockTimes[i],
+
         usedLocations,
+
         crimeLocation
+
       )
+
     );
 
   }
 
-  const murderTaskId =
-    roundSeed+
-    "_"+
-    playerIdForSeed+
-    "_KILL_"+
-    Math.random()
-      .toString(36)
-      .substring(2,8);
-
-  const murderDescription =
-    fillLocationTemplate(
-      random(murderTemplates),
-      crimeLocation
-    )
-    .replace(
-      "{time}",
-      shortClock(
-        new Date(murderAt)
-      )
-    );
 
   tasks.push(
+
     createTask(
-      murderTaskId,
+
+      roundSeed +
+      "_" +
+      id +
+      "_KILL",
+
       murderAt,
-      murderDescription
-    )
-  );
 
-  const afterTime =
-    Math.min(
-      murderAt+25000,
-      detectiveEnd-20000
-    );
-
-  const afterTaskId =
-    roundSeed+
-    "_"+
-    playerIdForSeed+
-    "_A_"+
-    Math.random()
-      .toString(36)
-      .substring(2,8);
-
-  tasks.push(
-    createTask(
-      afterTaskId,
-      afterTime,
-      fillLocationTemplate(
-        random(afterMurderTemplates),
+      random(
+        murderTemplates
+      )
+      .replace(
+        "{location}",
         crimeLocation
       )
+      .replace(
+        "{time}",
+        shortClock(
+          new Date(
+            murderAt
+          )
+        )
+      )
+
     )
+
   );
 
-  return shuffle(tasks);
 
-}
+  tasks.push(
 
+    createTask(
 
-/* =====================================================
-ALERTS
-===================================================== */
+      roundSeed +
+      "_" +
+      id +
+      "_AFTER",
 
-window.enableAlerts =
-async function(){
+      Math.min(
+        murderAt +
+        25 * 1000,
 
-  try{
+        detectiveEnd -
+        20 * 1000
+      ),
 
-    const AudioContext =
-      window.AudioContext ||
-      window.webkitAudioContext;
+      random(
+        afterMurderTemplates
+      )
+      .replace(
+        "{location}",
+        crimeLocation
+      )
 
-    if(AudioContext){
+    )
 
-      audioContext =
-        audioContext ||
-        new AudioContext();
+  );
 
-      if(
-        audioContext.state==="suspended"
-      ){
 
-        await audioContext.resume();
-
-      }
-
-      const osc =
-        audioContext.createOscillator();
-
-      const gain =
-        audioContext.createGain();
-
-      osc.frequency.value=660;
-      gain.gain.value=0.1;
-
-      osc.connect(gain);
-      gain.connect(
-        audioContext.destination
-      );
-
-      const t =
-        audioContext.currentTime;
-
-      gain.gain.exponentialRampToValueAtTime(
-        0.12,
-        t+0.02
-      );
-
-      gain.gain.exponentialRampToValueAtTime(
-        0.0001,
-        t+0.20
-      );
-
-      osc.start(t);
-      osc.stop(t+0.22);
-
-    }
-
-    if(
-      "Notification" in window &&
-      Notification.permission==="default"
-    ){
-
-      try{
-        await Notification.requestPermission();
-      }catch(e){}
-
-    }
-
-    alertsEnabled=true;
-
-    localStorage.setItem(
-      "hotelMurderAlerts",
-      "1"
-    );
-
-    document
-      .getElementById("alertStatus")
-      .textContent=
-      "✅ Call alerts enabled.";
-
-    document
-      .getElementById("enableAlertsButton")
-      .textContent=
-      "✅ CALL ALERTS ENABLED";
-
-    playCallSound();
-
-  }
-  catch(error){
-
-    console.error(error);
-
-    alert(
-      "Tap the button again to enable alerts."
-    );
-
-  }
-
-};
-
-
-function playCallSound(){
-
-  try{
-
-    const AudioContext =
-      window.AudioContext ||
-      window.webkitAudioContext;
-
-    if(!AudioContext){
-      return;
-    }
-
-    audioContext =
-      audioContext ||
-      new AudioContext();
-
-    if(
-      audioContext.state==="suspended"
-    ){
-
-      audioContext.resume()
-        .catch(()=>{});
-
-    }
-
-    const start =
-      audioContext.currentTime;
-
-    for(
-      let group=0;
-      group<3;
-      group++
-    ){
-
-      const base =
-        start+
-        group*3.1;
-
-      for(
-        let i=0;
-        i<2;
-        i++
-      ){
-
-        const osc =
-          audioContext.createOscillator();
-
-        const gain =
-          audioContext.createGain();
-
-        osc.type="sine";
-
-        osc.frequency.value =
-          i===0 ? 880 : 660;
-
-        const t =
-          base+i*0.65;
-
-        gain.gain.setValueAtTime(
-          0.0001,
-          t
-        );
-
-        gain.gain.exponentialRampToValueAtTime(
-          0.28,
-          t+0.03
-        );
-
-        gain.gain.exponentialRampToValueAtTime(
-          0.0001,
-          t+0.50
-        );
-
-        osc.connect(gain);
-        gain.connect(
-          audioContext.destination
-        );
-
-        osc.start(t);
-        osc.stop(t+0.55);
-
-      }
-
-    }
-
-  }
-  catch(error){
-
-    console.error(error);
-
-  }
-
-}
-
-
-function vibrate(){
-
-  try{
-
-    if("vibrate" in navigator){
-
-      navigator.vibrate([
-        300,120,
-        300,120,
-        500,120,
-        500
-      ]);
-
-    }
-
-  }catch(e){}
-
-}
-
-
-function systemNotification(
-  destination,
-  caller
-){
-
-  if(!alertsEnabled){
-    return;
-  }
-
-  if(
-    "Notification" in window &&
-    Notification.permission==="granted"
-  ){
-
-    try{
-
-      new Notification(
-        "📞 Hotel Murder Call",
-        {
-          body:
-            `${caller} is calling everyone to ${destination}!`,
-          tag:
-            "hotel-murder-"+Date.now()
-        }
-      );
-
-    }catch(e){}
-
-  }
+  return shuffle(
+    tasks
+  );
 
 }
 
@@ -1941,7 +2408,9 @@ function(){
 
   myName =
     document
-      .getElementById("nameInput")
+      .getElementById(
+        "nameInput"
+      )
       .value
       .trim();
 
@@ -1956,12 +2425,16 @@ function(){
   }
 
   document
-    .getElementById("home")
+    .getElementById(
+      "home"
+    )
     .classList
     .add("hidden");
 
   document
-    .getElementById("createScreen")
+    .getElementById(
+      "createScreen"
+    )
     .classList
     .remove("hidden");
 
@@ -1972,12 +2445,16 @@ window.backHome =
 function(){
 
   document
-    .getElementById("createScreen")
+    .getElementById(
+      "createScreen"
+    )
     .classList
     .add("hidden");
 
   document
-    .getElementById("home")
+    .getElementById(
+      "home"
+    )
     .classList
     .remove("hidden");
 
@@ -1993,7 +2470,9 @@ async function(){
 
   roomCode =
     document
-      .getElementById("roomInput")
+      .getElementById(
+        "roomInput"
+      )
       .value
       .trim()
       .toUpperCase();
@@ -2001,9 +2480,25 @@ async function(){
   const limit =
     Number(
       document
-        .getElementById("playerLimit")
+        .getElementById(
+          "playerLimit"
+        )
         .value
     );
+
+
+  if(
+    limit > 4
+  ){
+
+    alert(
+      "Maximum is 4 players."
+    );
+
+    return;
+
+  }
+
 
   if(!roomCode){
 
@@ -2015,14 +2510,19 @@ async function(){
 
   }
 
+
   const roomRef =
     ref(
       db,
-      "rooms/"+roomCode
+      "rooms/" +
+      roomCode
     );
 
+
   if(
-    (await get(roomRef)).exists()
+    (
+      await get(roomRef)
+    ).exists()
   ){
 
     alert(
@@ -2033,25 +2533,46 @@ async function(){
 
   }
 
+
   await set(
     roomRef,
     {
-      status:"lobby",
-      host:playerId,
-      playerLimit:limit,
-      createdAt:Date.now(),
-      roundNumber:0,
+
+      status:
+        "lobby",
+
+      host:
+        playerId,
+
+      playerLimit:
+        limit,
+
+      createdAt:
+        serverNow(),
+
+      roundNumber:
+        0,
 
       players:{
+
         [playerId]:{
-          name:myName,
-          joinedAt:Date.now()
+
+          name:
+            myName,
+
+          joinedAt:
+            serverNow()
+
         }
+
       }
+
     }
   );
 
+
   setupDisconnectCleanup();
+
   enterLobby();
 
 };
@@ -2066,51 +2587,77 @@ async function(){
 
   myName =
     document
-      .getElementById("nameInput")
+      .getElementById(
+        "nameInput"
+      )
       .value
       .trim();
 
+
   roomCode =
     document
-      .getElementById("roomInput")
+      .getElementById(
+        "roomInput"
+      )
       .value
       .trim()
       .toUpperCase();
 
+
   if(!myName){
 
-    alert("Enter your name.");
+    alert(
+      "Enter your name."
+    );
+
     return;
 
   }
+
 
   if(!roomCode){
 
-    alert("Enter the room code.");
+    alert(
+      "Enter the room code."
+    );
+
     return;
 
   }
+
 
   const snapshot =
     await get(
+
       ref(
         db,
-        "rooms/"+roomCode
+        "rooms/" +
+        roomCode
       )
+
     );
 
-  if(!snapshot.exists()){
 
-    alert("Room not found.");
+  if(
+    !snapshot.exists()
+  ){
+
+    alert(
+      "Room not found."
+    );
+
     return;
 
   }
+
 
   const data =
     snapshot.val();
 
+
   if(
-    data.status!=="lobby"
+    data.status !==
+    "lobby"
   ){
 
     alert(
@@ -2121,32 +2668,69 @@ async function(){
 
   }
 
-  const players =
-    data.players||{};
 
   if(
-    !players[playerId] &&
-    Object.keys(players).length>=data.playerLimit
+    Number(
+      data.playerLimit
+    ) > 4
   ){
 
-    alert("Room is full.");
+    alert(
+      "This room exceeds the 4-player limit."
+    );
+
     return;
 
   }
 
+
+  const players =
+    data.players ||
+    {};
+
+
+  if(
+    !players[playerId] &&
+    Object.keys(
+      players
+    ).length >=
+    data.playerLimit
+  ){
+
+    alert(
+      "Room is full."
+    );
+
+    return;
+
+  }
+
+
   await update(
+
     ref(
       db,
-      "rooms/"+roomCode+
-      "/players/"+playerId
+      "rooms/" +
+      roomCode +
+      "/players/" +
+      playerId
     ),
+
     {
-      name:myName,
-      joinedAt:Date.now()
+
+      name:
+        myName,
+
+      joinedAt:
+        serverNow()
+
     }
+
   );
 
+
   setupDisconnectCleanup();
+
   enterLobby();
 
 };
@@ -2162,86 +2746,46 @@ function setupDisconnectCleanup(){
     return;
   }
 
-  onDisconnect(
-    ref(
-      db,
-      "rooms/"+roomCode+
-      "/players/"+playerId
-    )
-  ).remove();
 
   onDisconnect(
+
     ref(
       db,
-      "rooms/"+roomCode+
-      "/private/"+playerId
+      "rooms/" +
+      roomCode +
+      "/players/" +
+      playerId
     )
+
   ).remove();
 
+
   onDisconnect(
+
     ref(
       db,
-      "rooms/"+roomCode+
-      "/completed/"+playerId
+      "rooms/" +
+      roomCode +
+      "/private/" +
+      playerId
     )
+
+  ).remove();
+
+
+  onDisconnect(
+
+    ref(
+      db,
+      "rooms/" +
+      roomCode +
+      "/completed/" +
+      playerId
+    )
+
   ).remove();
 
 }
-
-
-async function deleteRoomIfEmpty(){
-
-  if(!roomCode){
-    return;
-  }
-
-  const roomRef =
-    ref(
-      db,
-      "rooms/"+roomCode
-    );
-
-  const snapshot =
-    await get(roomRef);
-
-  if(!snapshot.exists()){
-    return;
-  }
-
-  const players =
-    snapshot.val().players||{};
-
-  if(
-    Object.keys(players).length===0
-  ){
-
-    await remove(roomRef);
-
-  }
-
-}
-
-
-window.addEventListener(
-  "pagehide",
-  ()=>{
-    try{
-
-      if(roomCode){
-
-        remove(
-          ref(
-            db,
-            "rooms/"+roomCode+
-            "/players/"+playerId
-          )
-        );
-
-      }
-
-    }catch(e){}
-  }
-);
 
 
 /* =====================================================
@@ -2251,28 +2795,39 @@ LOBBY
 function enterLobby(){
 
   document
-    .getElementById("home")
+    .getElementById(
+      "home"
+    )
     .classList
     .add("hidden");
 
   document
-    .getElementById("createScreen")
+    .getElementById(
+      "createScreen"
+    )
     .classList
     .add("hidden");
 
   document
-    .getElementById("game")
+    .getElementById(
+      "game"
+    )
     .classList
     .add("hidden");
 
   document
-    .getElementById("lobby")
+    .getElementById(
+      "lobby"
+    )
     .classList
     .remove("hidden");
 
   document
-    .getElementById("roomDisplay")
-    .textContent=roomCode;
+    .getElementById(
+      "roomDisplay"
+    )
+    .textContent =
+    roomCode;
 
   listenToRoom();
 
@@ -2282,35 +2837,34 @@ function enterLobby(){
 function listenToRoom(){
 
   onValue(
+
     ref(
       db,
-      "rooms/"+roomCode
+      "rooms/" +
+      roomCode
     ),
-    async snapshot=>{
 
-      if(!snapshot.exists()){
+    snapshot=>{
+
+      if(
+        !snapshot.exists()
+      ){
+
         return;
+
       }
+
 
       roomData =
         snapshot.val();
 
-      const players =
-        roomData.players||{};
-
-      if(
-        Object.keys(players).length===0
-      ){
-
-        await deleteRoomIfEmpty();
-        return;
-
-      }
 
       renderLobby();
 
+
       if(
-        roomData.status==="game"
+        roomData.status ===
+        "game"
       ){
 
         loadGame();
@@ -2319,20 +2873,23 @@ function listenToRoom(){
       else{
 
         document
-          .getElementById("game")
+          .getElementById(
+            "game"
+          )
           .classList
           .add("hidden");
 
         document
-          .getElementById("lobby")
+          .getElementById(
+            "lobby"
+          )
           .classList
           .remove("hidden");
-
-        mySecret=null;
 
       }
 
     }
+
   );
 
 }
@@ -2341,163 +2898,130 @@ function listenToRoom(){
 function renderLobby(){
 
   const players =
-    roomData.players||{};
+    roomData.players ||
+    {};
+
 
   const ids =
-    Object.keys(players);
+    Object.keys(
+      players
+    );
+
 
   document
-    .getElementById("lobbyPlayerCount")
-    .innerHTML=`
+    .getElementById(
+      "lobbyPlayerCount"
+    )
+    .innerHTML = `
 
       <span class="badge">
+
         ${ids.length}/${roomData.playerLimit}
+
       </span>
 
+
       <span class="badge">
+
         🕵️ 1 Detective
+
       </span>
 
+
       <span class="badge">
+
         🔪 1 Murderer
+
       </span>
 
+
       <span class="badge">
+
         👤 ${Math.max(
           0,
-          roomData.playerLimit-2
+          roomData.playerLimit - 2
         )} Innocent
+
       </span>
 
     `;
 
+
   document
-    .getElementById("playersList")
-    .innerHTML=
+    .getElementById(
+      "playersList"
+    )
+    .innerHTML =
 
-    ids.map(
-      id=>`
+    ids
+      .map(
+        id=>`
 
-        <div class="player">
+          <div class="player">
 
-          👤
-          ${escapeHtml(
-            players[id].name
-          )}
+            👤
+            ${escapeHtml(
+              players[id]
+                .name
+            )}
 
-          ${
-            id===roomData.host
-            ?
-            `<span class="host">
-              👑 HOST
-            </span>`
-            :
-            ""
-          }
+            ${
+              id ===
+              roomData.host
 
-        </div>
+              ?
 
-      `
-    ).join("");
+              `<span class="host">
+
+                👑 HOST
+
+              </span>`
+
+              :
+
+              ""
+
+            }
+
+          </div>
+
+        `
+      )
+      .join("");
+
 
   if(
-    roomData.host===playerId
+    roomData.host ===
+    playerId
   ){
 
     document
-      .getElementById("hostPanel")
+      .getElementById(
+        "hostPanel"
+      )
       .classList
       .remove("hidden");
 
-    document
-      .getElementById("hostInfo")
-      .textContent=
-      `${ids.length}/${roomData.playerLimit} players joined.`;
 
     document
-      .getElementById("startButton")
-      .disabled=
-      ids.length!==roomData.playerLimit;
+      .getElementById(
+        "hostInfo"
+      )
+      .textContent =
+      `${ids.length}/${roomData.playerLimit} players joined.`;
+
+
+    document
+      .getElementById(
+        "startButton"
+      )
+      .disabled =
+      ids.length !==
+      roomData.playerLimit;
 
   }
 
 }
-
-
-/* =====================================================
-RESET
-===================================================== */
-
-window.resetGame =
-async function(){
-
-  if(
-    !roomData ||
-    roomData.host!==playerId
-  ){
-
-    alert(
-      "Only the host can reset the game."
-    );
-
-    return;
-
-  }
-
-  if(
-    !confirm(
-      "Reset the current game and send everyone back to the lobby?"
-    )
-  ){
-    return;
-  }
-
-  await update(
-    ref(db),
-    {
-
-      ["rooms/"+roomCode+"/status"]:
-        "lobby",
-
-      ["rooms/"+roomCode+"/game"]:
-        null,
-
-      ["rooms/"+roomCode+"/private"]:
-        null,
-
-      ["rooms/"+roomCode+"/completed"]:
-        null,
-
-      ["rooms/"+roomCode+"/evidence"]:
-        null,
-
-      ["rooms/"+roomCode+"/call"]:
-        null,
-
-      ["rooms/"+roomCode+"/result"]:
-        null
-
-    }
-  );
-
-  mySecret=null;
-  lastCallId=null;
-  selectedEvidenceFile=null;
-  evidenceListenerStarted=false;
-
-  clearInterval(globalInterval);
-
-  document
-    .getElementById("game")
-    .classList
-    .add("hidden");
-
-  document
-    .getElementById("lobby")
-    .classList
-    .remove("hidden");
-
-};
 
 
 /* =====================================================
@@ -2509,19 +3033,29 @@ async function(){
 
   if(
     !roomData ||
-    roomData.host!==playerId
+    roomData.host !==
+    playerId
   ){
+
     return;
+
   }
 
+
   const players =
-    roomData.players||{};
+    roomData.players ||
+    {};
+
 
   const ids =
-    Object.keys(players);
+    Object.keys(
+      players
+    );
+
 
   if(
-    ids.length!==roomData.playerLimit
+    ids.length !==
+    roomData.playerLimit
   ){
 
     alert(
@@ -2532,100 +3066,174 @@ async function(){
 
   }
 
-  if(ids.length<2){
+
+  if(
+    ids.length < 2 ||
+    ids.length > 4
+  ){
 
     alert(
-      "At least 2 players are required."
+      "The game supports 2–4 players."
     );
 
     return;
 
   }
 
-  const roundSeed =
-    freshRoundSeed();
 
   const shuffled =
-    shuffle(ids);
+    shuffle(
+      ids
+    );
+
 
   const detective =
     shuffled[0];
 
+
   const murderer =
     shuffled[1];
+
 
   const innocents =
     shuffled.slice(2);
 
+
   const now =
-    Date.now();
+    serverNow();
+
 
   const murderAt =
-    now+
-    MIN_MURDER_DELAY+
+    now +
+    MIN_MURDER_DELAY +
     Math.floor(
-      Math.random()*
+      Math.random() *
       (
-        MAX_MURDER_DELAY-
+        MAX_MURDER_DELAY -
         MIN_MURDER_DELAY
       )
     );
 
+
   const detectiveEnd =
-    now+
+    now +
     DETECTIVE_WAIT;
 
+
   const investigationEnd =
-    detectiveEnd+
+    detectiveEnd +
     INVESTIGATION_TIME;
 
+
   const crimeLocation =
-    random(locations);
+    random(
+      locations
+    );
+
 
   const victim =
-    random(victims);
+    random(
+      victims
+    );
+
 
   const caseDescription =
-    random(cases);
+    random(
+      cases
+    );
 
-  const privateData={};
 
-  privateData[detective]={
-    role:"detective",
+  const roundSeed =
+    freshRoundSeed();
+
+
+  const privateData =
+    {};
+
+
+  /*
+    Detective
+  */
+
+  privateData[detective] = {
+
+    role:
+      "detective",
+
     tasks:[]
+
   };
 
-  privateData[murderer]={
-    role:"murderer",
+
+  /*
+    Murderer
+  */
+
+  privateData[murderer] = {
+
+    role:
+      "murderer",
+
     tasks:
       buildRandomMurdererTasks(
+
         murderer,
+
         now,
+
         detectiveEnd,
+
         murderAt,
+
         crimeLocation,
+
         roundSeed
+
       )
+
   };
 
+
+  /*
+    Innocents
+  */
+
   innocents.forEach(
+
     id=>{
-      privateData[id]={
-        role:"innocent",
+
+      privateData[id] = {
+
+        role:
+          "innocent",
+
         tasks:
           buildRandomNormalTasks(
+
             id,
+
             now,
+
             detectiveEnd,
+
             crimeLocation,
+
             roundSeed
+
           )
+
       };
+
     }
+
   );
 
+
   for(
-    const id of Object.keys(privateData)
+    const id of
+    Object.keys(
+      privateData
+    )
   ){
 
     privateData[id].tasks =
@@ -2635,20 +3243,35 @@ async function(){
 
   }
 
-  const game={
+
+  const game = {
 
     roundNumber:
-      (roomData.roundNumber||0)+1,
+      (
+        roomData.roundNumber ||
+        0
+      ) +
+      1,
 
     roundSeed,
-    startedAt:now,
+
+    startedAt:
+      now,
+
     murderAt,
+
     detectiveEnd,
+
     investigationEnd,
+
     crimeLocation,
+
     victim,
+
     caseDescription,
+
     detective,
+
     murderer,
 
     suspects:[
@@ -2658,40 +3281,93 @@ async function(){
 
   };
 
-  const updates={};
+
+  const updates =
+    {};
+
 
   updates[
-    "rooms/"+roomCode+"/status"
-  ]="game";
+    "rooms/" +
+    roomCode +
+    "/status"
+  ] =
+    "game";
+
 
   updates[
-    "rooms/"+roomCode+"/roundNumber"
-  ]=game.roundNumber;
+    "rooms/" +
+    roomCode +
+    "/roundNumber"
+  ] =
+    game.roundNumber;
+
 
   updates[
-    "rooms/"+roomCode+"/game"
-  ]=game;
+    "rooms/" +
+    roomCode +
+    "/game"
+  ] =
+    game;
+
 
   updates[
-    "rooms/"+roomCode+"/evidence"
-  ]=null;
+    "rooms/" +
+    roomCode +
+    "/completed"
+  ] =
+    null;
+
+
+  updates[
+    "rooms/" +
+    roomCode +
+    "/detectiveBoard"
+  ] =
+    {
+
+      questions:{},
+
+      interviews:{},
+
+      locations:{},
+
+      clues:{},
+
+      theory:""
+
+    };
+
 
   for(
-    const [id,data]
-    of Object.entries(privateData)
+    const [
+      id,
+      data
+    ]
+    of
+    Object.entries(
+      privateData
+    )
   ){
 
     updates[
-      "rooms/"+roomCode+
-      "/private/"+id
-    ]=data;
+      "rooms/" +
+      roomCode +
+      "/private/" +
+      id
+    ] =
+    data;
+
 
     updates[
-      "rooms/"+roomCode+
-      "/completed/"+id
-    ]={};
+      "rooms/" +
+      roomCode +
+      "/completed/" +
+      id
+    ] =
+    {};
 
   }
+
 
   await update(
     ref(db),
@@ -2708,21 +3384,30 @@ LOAD GAME
 async function loadGame(){
 
   document
-    .getElementById("lobby")
+    .getElementById(
+      "lobby"
+    )
     .classList
     .add("hidden");
 
+
   document
-    .getElementById("game")
+    .getElementById(
+      "game"
+    )
     .classList
     .remove("hidden");
 
+
   if(
-    roomData.host===playerId
+    roomData.host ===
+    playerId
   ){
 
     document
-      .getElementById("resetFixed")
+      .getElementById(
+        "resetFixed"
+      )
       .classList
       .remove("hidden");
 
@@ -2730,24 +3415,34 @@ async function loadGame(){
   else{
 
     document
-      .getElementById("resetFixed")
+      .getElementById(
+        "resetFixed"
+      )
       .classList
       .add("hidden");
 
   }
 
+
   if(!mySecret){
 
     const snapshot =
       await get(
+
         ref(
           db,
-          "rooms/"+roomCode+
-          "/private/"+playerId
+          "rooms/" +
+          roomCode +
+          "/private/" +
+          playerId
         )
+
       );
 
-    if(snapshot.exists()){
+
+    if(
+      snapshot.exists()
+    ){
 
       mySecret =
         snapshot.val();
@@ -2758,32 +3453,30 @@ async function loadGame(){
 
   }
 
-  if(!listenersStarted){
 
-    listenersStarted=true;
+  if(
+    !listenersStarted
+  ){
+
+    listenersStarted =
+      true;
 
     listenForCalls();
+
     listenToMyTasks();
 
   }
 
-  if(!evidenceListenerStarted){
-
-    evidenceListenerStarted=true;
-
-    listenForEvidence();
-
-  }
-
-  await loadMyEvidence();
 
   if(
-    mySecret?.role==="detective"
+    mySecret?.role ===
+    "detective"
   ){
 
-    renderDetectiveEvidence();
+    startDetectiveBoardListener();
 
   }
+
 
   startGlobalClock();
 
@@ -2800,146 +3493,190 @@ function startGlobalClock(){
     globalInterval
   );
 
+
   function tick(){
 
     if(
       !roomData ||
       !roomData.game
     ){
+
       return;
+
     }
+
 
     const game =
       roomData.game;
 
+
     const now =
-      Date.now();
+      serverNow();
 
-    document
-      .getElementById("globalTimeText")
-      .textContent=
-      "Actual time: "+
-      clockText(
-        new Date(now)
-      );
 
-    if(now<game.murderAt){
+    /*
+      DETECTIVE:
+      Show countdown.
 
-      document
-        .getElementById("phaseText")
-        .textContent=
-        "ROUND IN PROGRESS — MURDER UPCOMING";
-
-    }
-    else if(now<game.detectiveEnd){
-
-      document
-        .getElementById("phaseText")
-        .textContent=
-        "DETECTIVE WAITING — MURDER HAS HAPPENED";
-
-    }
-    else if(now<game.investigationEnd){
-
-      document
-        .getElementById("phaseText")
-        .textContent=
-        "INVESTIGATION";
-
-    }
-    else{
-
-      document
-        .getElementById("phaseText")
-        .textContent=
-        "ROUND FINISHED";
-
-    }
-
-    let target=now;
-
-    if(now<game.murderAt){
-
-      target=game.murderAt;
-
-    }
-    else if(now<game.detectiveEnd){
-
-      target=game.detectiveEnd;
-
-    }
-    else if(now<game.investigationEnd){
-
-      target=game.investigationEnd;
-
-    }
-
-    document
-      .getElementById("globalTimer")
-      .textContent=
-      formatDuration(
-        target-now
-      );
+      EVERYONE ELSE:
+      Show only current time.
+    */
 
     if(
-      mySecret &&
-      mySecret.role==="detective"
+      mySecret?.role ===
+      "detective"
     ){
 
       document
-        .getElementById("detectiveTimer")
-        .textContent=
-        formatDuration(
-          Math.max(
-            0,
-            game.detectiveEnd-now
-          )
-        );
+        .getElementById(
+          "detectiveTimerArea"
+        )
+        .classList
+        .remove("hidden");
+
+
+      document
+        .getElementById(
+          "normalClockArea"
+        )
+        .classList
+        .add("hidden");
+
+
+      let target =
+        now;
+
 
       if(
-        now>=game.detectiveEnd
+        now <
+        game.murderAt
+      ){
+
+        target =
+          game.murderAt;
+
+      }
+      else if(
+        now <
+        game.detectiveEnd
+      ){
+
+        target =
+          game.detectiveEnd;
+
+      }
+      else if(
+        now <
+        game.investigationEnd
+      ){
+
+        target =
+          game.investigationEnd;
+
+      }
+
+
+      document
+        .getElementById(
+          "globalTimer"
+        )
+        .textContent =
+        formatDuration(
+          target -
+          now
+        );
+
+
+      if(
+        now >=
+        game.detectiveEnd
       ){
 
         showInvestigation();
 
       }
 
-      const timerCard =
-        document
-          .getElementById("investigationTimerCard");
 
       if(
-        now>=game.detectiveEnd &&
-        now<game.investigationEnd
+        now >=
+        game.detectiveEnd &&
+        now <
+        game.investigationEnd
       ){
 
-        timerCard
+        document
+          .getElementById(
+            "investigationTimerCard"
+          )
           .classList
           .remove("hidden");
 
+
         document
-          .getElementById("investigationTimer")
-          .textContent=
+          .getElementById(
+            "investigationTimer"
+          )
+          .textContent =
           formatDuration(
-            game.investigationEnd-now
+            game.investigationEnd -
+            now
           );
 
       }
       else{
 
-        timerCard
+        document
+          .getElementById(
+            "investigationTimerCard"
+          )
           .classList
           .add("hidden");
 
       }
 
     }
+    else{
 
-    renderTasks();
+      document
+        .getElementById(
+          "detectiveTimerArea"
+        )
+        .classList
+        .add("hidden");
+
+
+      document
+        .getElementById(
+          "normalClockArea"
+        )
+        .classList
+        .remove("hidden");
+
+
+      document
+        .getElementById(
+          "normalClock"
+        )
+        .textContent =
+        clockText(
+          new Date(
+            now
+          )
+        );
+
+    }
+
+
+    /*
+      Keep normal pages smooth.
+      Tasks are NOT rebuilt every 500ms.
+    */
 
   }
 
+
   tick();
+
 
   globalInterval =
     setInterval(
@@ -2951,115 +3688,163 @@ function startGlobalClock(){
 
 
 /* =====================================================
-SECRET
+SECRET SCREEN
 ===================================================== */
 
 function renderSecret(){
 
   const card =
-    document.getElementById(
-      "secretCard"
-    );
+    document
+      .getElementById(
+        "secretCard"
+      );
+
 
   if(
-    mySecret.role==="detective"
+    mySecret.role ===
+    "detective"
   ){
 
-    card.innerHTML=`
+    card.innerHTML = `
 
       <div class="role detective">
+
         🕵️ YOU ARE THE DETECTIVE
+
       </div>
 
       <div class="big">
+
         Leave the game area now.
+
       </div>
 
       <p>
-        You have exactly 5 minutes.
+
+        Your waiting timer is visible.
+
       </p>
 
-      <div class="warning">
-        Do not return until the timer reaches 00:00.
+      <div class="success">
+
+        While you wait, prepare your questions
+        in your private Detective Notebook.
+
       </div>
-
-      <p>
-        When you return, you will see
-        the case, suspects, task counts,
-        and evidence photos.
-      </p>
 
     `;
 
+
     document
-      .getElementById("detectiveWaiting")
+      .getElementById(
+        "detectiveWaiting"
+      )
       .classList
       .remove("hidden");
 
+
     document
-      .getElementById("normalWaiting")
+      .getElementById(
+        "normalWaiting"
+      )
       .classList
       .add("hidden");
 
+
     document
-      .getElementById("detectiveEvidencePanel")
+      .getElementById(
+        "detectiveNotebook"
+      )
       .classList
       .remove("hidden");
 
-    renderDetectiveEvidence();
+
+    renderDetectiveBoard();
+
 
     return;
 
   }
 
-  document
-    .getElementById("normalWaiting")
-    .classList
-    .remove("hidden");
 
   document
-    .getElementById("detectiveEvidencePanel")
+    .getElementById(
+      "detectiveWaiting"
+    )
     .classList
     .add("hidden");
 
-  const murderer =
-    mySecret.role==="murderer";
 
-  card.innerHTML=`
+  document
+    .getElementById(
+      "normalWaiting"
+    )
+    .classList
+    .remove("hidden");
+
+
+  const murderer =
+    mySecret.role ===
+    "murderer";
+
+
+  card.innerHTML = `
 
     <div class="role ${
       murderer
-      ? "murderer"
-      : "innocent"
+      ?
+      "murderer"
+      :
+      "innocent"
     }">
 
       ${
         murderer
-        ? "🔪 YOU ARE THE MURDERER"
-        : "👤 YOU ARE INNOCENT"
+        ?
+        "🔪 YOU ARE THE MURDERER"
+        :
+        "👤 YOU ARE INNOCENT"
       }
 
     </div>
+
 
     <p>
+
       ${
         murderer
+
         ?
+
         "The murder is completely fictional. Follow your secret timeline."
+
         :
+
         "You are innocent. Follow your own secret timeline."
+
       }
+
     </p>
 
+
     <div class="warning">
-      🔒 Future tasks stay hidden until their unlock time.
+
+      🔒 Follow your secret tasks carefully.
+
     </div>
 
-    <h2>✅ Your Tasks</h2>
 
-    <div id="myTasks"></div>
+    <h2>
+      ✅ Your Tasks
+    </h2>
+
+
+    <div
+      id="myTasks"
+    ></div>
 
   `;
+
 
   renderTasks();
 
@@ -3076,39 +3861,55 @@ function renderTasks(){
     !mySecret ||
     !mySecret.tasks
   ){
+
     return;
+
   }
 
+
   const container =
-    document.getElementById(
-      "myTasks"
-    );
+    document
+      .getElementById(
+        "myTasks"
+      );
+
 
   if(!container){
     return;
   }
 
+
   const now =
-    Date.now();
+    serverNow();
+
 
   const completed =
-    roomData?.completed?.[playerId]||{};
+    roomData
+      ?.completed
+      ?.[playerId] ||
+    {};
 
-  container.innerHTML=
+
+  container.innerHTML =
 
     mySecret.tasks
       .map(
         task=>{
 
           const unlocked =
-            now>=task.unlockAt;
+            now >=
+            task.unlockAt;
+
 
           const done =
             completed[
               task.id
-            ]===true;
+            ] === true;
 
-          if(!unlocked){
+
+          if(
+            !unlocked
+          ){
 
             return `
 
@@ -3119,14 +3920,20 @@ function renderTasks(){
                   <div class="task-text">
 
                     <div class="task-time">
+
                       🔒 Unlocks at
                       ${escapeHtml(
                         task.unlockText
                       )}
+
                     </div>
 
+
                     <div class="locked-text">
-                      Secret task — not available yet.
+
+                      Secret task —
+                      not available yet.
+
                     </div>
 
                   </div>
@@ -3139,11 +3946,18 @@ function renderTasks(){
 
           }
 
+
           return `
 
-            <div class="task ${
-              done ? "done" : ""
-            }">
+            <div
+              class="task ${
+                done
+                ?
+                "done"
+                :
+                ""
+              }"
+            >
 
               <div class="task-row">
 
@@ -3152,8 +3966,10 @@ function renderTasks(){
                   type="checkbox"
                   ${
                     done
-                    ? "checked"
-                    : ""
+                    ?
+                    "checked"
+                    :
+                    ""
                   }
                   onchange="
                     toggleTask(
@@ -3163,22 +3979,30 @@ function renderTasks(){
                   "
                 >
 
+
                 <div class="task-text">
 
                   <div class="task-time">
+
                     ⏰
                     ${escapeHtml(
                       task.unlockText
                     )}
+
                   </div>
 
+
                   <div>
+
                     ${escapeHtml(
                       task.description
                     )}
+
                   </div>
 
+
                   <div class="task-status">
+
                     ${
                       done
                       ?
@@ -3186,6 +4010,7 @@ function renderTasks(){
                       :
                       "⬜ Not completed"
                     }
+
                   </div>
 
                 </div>
@@ -3203,6 +4028,10 @@ function renderTasks(){
 }
 
 
+/* =====================================================
+TASK CHECK
+===================================================== */
+
 window.toggleTask =
 async function(
   taskId,
@@ -3216,17 +4045,23 @@ async function(
     return;
   }
 
+
   const task =
     mySecret.tasks.find(
-      t=>t.id===taskId
+      t =>
+      t.id ===
+      taskId
     );
+
 
   if(!task){
     return;
   }
 
+
   if(
-    Date.now()<task.unlockAt
+    serverNow() <
+    task.unlockAt
   ){
 
     alert(
@@ -3239,15 +4074,24 @@ async function(
 
   }
 
+
   await update(
+
     ref(
       db,
-      "rooms/"+roomCode+
-      "/completed/"+playerId
+      "rooms/" +
+      roomCode +
+      "/completed/" +
+      playerId
     ),
+
     {
-      [taskId]:checked
+
+      [taskId]:
+        checked
+
     }
+
   );
 
 };
@@ -3256,29 +4100,1255 @@ async function(
 function listenToMyTasks(){
 
   onValue(
+
     ref(
       db,
-      "rooms/"+roomCode+
-      "/completed/"+playerId
+      "rooms/" +
+      roomCode +
+      "/completed/" +
+      playerId
     ),
+
     snapshot=>{
 
       if(!roomData){
         return;
       }
 
+
       roomData.completed =
-        roomData.completed||{};
+        roomData.completed ||
+        {};
+
 
       roomData.completed[playerId] =
-        snapshot.val()||{};
+        snapshot.val() ||
+        {};
+
 
       renderTasks();
 
     }
+
   );
 
 }
+
+
+/* =====================================================
+DETECTIVE BOARD LISTENER
+===================================================== */
+
+function startDetectiveBoardListener(){
+
+  if(
+    boardListenerStarted
+  ){
+    renderDetectiveBoard();
+    return;
+  }
+
+
+  boardListenerStarted =
+    true;
+
+
+  onValue(
+
+    ref(
+      db,
+      "rooms/" +
+      roomCode +
+      "/detectiveBoard"
+    ),
+
+    snapshot=>{
+
+      roomData.detectiveBoard =
+        snapshot.val() ||
+        {
+
+          questions:{},
+
+          interviews:{},
+
+          locations:{},
+
+          clues:{},
+
+          theory:""
+
+        };
+
+
+      renderDetectiveBoard();
+
+    }
+
+  );
+
+}
+
+
+/* =====================================================
+DETECTIVE BOARD
+===================================================== */
+
+function getDetectiveBoard(){
+
+  return roomData.detectiveBoard ||
+    {
+
+      questions:{},
+
+      interviews:{},
+
+      locations:{},
+
+      clues:{},
+
+      theory:""
+
+    };
+
+}
+
+
+function renderDetectiveBoard(){
+
+  if(
+    mySecret?.role !==
+    "detective"
+  ){
+    return;
+  }
+
+
+  const board =
+    getDetectiveBoard();
+
+
+  renderPrepQuestions(
+    board
+  );
+
+
+  renderInterviewForm(
+    board
+  );
+
+
+  renderInterviews(
+    board
+  );
+
+
+  renderLocations(
+    board
+  );
+
+
+  renderClues(
+    board
+  );
+
+
+  const theory =
+    document.getElementById(
+      "detectiveTheory"
+    );
+
+
+  if(
+    theory &&
+    document.activeElement !==
+    theory
+  ){
+
+    theory.value =
+      board.theory ||
+      "";
+
+  }
+
+}
+
+
+function renderPrepQuestions(
+  board
+){
+
+  const container =
+    document.getElementById(
+      "prepQuestionsList"
+    );
+
+
+  if(!container){
+    return;
+  }
+
+
+  const entries =
+    Object.entries(
+      board.questions ||
+      {}
+    );
+
+
+  if(
+    entries.length ===
+    0
+  ){
+
+    container.innerHTML = `
+
+      <div class="empty-board">
+
+        No questions prepared yet.
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+
+  container.innerHTML =
+
+    entries
+      .map(
+        ([id,q],index)=>`
+
+          <div class="question-card">
+
+            <div class="question-number">
+
+              QUESTION ${index+1}
+
+            </div>
+
+            <div>
+
+              ${escapeHtml(q.text)}
+
+            </div>
+
+
+            <button
+              class="secondary board-small-button"
+              onclick="
+                deletePrepQuestion('${id}')
+              "
+            >
+
+              🗑️ DELETE
+
+            </button>
+
+          </div>
+
+        `
+      )
+      .join("");
+
+
+  updateInterviewQuestionOptions(
+    board
+  );
+
+}
+
+
+window.addPrepQuestion =
+async function(){
+
+  if(
+    mySecret?.role !==
+    "detective"
+  ){
+    return;
+  }
+
+
+  const input =
+    document.getElementById(
+      "prepQuestionInput"
+    );
+
+
+  const text =
+    input.value.trim();
+
+
+  if(!text){
+
+    alert(
+      "Write a question first."
+    );
+
+    return;
+
+  }
+
+
+  const board =
+    getDetectiveBoard();
+
+
+  const questionRef =
+    push(
+      ref(
+        db,
+        "rooms/" +
+        roomCode +
+        "/detectiveBoard/questions"
+      )
+    );
+
+
+  await set(
+    questionRef,
+    {
+
+      text,
+
+      createdAt:
+        serverNow()
+
+    }
+  );
+
+
+  input.value =
+    "";
+
+};
+
+
+window.deletePrepQuestion =
+async function(
+  questionId
+){
+
+  if(
+    mySecret?.role !==
+    "detective"
+  ){
+    return;
+  }
+
+
+  if(
+    !confirm(
+      "Delete this prepared question?"
+    )
+  ){
+
+    return;
+
+  }
+
+
+  await remove(
+
+    ref(
+      db,
+      "rooms/" +
+      roomCode +
+      "/detectiveBoard/questions/" +
+      questionId
+    )
+
+  );
+
+};
+
+
+/* =====================================================
+INTERVIEW FORM
+===================================================== */
+
+function renderInterviewForm(
+  board
+){
+
+  if(
+    mySecret?.role !==
+    "detective"
+  ){
+    return;
+  }
+
+
+  const suspectSelect =
+    document.getElementById(
+      "interviewSuspect"
+    );
+
+
+  if(!suspectSelect){
+    return;
+  }
+
+
+  const suspects =
+    roomData?.game?.suspects ||
+    [];
+
+
+  const current =
+    suspectSelect.value;
+
+
+  suspectSelect.innerHTML =
+
+    suspects
+      .map(
+        id=>`
+
+          <option
+            value="${id}"
+          >
+
+            ${escapeHtml(
+              roomData
+                .players[id]
+                ?.name ||
+              "Unknown"
+            )}
+
+          </option>
+
+        `
+      )
+      .join("");
+
+
+  if(
+    suspects.includes(
+      current
+    )
+  ){
+
+    suspectSelect.value =
+      current;
+
+  }
+
+
+  updateInterviewQuestionOptions(
+    board
+  );
+
+}
+
+
+function updateInterviewQuestionOptions(
+  board =
+    getDetectiveBoard()
+){
+
+  const select =
+    document.getElementById(
+      "interviewQuestion"
+    );
+
+
+  if(!select){
+    return;
+  }
+
+
+  const questions =
+    board.questions ||
+    {};
+
+
+  const entries =
+    Object.entries(
+      questions
+    );
+
+
+  select.innerHTML =
+
+    entries.length
+
+    ?
+
+    entries
+      .map(
+        ([id,q])=>`
+
+          <option
+            value="${id}"
+          >
+
+            ${escapeHtml(
+              q.text
+            )}
+
+          </option>
+
+        `
+      )
+      .join("")
+
+    :
+
+    `<option value="">
+      No prepared questions
+    </option>`;
+
+}
+
+
+window.saveInterview =
+async function(){
+
+  if(
+    mySecret?.role !==
+    "detective"
+  ){
+    return;
+  }
+
+
+  const suspect =
+    document
+      .getElementById(
+        "interviewSuspect"
+      )
+      .value;
+
+
+  const questionId =
+    document
+      .getElementById(
+        "interviewQuestion"
+      )
+      .value;
+
+
+  const answerInput =
+    document
+      .getElementById(
+        "interviewAnswer"
+      );
+
+
+  const answer =
+    answerInput
+      .value
+      .trim();
+
+
+  if(!suspect){
+
+    alert(
+      "Choose a suspect."
+    );
+
+    return;
+
+  }
+
+
+  if(!questionId){
+
+    alert(
+      "Add a question first."
+    );
+
+    return;
+
+  }
+
+
+  if(!answer){
+
+    alert(
+      "Write the answer."
+    );
+
+    return;
+
+  }
+
+
+  const board =
+    getDetectiveBoard();
+
+
+  const question =
+    board
+      .questions
+      ?.[questionId];
+
+
+  if(!question){
+
+    alert(
+      "Question not found."
+    );
+
+    return;
+
+  }
+
+
+  const interviewRef =
+    push(
+      ref(
+        db,
+        "rooms/" +
+        roomCode +
+        "/detectiveBoard/interviews"
+      )
+    );
+
+
+  await set(
+    interviewRef,
+    {
+
+      suspect,
+
+      suspectName:
+        roomData
+          .players[suspect]
+          ?.name ||
+        "Unknown",
+
+      question:
+        question.text,
+
+      answer,
+
+      time:
+        serverNow()
+
+    }
+  );
+
+
+  answerInput.value =
+    "";
+
+};
+
+
+function renderInterviews(
+  board
+){
+
+  const container =
+    document.getElementById(
+      "interviewList"
+    );
+
+
+  if(!container){
+    return;
+  }
+
+
+  const interviews =
+    Object.entries(
+      board.interviews ||
+      {}
+    );
+
+
+  if(
+    interviews.length ===
+    0
+  ){
+
+    container.innerHTML = `
+
+      <div class="empty-board">
+
+        No interviews recorded yet.
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+
+  container.innerHTML =
+
+    interviews
+      .map(
+        ([id,item])=>`
+
+          <div class="interview-card">
+
+            <div class="interview-header">
+
+              <div class="interview-name">
+
+                ${escapeHtml(
+                  item.suspectName
+                )}
+
+              </div>
+
+              <div class="interview-time">
+
+                ${escapeHtml(
+                  shortClock(
+                    new Date(
+                      Number(
+                        item.time
+                      )
+                    )
+                  )
+                )}
+
+              </div>
+
+            </div>
+
+
+            <div
+              class="answer-label"
+            >
+
+              QUESTION
+
+            </div>
+
+
+            <div>
+
+              ${escapeHtml(
+                item.question
+              )}
+
+            </div>
+
+
+            <div
+              class="answer-label"
+            >
+
+              ANSWER
+
+            </div>
+
+
+            <div>
+
+              ${escapeHtml(
+                item.answer
+              )}
+
+            </div>
+
+
+            <button
+              class="secondary board-small-button"
+              onclick="
+                deleteInterview('${id}')
+              "
+            >
+
+              🗑️ DELETE
+
+            </button>
+
+          </div>
+
+        `
+      )
+      .join("");
+
+}
+
+
+window.deleteInterview =
+async function(
+  interviewId
+){
+
+  if(
+    mySecret?.role !==
+    "detective"
+  ){
+    return;
+  }
+
+
+  await remove(
+
+    ref(
+      db,
+      "rooms/" +
+      roomCode +
+      "/detectiveBoard/interviews/" +
+      interviewId
+    )
+
+  );
+
+};
+
+
+/* =====================================================
+LOCATIONS
+===================================================== */
+
+window.addInvestigationLocation =
+async function(){
+
+  if(
+    mySecret?.role !==
+    "detective"
+  ){
+    return;
+  }
+
+
+  const input =
+    document.getElementById(
+      "locationInput"
+    );
+
+
+  const text =
+    input
+      .value
+      .trim();
+
+
+  if(!text){
+
+    alert(
+      "Write a location."
+    );
+
+    return;
+
+  }
+
+
+  const locationRef =
+    push(
+      ref(
+        db,
+        "rooms/" +
+        roomCode +
+        "/detectiveBoard/locations"
+      )
+    );
+
+
+  await set(
+    locationRef,
+    {
+
+      text,
+
+      time:
+        serverNow()
+
+    }
+  );
+
+
+  input.value =
+    "";
+
+};
+
+
+function renderLocations(
+  board
+){
+
+  const container =
+    document.getElementById(
+      "locationsList"
+    );
+
+
+  if(!container){
+    return;
+  }
+
+
+  const locations =
+    Object.entries(
+      board.locations ||
+      {}
+    )
+    .sort(
+      (a,b)=>
+        Number(
+          a[1].time ||
+          0
+        ) -
+        Number(
+          b[1].time ||
+          0
+        )
+    );
+
+
+  if(
+    locations.length ===
+    0
+  ){
+
+    container.innerHTML = `
+
+      <div class="empty-board">
+
+        No locations logged.
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+
+  container.innerHTML =
+
+    locations
+      .map(
+        ([id,item])=>`
+
+          <div class="location-card">
+
+            <span class="location-icon">
+              📍
+            </span>
+
+            <b>
+              ${escapeHtml(
+                item.text
+              )}
+            </b>
+
+            <div class="small">
+
+              ${escapeHtml(
+                shortClock(
+                  new Date(
+                    Number(
+                      item.time
+                    )
+                  )
+                )
+              )}
+
+            </div>
+
+
+            <button
+              class="secondary board-small-button"
+              onclick="
+                deleteInvestigationLocation('${id}')
+              "
+            >
+
+              🗑️ DELETE
+
+            </button>
+
+          </div>
+
+        `
+      )
+      .join("");
+
+}
+
+
+window.deleteInvestigationLocation =
+async function(
+  id
+){
+
+  if(
+    mySecret?.role !==
+    "detective"
+  ){
+    return;
+  }
+
+
+  await remove(
+
+    ref(
+      db,
+      "rooms/" +
+      roomCode +
+      "/detectiveBoard/locations/" +
+      id
+    )
+
+  );
+
+};
+
+
+/* =====================================================
+CLUES
+===================================================== */
+
+window.addInvestigationClue =
+async function(){
+
+  if(
+    mySecret?.role !==
+    "detective"
+  ){
+    return;
+  }
+
+
+  const input =
+    document.getElementById(
+      "clueInput"
+    );
+
+
+  const text =
+    input
+      .value
+      .trim();
+
+
+  if(!text){
+
+    alert(
+      "Write a clue."
+    );
+
+    return;
+
+  }
+
+
+  const clueRef =
+    push(
+      ref(
+        db,
+        "rooms/" +
+        roomCode +
+        "/detectiveBoard/clues"
+      )
+    );
+
+
+  await set(
+    clueRef,
+    {
+
+      text,
+
+      time:
+        serverNow()
+
+    }
+  );
+
+
+  input.value =
+    "";
+
+};
+
+
+function renderClues(
+  board
+){
+
+  const container =
+    document.getElementById(
+      "cluesList"
+    );
+
+
+  if(!container){
+    return;
+  }
+
+
+  const clues =
+    Object.entries(
+      board.clues ||
+      {}
+    )
+    .sort(
+      (a,b)=>
+        Number(
+          a[1].time ||
+          0
+        ) -
+        Number(
+          b[1].time ||
+          0
+        )
+    );
+
+
+  if(
+    clues.length ===
+    0
+  ){
+
+    container.innerHTML = `
+
+      <div class="empty-board">
+
+        No clues saved.
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+
+  container.innerHTML =
+
+    clues
+      .map(
+        ([id,item])=>`
+
+          <div class="clue-card">
+
+            <span class="clue-icon">
+              🧩
+            </span>
+
+            ${escapeHtml(
+              item.text
+            )}
+
+            <div class="small">
+
+              ${escapeHtml(
+                shortClock(
+                  new Date(
+                    Number(
+                      item.time
+                    )
+                  )
+                )
+              )}
+
+            </div>
+
+
+            <button
+              class="secondary board-small-button"
+              onclick="
+                deleteInvestigationClue('${id}')
+              "
+            >
+
+              🗑️ DELETE
+
+            </button>
+
+          </div>
+
+        `
+      )
+      .join("");
+
+}
+
+
+window.deleteInvestigationClue =
+async function(
+  id
+){
+
+  if(
+    mySecret?.role !==
+    "detective"
+  ){
+    return;
+  }
+
+
+  await remove(
+
+    ref(
+      db,
+      "rooms/" +
+      roomCode +
+      "/detectiveBoard/clues/" +
+      id
+    )
+
+  );
+
+};
+
+
+/* =====================================================
+THEORY
+===================================================== */
+
+window.saveTheory =
+async function(){
+
+  if(
+    mySecret?.role !==
+    "detective"
+  ){
+    return;
+  }
+
+
+  const input =
+    document.getElementById(
+      "detectiveTheory"
+    );
+
+
+  await update(
+
+    ref(
+      db,
+      "rooms/" +
+      roomCode +
+      "/detectiveBoard"
+    ),
+
+    {
+
+      theory:
+        input.value
+
+    }
+
+  );
+
+
+  alert(
+    "✅ Theory saved."
+  );
+
+};
 
 
 /* =====================================================
@@ -3288,37 +5358,55 @@ INVESTIGATION
 function showInvestigation(){
 
   if(
-    !mySecret ||
-    mySecret.role!=="detective"
+    mySecret?.role !==
+    "detective"
   ){
     return;
   }
 
+
   document
-    .getElementById("detectiveWaiting")
+    .getElementById(
+      "detectiveWaiting"
+    )
     .classList
     .add("hidden");
 
+
   document
-    .getElementById("normalWaiting")
+    .getElementById(
+      "normalWaiting"
+    )
     .classList
     .add("hidden");
 
+
   document
-    .getElementById("investigation")
+    .getElementById(
+      "detectiveNotebook"
+    )
     .classList
     .remove("hidden");
 
+
   document
-    .getElementById("detectiveEvidencePanel")
+    .getElementById(
+      "investigation"
+    )
     .classList
     .remove("hidden");
+
 
   renderCase();
-  renderDetectiveEvidence();
+
+  renderDetectiveSummary();
 
 }
 
+
+/* =====================================================
+CASE
+===================================================== */
 
 function renderCase(){
 
@@ -3329,27 +5417,33 @@ function renderCase(){
     return;
   }
 
+
   const game =
     roomData.game;
 
+
   const suspects =
-    game.suspects||[];
+    game.suspects ||
+    [];
+
 
   document
-    .getElementById("caseFile")
-    .innerHTML=`
+    .getElementById(
+      "caseFile"
+    )
+    .innerHTML = `
 
       <div class="success">
 
-        ⏰ Detective timer finished.
-
-        <br><br>
-
-        Investigation started.
+        🔎 Investigation started.
 
       </div>
 
-      <h3>CASE</h3>
+
+      <h3>
+        CASE
+      </h3>
+
 
       <p>
         ${escapeHtml(
@@ -3357,173 +5451,371 @@ function renderCase(){
         )}
       </p>
 
-      <p>
-        <b>Victim:</b>
-        ${escapeHtml(game.victim)}
-      </p>
 
       <p>
-        <b>Fictional murder time:</b>
-        ${shortClock(
-          new Date(
-            game.murderAt
-          )
+
+        <b>
+          Victim:
+        </b>
+
+        ${escapeHtml(
+          game.victim
         )}
+
       </p>
 
+
       <p>
-        <b>Crime location:</b>
+
+        <b>
+          Crime location:
+        </b>
+
         ${escapeHtml(
           game.crimeLocation
         )}
+
       </p>
+
 
       <p>
-        <b>Current real time:</b>
+
+        <b>
+          Current time:
+        </b>
+
         ${clockText(
-          new Date()
+          new Date(
+            serverNow()
+          )
         )}
+
       </p>
 
-      <h3>👥 SUSPECTS</h3>
+
+      <h3>
+        👥 SUSPECTS
+      </h3>
+
 
       ${
-        suspects.map(
-          id=>`
+        suspects
+          .map(
+            id=>`
 
-            <div class="player">
+              <div class="player">
 
-              👤
-              ${escapeHtml(
-                roomData
-                  .players[id]
-                  ?.name ||
-                "Unknown"
-              )}
+                👤
 
-            </div>
+                ${escapeHtml(
+                  roomData
+                    .players[id]
+                    ?.name ||
+                  "Unknown"
+                )}
 
-          `
-        ).join("")
+              </div>
+
+            `
+          )
+          .join("")
       }
 
     `;
 
+
   renderTaskProgress();
 
+
   document
-    .getElementById("accusationButtons")
-    .innerHTML=
+    .getElementById(
+      "accusationButtons"
+    )
+    .innerHTML =
 
-    suspects.map(
-      id=>`
+    suspects
+      .map(
+        id=>`
 
-        <button
-          onclick="
-            accuse('${id}')
-          "
-        >
-          Accuse
-          ${escapeHtml(
-            roomData.players[id]?.name||
-            "Unknown"
-          )}
-        </button>
+          <button
+            onclick="
+              accuse('${id}')
+            "
+          >
 
-      `
-    ).join("");
+            Accuse
+            ${escapeHtml(
+              roomData
+                .players[id]
+                ?.name ||
+              "Unknown"
+            )}
+
+          </button>
+
+        `
+      )
+      .join("");
 
 }
 
 
-async function renderTaskProgress(){
+/* =====================================================
+DETECTIVE SUMMARY
+===================================================== */
 
-  const suspects =
-    roomData?.game?.suspects||[];
+function renderDetectiveSummary(){
+
+  if(
+    mySecret?.role !==
+    "detective"
+  ){
+    return;
+  }
+
 
   const container =
     document.getElementById(
-      "taskProgress"
+      "detectiveSummary"
     );
+
 
   if(!container){
     return;
   }
 
-  container.innerHTML="";
+
+  const board =
+    getDetectiveBoard();
+
+
+  const interviews =
+    Object.values(
+      board.interviews ||
+      {}
+    );
+
+
+  const locations =
+    Object.values(
+      board.locations ||
+      {}
+    );
+
+
+  const clues =
+    Object.values(
+      board.clues ||
+      {}
+    );
+
+
+  const questions =
+    Object.values(
+      board.questions ||
+      {}
+    );
+
+
+  container.innerHTML = `
+
+    <div class="count-card">
+
+      <span class="case-pill">
+        ❓ ${questions.length} questions
+      </span>
+
+      <span class="case-pill">
+        🗣️ ${interviews.length} answers
+      </span>
+
+      <span class="case-pill">
+        📍 ${locations.length} locations
+      </span>
+
+      <span class="case-pill">
+        🧩 ${clues.length} clues
+      </span>
+
+    </div>
+
+
+    ${
+      board.theory
+      ?
+
+      `
+
+        <div class="detective-section">
+
+          <div class="detective-section-title">
+
+            🧠 Your Theory
+
+          </div>
+
+          <p>
+
+            ${escapeHtml(
+              board.theory
+            )}
+
+          </p>
+
+        </div>
+
+      `
+
+      :
+
+      ""
+
+    }
+
+  `;
+
+}
+
+
+/* =====================================================
+TASK PROGRESS
+===================================================== */
+
+async function renderTaskProgress(){
+
+  const suspects =
+    roomData
+      ?.game
+      ?.suspects ||
+    [];
+
+
+  const container =
+    document
+      .getElementById(
+        "taskProgress"
+      );
+
+
+  if(!container){
+    return;
+  }
+
+
+  container.innerHTML =
+    "";
+
 
   for(
     const id of suspects
   ){
 
     const completed =
-      roomData.completed?.[id]||{};
+      roomData
+        ?.completed
+        ?.[id] ||
+      {};
+
 
     const count =
-      Object.values(completed)
-        .filter(
-          v=>v===true
-        )
-        .length;
+      Object.values(
+        completed
+      )
+      .filter(
+        v =>
+        v === true
+      )
+      .length;
+
 
     const total =
-      await getPrivateTaskCount(id);
+      await getPrivateTaskCount(
+        id
+      );
+
 
     const percent =
       total
       ?
       Math.min(
         100,
-        count/total*100
+        count /
+        total *
+        100
       )
       :
       0;
 
+
     const name =
       roomData
         .players[id]
-        ?.name||
+        ?.name ||
       "Unknown";
 
+
     const div =
-      document.createElement("div");
+      document.createElement(
+        "div"
+      );
 
-    div.className="count-card";
 
-    div.innerHTML=`
+    div.className =
+      "count-card";
+
+
+    div.innerHTML = `
 
       <b>
-        👤 ${escapeHtml(name)}
+
+        👤
+        ${escapeHtml(name)}
+
       </b>
 
+
       <div class="count-number">
+
         ${count}/${total}
+
       </div>
+
 
       <div class="progress">
 
         <div
           class="progress-bar"
-          style="width:${percent}%"
+          style="
+            width:${percent}%
+          "
         ></div>
 
       </div>
 
+
       <div class="small">
 
         ${
-          count===total
+          count === total
+
           ?
+
           "✅ All tasks completed"
+
           :
-          `${total-count} task(s) unfinished`
+
+          `${total - count} task(s) unfinished`
+
         }
 
       </div>
 
     `;
 
-    container.appendChild(div);
+
+    container.appendChild(
+      div
+    );
 
   }
 
@@ -3536,29 +5828,48 @@ async function getPrivateTaskCount(
 
   const snapshot =
     await get(
+
       ref(
         db,
-        "rooms/"+roomCode+
-        "/private/"+player+
+        "rooms/" +
+        roomCode +
+        "/private/" +
+        player +
         "/tasks"
       )
+
     );
 
-  if(!snapshot.exists()){
+
+  if(
+    !snapshot.exists()
+  ){
+
     return 0;
+
   }
+
 
   const tasks =
     snapshot.val();
 
-  return Array.isArray(tasks)
-    ?
-    tasks.length
-    :
-    Object.keys(tasks).length;
+
+  return Array.isArray(
+    tasks
+  )
+  ?
+  tasks.length
+  :
+  Object.keys(
+    tasks
+  ).length;
 
 }
 
+
+/* =====================================================
+ACCUSE
+===================================================== */
 
 window.accuse =
 async function(
@@ -3566,31 +5877,33 @@ async function(
 ){
 
   if(
-    !roomData ||
-    !roomData.game
+    mySecret?.role !==
+    "detective"
   ){
     return;
   }
 
-  if(
-    playerId!==roomData.game.detective
-  ){
-    return;
-  }
 
   const correct =
-    accusedId===
+    accusedId ===
     roomData.game.murderer;
 
+
   const name =
-    roomData.players[accusedId]?.name||
+    roomData
+      .players[accusedId]
+      ?.name ||
     "Unknown";
 
+
   document
-    .getElementById("result")
-    .innerHTML=
+    .getElementById(
+      "result"
+    )
+    .innerHTML =
 
     correct
+
     ?
 
     `
@@ -3604,7 +5917,9 @@ async function(
         You caught the murderer:
 
         <b>
+
           ${escapeHtml(name)}
+
         </b>
 
       </div>
@@ -3624,7 +5939,9 @@ async function(
         You accused:
 
         <b>
+
           ${escapeHtml(name)}
+
         </b>
 
         <br><br>
@@ -3632,781 +5949,46 @@ async function(
         The murderer was:
 
         <b>
+
           ${escapeHtml(
             roomData
               .players[
                 roomData.game.murderer
               ]
-              ?.name||
+              ?.name ||
             "Unknown"
           )}
+
         </b>
 
       </div>
 
     `;
 
-  await update(
+
+  await set(
+
     ref(
       db,
-      "rooms/"+roomCode+
+      "rooms/" +
+      roomCode +
       "/result"
     ),
+
     {
+
       accusedId,
+
       correct,
-      finishedAt:serverTimestamp()
+
+      finishedAt:
+        serverNow()
+
     }
+
   );
 
 };
-
-
-/* =====================================================
-EVIDENCE
-===================================================== */
-
-function evidencePath(
-  player=playerId
-){
-
-  return (
-    "rooms/"+
-    roomCode+
-    "/evidence/"+
-    player
-  );
-
-}
-
-
-/*
-  Compress the photo so it is small enough
-  for Realtime Database.
-*/
-
-function compressEvidenceImage(
-  file,
-  maxWidth=960,
-  quality=0.62
-){
-
-  return new Promise(
-    (resolve,reject)=>{
-
-      const reader =
-        new FileReader();
-
-      reader.onload =
-        event=>{
-
-          const img =
-            new Image();
-
-          img.onload =
-            ()=>{
-
-              let width=
-                img.width;
-
-              let height=
-                img.height;
-
-              if(
-                width>maxWidth
-              ){
-
-                const ratio =
-                  maxWidth/width;
-
-                width =
-                  Math.round(
-                    width*ratio
-                  );
-
-                height =
-                  Math.round(
-                    height*ratio
-                  );
-
-              }
-
-              const canvas =
-                document.createElement(
-                  "canvas"
-                );
-
-              canvas.width=width;
-              canvas.height=height;
-
-              const ctx =
-                canvas.getContext(
-                  "2d"
-                );
-
-              ctx.drawImage(
-                img,
-                0,
-                0,
-                width,
-                height
-              );
-
-              resolve(
-                canvas.toDataURL(
-                  "image/jpeg",
-                  quality
-                )
-              );
-
-            };
-
-          img.onerror=
-            ()=>{
-              reject(
-                new Error(
-                  "Could not read image."
-                )
-              );
-            };
-
-          img.src=
-            event.target.result;
-
-        };
-
-      reader.onerror=
-        ()=>{
-          reject(
-            new Error(
-              "Could not load file."
-            )
-          );
-        };
-
-      reader.readAsDataURL(file);
-
-    }
-  );
-
-}
-
-
-/*
-  Photo picker.
-*/
-
-document.addEventListener(
-  "change",
-  event=>{
-
-    if(
-      event.target.id!=="evidenceInput"
-    ){
-      return;
-    }
-
-    const file =
-      event.target.files?.[0];
-
-    if(!file){
-      return;
-    }
-
-    if(
-      !file.type.startsWith("image/")
-    ){
-
-      alert(
-        "Please choose an image."
-      );
-
-      event.target.value="";
-      return;
-
-    }
-
-    selectedEvidenceFile=file;
-
-    const preview =
-      document.getElementById(
-        "evidencePreview"
-      );
-
-    const button =
-      document.getElementById(
-        "uploadEvidenceButton"
-      );
-
-    if(
-      evidencePreviewUrl
-    ){
-
-      URL.revokeObjectURL(
-        evidencePreviewUrl
-      );
-
-    }
-
-    evidencePreviewUrl =
-      URL.createObjectURL(file);
-
-    preview.src=
-      evidencePreviewUrl;
-
-    preview.classList.remove(
-      "hidden"
-    );
-
-    button.disabled=false;
-
-  }
-);
-
-
-/*
-  Format the Firebase server timestamp.
-*/
-
-function formatEvidenceTimestamp(
-  value
-){
-
-  if(
-    value===null ||
-    value===undefined
-  ){
-
-    return "Timestamp unavailable";
-
-  }
-
-  const date =
-    new Date(
-      Number(value)
-    );
-
-  if(
-    Number.isNaN(
-      date.getTime()
-    )
-  ){
-
-    return "Timestamp unavailable";
-
-  }
-
-  return (
-    date.toLocaleDateString(
-      undefined,
-      {
-        year:"numeric",
-        month:"short",
-        day:"numeric"
-      }
-    )+
-    " • "+
-    date.toLocaleTimeString(
-      undefined,
-      {
-        hour:"numeric",
-        minute:"2-digit",
-        second:"2-digit"
-      }
-    )
-  );
-
-}
-
-
-/*
-  Load the current player's photo.
-*/
-
-async function loadMyEvidence(){
-
-  if(
-    !roomCode ||
-    !playerId
-  ){
-    return;
-  }
-
-  try{
-
-    const snapshot =
-      await get(
-        ref(
-          db,
-          evidencePath()
-        )
-      );
-
-    const status =
-      document.getElementById(
-        "evidencePlayerStatus"
-      );
-
-    const input =
-      document.getElementById(
-        "evidenceInput"
-      );
-
-    const button =
-      document.getElementById(
-        "uploadEvidenceButton"
-      );
-
-    if(
-      snapshot.exists()
-    ){
-
-      const evidence =
-        snapshot.val();
-
-      status.innerHTML=`
-
-        ✅ Evidence already submitted.
-
-        <br>
-
-        <span class="evidence-count">
-          1 / 1 photo used
-        </span>
-
-        <div class="evidence-stamp">
-
-          🕐 Submitted:
-          ${escapeHtml(
-            formatEvidenceTimestamp(
-              evidence.submittedAt
-            )
-          )}
-
-        </div>
-
-      `;
-
-      if(input){
-        input.disabled=true;
-      }
-
-      if(button){
-
-        button.disabled=true;
-
-        button.textContent=
-          "✅ PHOTO SUBMITTED";
-
-      }
-
-      const preview =
-        document.getElementById(
-          "evidencePreview"
-        );
-
-      if(
-        preview &&
-        evidence.image
-      ){
-
-        preview.src=
-          evidence.image;
-
-        preview.classList.remove(
-          "hidden"
-        );
-
-      }
-
-      return;
-
-    }
-
-    status.textContent=
-      "No photo submitted yet.";
-
-    if(input){
-      input.disabled=false;
-    }
-
-    if(button){
-
-      button.disabled=
-        !selectedEvidenceFile;
-
-      button.textContent=
-        "📤 SUBMIT EVIDENCE";
-
-    }
-
-  }
-  catch(error){
-
-    console.error(
-      "Evidence load error:",
-      error
-    );
-
-  }
-
-}
-
-
-/*
-  Submit one and only one photo.
-*/
-
-window.uploadEvidence =
-async function(){
-
-  if(
-    !selectedEvidenceFile
-  ){
-
-    alert(
-      "Take or choose a photo first."
-    );
-
-    return;
-
-  }
-
-  const button =
-    document.getElementById(
-      "uploadEvidenceButton"
-    );
-
-  button.disabled=true;
-  button.textContent=
-    "⏳ SAVING PHOTO...";
-
-  try{
-
-    const evidenceRef =
-      ref(
-        db,
-        evidencePath()
-      );
-
-    /*
-      Check first.
-      Existing evidence cannot be replaced.
-    */
-
-    const existing =
-      await get(
-        evidenceRef
-      );
-
-    if(
-      existing.exists()
-    ){
-
-      alert(
-        "You have already submitted your one evidence photo."
-      );
-
-      await loadMyEvidence();
-      return;
-
-    }
-
-    const compressed =
-      await compressEvidenceImage(
-        selectedEvidenceFile
-      );
-
-    /*
-      Keep the data small enough
-      for Realtime Database.
-    */
-
-    if(
-      compressed.length>1400000
-    ){
-
-      alert(
-        "That photo is still too large. Please choose another photo."
-      );
-
-      button.disabled=false;
-
-      button.textContent=
-        "📤 SUBMIT EVIDENCE";
-
-      return;
-
-    }
-
-    await set(
-      evidenceRef,
-      {
-
-        playerId,
-
-        playerName:
-          myName,
-
-        image:
-          compressed,
-
-        /*
-          Firebase server timestamp.
-          This is NOT taken from the player's
-          phone clock.
-        */
-
-        submittedAt:
-          serverTimestamp()
-
-      }
-    );
-
-    selectedEvidenceFile=null;
-
-    const input =
-      document.getElementById(
-        "evidenceInput"
-      );
-
-    if(input){
-      input.value="";
-    }
-
-    await loadMyEvidence();
-
-    alert(
-      "✅ Your evidence photo was submitted."
-    );
-
-    if(
-      mySecret?.role==="detective"
-    ){
-
-      renderDetectiveEvidence();
-
-    }
-
-  }
-  catch(error){
-
-    console.error(
-      "Evidence upload failed:",
-      error
-    );
-
-    alert(
-      "The photo could not be uploaded."
-    );
-
-    button.disabled=false;
-
-    button.textContent=
-      "📤 SUBMIT EVIDENCE";
-
-  }
-
-};
-
-
-/*
-  Detective evidence board.
-*/
-
-async function renderDetectiveEvidence(){
-
-  if(
-    !roomData ||
-    !roomData.game ||
-    roomData.game.detective!==playerId
-  ){
-
-    return;
-
-  }
-
-  const panel =
-    document.getElementById(
-      "detectiveEvidencePanel"
-    );
-
-  const list =
-    document.getElementById(
-      "evidenceList"
-    );
-
-  if(!panel || !list){
-    return;
-  }
-
-  panel.classList.remove(
-    "hidden"
-  );
-
-  try{
-
-    const snapshot =
-      await get(
-        ref(
-          db,
-          "rooms/"+roomCode+
-          "/evidence"
-        )
-      );
-
-    if(
-      !snapshot.exists()
-    ){
-
-      list.innerHTML=`
-
-        <div class="evidence-empty">
-
-          📭 No evidence photos
-          have been submitted yet.
-
-        </div>
-
-      `;
-
-      return;
-
-    }
-
-    const allEvidence =
-      snapshot.val()||{};
-
-    const players =
-      roomData.players||{};
-
-    const entries =
-      Object.entries(
-        allEvidence
-      );
-
-    if(entries.length===0){
-
-      list.innerHTML=`
-
-        <div class="evidence-empty">
-
-          📭 No evidence photos yet.
-
-        </div>
-
-      `;
-
-      return;
-
-    }
-
-    list.innerHTML=
-      entries.map(
-        ([id,evidence])=>{
-
-          const player =
-            players[id];
-
-          const name =
-            evidence.playerName||
-            player?.name||
-            "Unknown";
-
-          const submitted =
-            formatEvidenceTimestamp(
-              evidence.submittedAt
-            );
-
-          return `
-
-            <div class="evidence-player">
-
-              <div class="evidence-player-name">
-
-                📸
-                ${escapeHtml(name)}
-
-              </div>
-
-              <div class="evidence-time">
-
-                🕐 Submitted:
-                ${escapeHtml(submitted)}
-
-              </div>
-
-              <img
-                class="evidence-photo"
-                src="${evidence.image}"
-                alt="Evidence from ${escapeHtml(name)}"
-                loading="lazy"
-              >
-
-              <div class="evidence-stamp">
-
-                📸 1 / 1 evidence photo
-
-              </div>
-
-            </div>
-
-          `;
-
-        }
-      ).join("");
-
-  }
-  catch(error){
-
-    console.error(
-      "Evidence board error:",
-      error
-    );
-
-    list.innerHTML=`
-
-      <div class="warning">
-
-        ⚠️ Could not load evidence.
-
-      </div>
-
-    `;
-
-  }
-
-}
-
-
-/*
-  Watch evidence in real time.
-*/
-
-function listenForEvidence(){
-
-  onValue(
-    ref(
-      db,
-      "rooms/"+roomCode+
-      "/evidence"
-    ),
-    ()=>{
-
-      if(
-        mySecret?.role==="detective"
-      ){
-
-        renderDetectiveEvidence();
-
-      }
-
-      loadMyEvidence();
-
-    }
-  );
-
-}
 
 
 /* =====================================================
@@ -4422,12 +6004,16 @@ async function(
     return;
   }
 
+
   await set(
+
     ref(
       db,
-      "rooms/"+roomCode+
+      "rooms/" +
+      roomCode +
       "/call"
     ),
+
     {
 
       destination,
@@ -4436,12 +6022,14 @@ async function(
         myName,
 
       time:
-        serverTimestamp(),
+        serverNow(),
 
       id:
-        Date.now().toString()
+        Date.now()
+          .toString()
 
     }
+
   );
 
 };
@@ -4450,11 +6038,14 @@ async function(
 function listenForCalls(){
 
   onValue(
+
     ref(
       db,
-      "rooms/"+roomCode+
+      "rooms/" +
+      roomCode +
       "/call"
     ),
+
     snapshot=>{
 
       if(
@@ -4463,36 +6054,30 @@ function listenForCalls(){
         return;
       }
 
+
       const call =
         snapshot.val();
 
+
       if(
-        call.id===lastCallId
+        call.id ===
+        lastCallId
       ){
         return;
       }
 
-      lastCallId=
+
+      lastCallId =
         call.id;
+
 
       showCall(
         call.destination,
         call.caller
       );
 
-      if(alertsEnabled){
-
-        playCallSound();
-        vibrate();
-
-      }
-
-      systemNotification(
-        call.destination,
-        call.caller
-      );
-
     }
+
   );
 
 }
@@ -4508,70 +6093,183 @@ function showCall(
       "callStack"
     );
 
-  for(
-    let i=0;
-    i<3;
-    i++
+
+  const banner =
+    document.createElement(
+      "div"
+    );
+
+
+  banner.className =
+    "call-banner";
+
+
+  banner.innerHTML = `
+
+    <h2>
+      📞 GROUP CALL
+    </h2>
+
+
+    <p>
+
+      ${escapeHtml(caller)}
+
+      is calling everyone to
+
+      <b>
+        ${escapeHtml(destination)}
+      </b>!
+
+    </p>
+
+
+    <button>
+      Dismiss
+    </button>
+
+  `;
+
+
+  banner
+    .querySelector(
+      "button"
+    )
+    .onclick =
+    ()=>{
+      banner.remove();
+    };
+
+
+  stack.appendChild(
+    banner
+  );
+
+
+  setTimeout(
+    ()=>{
+      banner.remove();
+    },
+    10000
+  );
+
+}
+
+
+/* =====================================================
+RESET
+===================================================== */
+
+window.resetGame =
+async function(){
+
+  if(
+    !roomData ||
+    roomData.host !==
+    playerId
   ){
 
-    setTimeout(
-      ()=>{
-
-        const banner =
-          document.createElement(
-            "div"
-          );
-
-        banner.className=
-          "call-banner";
-
-        banner.innerHTML=`
-
-          <h2>
-            📞 GROUP CALL
-          </h2>
-
-          <p>
-
-            ${escapeHtml(caller)}
-            is calling everyone to
-            <b>
-              ${escapeHtml(destination)}
-            </b>!
-
-          </p>
-
-          <button>
-            Dismiss
-          </button>
-
-        `;
-
-        banner
-          .querySelector("button")
-          .onclick=
-          ()=>{
-            banner.remove();
-          };
-
-        stack.appendChild(
-          banner
-        );
-
-        setTimeout(
-          ()=>{
-            banner.remove();
-          },
-          10000
-        );
-
-      },
-      i*900
+    alert(
+      "Only the host can reset the game."
     );
+
+    return;
 
   }
 
-}
+
+  if(
+    !confirm(
+      "Reset the current game and send everyone back to the lobby?"
+    )
+  ){
+    return;
+  }
+
+
+  await update(
+
+    ref(db),
+
+    {
+
+      ["rooms/" +
+       roomCode +
+       "/status"]:
+       "lobby",
+
+      ["rooms/" +
+       roomCode +
+       "/game"]:
+       null,
+
+      ["rooms/" +
+       roomCode +
+       "/private"]:
+       null,
+
+      ["rooms/" +
+       roomCode +
+       "/completed"]:
+       null,
+
+      ["rooms/" +
+       roomCode +
+       "/detectiveBoard"]:
+       null,
+
+      ["rooms/" +
+       roomCode +
+       "/call"]:
+       null,
+
+      ["rooms/" +
+       roomCode +
+       "/result"]:
+       null
+
+    }
+
+  );
+
+
+  mySecret =
+    null;
+
+
+  lastCallId =
+    null;
+
+
+  clearInterval(
+    globalInterval
+  );
+
+
+  listenersStarted =
+    false;
+
+
+  boardListenerStarted =
+    false;
+
+
+  document
+    .getElementById(
+      "game"
+    )
+    .classList
+    .add("hidden");
+
+
+  document
+    .getElementById(
+      "lobby"
+    )
+    .classList
+    .remove("hidden");
+
+};
 
 
 /* =====================================================
@@ -4586,10 +6284,13 @@ if(
     "load",
     ()=>{
 
-      navigator.serviceWorker
-        .register("./sw.js")
+      navigator
+        .serviceWorker
+        .register(
+          "./sw.js"
+        )
         .catch(
-          error=>
+          error =>
             console.log(
               "Service worker:",
               error
@@ -4611,13 +6312,16 @@ const params =
     location.search
   );
 
+
 if(
   params.get("room")
 ){
 
   document
-    .getElementById("roomInput")
-    .value=
+    .getElementById(
+      "roomInput"
+    )
+    .value =
     params
       .get("room")
       .toUpperCase();
