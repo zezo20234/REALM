@@ -790,8 +790,6 @@ button:disabled{
 <div class="app">
 
 
-<!-- HOME -->
-
 <section id="home">
 
   <div class="card">
@@ -899,8 +897,6 @@ button:disabled{
 </section>
 
 
-<!-- CREATE -->
-
 <section
   id="createScreen"
   class="hidden"
@@ -977,8 +973,6 @@ button:disabled{
 </section>
 
 
-<!-- LOBBY -->
-
 <section
   id="lobby"
   class="hidden"
@@ -1047,8 +1041,6 @@ button:disabled{
 
 </section>
 
-
-<!-- GAME -->
 
 <section
   id="game"
@@ -1125,8 +1117,6 @@ button:disabled{
   </div>
 
 
-  <!-- PLAYER NOTE -->
-
   <div
     id="playerNoteCard"
     class="card"
@@ -1183,8 +1173,6 @@ button:disabled{
   </div>
 
 
-  <!-- DETECTIVE WAITING -->
-
   <div
     id="detectiveWaiting"
     class="card hidden center"
@@ -1234,8 +1222,6 @@ button:disabled{
 
   </div>
 
-
-  <!-- DETECTIVE NOTEBOOK -->
 
   <div
     id="detectiveNotebook"
@@ -1379,8 +1365,6 @@ button:disabled{
   </div>
 
 
-  <!-- LIVE NOTES -->
-
   <div
     id="detectiveLiveNotes"
     class="card hidden"
@@ -1405,8 +1389,6 @@ button:disabled{
 
   </div>
 
-
-  <!-- INVESTIGATION -->
 
   <div
     id="investigation"
@@ -1489,8 +1471,7 @@ import {
   set,
   update,
   remove,
-  onValue,
-  onDisconnect
+  onValue
 }
 from
 "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
@@ -2174,20 +2155,6 @@ function createTask(
 TASK TIME FIX
 ===================================================== */
 
-/*
-  Every normal task is moved to the next full minute.
-
-  Example:
-
-  Current time:
-  10:14:23
-
-  Task:
-  opens at 10:15
-
-  The task will actually unlock at 10:15:00.
-*/
-
 function nextMinuteTimestamp(
   timestamp
 ){
@@ -2209,10 +2176,6 @@ function nextMinuteTimestamp(
 
 }
 
-
-/*
-  Display task unlock times without seconds.
-*/
 
 function taskUnlockText(
   timestamp
@@ -2295,11 +2258,6 @@ function makeRandomUnlockTimes(
   count
 ){
 
-  /*
-    We generate approximate times first,
-    then snap EVERY task to the next full minute.
-  */
-
   const startOffset =
     60 * 1000;
 
@@ -2368,11 +2326,6 @@ function makeRandomUnlockTimes(
     (a,b)=>
       a-b
   );
-
-  /*
-    Make sure the times remain inside
-    the Detective waiting period.
-  */
 
   return values.map(
     value=>{
@@ -2518,11 +2471,6 @@ function buildRandomMurdererTasks(
 
   }
 
-
-  /*
-    Murderer still needs the private murder task,
-    but the main game timer never exposes this time.
-  */
 
   const murderTaskId =
     roundSeed +
@@ -3115,6 +3063,9 @@ async function(){
             myName,
 
           joinedAt:
+            now,
+
+          lastSeenAt:
             now
 
         }
@@ -3123,7 +3074,14 @@ async function(){
     }
   );
 
-  setupDisconnectCleanup();
+  /*
+    IMPORTANT FIX:
+    We no longer register an onDisconnect().remove()
+    for the player. This means a temporary phone
+    disconnect cannot erase the player's name.
+  */
+
+  await markPlayerSeen();
 
   startRoomExpiryWatcher();
 
@@ -3226,11 +3184,24 @@ async function(){
     "lobby"
   ){
 
-    alert(
-      "The game has already started."
-    );
+    /*
+      Allow a player who was already part of
+      the game to reconnect without making them
+      "Unknown".
+    */
 
-    return;
+    const existingPlayer =
+      data.players?.[playerId];
+
+    if(!existingPlayer){
+
+      alert(
+        "The game has already started."
+      );
+
+      return;
+
+    }
 
   }
 
@@ -3239,6 +3210,7 @@ async function(){
     {};
 
   if(
+    data.status === "lobby" &&
     !players[playerId] &&
     Object.keys(
       players
@@ -3257,6 +3229,12 @@ async function(){
   const now =
     Date.now();
 
+  /*
+    IMPORTANT FIX:
+    Rejoin/update the SAME persistent player
+    instead of replacing it with a new identity.
+  */
+
   await update(
     roomRef,
     {
@@ -3272,12 +3250,24 @@ async function(){
       ["players/" +
        playerId +
        "/joinedAt"]:
+       players[playerId]?.joinedAt ||
+       now,
+
+      ["players/" +
+       playerId +
+       "/lastSeenAt"]:
        now
 
     }
   );
 
-  setupDisconnectCleanup();
+  /*
+    No onDisconnect remove here.
+    The player stays in Firebase even if the
+    iPhone sleeps or briefly loses connection.
+  */
+
+  await markPlayerSeen();
 
   startRoomExpiryWatcher();
 
@@ -3287,68 +3277,132 @@ async function(){
 
 
 /* =====================================================
-PRESENCE
+PERSISTENT PLAYER PRESENCE
 ===================================================== */
 
-function setupDisconnectCleanup(){
+/*
+  The player record is deliberately NOT deleted when
+  the phone loses connection.
+
+  Instead, we only update lastSeenAt when the player
+  returns / interacts with the page.
+
+  This keeps names, roles, tasks, notes and dossiers
+  stable across iPhone lock/background disconnects.
+*/
+
+async function markPlayerSeen(){
 
   if(!roomCode){
     return;
   }
 
-  onDisconnect(
-    ref(
-      db,
-      `rooms/${roomCode}/players/${playerId}`
-    )
-  ).remove();
+  try{
 
-  onDisconnect(
-    ref(
-      db,
-      `rooms/${roomCode}/private/${playerId}`
-    )
-  ).remove();
+    await update(
 
-  onDisconnect(
-    ref(
-      db,
-      `rooms/${roomCode}/completed/${playerId}`
-    )
-  ).remove();
+      ref(
+        db,
+        `rooms/${roomCode}/players/${playerId}`
+      ),
 
-  onDisconnect(
-    ref(
-      db,
-      `rooms/${roomCode}/notes/${playerId}`
-    )
-  ).remove();
+      {
+
+        name:
+          myName,
+
+        lastSeenAt:
+          Date.now()
+
+      }
+
+    );
+
+  }
+  catch(error){
+
+    console.warn(
+      "Could not update player lastSeenAt:",
+      error
+    );
+
+  }
 
 }
 
 
-window.addEventListener(
-  "pagehide",
+/*
+  Update lastSeenAt when the page becomes active again.
+*/
+
+document.addEventListener(
+  "visibilitychange",
   ()=>{
 
-    try{
+    if(
+      document.visibilityState ===
+      "visible"
+    ){
 
-      if(roomCode){
-
-        remove(
-          ref(
-            db,
-            `rooms/${roomCode}/players/${playerId}`
-          )
-        );
-
-      }
+      markPlayerSeen();
 
     }
-    catch(e){}
 
   }
 );
+
+
+/*
+  Also refresh when the browser restores focus.
+*/
+
+window.addEventListener(
+  "focus",
+  ()=>{
+
+    markPlayerSeen();
+
+  }
+);
+
+
+/*
+  Periodic lightweight heartbeat.
+  This DOES NOT delete anyone.
+*/
+
+setInterval(
+  ()=>{
+
+    if(
+      roomCode
+    ){
+
+      markPlayerSeen();
+
+    }
+
+  },
+  30000
+);
+
+
+/*
+  IMPORTANT:
+  The old pagehide handler that deleted the player
+  has intentionally been removed.
+
+  DO NOT add this back:
+
+    remove(
+      ref(
+        db,
+        `rooms/${roomCode}/players/${playerId}`
+      )
+    );
+
+  That was one of the causes of the "Unknown" problem.
+*/
 
 
 /* =====================================================
@@ -3425,6 +3479,53 @@ function listenToRoom(){
 
       roomData =
         snapshot.val();
+
+      /*
+        If our player record somehow does not exist
+        because of an old room created with the broken
+        version, recreate it here safely.
+      */
+
+      if(
+        !roomData.players ||
+        !roomData.players[playerId]
+      ){
+
+        try{
+
+          await update(
+
+            ref(
+              db,
+              `rooms/${roomCode}/players/${playerId}`
+            ),
+
+            {
+
+              name:
+                myName,
+
+              joinedAt:
+                Date.now(),
+
+              lastSeenAt:
+                Date.now()
+
+            }
+
+          );
+
+        }
+        catch(error){
+
+          console.warn(
+            "Could not restore player:",
+            error
+          );
+
+        }
+
+      }
 
       if(
         isRoomStale(
@@ -4078,6 +4179,62 @@ async function loadGame(){
 
   }
 
+  /*
+    Always make sure our own player node exists
+    before loading game information.
+  */
+
+  const playerSnapshot =
+    await get(
+
+      ref(
+        db,
+        `rooms/${roomCode}/players/${playerId}`
+      )
+
+    );
+
+  if(
+    !playerSnapshot.exists()
+  ){
+
+    await set(
+
+      ref(
+        db,
+        `rooms/${roomCode}/players/${playerId}`
+      ),
+
+      {
+
+        name:
+          myName,
+
+        joinedAt:
+          Date.now(),
+
+        lastSeenAt:
+          Date.now()
+
+      }
+
+    );
+
+  }
+  else{
+
+    const currentPlayer =
+      playerSnapshot.val();
+
+    myName =
+      currentPlayer.name ||
+      myName;
+
+    await markPlayerSeen();
+
+  }
+
+
   if(!mySecret){
 
     const snapshot =
@@ -4161,16 +4318,6 @@ async function loadGame(){
 MAIN TIMER
 ===================================================== */
 
-/*
-  IMPORTANT:
-  The main screen does NOT show the murder time.
-
-  It only shows:
-  - 5 minute Detective countdown
-  - then "DETECTIVE IS HERE"
-  - then investigation timer for Detective
-*/
-
 function startGlobalClock(){
 
   clearInterval(
@@ -4205,10 +4352,6 @@ function startGlobalClock(){
       );
 
 
-    /*
-      FIRST 5 MINUTES
-    */
-
     if(
       now <
       game.detectiveEnd
@@ -4232,12 +4375,6 @@ function startGlobalClock(){
         );
 
     }
-
-
-    /*
-      AFTER 5 MINUTES
-    */
-
     else{
 
       document
@@ -4256,10 +4393,6 @@ function startGlobalClock(){
 
     }
 
-
-    /*
-      Detective-only investigation timer.
-    */
 
     if(
       mySecret &&
