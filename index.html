@@ -1835,11 +1835,7 @@ let alertsEnabled =
 
 let revealRunning = false;
 
-/*
-  FIX:
-  This variable was missing.
-  The call listener uses it.
-*/
+/* FIXED */
 let lastCallId = null;
 
 let lastRevealId = null;
@@ -1876,6 +1872,225 @@ const LOBBY_EXPIRY =
 
 const GAME_EXPIRY =
   2 * 60 * 60 * 1000;
+
+
+/* =====================================================
+HELPERS — RESTORED
+===================================================== */
+
+function random(array){
+
+  if(
+    !Array.isArray(array) ||
+    array.length === 0
+  ){
+
+    return "";
+
+  }
+
+  return array[
+    Math.floor(
+      Math.random() *
+      array.length
+    )
+  ];
+
+}
+
+
+function shuffle(array){
+
+  const result =
+    Array.isArray(array)
+    ?
+    [...array]
+    :
+    [];
+
+  for(
+    let i =
+      result.length - 1;
+    i > 0;
+    i--
+  ){
+
+    const j =
+      Math.floor(
+        Math.random() *
+        (i + 1)
+      );
+
+    [
+      result[i],
+      result[j]
+    ] =
+    [
+      result[j],
+      result[i]
+    ];
+
+  }
+
+  return result;
+
+}
+
+
+function pad(number){
+
+  return String(
+    number
+  ).padStart(
+    2,
+    "0"
+  );
+
+}
+
+
+function clockText(date){
+
+  let h =
+    date.getHours();
+
+  const m =
+    pad(
+      date.getMinutes()
+    );
+
+  const s =
+    pad(
+      date.getSeconds()
+    );
+
+  const period =
+    h >= 12
+    ?
+    "PM"
+    :
+    "AM";
+
+  h =
+    h % 12;
+
+  if(
+    h === 0
+  ){
+
+    h = 12;
+
+  }
+
+  return (
+    `${h}:${m}:${s} ${period}`
+  );
+
+}
+
+
+function shortClock(date){
+
+  let h =
+    date.getHours();
+
+  const m =
+    pad(
+      date.getMinutes()
+    );
+
+  const period =
+    h >= 12
+    ?
+    "PM"
+    :
+    "AM";
+
+  h =
+    h % 12;
+
+  if(
+    h === 0
+  ){
+
+    h = 12;
+
+  }
+
+  return (
+    `${h}:${m} ${period}`
+  );
+
+}
+
+
+function formatDuration(ms){
+
+  const totalSeconds =
+    Math.max(
+      0,
+      Math.ceil(
+        ms / 1000
+      )
+    );
+
+  const minutes =
+    Math.floor(
+      totalSeconds / 60
+    );
+
+  const seconds =
+    totalSeconds % 60;
+
+  return (
+    pad(minutes) +
+    ":" +
+    pad(seconds)
+  );
+
+}
+
+
+function escapeHtml(value){
+
+  return String(
+    value ?? ""
+  )
+    .replaceAll(
+      "&",
+      "&amp;"
+    )
+    .replaceAll(
+      "<",
+      "&lt;"
+    )
+    .replaceAll(
+      ">",
+      "&gt;"
+    )
+    .replaceAll(
+      '"',
+      "&quot;"
+    )
+    .replaceAll(
+      "'",
+      "&#039;"
+    );
+
+}
+
+
+function sleep(ms){
+
+  return new Promise(
+    resolve =>
+      setTimeout(
+        resolve,
+        ms
+      )
+  );
+
+}
 
 
 /* =====================================================
@@ -1925,12 +2140,10 @@ function isRoomStale(
 
   }
 
-
   const activity =
     roomActivityTime(
       data
     );
-
 
   if(
     !activity
@@ -1939,7 +2152,6 @@ function isRoomStale(
     return true;
 
   }
-
 
   return (
     Date.now() -
@@ -1963,67 +2175,56 @@ function stopListeners(){
   ){
 
     roomUnsubscribe();
-
     roomUnsubscribe =
       null;
 
   }
-
 
   if(
     callUnsubscribe
   ){
 
     callUnsubscribe();
-
     callUnsubscribe =
       null;
 
   }
-
 
   if(
     tasksUnsubscribe
   ){
 
     tasksUnsubscribe();
-
     tasksUnsubscribe =
       null;
 
   }
-
 
   if(
     notesUnsubscribe
   ){
 
     notesUnsubscribe();
-
     notesUnsubscribe =
       null;
 
   }
-
 
   if(
     detectiveNotesUnsubscribe
   ){
 
     detectiveNotesUnsubscribe();
-
     detectiveNotesUnsubscribe =
       null;
 
   }
-
 
   if(
     resultUnsubscribe
   ){
 
     resultUnsubscribe();
-
     resultUnsubscribe =
       null;
 
@@ -2041,7 +2242,6 @@ function stopTimers(){
   globalInterval =
     null;
 
-
   clearInterval(
     heartbeatInterval
   );
@@ -2049,14 +2249,12 @@ function stopTimers(){
   heartbeatInterval =
     null;
 
-
   clearInterval(
     roomExpiryInterval
   );
 
   roomExpiryInterval =
     null;
-
 
   clearTimeout(
     callTimer
@@ -2092,8 +2290,10 @@ async function touchRoom(){
       ),
 
       {
+
         lastActivityAt:
           Date.now()
+
       }
 
     );
@@ -2183,7 +2383,6 @@ async function markPlayerSeen(){
 
   }
 
-
   try{
 
     if(
@@ -2216,16 +2415,10 @@ async function markPlayerSeen(){
 
     }
 
-
     await saveDeviceRecord();
 
   }
   catch(error){
-
-    /*
-      Network failures DO NOT remove
-      the player from Firebase.
-    */
 
     console.warn(
       "markPlayerSeen:",
@@ -2242,7 +2435,6 @@ function startHeartbeat(){
   clearInterval(
     heartbeatInterval
   );
-
 
   heartbeatInterval =
     setInterval(
@@ -2327,14 +2519,20 @@ function hideAllMainScreens(){
   .forEach(
     id=>{
 
-      document
-        .getElementById(
+      const element =
+        document.getElementById(
           id
-        )
-        .classList
-        .add(
+        );
+
+      if(
+        element
+      ){
+
+        element.classList.add(
           "hidden"
         );
+
+      }
 
     }
   );
@@ -2346,7 +2544,6 @@ function showHome(){
 
   hideAllMainScreens();
 
-
   document
     .getElementById(
       "home"
@@ -2355,7 +2552,6 @@ function showHome(){
     .remove(
       "hidden"
     );
-
 
   document
     .getElementById(
@@ -2366,7 +2562,6 @@ function showHome(){
       "hidden"
     );
 
-
   document
     .getElementById(
       "userBarName"
@@ -2374,14 +2569,12 @@ function showHome(){
     .textContent =
     myName;
 
-
   document
     .getElementById(
       "welcomeName"
     )
     .textContent =
     myName;
-
 
   restoreSavedRoom();
 
@@ -2409,10 +2602,8 @@ async function(){
       "nameInput"
     );
 
-
   const value =
     input.value.trim();
-
 
   if(
     !value
@@ -2428,22 +2619,18 @@ async function(){
 
   }
 
-
   myName =
     value.slice(
       0,
       30
     );
 
-
   localStorage.setItem(
     "tivoliMysteryName",
     myName
   );
 
-
   await saveDeviceRecord();
-
 
   showHome();
 
@@ -2459,7 +2646,6 @@ async function(){
       myName
     );
 
-
   if(
     value ===
     null
@@ -2469,10 +2655,8 @@ async function(){
 
   }
 
-
   const cleaned =
     value.trim();
-
 
   if(
     !cleaned
@@ -2482,22 +2666,18 @@ async function(){
 
   }
 
-
   myName =
     cleaned.slice(
       0,
       30
     );
 
-
   localStorage.setItem(
     "tivoliMysteryName",
     myName
   );
 
-
   await markPlayerSeen();
-
 
   document
     .getElementById(
@@ -2505,7 +2685,6 @@ async function(){
     )
     .textContent =
     myName;
-
 
   document
     .getElementById(
@@ -2526,25 +2705,26 @@ function restoreSavedRoom(){
   const saved =
     getLocalRoom();
 
+  const box =
+    document.getElementById(
+      "resumeBox"
+    );
 
   if(
     !saved
   ){
 
+    box.classList.add(
+      "hidden"
+    );
+
     return;
 
   }
 
-
-  document
-    .getElementById(
-      "resumeBox"
-    )
-    .classList
-    .remove(
-      "hidden"
-    );
-
+  box.classList.remove(
+    "hidden"
+  );
 
   document
     .getElementById(
@@ -2562,7 +2742,6 @@ async function(){
   const saved =
     getLocalRoom();
 
-
   if(
     !saved
   ){
@@ -2571,14 +2750,12 @@ async function(){
 
   }
 
-
   document
     .getElementById(
       "roomInput"
     )
     .value =
     saved;
-
 
   await joinRoom();
 
@@ -2618,8 +2795,19 @@ CREATE ROOM
 window.createRoom =
 function(){
 
-  hideAllMainScreens();
+  if(
+    !myName
+  ){
 
+    alert(
+      "Enter your name first."
+    );
+
+    return;
+
+  }
+
+  hideAllMainScreens();
 
   document
     .getElementById(
@@ -2655,7 +2843,6 @@ async function(){
 
     );
 
-
   const playerLimit =
     Number(
 
@@ -2666,7 +2853,6 @@ async function(){
         .value
 
     );
-
 
   if(
     roomCode.length <
@@ -2681,17 +2867,14 @@ async function(){
 
   }
 
-
   const now =
     Date.now();
-
 
   const roomRef =
     ref(
       db,
       `rooms/${roomCode}`
     );
-
 
   const newRoom = {
 
@@ -2755,19 +2938,6 @@ async function(){
 
           }
 
-
-          if(
-            !current.status &&
-            !current.players &&
-            !current.lastActivityAt &&
-            !current.createdAt
-          ){
-
-            return newRoom;
-
-          }
-
-
           if(
             isRoomStale(
               current
@@ -2777,7 +2947,6 @@ async function(){
             return newRoom;
 
           }
-
 
           return;
 
@@ -2802,7 +2971,6 @@ async function(){
     roomData =
       result.snapshot.val();
 
-
     saveLocalRoom();
 
     await saveDeviceRecord();
@@ -2816,7 +2984,6 @@ async function(){
       "CREATE ROOM ERROR:",
       error
     );
-
 
     alert(
       "Could not create the room.\n\n" +
@@ -2849,7 +3016,6 @@ async function(){
 
     );
 
-
   if(
     roomCode.length <
     2
@@ -2872,12 +3038,10 @@ async function(){
         `rooms/${roomCode}`
       );
 
-
     const snapshot =
       await get(
         roomRef
       );
-
 
     if(
       !snapshot.exists()
@@ -2902,10 +3066,6 @@ async function(){
       )
     ){
 
-      alert(
-        "That room has expired."
-      );
-
       if(
         data.host ===
         playerId
@@ -2916,6 +3076,10 @@ async function(){
         );
 
       }
+
+      alert(
+        "That room has expired."
+      );
 
       return;
 
@@ -2955,7 +3119,9 @@ async function(){
       "lobby" &&
       !existingPlayer &&
       playerCount >=
-      data.playerLimit
+      Number(
+        data.playerLimit
+      )
     ){
 
       alert(
@@ -3028,7 +3194,6 @@ async function(){
       error
     );
 
-
     alert(
       "Could not join the room.\n\n" +
       (
@@ -3052,29 +3217,22 @@ function startRoomSession(){
 
   stopTimers();
 
-
   lastCallId =
     null;
-
 
   lastRevealId =
     null;
 
-
   revealRunning =
     false;
-
 
   selectedDetectivePlayerId =
     null;
 
-
-  mySecret =
-    null;
-
+  gameLoading =
+    false;
 
   hideAllMainScreens();
-
 
   document
     .getElementById(
@@ -3085,7 +3243,6 @@ function startRoomSession(){
       "hidden"
     );
 
-
   document
     .getElementById(
       "roomDisplay"
@@ -3093,6 +3250,13 @@ function startRoomSession(){
     .textContent =
     roomCode;
 
+  /*
+    Render immediately.
+    This guarantees the host/player appears
+    even before the listener's first callback.
+  */
+
+  renderLobby();
 
   startHeartbeat();
 
@@ -3145,6 +3309,11 @@ function listenToRoom(){
           snapshot.val();
 
 
+        /*
+          Never delete the player.
+          Restore the SAME playerId if necessary.
+        */
+
         if(
           !roomData.players?.[
             playerId
@@ -3178,12 +3347,17 @@ function listenToRoom(){
 
           );
 
-        }
-        else{
+          /*
+            The Firebase listener will fire again
+            with the restored player.
+          */
 
-          await markPlayerSeen();
+          return;
 
         }
+
+
+        await markPlayerSeen();
 
 
         renderLobby();
@@ -3202,11 +3376,9 @@ function listenToRoom(){
           mySecret =
             null;
 
-
           clearInterval(
             globalInterval
           );
-
 
           document
             .getElementById(
@@ -3216,7 +3388,6 @@ function listenToRoom(){
             .add(
               "hidden"
             );
-
 
           document
             .getElementById(
@@ -3234,9 +3405,37 @@ function listenToRoom(){
       error=>{
 
         console.error(
-          "ROOM LISTENER:",
+          "ROOM LISTENER ERROR:",
           error
         );
+
+        const playerList =
+          document.getElementById(
+            "playersList"
+          );
+
+        if(
+          playerList
+        ){
+
+          playerList.innerHTML = `
+
+            <div class="error-box">
+
+              ❌ Could not read the room.
+
+              <br><br>
+
+              ${escapeHtml(
+                error?.message ||
+                "Firebase read error."
+              )}
+
+            </div>
+
+          `;
+
+        }
 
       }
 
@@ -3356,22 +3555,17 @@ function leaveRoomToHome(
 
   stopTimers();
 
-
   roomCode =
     "";
-
 
   roomData =
     null;
 
-
   mySecret =
     null;
 
-
   selectedDetectivePlayerId =
     null;
-
 
   document
     .getElementById(
@@ -3382,7 +3576,6 @@ function leaveRoomToHome(
       "hidden"
     );
 
-
   document
     .getElementById(
       "lobby"
@@ -3391,7 +3584,6 @@ function leaveRoomToHome(
     .add(
       "hidden"
     );
-
 
   document
     .getElementById(
@@ -3402,7 +3594,6 @@ function leaveRoomToHome(
       "hidden"
     );
 
-
   document
     .getElementById(
       "home"
@@ -3411,7 +3602,6 @@ function leaveRoomToHome(
     .remove(
       "hidden"
     );
-
 
   if(
     message
@@ -3427,7 +3617,7 @@ function leaveRoomToHome(
 
 
 /* =====================================================
-LOBBY
+LOBBY RENDER
 ===================================================== */
 
 function renderLobby(){
@@ -3467,7 +3657,9 @@ function renderLobby(){
     .innerHTML = `
 
       <span class="badge">
-        ${ids.length}/${roomData.playerLimit}
+        ${ids.length}/${Number(
+          roomData.playerLimit
+        )}
       </span>
 
       <span class="badge">
@@ -3481,38 +3673,42 @@ function renderLobby(){
       <span class="badge">
         👤 ${Math.max(
           0,
-          roomData.playerLimit -
-          2
+          Number(
+            roomData.playerLimit
+          ) - 2
         )} Innocent
       </span>
 
     `;
 
 
-  document
-    .getElementById(
+  const list =
+    document.getElementById(
       "playersList"
-    )
-    .innerHTML =
+    );
+
+
+  list.innerHTML =
 
     ids
       .map(
         id=>{
 
           const player =
-            players[id];
+            players[id] ||
+            {};
 
 
-          const seen =
+          const seenAgo =
             Date.now() -
             Number(
-              player?.lastSeenAt ||
+              player.lastSeenAt ||
               0
             );
 
 
           const connected =
-            seen <
+            seenAgo <
             45000;
 
 
@@ -3524,7 +3720,7 @@ function renderLobby(){
 
                 👤
                 ${escapeHtml(
-                  player?.name ||
+                  player.name ||
                   "Unknown"
                 )}
 
@@ -3562,9 +3758,26 @@ function renderLobby(){
       .join("");
 
 
+  /*
+    IMPORTANT:
+    The host panel must be shown for the host.
+  */
+
   const hostPanel =
     document.getElementById(
       "hostPanel"
+    );
+
+
+  const startButton =
+    document.getElementById(
+      "startButton"
+    );
+
+
+  const hostInfo =
+    document.getElementById(
+      "hostInfo"
     );
 
 
@@ -3583,41 +3796,31 @@ function renderLobby(){
     isHost
   ){
 
-    const startButton =
-      document.getElementById(
-        "startButton"
+    const limit =
+      Number(
+        roomData.playerLimit
       );
+
+
+    const full =
+      ids.length ===
+      limit;
 
 
     startButton.disabled =
-      ids.length !==
-      Number(
-        roomData.playerLimit
-      );
+      !full;
 
 
     startButton.textContent =
-
-      ids.length ===
-      Number(
-        roomData.playerLimit
-      )
-
+      full
       ?
-
       "▶️ START ROUND"
-
       :
-
       "⏳ WAITING FOR PLAYERS";
 
 
-    document
-      .getElementById(
-        "hostInfo"
-      )
-      .textContent =
-      `${ids.length}/${roomData.playerLimit} players joined.`;
+    hostInfo.textContent =
+      `${ids.length}/${limit} players joined.`;
 
   }
 
@@ -3625,7 +3828,7 @@ function renderLobby(){
 
 
 /* =====================================================
-LOCATIONS / TASKS
+LOCATIONS
 ===================================================== */
 
 const locations = [
@@ -3691,6 +3894,10 @@ const afterMurderTemplates = [
 
 ];
 
+
+/* =====================================================
+TASK HELPERS
+===================================================== */
 
 function createTask(
   id,
@@ -3762,7 +3969,6 @@ function makeUnlockTimes(
       first +
       60 *
       1000,
-
       detectiveEnd -
       60 *
       1000
@@ -3883,21 +4089,28 @@ function buildNormalTasks(
         );
 
 
+        const templatePool =
+          Math.random() <
+          0.5
+          ?
+          activityTemplates
+          :
+          actionTemplates;
+
+
         return createTask(
 
           `${roundSeed}_${playerIdForSeed}_N_${i}_${Math.random()
             .toString(36)
-            .slice(2,7)}`,
+            .slice(
+              2,
+              7
+            )}`,
 
           unlockAt,
 
           random(
-            Math.random() <
-            0.5
-            ?
-            activityTemplates
-            :
-            actionTemplates
+            templatePool
           )
             .replace(
               "{location}",
@@ -3994,7 +4207,10 @@ function buildMurdererTasks(
 
           `${roundSeed}_${playerIdForSeed}_M_${i}_${Math.random()
             .toString(36)
-            .slice(2,7)}`,
+            .slice(
+              2,
+              7
+            )}`,
 
           unlockAt,
 
@@ -4018,7 +4234,10 @@ function buildMurdererTasks(
 
       `${roundSeed}_${playerIdForSeed}_KILL_${Math.random()
         .toString(36)
-        .slice(2,7)}`,
+        .slice(
+          2,
+          7
+        )}`,
 
       murderAt,
 
@@ -4049,7 +4268,10 @@ function buildMurdererTasks(
 
       `${roundSeed}_${playerIdForSeed}_AFTER_${Math.random()
         .toString(36)
-        .slice(2,7)}`,
+        .slice(
+          2,
+          7
+        )}`,
 
       Math.min(
         murderAt +
@@ -4106,15 +4328,33 @@ async function(){
     );
 
 
-  if(
-    ids.length !==
+  const playerLimit =
     Number(
       roomData.playerLimit
-    )
+    );
+
+
+  if(
+    ids.length !==
+    playerLimit
   ){
 
     alert(
-      "Wait for everyone."
+      `Wait for everyone. ${ids.length}/${playerLimit} players are joined.`
+    );
+
+    return;
+
+  }
+
+
+  if(
+    ids.length <
+    2
+  ){
+
+    alert(
+      "At least 2 players are required."
     );
 
     return;
@@ -4322,6 +4562,12 @@ async function(){
 
 
   updates[
+    `rooms/${roomCode}/call`
+  ] =
+    null;
+
+
+  updates[
     `rooms/${roomCode}/lastActivityAt`
   ] =
     now;
@@ -4346,7 +4592,7 @@ async function(){
     updates[
       `rooms/${roomCode}/private/${id}`
     ] =
-      data;
+    data;
 
 
     updates[
@@ -4357,12 +4603,32 @@ async function(){
   }
 
 
-  await update(
-    ref(
-      db
-    ),
-    updates
-  );
+  try{
+
+    await update(
+      ref(
+        db
+      ),
+      updates
+    );
+
+  }
+  catch(error){
+
+    console.error(
+      "START ROUND ERROR:",
+      error
+    );
+
+    alert(
+      "Could not start the round.\n\n" +
+      (
+        error?.message ||
+        "Unknown Firebase error."
+      )
+    );
+
+  }
 
 };
 
@@ -4439,6 +4705,12 @@ async function loadGame(){
         secretSnap.val();
 
     }
+    else{
+
+      mySecret =
+        null;
+
+    }
 
 
     renderSecret();
@@ -4451,7 +4723,7 @@ async function loadGame(){
   catch(error){
 
     console.error(
-      "LOAD GAME:",
+      "LOAD GAME ERROR:",
       error
     );
 
@@ -4556,6 +4828,15 @@ function startGameListeners(){
 
         snapshot=>{
 
+          if(
+            !roomData
+          ){
+
+            return;
+
+          }
+
+
           roomData.completed =
             roomData.completed ||
             {};
@@ -4590,6 +4871,15 @@ function startGameListeners(){
         ),
 
         snapshot=>{
+
+          if(
+            !roomData
+          ){
+
+            return;
+
+          }
+
 
           roomData.notes =
             snapshot.val() ||
@@ -4655,7 +4945,7 @@ function startGameListeners(){
           }
 
 
-          const id =
+          const revealId =
             String(
               result.votedAt ||
               result.accusedId
@@ -4663,7 +4953,7 @@ function startGameListeners(){
 
 
           if(
-            id ===
+            revealId ===
             lastRevealId
           ){
 
@@ -4673,7 +4963,7 @@ function startGameListeners(){
 
 
           lastRevealId =
-            id;
+            revealId;
 
 
           runReveal(
@@ -4715,6 +5005,7 @@ function startGameListeners(){
 
 
           if(
+            input &&
             document.activeElement !==
             input
           ){
@@ -4738,7 +5029,7 @@ function startGameListeners(){
 
 
 /* =====================================================
-GLOBAL TIMER
+GLOBAL CLOCK
 ===================================================== */
 
 function startGlobalClock(){
@@ -4905,11 +5196,29 @@ function startGlobalClock(){
       500
     );
 
+
+  /*
+    Draw once immediately.
+  */
+
+  if(
+    roomData?.game
+  ){
+
+    const event =
+      new Event(
+        "tivoli-clock"
+      );
+
+    void event;
+
+  }
+
 }
 
 
 /* =====================================================
-SECRET
+SECRET UI
 ===================================================== */
 
 function renderSecret(){
@@ -5121,7 +5430,12 @@ function renderTasks(){
 
                   🔒 Opens at
                   ${escapeHtml(
-                    task.unlockText
+                    task.unlockText ||
+                    shortClock(
+                      new Date(
+                        task.unlockAt
+                      )
+                    )
                   )}
 
                 </div>
@@ -5177,7 +5491,12 @@ function renderTasks(){
 
                     ⏰ Opened at
                     ${escapeHtml(
-                      task.unlockText
+                      task.unlockText ||
+                      shortClock(
+                        new Date(
+                          task.unlockAt
+                        )
+                      )
                     )}
 
                   </div>
@@ -5240,7 +5559,9 @@ async function(
 
   if(
     Date.now() <
-    task.unlockAt
+    Number(
+      task.unlockAt
+    )
   ){
 
     alert(
@@ -5276,6 +5597,7 @@ async function(
   catch(error){
 
     console.error(
+      "TASK ERROR:",
       error
     );
 
@@ -5439,14 +5761,14 @@ async function(){
   }
 
 
-  const noteRef =
-    ref(
-      db,
-      `rooms/${roomCode}/notes/${playerId}`
-    );
-
-
   try{
+
+    const noteRef =
+      ref(
+        db,
+        `rooms/${roomCode}/notes/${playerId}`
+      );
+
 
     const existing =
       await get(
@@ -5629,21 +5951,21 @@ function renderLivePlayerNotes(){
     Object.values(
       notes
     )
-      .sort(
+    .sort(
+      (
+        a,
+        b
+      ) =>
         (
-          a,
-          b
-        ) =>
-          (
-            b.timestamp ||
-            0
-          )
-          -
-          (
-            a.timestamp ||
-            0
-          )
-      );
+          b.timestamp ||
+          0
+        )
+        -
+        (
+          a.timestamp ||
+          0
+        )
+    );
 
 
   if(
@@ -5745,6 +6067,23 @@ function renderDetectivePlayerButtons(){
   const players =
     roomData?.players ||
     {};
+
+
+  if(
+    !suspects.length
+  ){
+
+    container.innerHTML = `
+
+      <div class="note-empty">
+        No suspects loaded yet.
+      </div>
+
+    `;
+
+    return;
+
+  }
 
 
   container.innerHTML =
@@ -5895,18 +6234,14 @@ async function(
       .textContent =
 
       data.updatedAt
-
       ?
-
       "Last saved: " +
       clockText(
         new Date(
           data.updatedAt
         )
       )
-
       :
-
       "Not saved yet.";
 
   }
@@ -6056,6 +6391,7 @@ async function(){
   catch(error){
 
     console.error(
+      "SAVE DOSSIER:",
       error
     );
 
@@ -6112,6 +6448,7 @@ async function(){
   catch(error){
 
     console.error(
+      "SAVE GENERAL NOTES:",
       error
     );
 
@@ -6340,39 +6677,55 @@ async function renderTaskProgress(){
         completed
       )
       .filter(
-        x =>
-          x ===
+        value =>
+          value ===
           true
       )
       .length;
 
 
-    const snapshot =
-      await get(
+    let total =
+      0;
 
-        ref(
-          db,
-          `rooms/${roomCode}/private/${id}/tasks`
+
+    try{
+
+      const snapshot =
+        await get(
+
+          ref(
+            db,
+            `rooms/${roomCode}/private/${id}/tasks`
+          )
+
+        );
+
+
+      const tasks =
+        snapshot.val() ||
+        [];
+
+
+      total =
+        Array.isArray(
+          tasks
         )
+        ?
+        tasks.length
+        :
+        Object.keys(
+          tasks
+        ).length;
 
+    }
+    catch(error){
+
+      console.warn(
+        "TASK COUNT:",
+        error
       );
 
-
-    const tasks =
-      snapshot.val() ||
-      {};
-
-
-    const total =
-      Array.isArray(
-        tasks
-      )
-      ?
-      tasks.length
-      :
-      Object.keys(
-        tasks
-      ).length;
+    }
 
 
     const percent =
@@ -6402,7 +6755,9 @@ async function renderTaskProgress(){
 
       <b>
         👤 ${escapeHtml(
-          roomData.players[id]?.name ||
+          roomData
+            .players[id]
+            ?.name ||
           "Unknown"
         )}
       </b>
@@ -6493,6 +6848,10 @@ async function(
     console.error(
       "ACCUSE:",
       error
+    );
+
+    alert(
+      "Could not submit the accusation."
     );
 
   }
@@ -6610,6 +6969,7 @@ async function runReveal(
     players[
       accusedId
     ]?.name ||
+    result.accusedName ||
     "Unknown";
 
 
@@ -6884,67 +7244,79 @@ async function resetToLobby(){
   }
 
 
-  const now =
-    Date.now();
+  try{
+
+    const now =
+      Date.now();
 
 
-  await update(
+    await update(
 
-    ref(
-      db
-    ),
+      ref(
+        db
+      ),
 
-    {
+      {
 
-      [`rooms/${roomCode}/status`]:
-        "lobby",
+        [`rooms/${roomCode}/status`]:
+          "lobby",
 
-      [`rooms/${roomCode}/game`]:
-        null,
+        [`rooms/${roomCode}/game`]:
+          null,
 
-      [`rooms/${roomCode}/private`]:
-        null,
+        [`rooms/${roomCode}/private`]:
+          null,
 
-      [`rooms/${roomCode}/completed`]:
-        null,
+        [`rooms/${roomCode}/completed`]:
+          null,
 
-      [`rooms/${roomCode}/notes`]:
-        null,
+        [`rooms/${roomCode}/notes`]:
+          null,
 
-      [`rooms/${roomCode}/detectiveNotes`]:
-        null,
+        [`rooms/${roomCode}/detectiveNotes`]:
+          null,
 
-      [`rooms/${roomCode}/call`]:
-        null,
+        [`rooms/${roomCode}/call`]:
+          null,
 
-      [`rooms/${roomCode}/result`]:
-        null,
+        [`rooms/${roomCode}/result`]:
+          null,
 
-      [`rooms/${roomCode}/createdAt`]:
-        now,
+        [`rooms/${roomCode}/createdAt`]:
+          now,
 
-      [`rooms/${roomCode}/lastActivityAt`]:
-        now
+        [`rooms/${roomCode}/lastActivityAt`]:
+          now
 
-    }
+      }
 
-  );
-
-
-  mySecret =
-    null;
+    );
 
 
-  selectedDetectivePlayerId =
-    null;
+    mySecret =
+      null;
 
 
-  lastCallId =
-    null;
+    selectedDetectivePlayerId =
+      null;
 
 
-  lastRevealId =
-    null;
+    lastCallId =
+      null;
+
+
+    lastRevealId =
+      null;
+
+  }
+  catch(error){
+
+    console.error(
+      "RESET TO LOBBY:",
+      error
+    );
+
+  }
 
 }
 
@@ -7645,12 +8017,15 @@ async function reconnectCurrentRoom(){
 
       );
 
-    }
-    else{
-
-      await markPlayerSeen();
+      return;
 
     }
+
+
+    await markPlayerSeen();
+
+
+    renderLobby();
 
 
     if(
@@ -7659,11 +8034,6 @@ async function reconnectCurrentRoom(){
     ){
 
       await loadGame();
-
-    }
-    else{
-
-      renderLobby();
 
     }
 
