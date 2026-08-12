@@ -25,8 +25,7 @@
   box-sizing:border-box;
 }
 
-html,
-body{
+html,body{
   margin:0;
   min-height:100%;
 }
@@ -165,6 +164,10 @@ button.orange{
   background:#c47d35;
 }
 
+button.dark{
+  background:#171c2a;
+}
+
 .hidden{
   display:none!important;
 }
@@ -173,94 +176,12 @@ button.orange{
   text-align:center;
 }
 
-.auth-tabs{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:8px;
-  background:#0d111b;
-  padding:6px;
-  border-radius:16px;
-  margin:16px 0;
-}
-
-.auth-tab{
-  margin:0;
-  background:transparent;
-  color:#929db4;
-}
-
-.auth-tab.active{
-  background:#2a3551;
-  color:white;
-}
-
-.auth-status{
-  min-height:20px;
-  margin-top:12px;
-  color:#929db4;
-  font-size:13px;
-}
-
 .install-box{
   background:#172038;
   border:1px solid rgba(113,140,255,.25);
   padding:15px;
   border-radius:16px;
   margin-top:15px;
-}
-
-.user-bar{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  background:#161b2a;
-  border:1px solid rgba(255,255,255,.08);
-  border-radius:18px;
-  padding:12px;
-  margin-bottom:16px;
-}
-
-.user-name{
-  font-weight:900;
-}
-
-.user-status{
-  color:#8b96ad;
-  font-size:12px;
-  margin-top:3px;
-}
-
-.logout{
-  width:auto;
-  padding:10px 13px;
-  margin:0;
-  background:#2a3042;
-  font-size:12px;
-}
-
-.connection{
-  display:inline-flex;
-  align-items:center;
-  gap:7px;
-  margin-top:5px;
-  font-size:12px;
-  color:#8b96ad;
-}
-
-.connection-dot{
-  width:9px;
-  height:9px;
-  border-radius:50%;
-  background:#e4a84b;
-}
-
-.connection.online .connection-dot{
-  background:#35c88b;
-}
-
-.connection.offline .connection-dot{
-  background:#d54d5d;
 }
 
 .room-code{
@@ -281,26 +202,20 @@ button.orange{
   margin:7px 0;
 }
 
-.player-row{
-  display:flex;
-  justify-content:space-between;
-  gap:10px;
-  align-items:center;
-}
-
-.player-name{
-  font-weight:900;
-}
-
-.player-status{
-  font-size:12px;
-  color:#8994ab;
-  margin-top:4px;
-}
-
 .host{
   color:#ffd36a;
   margin-left:6px;
+}
+
+.player-status{
+  color:#8792aa;
+  font-size:12px;
+  margin-top:4px;
+}
+
+.name-display{
+  font-size:17px;
+  font-weight:900;
 }
 
 .role{
@@ -483,40 +398,68 @@ button.orange{
   font-weight:900;
 }
 
-.reset-fixed{
-  position:fixed;
-  top:calc(12px + env(safe-area-inset-top));
-  right:12px;
-  z-index:9000;
-  width:auto;
-  padding:11px 15px;
-  font-size:13px;
-  box-shadow:0 8px 25px rgba(0,0,0,.35);
+/* USER BAR */
+
+.user-bar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-bottom:14px;
+  background:#151a29;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:18px;
+  padding:13px 15px;
 }
 
-/* FULL SCREEN CALL */
+.user-bar-left{
+  min-width:0;
+}
+
+.user-bar-name{
+  font-weight:900;
+  font-size:16px;
+}
+
+.user-bar-status{
+  color:#8c96aa;
+  font-size:12px;
+  margin-top:3px;
+}
+
+.user-bar button{
+  width:auto;
+  margin:0;
+  padding:9px 13px;
+  font-size:12px;
+  background:#252c40;
+}
+
+/* CALL */
 
 .call-overlay{
   position:fixed;
   inset:0;
   z-index:150000;
 
-  background:
-    radial-gradient(
-      circle at center,
-      #334576 0%,
-      #111928 44%,
-      #020307 100%
-    );
-
   display:flex;
   align-items:center;
   justify-content:center;
+
+  background:
+    radial-gradient(
+      circle at center,
+      #354976 0%,
+      #111a2a 43%,
+      #020307 100%
+    );
 
   padding:
     calc(20px + env(safe-area-inset-top))
     20px
     calc(20px + env(safe-area-inset-bottom));
+
+  overflow:hidden;
 }
 
 .call-overlay.hidden{
@@ -530,43 +473,43 @@ button.orange{
 }
 
 .call-icon{
-  font-size:82px;
+  font-size:84px;
   animation:callPulse 1s infinite;
 }
 
 .call-small{
   color:#9eadd0;
-  font-size:14px;
+  font-size:13px;
   font-weight:900;
-  letter-spacing:3px;
-  margin-top:22px;
-}
-
-.call-caller{
-  font-size:clamp(40px,10vw,78px);
-  line-height:1;
-  font-weight:1000;
-  margin-top:12px;
-}
-
-.call-location{
-  font-size:clamp(24px,6vw,48px);
-  font-weight:900;
+  letter-spacing:4px;
   margin-top:20px;
 }
 
-.call-count{
-  font-size:65px;
+.call-caller{
+  font-size:clamp(42px,10vw,82px);
+  line-height:1;
   font-weight:1000;
-  margin-top:30px;
+  margin-top:15px;
+}
+
+.call-destination{
+  font-size:clamp(25px,7vw,52px);
+  font-weight:900;
+  margin-top:22px;
+}
+
+.call-count{
+  font-size:66px;
+  font-weight:1000;
+  margin-top:28px;
 }
 
 .call-progress{
-  height:10px;
+  height:9px;
   background:rgba(255,255,255,.15);
   border-radius:999px;
   overflow:hidden;
-  margin-top:25px;
+  margin-top:24px;
 }
 
 .call-progress-bar{
@@ -577,6 +520,7 @@ button.orange{
 }
 
 @keyframes callPulse{
+
   0%,100%{
     transform:scale(1);
   }
@@ -584,7 +528,10 @@ button.orange{
   50%{
     transform:scale(1.13);
   }
+
 }
+
+/* ALERT MODAL */
 
 .alert-modal{
   position:fixed;
@@ -605,7 +552,23 @@ button.orange{
   border-radius:25px;
   padding:25px;
   text-align:center;
+  box-shadow:0 20px 60px rgba(0,0,0,.5);
 }
+
+/* RESET */
+
+.reset-fixed{
+  position:fixed;
+  top:calc(12px + env(safe-area-inset-top));
+  right:12px;
+  z-index:9000;
+  width:auto;
+  padding:11px 15px;
+  font-size:13px;
+  box-shadow:0 8px 25px rgba(0,0,0,.35);
+}
+
+/* NOTES */
 
 .notes-box{
   background:#202638;
@@ -658,6 +621,8 @@ button.orange{
   font-size:12px;
   margin-top:8px;
 }
+
+/* DOSSIER */
 
 .detective-player-buttons{
   display:grid;
@@ -727,10 +692,13 @@ button.orange{
   margin-bottom:5px;
 }
 
+/* REVEAL */
+
 .reveal-overlay{
   position:fixed;
   inset:0;
   z-index:200000;
+
   background:
     radial-gradient(
       circle at center,
@@ -738,9 +706,11 @@ button.orange{
       #0c101b 44%,
       #020307 100%
     );
+
   display:flex;
   align-items:center;
   justify-content:center;
+
   padding:20px;
   overflow:hidden;
 }
@@ -787,6 +757,7 @@ button.orange{
   border:1px solid rgba(255,255,255,.1);
   border-radius:24px;
   padding:18px;
+  box-shadow:0 20px 70px rgba(0,0,0,.45);
   text-align:left;
 }
 
@@ -842,6 +813,7 @@ button.orange{
 }
 
 @keyframes revealPop{
+
   0%{
     opacity:0;
     transform:scale(.72);
@@ -851,9 +823,11 @@ button.orange{
     opacity:1;
     transform:scale(1);
   }
+
 }
 
 @keyframes revealFade{
+
   0%{
     opacity:0;
   }
@@ -861,9 +835,11 @@ button.orange{
   100%{
     opacity:1;
   }
+
 }
 
 @keyframes revealShake{
+
   0%,100%{
     transform:translateX(0);
   }
@@ -883,6 +859,7 @@ button.orange{
   80%{
     transform:translateX(5px);
   }
+
 }
 
 @media(max-width:600px){
@@ -947,8 +924,8 @@ FULL SCREEN CALL
     </div>
 
     <div
-      id="callLocation"
-      class="call-location"
+      id="callDestination"
+      class="call-destination"
     >
       COME TO SEA VIEW
     </div>
@@ -995,7 +972,7 @@ ALERT MODAL
 
     <p>
       Tap this once so the game can use
-      its ringtone and notifications.
+      notifications and its ringtone.
     </p>
 
     <button
@@ -1057,6 +1034,60 @@ REVEAL
 
 
 <!-- =====================================================
+NAME SETUP
+===================================================== -->
+
+<section
+  id="nameSetup"
+>
+
+  <div class="card center">
+
+    <h1>
+      🕵️ Tivoli Mystery
+    </h1>
+
+    <p>
+      Before you start, what should the game
+      call you?
+    </p>
+
+    <label>
+      Your name
+    </label>
+
+    <input
+      id="nameInput"
+      placeholder="Example: Zezo"
+      autocomplete="nickname"
+      maxlength="30"
+      autofocus
+    >
+
+    <button
+      onclick="saveNameAndContinue()"
+    >
+      CONTINUE
+    </button>
+
+    <div class="install-box">
+
+      <b>📱 This device will remember your name</b>
+
+      <p class="small">
+        You only need to enter it once on this device.
+        A temporary Wi-Fi or hotspot disconnect will
+        not change your player identity.
+      </p>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =====================================================
 USER BAR
 ===================================================== -->
 
@@ -1065,173 +1096,31 @@ USER BAR
   class="user-bar hidden"
 >
 
-  <div>
+  <div class="user-bar-left">
 
     <div
-      id="userNameDisplay"
-      class="user-name"
+      id="userBarName"
+      class="user-bar-name"
     >
       Player
     </div>
 
     <div
-      id="userStatusDisplay"
-      class="user-status"
+      id="userBarStatus"
+      class="user-bar-status"
     >
-      Logged in
-    </div>
-
-    <div
-      id="connectionDisplay"
-      class="connection"
-    >
-
-      <span class="connection-dot"></span>
-
-      <span id="connectionText">
-        Checking connection...
-      </span>
-
+      Saved on this device
     </div>
 
   </div>
 
   <button
-    class="logout"
-    onclick="logout()"
+    onclick="changeName()"
   >
-    LOG OUT
+    CHANGE NAME
   </button>
 
 </div>
-
-
-<!-- =====================================================
-AUTH
-===================================================== -->
-
-<section
-  id="authScreen"
->
-
-  <div class="card">
-
-    <h1>
-      🕵️ Tivoli Mystery
-    </h1>
-
-    <p>
-      Real-time fictional mystery game
-      for the outdoor Tivoli area.
-    </p>
-
-    <div class="install-box">
-
-      <b>📱 iPhone App Mode</b>
-
-      <p class="small">
-        Safari → Share → Add to Home Screen.
-      </p>
-
-    </div>
-
-
-    <div class="auth-tabs">
-
-      <button
-        id="loginTab"
-        class="auth-tab active"
-        onclick="switchAuthMode('login')"
-      >
-        LOGIN
-      </button>
-
-      <button
-        id="signupTab"
-        class="auth-tab"
-        onclick="switchAuthMode('signup')"
-      >
-        CREATE ACCOUNT
-      </button>
-
-    </div>
-
-
-    <label>
-      Username
-    </label>
-
-    <input
-      id="usernameInput"
-      placeholder="Example: Zezo"
-      autocomplete="username"
-      maxlength="20"
-    >
-
-
-    <label>
-      Password
-    </label>
-
-    <input
-      id="passwordInput"
-      type="password"
-      placeholder="Password"
-      autocomplete="current-password"
-      minlength="6"
-      maxlength="100"
-    >
-
-
-    <button
-      id="authButton"
-      onclick="submitAuth()"
-    >
-      LOGIN
-    </button>
-
-
-    <div
-      id="authStatus"
-      class="auth-status"
-    ></div>
-
-
-    <div class="info">
-
-      <b>🔐 Reconnect-safe account</b>
-
-      <p class="small">
-        Your account has a permanent player ID.
-        Temporary Wi-Fi or hotspot disconnects
-        do not create an Unknown player.
-      </p>
-
-    </div>
-
-  </div>
-
-
-  <div class="card">
-
-    <h2>
-      🎮 Rules
-    </h2>
-
-    <p>
-      🕵️ 1 Detective<br>
-      🔪 1 Murderer<br>
-      👤 Everyone else = Innocent
-    </p>
-
-    <p>
-      All game locations are outside around
-      the sea-view café area.
-    </p>
-
-  </div>
-
-</section>
 
 
 <!-- =====================================================
@@ -1250,8 +1139,19 @@ HOME
     </h1>
 
     <p>
-      Ready to create or join your game?
+      Welcome,
+      <b id="welcomeName"></b>.
     </p>
+
+    <div class="install-box">
+
+      <b>📱 iPhone App Mode</b>
+
+      <p class="small">
+        Safari → Share → Add to Home Screen.
+      </p>
+
+    </div>
 
 
     <div id="alertBox" class="info">
@@ -1296,23 +1196,20 @@ HOME
       JOIN ROOM
     </button>
 
-
     <div
       id="resumeBox"
       class="info hidden"
     >
 
-      <b>🔄 Previous game found</b>
+      <b>🔄 Saved game found</b>
 
-      <p id="resumeText">
-        You have a saved game.
-      </p>
+      <p id="resumeText"></p>
 
       <button
         class="green"
-        onclick="resumeSavedGame()"
+        onclick="resumeSavedRoom()"
       >
-        REJOIN GAME
+        REJOIN SAVED ROOM
       </button>
 
     </div>
@@ -1351,7 +1248,7 @@ HOME
     </span>
 
     <span class="badge">
-      💧 Central Outdoor Area
+      🌿 Central Outdoor Area
     </span>
 
     <span class="badge">
@@ -1359,7 +1256,9 @@ HOME
     </span>
 
     <p class="small">
-      Nobody needs to enter a café or restaurant.
+      The game is designed to stay outside.
+      Players do not need to enter restaurants
+      or cafés.
     </p>
 
   </div>
@@ -1429,7 +1328,6 @@ CREATE ROOM
 
     </select>
 
-
     <button
       onclick="finishCreateRoom()"
     >
@@ -1472,9 +1370,7 @@ LOBBY
       class="room-code"
     ></div>
 
-    <div
-      id="lobbyPlayerCount"
-    ></div>
+    <div id="lobbyPlayerCount"></div>
 
   </div>
 
@@ -1567,8 +1463,8 @@ GAME
     </h2>
 
     <p>
-      The call will take over the entire
-      screen for 15 seconds.
+      Calls take over the entire screen for
+      15 seconds.
     </p>
 
     <div class="row">
@@ -1627,15 +1523,14 @@ GAME
 
     <p>
       Write one short note for the Detective.
+      It is timestamped automatically.
     </p>
-
 
     <textarea
       id="playerNoteInput"
       maxlength="240"
-      placeholder="Example: I was near the sea view."
+      placeholder="Example: I was sitting near the sea view."
     ></textarea>
-
 
     <div
       class="small"
@@ -1643,7 +1538,6 @@ GAME
     >
       0 / 240
     </div>
-
 
     <button
       id="submitPlayerNoteButton"
@@ -1653,7 +1547,6 @@ GAME
       📝 SEND NOTE TO DETECTIVE
     </button>
 
-
     <div
       id="myNoteStatus"
       class="small"
@@ -1661,7 +1554,6 @@ GAME
     >
       You have 1 note available.
     </div>
-
 
     <div
       id="myNoteError"
@@ -1708,13 +1600,15 @@ GAME
     </h2>
 
     <p>
-      New tasks unlock at their exact times.
+      Every new match gives you a fresh randomized
+      task set. Future tasks stay locked until their
+      actual unlock time.
     </p>
 
   </div>
 
 
-  <!-- DETECTIVE NOTEBOOK -->
+  <!-- DETECTIVE -->
 
   <div
     id="detectiveNotebook"
@@ -1726,27 +1620,26 @@ GAME
     </h2>
 
     <p>
-      These notes are private.
+      These notes are private to you.
     </p>
-
 
     <div class="notes-box">
 
       <label>
-        🧠 My General Notes
+        🧠 My general notes
       </label>
 
       <textarea
         id="detectiveGeneralNotes"
         maxlength="3000"
-        placeholder="Write your observations..."
+        placeholder="Write anything you notice..."
       ></textarea>
 
       <button
         class="green"
         onclick="saveDetectiveGeneralNotes()"
       >
-        💾 SAVE NOTES
+        💾 SAVE MY NOTES
       </button>
 
       <div
@@ -1764,6 +1657,10 @@ GAME
     <h3>
       👥 Player Notes
     </h3>
+
+    <p class="small">
+      Click a player to open their private investigation file.
+    </p>
 
     <div
       id="detectivePlayerButtons"
@@ -1810,26 +1707,29 @@ GAME
       <textarea
         id="dossierClaim"
         maxlength="1200"
+        placeholder="What do they claim?"
       ></textarea>
 
 
       <label>
-        🔎 Important Stuff
+        🔎 Important stuff
       </label>
 
       <textarea
         id="dossierImportant"
         maxlength="2000"
+        placeholder="Suspicious behavior, contradictions..."
       ></textarea>
 
 
       <label>
-        ❓ Questions
+        ❓ Questions to ask later
       </label>
 
       <textarea
         id="dossierQuestions"
         maxlength="2000"
+        placeholder="Who were you with?"
       ></textarea>
 
 
@@ -1839,7 +1739,6 @@ GAME
       >
         💾 SAVE PLAYER FILE
       </button>
-
 
       <div
         id="dossierSaveStatus"
@@ -1852,8 +1751,6 @@ GAME
 
   </div>
 
-
-  <!-- LIVE NOTES -->
 
   <div
     id="detectiveLiveNotes"
@@ -1892,9 +1789,7 @@ GAME
 
     <div id="caseFile"></div>
 
-
     <div class="divider"></div>
-
 
     <h3>
       📊 Task Progress
@@ -1902,16 +1797,13 @@ GAME
 
     <div id="taskProgress"></div>
 
-
     <div class="divider"></div>
-
 
     <h3>
       Who is the murderer?
     </h3>
 
     <div id="accusationButtons"></div>
-
 
     <div id="result"></div>
 
@@ -2006,47 +1898,77 @@ const db =
 
 
 /* =====================================================
+PLAYER ID
+===================================================== */
+
+let playerId =
+  localStorage.getItem(
+    "tivoliMysteryPlayerId"
+  );
+
+
+if(
+  !playerId
+){
+
+  playerId =
+    "p_" +
+    Date.now()
+      .toString(36) +
+    "_" +
+    Math.random()
+      .toString(36)
+      .substring(
+        2,
+        10
+      );
+
+
+  localStorage.setItem(
+    "tivoliMysteryPlayerId",
+    playerId
+  );
+
+}
+
+
+/* =====================================================
 STATE
 ===================================================== */
 
-let currentUser = null;
-
 let roomCode = "";
+let myName = "";
 let roomData = null;
 let mySecret = null;
 
 let globalInterval = null;
 let roomExpiryInterval = null;
-let heartbeatInterval = null;
 
-let roomListenerStarted = false;
-let completedListenerStarted = false;
+let lastCallId = null;
+
+let listenersStarted = false;
 let notesListenerStarted = false;
 let detectiveNotesListenerStarted = false;
 let gameResultListenerStarted = false;
+let roomListenerStarted = false;
 
-let lastCallId = null;
 let selectedDetectivePlayerId = null;
 
 let audioContext = null;
 
+let alertsEnabled =
+  localStorage.getItem(
+    "tivoliMysteryAlerts"
+  ) === "1";
+
 let revealRunning = false;
 let lastRevealId = null;
 
-let authMode = "login";
-
-let databaseConnected = false;
-
 let callTimer = null;
-
-let alertsEnabled =
-  localStorage.getItem(
-    "hotelMurderAlerts"
-  ) === "1";
 
 
 /* =====================================================
-CONSTANTS
+TIMING
 ===================================================== */
 
 const DETECTIVE_WAIT =
@@ -2066,2102 +1988,30 @@ const MAX_MURDER_DELAY =
 const MAX_PLAYER_NOTE_LENGTH =
   240;
 
-const ROOM_STALE_TIME =
-  15 * 60 * 1000;
-
 const CALL_DURATION =
   15 * 1000;
 
 
 /* =====================================================
-TIVOLI OUTDOOR LOCATIONS
+ROOM EXPIRY
 ===================================================== */
 
-const locations = [
+const ROOM_STALE_TIME =
+  15 * 60 * 1000;
 
-  "Sea View",
-  "Outdoor Café",
-  "Café Tables",
-  "Sea-Side Walkway",
-  "Sea-Side Edge",
-  "Dip N Dip Stairs",
-  "Central Outdoor Area",
-  "Side Seating"
 
-];
-
-
-/* =====================================================
-TASK TEXT
-===================================================== */
-
-const activityTemplates = [
-
-  "Sit quietly at {location}.",
-  "Walk around {location}.",
-  "Stand for a moment near {location}.",
-  "Look around {location}.",
-  "Wait nearby {location}.",
-  "Walk through {location}.",
-  "Sit at a nearby seat around {location}.",
-  "Check your phone near {location}.",
-  "Pause briefly around {location}.",
-  "Stay around {location} for a short moment.",
-  "Walk past {location}, then continue normally.",
-  "Spend a moment near {location} before moving on.",
-  "Look toward {location}, then continue.",
-  "Stay near {location} for a little while.",
-  "Take a short pause around {location}."
-
-];
-
-const actionTemplates = [
-
-  "Go to {location} and stay there briefly.",
-  "Move to {location}, then continue normally.",
-  "Visit {location} for a short moment.",
-  "Pass through {location} before continuing.",
-  "Wait near {location}, then move on.",
-  "Walk to {location} and look around briefly.",
-  "Head toward {location}, pause, then continue.",
-  "Go through {location} before moving elsewhere.",
-  "Spend a short moment at {location}, then leave.",
-  "Move through {location} and continue your route."
-
-];
-
-const murderTemplates = [
-
-  "Be at {location} at {time}. The fictional incident happens there.",
-  "Reach {location} when the clock reaches {time}.",
-  "At {time}, go to {location} for the fictional event.",
-  "Be near {location} at {time} for the fictional event.",
-  "Go to {location} around {time}. The fictional incident happens there.",
-  "At exactly {time}, be at {location} for the fictional event."
-
-];
-
-const afterMurderTemplates = [
-
-  "Leave {location} and continue normally.",
-  "Move away from {location} after the fictional event.",
-  "After the fictional incident, leave {location}.",
-  "Continue to another area after leaving {location}.",
-  "Move on from {location} and continue your timeline.",
-  "Leave {location} and go somewhere else."
-
-];
-
-const victims = [
-
-  "a fictional visitor",
-  "a fictional guest",
-  "a fictional character",
-  "a fictional person"
-
-];
-
-const cases = [
-
-  "A fictional incident occurred during the game.",
-  "A fictional visitor was involved in the mystery.",
-  "A fictional guest was involved in the case.",
-  "A fictional event happened in the story."
-
-];
-
-
-/* =====================================================
-BASIC HELPERS
-===================================================== */
-
-function random(array){
-
-  return array[
-    Math.floor(
-      Math.random() *
-      array.length
-    )
-  ];
-
-}
-
-
-function shuffle(array){
-
-  const result =
-    [...array];
-
-  for(
-    let i =
-      result.length - 1;
-    i > 0;
-    i--
-  ){
-
-    const j =
-      Math.floor(
-        Math.random() *
-        (i + 1)
-      );
-
-    [
-      result[i],
-      result[j]
-    ] =
-    [
-      result[j],
-      result[i]
-    ];
-
-  }
-
-  return result;
-
-}
-
-
-function pad(n){
-
-  return String(n)
-    .padStart(
-      2,
-      "0"
-    );
-
-}
-
-
-function clockText(date){
-
-  let h =
-    date.getHours();
-
-  const m =
-    pad(
-      date.getMinutes()
-    );
-
-  const s =
-    pad(
-      date.getSeconds()
-    );
-
-  const period =
-    h >= 12
-    ? "PM"
-    : "AM";
-
-  h =
-    h % 12;
-
-  if(
-    h === 0
-  ){
-
-    h = 12;
-
-  }
-
-  return (
-    `${h}:${m}:${s} ${period}`
-  );
-
-}
-
-
-function shortClock(date){
-
-  let h =
-    date.getHours();
-
-  const m =
-    pad(
-      date.getMinutes()
-    );
-
-  const period =
-    h >= 12
-    ? "PM"
-    : "AM";
-
-  h =
-    h % 12;
-
-  if(
-    h === 0
-  ){
-
-    h = 12;
-
-  }
-
-  return (
-    `${h}:${m} ${period}`
-  );
-
-}
-
-
-function formatDuration(ms){
-
-  const s =
-    Math.max(
-      0,
-      Math.ceil(
-        ms / 1000
-      )
-    );
-
-  return (
-    pad(
-      Math.floor(
-        s / 60
-      )
-    ) +
-    ":" +
-    pad(
-      s % 60
-    )
-  );
-
-}
-
-
-function escapeHtml(value){
-
-  return String(
-    value
-  )
-    .replaceAll(
-      "&",
-      "&amp;"
-    )
-    .replaceAll(
-      "<",
-      "&lt;"
-    )
-    .replaceAll(
-      ">",
-      "&gt;"
-    )
-    .replaceAll(
-      '"',
-      "&quot;"
-    )
-    .replaceAll(
-      "'",
-      "&#039;"
-    );
-
-}
-
-
-function sleep(ms){
-
-  return new Promise(
-    resolve =>
-      setTimeout(
-        resolve,
-        ms
-      )
-  );
-
-}
-
-
-/* =====================================================
-TIVOLI LOCATION RANDOMIZER
-===================================================== */
-
-function randomLocation(){
-
-  const weighted = [
-
-    ["Sea View",30],
-    ["Outdoor Café",25],
-    ["Café Tables",20],
-    ["Sea-Side Walkway",12],
-    ["Sea-Side Edge",5],
-    ["Dip N Dip Stairs",3],
-    ["Central Outdoor Area",3],
-    ["Side Seating",2]
-
-  ];
-
-  const total =
-    weighted.reduce(
-      (
-        sum,
-        item
-      ) =>
-        sum + item[1],
-      0
-    );
-
-  let roll =
-    Math.random() *
-    total;
-
-  for(
-    const item of
-    weighted
-  ){
-
-    roll -=
-      item[1];
-
-    if(
-      roll <= 0
-    ){
-
-      return item[0];
-
-    }
-
-  }
-
-  return "Sea View";
-
-}
-
-
-function uniqueLocation(
-  used,
-  forbidden
+function roomActivityTime(
+  data
 ){
 
-  let x;
-
-  let guard =
-    0;
-
-  do{
-
-    x =
-      randomLocation();
-
-    guard++;
-
-    if(
-      guard >
-      50
-    ){
-
-      x =
-        locations.find(
-          item =>
-            !used.includes(
-              item
-            ) &&
-            item !==
-            forbidden
-        ) ||
-        "Outdoor Café";
-
-      break;
-
-    }
-
-  }
-  while(
-    used.includes(x) ||
-    x === forbidden
-  );
-
-  used.push(x);
-
-  return x;
-
-}
-
-
-/* =====================================================
-TASK HELPERS
-===================================================== */
-
-function createTask(
-  id,
-  unlockAt,
-  description
-){
-
-  return {
-
-    id,
-    unlockAt,
-    description
-
-  };
-
-}
-
-
-function nextMinuteTimestamp(
-  timestamp
-){
-
-  const date =
-    new Date(
-      timestamp
-    );
-
-  date.setSeconds(
-    0,
+  return Number(
+    data?.lastActivityAt ||
+    data?.createdAt ||
     0
   );
 
-  date.setMinutes(
-    date.getMinutes() +
-    1
-  );
-
-  return date.getTime();
-
 }
 
-
-function taskUnlockText(
-  timestamp
-){
-
-  return shortClock(
-    new Date(
-      timestamp
-    )
-  );
-
-}
-
-
-function freshRoundSeed(){
-
-  return (
-    Date.now()
-      .toString(36) +
-    "_" +
-    Math.random()
-      .toString(36)
-      .substring(
-        2,
-        12
-      )
-  );
-
-}
-
-
-function fillLocationTemplate(
-  template,
-  location
-){
-
-  return template.replace(
-    "{location}",
-    location
-  );
-
-}
-
-
-/* =====================================================
-TASK GENERATION
-===================================================== */
-
-function makeRandomUnlockTimes(
-  now,
-  detectiveEnd,
-  count
-){
-
-  const startOffset =
-    60 *
-    1000;
-
-  const endOffset =
-    Math.max(
-      startOffset +
-      60 *
-      1000,
-      detectiveEnd -
-      now -
-      60 *
-      1000
-    );
-
-  const values =
-    [];
-
-  for(
-    let i = 0;
-    i < count;
-    i++
-  ){
-
-    const percentage =
-      (i + 1) /
-      (count + 1);
-
-    const spread =
-      (
-        Math.random() -
-        0.5
-      ) *
-      50 *
-      1000;
-
-    let offset =
-      startOffset +
-      (
-        endOffset -
-        startOffset
-      ) *
-      percentage +
-      spread;
-
-    offset =
-      Math.max(
-        startOffset,
-        Math.min(
-          endOffset,
-          offset
-        )
-      );
-
-    values.push(
-      nextMinuteTimestamp(
-        now +
-        offset
-      )
-    );
-
-  }
-
-  values.sort(
-    (a,b)=>
-      a-b
-  );
-
-  return values;
-
-}
-
-
-function buildRandomNormalTask(
-  id,
-  unlockAt,
-  usedLocations,
-  forbiddenLocation
-){
-
-  const location =
-    uniqueLocation(
-      usedLocations,
-      forbiddenLocation
-    );
-
-  const pool =
-    Math.random() <
-    0.5
-    ?
-    activityTemplates
-    :
-    actionTemplates;
-
-  return createTask(
-    id,
-    unlockAt,
-    fillLocationTemplate(
-      random(pool),
-      location
-    )
-  );
-
-}
-
-
-function buildRandomNormalTasks(
-  playerUid,
-  now,
-  detectiveEnd,
-  crimeLocation,
-  roundSeed
-){
-
-  const count =
-    3 +
-    Math.floor(
-      Math.random() *
-      3
-    );
-
-  const times =
-    makeRandomUnlockTimes(
-      now,
-      detectiveEnd,
-      count
-    );
-
-  const used =
-    [];
-
-  const tasks =
-    [];
-
-  for(
-    let i = 0;
-    i < count;
-    i++
-  ){
-
-    const id =
-      roundSeed +
-      "_" +
-      playerUid +
-      "_N_" +
-      i +
-      "_" +
-      Math.random()
-        .toString(36)
-        .substring(2,8);
-
-    tasks.push(
-      buildRandomNormalTask(
-        id,
-        times[i],
-        used,
-        crimeLocation
-      )
-    );
-
-  }
-
-  return shuffle(
-    tasks
-  );
-
-}
-
-
-function buildRandomMurdererTasks(
-  playerUid,
-  now,
-  detectiveEnd,
-  murderAt,
-  crimeLocation,
-  roundSeed
-){
-
-  const normalCount =
-    2 +
-    Math.floor(
-      Math.random() *
-      3
-    );
-
-  const normalTimes =
-    makeRandomUnlockTimes(
-      now,
-      Math.min(
-        detectiveEnd,
-        murderAt -
-        20 *
-        1000
-      ),
-      normalCount
-    );
-
-  const used =
-    [];
-
-  const tasks =
-    [];
-
-  for(
-    let i = 0;
-    i < normalCount;
-    i++
-  ){
-
-    const id =
-      roundSeed +
-      "_" +
-      playerUid +
-      "_M_" +
-      i +
-      "_" +
-      Math.random()
-        .toString(36)
-        .substring(2,8);
-
-    tasks.push(
-      buildRandomNormalTask(
-        id,
-        normalTimes[i],
-        used,
-        crimeLocation
-      )
-    );
-
-  }
-
-
-  const murderTaskId =
-    roundSeed +
-    "_" +
-    playerUid +
-    "_KILL_" +
-    Math.random()
-      .toString(36)
-      .substring(2,8);
-
-
-  tasks.push(
-
-    createTask(
-      murderTaskId,
-
-      murderAt,
-
-      fillLocationTemplate(
-        random(
-          murderTemplates
-        ),
-        crimeLocation
-      )
-        .replace(
-          "{time}",
-          shortClock(
-            new Date(
-              murderAt
-            )
-          )
-        )
-
-    )
-
-  );
-
-
-  const afterTime =
-    Math.min(
-      murderAt +
-      25 *
-      1000,
-      detectiveEnd -
-      20 *
-      1000
-    );
-
-
-  const afterTaskId =
-    roundSeed +
-    "_" +
-    playerUid +
-    "_A_" +
-    Math.random()
-      .toString(36)
-      .substring(2,8);
-
-
-  tasks.push(
-
-    createTask(
-
-      afterTaskId,
-
-      afterTime,
-
-      fillLocationTemplate(
-        random(
-          afterMurderTemplates
-        ),
-        crimeLocation
-      )
-
-    )
-
-  );
-
-
-  return shuffle(
-    tasks
-  );
-
-}
-
-
-/* =====================================================
-USER DATABASE ACCOUNT SYSTEM
-===================================================== */
-
-function normalizeUsername(
-  value
-){
-
-  return String(
-    value
-  )
-    .trim()
-    .toLowerCase();
-
-}
-
-
-function validUsername(
-  value
-){
-
-  return /^[a-zA-Z0-9_-]{3,20}$/
-    .test(
-      String(
-        value
-      )
-    );
-
-}
-
-
-/*
-  SHA-256 password hash.
-
-  The password itself is NOT stored.
-*/
-
-async function hashPassword(
-  password
-){
-
-  const data =
-    new TextEncoder().encode(
-      password
-    );
-
-  const hash =
-    await crypto.subtle.digest(
-      "SHA-256",
-      data
-    );
-
-  return Array.from(
-    new Uint8Array(
-      hash
-    )
-  )
-    .map(
-      b =>
-        b
-          .toString(16)
-          .padStart(
-            2,
-            "0"
-          )
-    )
-    .join("");
-
-}
-
-
-function generateUid(){
-
-  return (
-    "u_" +
-    Date.now()
-      .toString(36) +
-    "_" +
-    Math.random()
-      .toString(36)
-      .substring(
-        2,
-        12
-      )
-  );
-
-}
-
-
-function saveLocalUser(){
-
-  if(
-    currentUser
-  ){
-
-    localStorage.setItem(
-      "tivoliUserId",
-      currentUser.uid
-    );
-
-    localStorage.setItem(
-      "tivoliUsername",
-      currentUser.username
-    );
-
-  }
-
-}
-
-
-function loadLocalUser(){
-
-  const uid =
-    localStorage.getItem(
-      "tivoliUserId"
-    );
-
-  const username =
-    localStorage.getItem(
-      "tivoliUsername"
-    );
-
-  if(
-    uid &&
-    username
-  ){
-
-    currentUser = {
-
-      uid,
-
-      username
-
-    };
-
-    return true;
-
-  }
-
-  return false;
-
-}
-
-
-/* =====================================================
-AUTH UI
-===================================================== */
-
-window.switchAuthMode =
-function(
-  mode
-){
-
-  authMode =
-    mode ===
-    "signup"
-    ?
-    "signup"
-    :
-    "login";
-
-  document
-    .getElementById(
-      "loginTab"
-    )
-    .classList
-    .toggle(
-      "active",
-      authMode ===
-      "login"
-    );
-
-  document
-    .getElementById(
-      "signupTab"
-    )
-    .classList
-    .toggle(
-      "active",
-      authMode ===
-      "signup"
-    );
-
-  document
-    .getElementById(
-      "authButton"
-    )
-    .textContent =
-    authMode ===
-    "signup"
-    ?
-    "CREATE ACCOUNT"
-    :
-    "LOGIN";
-
-  const status =
-    document.getElementById(
-      "authStatus"
-    );
-
-  status.textContent =
-    "";
-
-};
-
-
-window.submitAuth =
-async function(){
-
-  const username =
-    document
-      .getElementById(
-        "usernameInput"
-      )
-      .value
-      .trim();
-
-  const password =
-    document
-      .getElementById(
-        "passwordInput"
-      )
-      .value;
-
-  const status =
-    document.getElementById(
-      "authStatus"
-    );
-
-  const button =
-    document.getElementById(
-      "authButton"
-    );
-
-
-  if(
-    !validUsername(
-      username
-    )
-  ){
-
-    status.textContent =
-      "Username must be 3–20 characters and use only letters, numbers, _ or -.";
-
-    return;
-
-  }
-
-
-  if(
-    password.length <
-    6
-  ){
-
-    status.textContent =
-      "Password must be at least 6 characters.";
-
-    return;
-
-  }
-
-
-  button.disabled =
-    true;
-
-  status.textContent =
-    authMode ===
-    "signup"
-    ?
-    "Creating account..."
-    :
-    "Logging in...";
-
-
-  try{
-
-    const normalized =
-      normalizeUsername(
-        username
-      );
-
-    const userRef =
-      ref(
-        db,
-        `users/${normalized}`
-      );
-
-    const existing =
-      await get(
-        userRef
-      );
-
-
-    if(
-      authMode ===
-      "signup"
-    ){
-
-      if(
-        existing.exists()
-      ){
-
-        status.textContent =
-          "❌ That username is already taken.";
-
-        return;
-
-      }
-
-
-      const uid =
-        generateUid();
-
-      const passwordHash =
-        await hashPassword(
-          password
-        );
-
-      await set(
-        userRef,
-        {
-
-          uid,
-
-          username,
-
-          normalizedUsername:
-            normalized,
-
-          passwordHash,
-
-          createdAt:
-            Date.now(),
-
-          lastSeenAt:
-            Date.now(),
-
-          connectionStatus:
-            "online",
-
-          currentRoom:
-            null,
-
-          currentGame:
-            null
-
-        }
-      );
-
-
-      currentUser = {
-
-        uid,
-
-        username
-
-      };
-
-
-      saveLocalUser();
-
-      await loadUserProfile();
-
-      showLoggedInUI();
-
-      status.textContent =
-        "✅ Account created.";
-
-    }
-    else{
-
-      if(
-        !existing.exists()
-      ){
-
-        status.textContent =
-          "❌ Username or password is incorrect.";
-
-        return;
-
-      }
-
-
-      const data =
-        existing.val();
-
-
-      const passwordHash =
-        await hashPassword(
-          password
-        );
-
-
-      if(
-        passwordHash !==
-        data.passwordHash
-      ){
-
-        status.textContent =
-          "❌ Username or password is incorrect.";
-
-        return;
-
-      }
-
-
-      currentUser = {
-
-        uid:
-          data.uid,
-
-        username:
-          data.username ||
-
-          username
-
-      };
-
-
-      saveLocalUser();
-
-      await loadUserProfile();
-
-      showLoggedInUI();
-
-      status.textContent =
-        "✅ Logged in.";
-
-    }
-
-  }
-  catch(error){
-
-    console.error(
-      "ACCOUNT:",
-      error
-    );
-
-    status.textContent =
-      "❌ " +
-      (
-        error?.message ||
-        "Database error."
-      );
-
-  }
-  finally{
-
-    button.disabled =
-      false;
-
-  }
-
-};
-
-
-/* =====================================================
-LOAD USER
-===================================================== */
-
-async function loadUserProfile(){
-
-  if(
-    !currentUser
-  ){
-
-    return null;
-
-  }
-
-  const userRef =
-    ref(
-      db,
-      `users/${normalizeUsername(currentUser.username)}`
-    );
-
-  const snap =
-    await get(
-      userRef
-    );
-
-  if(
-    !snap.exists()
-  ){
-
-    return null;
-
-  }
-
-  const data =
-    snap.val();
-
-
-  currentUser.uid =
-    data.uid;
-
-  currentUser.username =
-    data.username;
-
-
-  saveLocalUser();
-
-
-  await update(
-    userRef,
-    {
-
-      lastSeenAt:
-        Date.now(),
-
-      connectionStatus:
-        databaseConnected
-        ?
-        "online"
-        :
-        "reconnecting"
-
-    }
-  );
-
-
-  return data;
-
-}
-
-
-/* =====================================================
-LOGOUT
-===================================================== */
-
-window.logout =
-async function(){
-
-  if(
-    currentUser
-  ){
-
-    try{
-
-      await update(
-        ref(
-          db,
-          `users/${normalizeUsername(currentUser.username)}`
-        ),
-        {
-
-          lastSeenAt:
-            Date.now(),
-
-          connectionStatus:
-            "offline"
-
-        }
-      );
-
-    }
-    catch(error){
-
-      console.warn(
-        error
-      );
-
-    }
-
-  }
-
-
-  clearInterval(
-    heartbeatInterval
-  );
-
-
-  currentUser =
-    null;
-
-  roomCode =
-    "";
-
-  roomData =
-    null;
-
-  mySecret =
-    null;
-
-
-  localStorage.removeItem(
-    "tivoliUserId"
-  );
-
-  localStorage.removeItem(
-    "tivoliUsername"
-  );
-
-  localStorage.removeItem(
-    "tivoliRoom"
-  );
-
-
-  document
-    .getElementById(
-      "userBar"
-    )
-    .classList
-    .add("hidden");
-
-
-  document
-    .getElementById(
-      "home"
-    )
-    .classList
-    .add("hidden");
-
-
-  document
-    .getElementById(
-      "createScreen"
-    )
-    .classList
-    .add("hidden");
-
-
-  document
-    .getElementById(
-      "lobby"
-    )
-    .classList
-    .add("hidden");
-
-
-  document
-    .getElementById(
-      "game"
-    )
-    .classList
-    .add("hidden");
-
-
-  document
-    .getElementById(
-      "authScreen"
-    )
-    .classList
-    .remove("hidden");
-
-};
-
-
-/* =====================================================
-LOGGED-IN UI
-===================================================== */
-
-function showLoggedInUI(){
-
-  document
-    .getElementById(
-      "authScreen"
-    )
-    .classList
-    .add("hidden");
-
-
-  document
-    .getElementById(
-      "userBar"
-    )
-    .classList
-    .remove("hidden");
-
-
-  document
-    .getElementById(
-      "home"
-    )
-    .classList
-    .remove("hidden");
-
-
-  document
-    .getElementById(
-      "userNameDisplay"
-    )
-    .textContent =
-    currentUser.username;
-
-
-  restoreSavedRoom();
-
-}
-
-
-/* =====================================================
-RESTORE ROOM
-===================================================== */
-
-function saveRoomLocally(){
-
-  if(
-    roomCode
-  ){
-
-    localStorage.setItem(
-      "tivoliRoom",
-      roomCode
-    );
-
-  }
-
-}
-
-
-function restoreSavedRoom(){
-
-  if(
-    !currentUser
-  ){
-
-    return;
-
-  }
-
-
-  const saved =
-    localStorage.getItem(
-      "tivoliRoom"
-    );
-
-
-  if(
-    !saved
-  ){
-
-    return;
-
-  }
-
-
-  document
-    .getElementById(
-      "resumeBox"
-    )
-    .classList
-    .remove("hidden");
-
-
-  document
-    .getElementById(
-      "resumeText"
-    )
-    .textContent =
-    `Previous room saved: ${saved}`;
-
-}
-
-
-window.resumeSavedGame =
-async function(){
-
-  const saved =
-    localStorage.getItem(
-      "tivoliRoom"
-    );
-
-  if(
-    !saved
-  ){
-
-    return;
-
-  }
-
-  document
-    .getElementById(
-      "roomInput"
-    )
-    .value =
-    saved;
-
-  await joinRoom();
-
-};
-
-
-/* =====================================================
-DATABASE CONNECTION MONITOR
-===================================================== */
-
-onValue(
-
-  ref(
-    db,
-    ".info/connected"
-  ),
-
-  async snapshot=>{
-
-    databaseConnected =
-      snapshot.val() === true;
-
-
-    const connection =
-      document
-        .getElementById(
-          "connectionDisplay"
-        );
-
-
-    const text =
-      document
-        .getElementById(
-          "connectionText"
-        );
-
-
-    if(
-      databaseConnected
-    ){
-
-      connection
-        .classList
-        .add("online");
-
-
-      text.textContent =
-        "Connected";
-
-
-      document
-        .getElementById(
-          "userStatusDisplay"
-        )
-        .textContent =
-        "Online";
-
-
-      if(
-        currentUser
-      ){
-
-        await updatePlayerConnection(
-          "online"
-        );
-
-      }
-
-    }
-    else{
-
-      connection
-        .classList
-        .remove(
-          "online"
-        );
-
-
-      text.textContent =
-        "Reconnecting...";
-
-
-      document
-        .getElementById(
-          "userStatusDisplay"
-        )
-        .textContent =
-        "Connection lost — player kept";
-
-
-    }
-
-  }
-
-);
-
-
-/* =====================================================
-USER HEARTBEAT
-===================================================== */
-
-function startHeartbeat(){
-
-  clearInterval(
-    heartbeatInterval
-  );
-
-
-  heartbeatInterval =
-    setInterval(
-      async ()=>{
-
-        if(
-          !currentUser
-        ){
-
-          return;
-
-        }
-
-
-        try{
-
-          await update(
-            ref(
-              db,
-              `users/${normalizeUsername(currentUser.username)}`
-            ),
-            {
-
-              uid:
-                currentUser.uid,
-
-              username:
-                currentUser.username,
-
-              lastSeenAt:
-                Date.now(),
-
-              connectionStatus:
-                databaseConnected
-                ?
-                "online"
-                :
-                "reconnecting",
-
-              currentRoom:
-                roomCode ||
-                null,
-
-              currentGame:
-                roomData?.status ||
-                null
-
-            }
-          );
-
-
-          if(
-            roomCode
-          ){
-
-            await updatePlayerConnection(
-              "online"
-            );
-
-          }
-
-        }
-        catch(error){
-
-          console.warn(
-            "Heartbeat:",
-            error
-          );
-
-        }
-
-      },
-      20000
-    );
-
-}
-
-
-async function updatePlayerConnection(
-  status
-){
-
-  if(
-    !currentUser
-  ){
-
-    return;
-
-  }
-
-
-  try{
-
-    await update(
-
-      ref(
-        db,
-        `users/${normalizeUsername(currentUser.username)}`
-      ),
-
-      {
-
-        uid:
-          currentUser.uid,
-
-        username:
-          currentUser.username,
-
-        lastSeenAt:
-          Date.now(),
-
-        connectionStatus:
-          status,
-
-        currentRoom:
-          roomCode ||
-          null,
-
-        currentGame:
-          roomData?.status ||
-          null
-
-      }
-
-    );
-
-
-    if(
-      roomCode
-    ){
-
-      await update(
-
-        ref(
-          db,
-          `rooms/${roomCode}/players/${currentUser.uid}`
-        ),
-
-        {
-
-          uid:
-            currentUser.uid,
-
-          name:
-            currentUser.username,
-
-          lastSeenAt:
-            Date.now(),
-
-          connectionStatus:
-            status
-
-        }
-
-      );
-
-    }
-
-  }
-  catch(error){
-
-    console.warn(
-      "Connection update:",
-      error
-    );
-
-  }
-
-}
-
-
-/* =====================================================
-AUTO RESTORE ON PAGE RETURN
-===================================================== */
-
-document.addEventListener(
-  "visibilitychange",
-  async ()=>{
-
-    if(
-      document.visibilityState !==
-      "visible"
-    ){
-
-      return;
-
-    }
-
-
-    if(
-      !currentUser
-    ){
-
-      return;
-
-    }
-
-
-    try{
-
-      await loadUserProfile();
-
-
-      if(
-        roomCode
-      ){
-
-        await reconnectToRoom();
-
-      }
-      else{
-
-        const saved =
-          localStorage.getItem(
-            "tivoliRoom"
-          );
-
-        if(
-          saved
-        ){
-
-          await reconnectToSpecificRoom(
-            saved
-          );
-
-        }
-
-      }
-
-    }
-    catch(error){
-
-      console.warn(
-        "Resume:",
-        error
-      );
-
-    }
-
-  }
-);
-
-
-/* =====================================================
-RECONNECT ROOM
-===================================================== */
-
-async function reconnectToRoom(){
-
-  if(
-    !roomCode ||
-    !currentUser
-  ){
-
-    return;
-
-  }
-
-
-  const snap =
-    await get(
-      ref(
-        db,
-        `rooms/${roomCode}`
-      )
-    );
-
-
-  if(
-    !snap.exists()
-  ){
-
-    return;
-
-  }
-
-
-  roomData =
-    snap.val();
-
-
-  const player =
-    roomData.players?.[
-      currentUser.uid
-    ];
-
-
-  if(
-    player
-  ){
-
-    await update(
-      ref(
-        db,
-        `rooms/${roomCode}/players/${currentUser.uid}`
-      ),
-      {
-
-        name:
-          currentUser.username,
-
-        uid:
-          currentUser.uid,
-
-        connectionStatus:
-          "online",
-
-        lastSeenAt:
-          Date.now()
-
-      }
-    );
-
-  }
-
-
-  renderLobby();
-
-
-  if(
-    roomData.status ===
-    "game"
-  ){
-
-    await loadGame();
-
-  }
-
-}
-
-
-async function reconnectToSpecificRoom(
-  code
-){
-
-  const roomRef =
-    ref(
-      db,
-      `rooms/${code}`
-    );
-
-
-  const snap =
-    await get(
-      roomRef
-    );
-
-
-  if(
-    !snap.exists()
-  ){
-
-    localStorage.removeItem(
-      "tivoliRoom"
-    );
-
-    return;
-
-  }
-
-
-  const data =
-    snap.val();
-
-
-  if(
-    data.players?.[
-      currentUser.uid
-    ]
-  ){
-
-    roomCode =
-      code;
-
-    roomData =
-      data;
-
-    enterLobby();
-
-  }
-
-}
-
-
-/* =====================================================
-ROOM EXPIRY
-===================================================== */
 
 function isRoomStale(
   data
@@ -4187,16 +2037,14 @@ function isRoomStale(
   }
 
 
-  const time =
-    Number(
-      data.lastActivityAt ||
-      data.createdAt ||
-      0
+  const activity =
+    roomActivityTime(
+      data
     );
 
 
   if(
-    !time
+    !activity
   ){
 
     return false;
@@ -4206,129 +2054,12 @@ function isRoomStale(
 
   return (
     Date.now() -
-    time >=
+    activity >=
     ROOM_STALE_TIME
   );
 
 }
 
-
-function startRoomExpiryWatcher(){
-
-  clearInterval(
-    roomExpiryInterval
-  );
-
-
-  if(
-    !roomCode
-  ){
-
-    return;
-
-  }
-
-
-  roomExpiryInterval =
-    setInterval(
-      async ()=>{
-
-        if(
-          !roomCode
-        ){
-
-          return;
-
-        }
-
-
-        try{
-
-          const snap =
-            await get(
-              ref(
-                db,
-                `rooms/${roomCode}`
-              )
-            );
-
-
-          if(
-            !snap.exists()
-          ){
-
-            leaveRoomToHome(
-              "This room no longer exists."
-            );
-
-            return;
-
-          }
-
-
-          const data =
-            snap.val();
-
-
-          if(
-            isRoomStale(
-              data
-            )
-          ){
-
-            if(
-              data.host ===
-              currentUser?.uid
-            ){
-
-              await remove(
-                ref(
-                  db,
-                  `rooms/${roomCode}`
-                )
-              );
-
-            }
-
-
-            leaveRoomToHome(
-              "This room expired after 15 minutes."
-            );
-
-          }
-
-        }
-        catch(error){
-
-          console.warn(
-            "Expiry:",
-            error
-          );
-
-        }
-
-      },
-      30000
-    );
-
-}
-
-
-function stopRoomExpiryWatcher(){
-
-  clearInterval(
-    roomExpiryInterval
-  );
-
-  roomExpiryInterval =
-    null;
-
-}
-
-
-/* =====================================================
-TOUCH ROOM
-===================================================== */
 
 async function touchRoom(){
 
@@ -4363,7 +2094,7 @@ async function touchRoom(){
   catch(error){
 
     console.warn(
-      "Touch room:",
+      "touchRoom:",
       error
     );
 
@@ -4372,8 +2103,114 @@ async function touchRoom(){
 }
 
 
+function startRoomExpiryWatcher(){
+
+  clearInterval(
+    roomExpiryInterval
+  );
+
+
+  if(
+    !roomCode
+  ){
+
+    return;
+
+  }
+
+
+  roomExpiryInterval =
+    setInterval(
+      async ()=>{
+
+        try{
+
+          const snap =
+            await get(
+              ref(
+                db,
+                `rooms/${roomCode}`
+              )
+            );
+
+
+          if(
+            !snap.exists()
+          ){
+
+            return;
+
+          }
+
+
+          const data =
+            snap.val();
+
+
+          if(
+            isRoomStale(
+              data
+            )
+          ){
+
+            /*
+              Only the host deletes stale rooms.
+              A temporary disconnect cannot delete
+              the room/player.
+            */
+
+            if(
+              data.host ===
+              playerId
+            ){
+
+              await remove(
+                ref(
+                  db,
+                  `rooms/${roomCode}`
+                )
+              );
+
+            }
+
+
+            leaveRoomToHome(
+              "This room expired after 15 minutes."
+            );
+
+          }
+
+        }
+        catch(error){
+
+          console.warn(
+            "Room expiry:",
+            error
+          );
+
+        }
+
+      },
+      30000
+    );
+
+}
+
+
+function stopRoomExpiryWatcher(){
+
+  clearInterval(
+    roomExpiryInterval
+  );
+
+  roomExpiryInterval =
+    null;
+
+}
+
+
 /* =====================================================
-LEAVE TO HOME
+LEAVE ROOM UI
 ===================================================== */
 
 function leaveRoomToHome(
@@ -4396,13 +2233,18 @@ function leaveRoomToHome(
   roomCode =
     "";
 
+  selectedDetectivePlayerId =
+    null;
+
 
   document
     .getElementById(
       "home"
     )
     .classList
-    .remove("hidden");
+    .remove(
+      "hidden"
+    );
 
 
   document
@@ -4410,7 +2252,9 @@ function leaveRoomToHome(
       "createScreen"
     )
     .classList
-    .add("hidden");
+    .add(
+      "hidden"
+    );
 
 
   document
@@ -4418,7 +2262,9 @@ function leaveRoomToHome(
       "lobby"
     )
     .classList
-    .add("hidden");
+    .add(
+      "hidden"
+    );
 
 
   document
@@ -4426,7 +2272,9 @@ function leaveRoomToHome(
       "game"
     )
     .classList
-    .add("hidden");
+    .add(
+      "hidden"
+    );
 
 
   if(
@@ -4443,18 +2291,1965 @@ function leaveRoomToHome(
 
 
 /* =====================================================
-HOME
+TIVOLI OUTDOOR LOCATIONS
 ===================================================== */
 
-window.createRoom =
-function(){
+const locations = [
+
+  "Sea View",
+
+  "Outdoor Café",
+
+  "Café Tables",
+
+  "Sea-Side Walkway",
+
+  "Sea-Side Edge",
+
+  "Dip N Dip Stairs",
+
+  "Central Outdoor Area",
+
+  "Side Seating"
+
+];
+
+
+/* =====================================================
+TASK TEXT
+===================================================== */
+
+const activityTemplates = [
+
+  "Sit quietly at {location}.",
+
+  "Walk around {location}.",
+
+  "Stand for a moment at {location}.",
+
+  "Look around {location}.",
+
+  "Wait nearby {location}.",
+
+  "Walk through {location}.",
+
+  "Sit at a nearby seat around {location}.",
+
+  "Check your phone near {location}.",
+
+  "Pause briefly at {location}.",
+
+  "Stay around {location} for a short moment.",
+
+  "Walk past {location}, then continue normally.",
+
+  "Spend a moment near {location} before moving on.",
+
+  "Look toward {location}, then continue.",
+
+  "Stay near {location} for a little while.",
+
+  "Take a short pause around {location}."
+
+];
+
+
+const actionTemplates = [
+
+  "Go to {location} and stay there briefly.",
+
+  "Move to {location}, then continue normally.",
+
+  "Visit {location} for a short moment.",
+
+  "Pass through {location} before continuing.",
+
+  "Wait near {location}, then move on.",
+
+  "Walk to {location} and look around briefly.",
+
+  "Head toward {location}, pause, then continue.",
+
+  "Go through {location} before moving elsewhere.",
+
+  "Spend a short moment at {location}, then leave.",
+
+  "Move through {location} and continue your route."
+
+];
+
+
+const murderTemplates = [
+
+  "Be at {location} at {time}. The fictional incident happens there.",
+
+  "Reach {location} when the clock reaches {time}.",
+
+  "At {time}, go to {location} for the fictional event.",
+
+  "Be near {location} at {time} for the fictional event.",
+
+  "Go to {location} around {time}. The fictional incident happens there.",
+
+  "At exactly {time}, be at {location} for the fictional event."
+
+];
+
+
+const afterMurderTemplates = [
+
+  "Leave {location} and continue normally.",
+
+  "Move away from {location} after the fictional event.",
+
+  "After the fictional incident, leave {location}.",
+
+  "Continue to another area after leaving {location}.",
+
+  "Move on from {location} and continue your timeline.",
+
+  "Leave {location} and go somewhere else."
+
+];
+
+
+const victims = [
+
+  "a fictional visitor",
+
+  "a fictional guest",
+
+  "a fictional character",
+
+  "a fictional person"
+
+];
+
+
+const cases = [
+
+  "A fictional incident occurred during the game.",
+
+  "A fictional visitor was involved in the mystery.",
+
+  "A fictional guest was involved in the case.",
+
+  "A fictional event happened in the story."
+
+];
+
+
+/* =====================================================
+HELPERS
+===================================================== */
+
+function random(
+  array
+){
+
+  return array[
+    Math.floor(
+      Math.random() *
+      array.length
+    )
+  ];
+
+}
+
+
+function shuffle(
+  array
+){
+
+  const result =
+    [
+      ...array
+    ];
+
+
+  for(
+    let i =
+      result.length -
+      1;
+    i > 0;
+    i--
+  ){
+
+    const j =
+      Math.floor(
+        Math.random() *
+        (
+          i + 1
+        )
+      );
+
+
+    [
+      result[i],
+      result[j]
+    ] =
+    [
+      result[j],
+      result[i]
+    ];
+
+  }
+
+
+  return result;
+
+}
+
+
+function pad(
+  n
+){
+
+  return String(
+    n
+  )
+    .padStart(
+      2,
+      "0"
+    );
+
+}
+
+
+function clockText(
+  date
+){
+
+  let h =
+    date.getHours();
+
+
+  const m =
+    pad(
+      date.getMinutes()
+    );
+
+
+  const s =
+    pad(
+      date.getSeconds()
+    );
+
+
+  const period =
+    h >= 12
+    ?
+    "PM"
+    :
+    "AM";
+
+
+  h =
+    h % 12;
+
+
+  if(
+    h === 0
+  ){
+
+    h = 12;
+
+  }
+
+
+  return (
+    `${h}:${m}:${s} ${period}`
+  );
+
+}
+
+
+function shortClock(
+  date
+){
+
+  let h =
+    date.getHours();
+
+
+  const m =
+    pad(
+      date.getMinutes()
+    );
+
+
+  const period =
+    h >= 12
+    ?
+    "PM"
+    :
+    "AM";
+
+
+  h =
+    h % 12;
+
+
+  if(
+    h === 0
+  ){
+
+    h = 12;
+
+  }
+
+
+  return (
+    `${h}:${m} ${period}`
+  );
+
+}
+
+
+function formatDuration(
+  ms
+){
+
+  const s =
+    Math.max(
+      0,
+      Math.ceil(
+        ms /
+        1000
+      )
+    );
+
+
+  return (
+
+    pad(
+      Math.floor(
+        s /
+        60
+      )
+    )
+
+    +
+
+    ":"
+
+    +
+
+    pad(
+      s %
+      60
+    )
+
+  );
+
+}
+
+
+function escapeHtml(
+  value
+){
+
+  return String(
+    value
+  )
+
+    .replaceAll(
+      "&",
+      "&amp;"
+    )
+
+    .replaceAll(
+      "<",
+      "&lt;"
+    )
+
+    .replaceAll(
+      ">",
+      "&gt;"
+    )
+
+    .replaceAll(
+      '"',
+      "&quot;"
+    )
+
+    .replaceAll(
+      "'",
+      "&#039;"
+    );
+
+}
+
+
+function sleep(
+  ms
+){
+
+  return new Promise(
+    resolve =>
+      setTimeout(
+        resolve,
+        ms
+      )
+  );
+
+}
+
+
+function uniqueLocation(
+  used,
+  forbidden
+){
+
+  let location;
+
+  let attempts =
+    0;
+
+
+  do{
+
+    location =
+      random(
+        locations
+      );
+
+    attempts++;
+
+    if(
+      attempts >
+      100
+    ){
+
+      break;
+
+    }
+
+  }
+  while(
+    used.includes(
+      location
+    ) ||
+    location ===
+    forbidden
+  );
+
+
+  used.push(
+    location
+  );
+
+
+  return location;
+
+}
+
+
+function createTask(
+  id,
+  unlockAt,
+  description
+){
+
+  return {
+
+    id,
+
+    unlockAt,
+
+    unlockText:
+      shortClock(
+        new Date(
+          unlockAt
+        )
+      ),
+
+    description
+
+  };
+
+}
+
+
+/* =====================================================
+TASK TIMING
+===================================================== */
+
+function nextMinuteTimestamp(
+  timestamp
+){
+
+  const date =
+    new Date(
+      timestamp
+    );
+
+
+  date.setSeconds(
+    0,
+    0
+  );
+
+
+  date.setMinutes(
+    date.getMinutes() +
+    1
+  );
+
+
+  return date.getTime();
+
+}
+
+
+function taskUnlockText(
+  timestamp
+){
+
+  return shortClock(
+    new Date(
+      timestamp
+    )
+  );
+
+}
+
+
+/* =====================================================
+TASK GENERATOR
+===================================================== */
+
+function freshRoundSeed(){
+
+  return (
+
+    Date.now()
+      .toString(36)
+
+    +
+
+    "_"
+
+    +
+
+    Math.random()
+      .toString(36)
+      .substring(
+        2,
+        12
+      )
+
+  );
+
+}
+
+
+function fillLocationTemplate(
+  template,
+  location
+){
+
+  return template
+    .replace(
+      "{location}",
+      location
+    );
+
+}
+
+
+function buildRandomNormalTask(
+  id,
+  unlockAt,
+  usedLocations,
+  forbiddenLocation
+){
+
+  const location =
+    uniqueLocation(
+      usedLocations,
+      forbiddenLocation
+    );
+
+
+  const pool =
+    Math.random() <
+    0.5
+    ?
+    activityTemplates
+    :
+    actionTemplates;
+
+
+  return createTask(
+    id,
+    unlockAt,
+    fillLocationTemplate(
+      random(
+        pool
+      ),
+      location
+    )
+  );
+
+}
+
+
+function makeRandomUnlockTimes(
+  now,
+  detectiveEnd,
+  count
+){
+
+  const startOffset =
+    60 *
+    1000;
+
+
+  const endOffset =
+    Math.max(
+      startOffset +
+      60 *
+      1000,
+
+      detectiveEnd -
+      now -
+      60 *
+      1000
+    );
+
+
+  const values =
+    [];
+
+
+  for(
+    let i = 0;
+    i < count;
+    i++
+  ){
+
+    const percentage =
+      (
+        i + 1
+      ) /
+      (
+        count + 1
+      );
+
+
+    const spread =
+      (
+        Math.random() -
+        0.5
+      ) *
+      50 *
+      1000;
+
+
+    let offset =
+      startOffset +
+
+      (
+        endOffset -
+        startOffset
+      )
+      *
+      percentage
+
+      +
+
+      spread;
+
+
+    offset =
+      Math.max(
+        startOffset,
+
+        Math.min(
+          endOffset,
+          offset
+        )
+      );
+
+
+    values.push(
+      nextMinuteTimestamp(
+        now +
+        offset
+      )
+    );
+
+  }
+
+
+  values.sort(
+    (
+      a,
+      b
+    ) =>
+      a -
+      b
+  );
+
+
+  return values.map(
+    value=>{
+
+      const latestAllowed =
+        detectiveEnd -
+        30 *
+        1000;
+
+
+      return Math.min(
+        value,
+        latestAllowed
+      );
+
+    }
+  );
+
+}
+
+
+function buildRandomNormalTasks(
+  playerIdForSeed,
+  now,
+  detectiveEnd,
+  crimeLocation,
+  roundSeed
+){
+
+  const count =
+    3 +
+    Math.floor(
+      Math.random() *
+      3
+    );
+
+
+  const unlockTimes =
+    makeRandomUnlockTimes(
+      now,
+      detectiveEnd,
+      count
+    );
+
+
+  const usedLocations =
+    [];
+
+
+  const tasks =
+    [];
+
+
+  for(
+    let i = 0;
+    i < count;
+    i++
+  ){
+
+    const taskId =
+
+      roundSeed +
+
+      "_" +
+
+      playerIdForSeed +
+
+      "_N_" +
+
+      i +
+
+      "_" +
+
+      Math.random()
+        .toString(36)
+        .substring(
+          2,
+          8
+        );
+
+
+    tasks.push(
+
+      buildRandomNormalTask(
+        taskId,
+        unlockTimes[i],
+        usedLocations,
+        crimeLocation
+      )
+
+    );
+
+  }
+
+
+  return shuffle(
+    tasks
+  );
+
+}
+
+
+function buildRandomMurdererTasks(
+  playerIdForSeed,
+  now,
+  detectiveEnd,
+  murderAt,
+  crimeLocation,
+  roundSeed
+){
+
+  const normalCount =
+    2 +
+    Math.floor(
+      Math.random() *
+      3
+    );
+
+
+  const normalTimes =
+    makeRandomUnlockTimes(
+      now,
+
+      Math.min(
+        detectiveEnd,
+
+        murderAt -
+        20 *
+        1000
+      ),
+
+      normalCount
+    );
+
+
+  const usedLocations =
+    [];
+
+
+  const tasks =
+    [];
+
+
+  for(
+    let i = 0;
+    i < normalCount;
+    i++
+  ){
+
+    const taskId =
+
+      roundSeed +
+
+      "_" +
+
+      playerIdForSeed +
+
+      "_M_" +
+
+      i +
+
+      "_" +
+
+      Math.random()
+        .toString(36)
+        .substring(
+          2,
+          8
+        );
+
+
+    tasks.push(
+
+      buildRandomNormalTask(
+        taskId,
+        normalTimes[i],
+        usedLocations,
+        crimeLocation
+      )
+
+    );
+
+  }
+
+
+  const murderTaskId =
+
+    roundSeed +
+
+    "_" +
+
+    playerIdForSeed +
+
+    "_KILL_" +
+
+    Math.random()
+      .toString(36)
+      .substring(
+        2,
+        8
+      );
+
+
+  const murderDescription =
+
+    fillLocationTemplate(
+      random(
+        murderTemplates
+      ),
+      crimeLocation
+    )
+
+      .replace(
+        "{time}",
+        shortClock(
+          new Date(
+            murderAt
+          )
+        )
+      );
+
+
+  tasks.push(
+
+    createTask(
+      murderTaskId,
+      murderAt,
+      murderDescription
+    )
+
+  );
+
+
+  const afterTime =
+
+    Math.min(
+      murderAt +
+      25 *
+      1000,
+
+      detectiveEnd -
+      20 *
+      1000
+    );
+
+
+  const afterTaskId =
+
+    roundSeed +
+
+    "_" +
+
+    playerIdForSeed +
+
+    "_A_" +
+
+    Math.random()
+      .toString(36)
+      .substring(
+        2,
+        8
+      );
+
+
+  tasks.push(
+
+    createTask(
+
+      afterTaskId,
+
+      afterTime,
+
+      fillLocationTemplate(
+        random(
+          afterMurderTemplates
+        ),
+        crimeLocation
+      )
+
+    )
+
+  );
+
+
+  return shuffle(
+    tasks
+  );
+
+}
+
+
+/* =====================================================
+NAME
+===================================================== */
+
+function loadSavedName(){
+
+  return localStorage.getItem(
+    "tivoliMysteryName"
+  );
+
+}
+
+
+window.saveNameAndContinue =
+async function(){
+
+  const input =
+    document.getElementById(
+      "nameInput"
+    );
+
+
+  const name =
+    input.value.trim();
+
+
+  if(
+    !name
+  ){
+
+    alert(
+      "Enter your name."
+    );
+
+    input.focus();
+
+    return;
+
+  }
+
+
+  if(
+    name.length >
+    30
+  ){
+
+    alert(
+      "Name is too long."
+    );
+
+    return;
+
+  }
+
+
+  myName =
+    name;
+
+
+  localStorage.setItem(
+    "tivoliMysteryName",
+    myName
+  );
+
+
+  await saveDeviceRecord();
+
+
+  showHome();
+
+};
+
+
+function showHome(){
+
+  document
+    .getElementById(
+      "nameSetup"
+    )
+    .classList
+    .add(
+      "hidden"
+    );
+
 
   document
     .getElementById(
       "home"
     )
     .classList
-    .add("hidden");
+    .remove(
+      "hidden"
+    );
+
+
+  document
+    .getElementById(
+      "userBar"
+    )
+    .classList
+    .remove(
+      "hidden"
+    );
+
+
+  document
+    .getElementById(
+      "userBarName"
+    )
+    .textContent =
+    myName;
+
+
+  document
+    .getElementById(
+      "welcomeName"
+    )
+    .textContent =
+    myName;
+
+
+  restoreSavedRoom();
+
+}
+
+
+window.changeName =
+async function(){
+
+  const newName =
+    prompt(
+      "What is your name?",
+      myName
+    );
+
+
+  if(
+    newName ===
+    null
+  ){
+
+    return;
+
+  }
+
+
+  const cleaned =
+    newName.trim();
+
+
+  if(
+    !cleaned
+  ){
+
+    return;
+
+  }
+
+
+  myName =
+    cleaned.slice(
+      0,
+      30
+    );
+
+
+  localStorage.setItem(
+    "tivoliMysteryName",
+    myName
+  );
+
+
+  if(
+    roomCode
+  ){
+
+    try{
+
+      await update(
+
+        ref(
+          db,
+          `rooms/${roomCode}/players/${playerId}`
+        ),
+
+        {
+
+          name:
+            myName,
+
+          lastSeenAt:
+            Date.now()
+
+        }
+
+      );
+
+    }
+    catch(error){
+
+      console.warn(
+        error
+      );
+
+    }
+
+  }
+
+
+  await saveDeviceRecord();
+
+
+  document
+    .getElementById(
+      "userBarName"
+    )
+    .textContent =
+    myName;
+
+
+  document
+    .getElementById(
+      "welcomeName"
+    )
+    .textContent =
+    myName;
+
+};
+
+
+/* =====================================================
+DEVICE DATABASE RECORD
+===================================================== */
+
+/*
+  This is NOT an account.
+
+  It simply keeps the permanent device/player ID
+  and name in Realtime Database so the game can
+  recognize the same player after reconnecting.
+*/
+
+async function saveDeviceRecord(){
+
+  try{
+
+    await set(
+
+      ref(
+        db,
+        `devices/${playerId}`
+      ),
+
+      {
+
+        playerId,
+
+        name:
+          myName,
+
+        lastSeenAt:
+          Date.now(),
+
+        currentRoom:
+          roomCode ||
+          null,
+
+        currentGame:
+          roomData?.status ||
+          null
+
+      }
+
+    );
+
+  }
+  catch(error){
+
+    console.warn(
+      "Could not save device record:",
+      error
+    );
+
+  }
+
+}
+
+
+async function markPlayerSeen(){
+
+  if(
+    !roomCode
+  ){
+
+    await saveDeviceRecord();
+
+    return;
+
+  }
+
+
+  try{
+
+    await update(
+
+      ref(
+        db,
+        `rooms/${roomCode}/players/${playerId}`
+      ),
+
+      {
+
+        playerId,
+
+        name:
+          myName,
+
+        lastSeenAt:
+          Date.now(),
+
+        connectionStatus:
+          "connected"
+
+      }
+
+    );
+
+
+    await update(
+
+      ref(
+        db,
+        `devices/${playerId}`
+      ),
+
+      {
+
+        playerId,
+
+        name:
+          myName,
+
+        lastSeenAt:
+          Date.now(),
+
+        currentRoom:
+          roomCode,
+
+        currentGame:
+          roomData?.status ||
+          null
+
+      }
+
+    );
+
+  }
+  catch(error){
+
+    /*
+      A temporary network failure is ignored.
+      The player record remains in Firebase.
+    */
+
+    console.warn(
+      "markPlayerSeen:",
+      error
+    );
+
+  }
+
+}
+
+
+/* =====================================================
+PRESENCE / RECONNECT
+===================================================== */
+
+document.addEventListener(
+  "visibilitychange",
+  ()=>{
+
+    if(
+      document.visibilityState ===
+      "visible"
+    ){
+
+      markPlayerSeen();
+
+      if(
+        roomCode
+      ){
+
+        reconnectToCurrentRoom();
+
+      }
+
+    }
+
+  }
+);
+
+
+window.addEventListener(
+  "focus",
+  ()=>{
+
+    markPlayerSeen();
+
+    if(
+      roomCode
+    ){
+
+      reconnectToCurrentRoom();
+
+    }
+
+  }
+);
+
+
+setInterval(
+  ()=>{
+
+    if(
+      myName
+    ){
+
+      markPlayerSeen();
+
+    }
+
+  },
+  20000
+);
+
+
+async function reconnectToCurrentRoom(){
+
+  if(
+    !roomCode
+  ){
+
+    return;
+
+  }
+
+
+  try{
+
+    const snapshot =
+      await get(
+
+        ref(
+          db,
+          `rooms/${roomCode}`
+        )
+
+      );
+
+
+    if(
+      !snapshot.exists()
+    ){
+
+      return;
+
+    }
+
+
+    const data =
+      snapshot.val();
+
+
+    roomData =
+      data;
+
+
+    /*
+      Recreate the player's record with the SAME
+      playerId if it is somehow missing.
+    */
+
+    if(
+      !data.players?.[playerId]
+    ){
+
+      await update(
+
+        ref(
+          db,
+          `rooms/${roomCode}/players/${playerId}`
+        ),
+
+        {
+
+          playerId,
+
+          name:
+            myName,
+
+          joinedAt:
+            Date.now(),
+
+          lastSeenAt:
+            Date.now(),
+
+          connectionStatus:
+            "connected"
+
+        }
+
+      );
+
+    }
+    else{
+
+      await markPlayerSeen();
+
+    }
+
+
+    renderLobby();
+
+
+    if(
+      data.status ===
+      "game"
+    ){
+
+      await loadGame();
+
+    }
+
+  }
+  catch(error){
+
+    console.warn(
+      "Reconnect:",
+      error
+    );
+
+  }
+
+}
+
+
+/* =====================================================
+ALERTS
+===================================================== */
+
+window.enableAlerts =
+async function(){
+
+  try{
+
+    const AudioContext =
+      window.AudioContext ||
+      window.webkitAudioContext;
+
+
+    if(
+      AudioContext
+    ){
+
+      audioContext =
+        audioContext ||
+        new AudioContext();
+
+
+      if(
+        audioContext.state ===
+        "suspended"
+      ){
+
+        await audioContext.resume();
+
+      }
+
+
+      const osc =
+        audioContext.createOscillator();
+
+
+      const gain =
+        audioContext.createGain();
+
+
+      osc.frequency.value =
+        660;
+
+
+      gain.gain.value =
+        0.1;
+
+
+      osc.connect(
+        gain
+      );
+
+
+      gain.connect(
+        audioContext.destination
+      );
+
+
+      const t =
+        audioContext.currentTime;
+
+
+      gain.gain.exponentialRampToValueAtTime(
+        0.12,
+        t +
+        0.02
+      );
+
+
+      gain.gain.exponentialRampToValueAtTime(
+        0.0001,
+        t +
+        0.20
+      );
+
+
+      osc.start(
+        t
+      );
+
+
+      osc.stop(
+        t +
+        0.22
+      );
+
+    }
+
+
+    if(
+      "Notification" in window &&
+      Notification.permission ===
+      "default"
+    ){
+
+      try{
+
+        await Notification.requestPermission();
+
+      }
+      catch(e){}
+
+    }
+
+
+    alertsEnabled =
+      true;
+
+
+    localStorage.setItem(
+      "tivoliMysteryAlerts",
+      "1"
+    );
+
+
+    const status =
+      document.getElementById(
+        "alertStatus"
+      );
+
+
+    if(
+      status
+    ){
+
+      status.textContent =
+        "✅ Call alerts enabled.";
+
+    }
+
+
+    const button =
+      document.getElementById(
+        "enableAlertsButton"
+      );
+
+
+    if(
+      button
+    ){
+
+      button.textContent =
+        "✅ CALL ALERTS ENABLED";
+
+    }
+
+
+    playCallSound();
+
+  }
+  catch(error){
+
+    console.error(
+      error
+    );
+
+
+    alert(
+      "Tap the button again to enable alerts."
+    );
+
+  }
+
+};
+
+
+window.closeAlertModal =
+function(){
+
+  document
+    .getElementById(
+      "alertModal"
+    )
+    .classList
+    .add(
+      "hidden"
+    );
+
+};
+
+
+function playCallSound(){
+
+  try{
+
+    const AudioContext =
+      window.AudioContext ||
+      window.webkitAudioContext;
+
+
+    if(
+      !AudioContext
+    ){
+
+      return;
+
+    }
+
+
+    audioContext =
+      audioContext ||
+      new AudioContext();
+
+
+    if(
+      audioContext.state ===
+      "suspended"
+    ){
+
+      audioContext
+        .resume()
+        .catch(
+          ()=>{}
+        );
+
+    }
+
+
+    const start =
+      audioContext.currentTime;
+
+
+    for(
+      let group = 0;
+      group < 3;
+      group++
+    ){
+
+      const base =
+        start +
+        group *
+        3.1;
+
+
+      for(
+        let i = 0;
+        i < 2;
+        i++
+      ){
+
+        const osc =
+          audioContext
+            .createOscillator();
+
+
+        const gain =
+          audioContext
+            .createGain();
+
+
+        osc.type =
+          "sine";
+
+
+        osc.frequency.value =
+          i === 0
+          ?
+          880
+          :
+          660;
+
+
+        const t =
+          base +
+          i *
+          0.65;
+
+
+        gain.gain.setValueAtTime(
+          0.0001,
+          t
+        );
+
+
+        gain.gain.exponentialRampToValueAtTime(
+          0.28,
+          t +
+          0.03
+        );
+
+
+        gain.gain.exponentialRampToValueAtTime(
+          0.0001,
+          t +
+          0.50
+        );
+
+
+        osc.connect(
+          gain
+        );
+
+
+        gain.connect(
+          audioContext.destination
+        );
+
+
+        osc.start(
+          t
+        );
+
+
+        osc.stop(
+          t +
+          0.55
+        );
+
+      }
+
+    }
+
+  }
+  catch(error){
+
+    console.error(
+      error
+    );
+
+  }
+
+}
+
+
+function vibrate(){
+
+  try{
+
+    if(
+      "vibrate" in navigator
+    ){
+
+      navigator.vibrate([
+        300,
+        120,
+        300,
+        120,
+        500
+      ]);
+
+    }
+
+  }
+  catch(e){}
+
+}
+
+
+function systemNotification(
+  destination,
+  caller
+){
+
+  if(
+    !alertsEnabled
+  ){
+
+    return;
+
+  }
+
+
+  if(
+    "Notification" in window &&
+    Notification.permission ===
+    "granted"
+  ){
+
+    try{
+
+      new Notification(
+
+        "📞 Tivoli Mystery Call",
+
+        {
+
+          body:
+            `${caller} is calling everyone to ${destination}!`,
+
+          tag:
+            "tivoli-" +
+            Date.now()
+
+        }
+
+      );
+
+    }
+    catch(e){}
+
+  }
+
+}
+
+
+/* =====================================================
+HOME
+===================================================== */
+
+window.createRoom =
+function(){
+
+  if(
+    !myName
+  ){
+
+    return;
+
+  }
+
+
+  document
+    .getElementById(
+      "home"
+    )
+    .classList
+    .add(
+      "hidden"
+    );
 
 
   document
@@ -4462,7 +4257,9 @@ function(){
       "createScreen"
     )
     .classList
-    .remove("hidden");
+    .remove(
+      "hidden"
+    );
 
 };
 
@@ -4475,7 +4272,9 @@ function(){
       "createScreen"
     )
     .classList
-    .add("hidden");
+    .add(
+      "hidden"
+    );
 
 
   document
@@ -4483,7 +4282,9 @@ function(){
       "home"
     )
     .classList
-    .remove("hidden");
+    .remove(
+      "hidden"
+    );
 
 };
 
@@ -4494,15 +4295,6 @@ CREATE ROOM
 
 window.finishCreateRoom =
 async function(){
-
-  if(
-    !currentUser
-  ){
-
-    return;
-
-  }
-
 
   roomCode =
     document
@@ -4564,6 +4356,11 @@ async function(){
       )
     ){
 
+      /*
+        Only remove a stale room if we're creating
+        a new one after checking it.
+      */
+
       await remove(
         roomRef
       );
@@ -4572,7 +4369,7 @@ async function(){
     else{
 
       alert(
-        "That room already exists."
+        "That room already exists and is active."
       );
 
       return;
@@ -4587,14 +4384,16 @@ async function(){
 
 
   await set(
+
     roomRef,
+
     {
 
       status:
         "lobby",
 
       host:
-        currentUser.uid,
+        playerId,
 
       playerLimit:
         limit,
@@ -4610,13 +4409,12 @@ async function(){
 
       players:{
 
-        [currentUser.uid]:{
+        [playerId]:{
 
-          uid:
-            currentUser.uid,
+          playerId,
 
           name:
-            currentUser.username,
+            myName,
 
           joinedAt:
             now,
@@ -4625,7 +4423,7 @@ async function(){
             now,
 
           connectionStatus:
-            "online"
+            "connected"
 
         }
 
@@ -4636,30 +4434,14 @@ async function(){
   );
 
 
-  await update(
-    ref(
-      db,
-      `users/${normalizeUsername(currentUser.username)}`
-    ),
-    {
-
-      currentRoom:
-        roomCode,
-
-      currentGame:
-        "lobby",
-
-      lastSeenAt:
-        Date.now(),
-
-      connectionStatus:
-        "online"
-
-    }
-  );
+  await saveDeviceRecord();
 
 
   saveRoomLocally();
+
+
+  resetListenerFlags();
+
 
   enterLobby();
 
@@ -4672,15 +4454,6 @@ JOIN ROOM
 
 window.joinRoom =
 async function(){
-
-  if(
-    !currentUser
-  ){
-
-    return;
-
-  }
-
 
   roomCode =
     document
@@ -4735,11 +4508,43 @@ async function(){
     snapshot.val();
 
 
+  if(
+    isRoomStale(
+      data
+    )
+  ){
+
+    if(
+      data.host ===
+      playerId
+    ){
+
+      await remove(
+        roomRef
+      );
+
+    }
+
+
+    alert(
+      "That room expired."
+    );
+
+    return;
+
+  }
+
+
   const existingPlayer =
     data.players?.[
-      currentUser.uid
+      playerId
     ];
 
+
+  /*
+    Someone who already belongs to the room can
+    reconnect even when the game is already running.
+  */
 
   if(
     data.status !==
@@ -4764,8 +4569,12 @@ async function(){
   if(
     data.status ===
     "lobby" &&
+
     !existingPlayer &&
-    Object.keys(players).length >=
+
+    Object.keys(
+      players
+    ).length >=
     data.playerLimit
   ){
 
@@ -4783,21 +4592,22 @@ async function(){
 
 
   await update(
+
     roomRef,
+
     {
 
       lastActivityAt:
         now,
 
-      [`players/${currentUser.uid}`]:{
+      [`players/${playerId}`]:{
 
         ...(existingPlayer || {}),
 
-        uid:
-          currentUser.uid,
+        playerId,
 
         name:
-          currentUser.username,
+          myName,
 
         joinedAt:
           existingPlayer?.joinedAt ||
@@ -4807,38 +4617,23 @@ async function(){
           now,
 
         connectionStatus:
-          "online"
+          "connected"
 
       }
 
     }
+
   );
 
 
-  await update(
-    ref(
-      db,
-      `users/${normalizeUsername(currentUser.username)}`
-    ),
-    {
-
-      currentRoom:
-        roomCode,
-
-      currentGame:
-        data.status,
-
-      lastSeenAt:
-        Date.now(),
-
-      connectionStatus:
-        "online"
-
-    }
-  );
+  await saveDeviceRecord();
 
 
   saveRoomLocally();
+
+
+  resetListenerFlags();
+
 
   enterLobby();
 
@@ -4846,15 +4641,114 @@ async function(){
 
 
 /* =====================================================
-SAVE ROOM
+ROOM LOCAL SAVE
 ===================================================== */
 
 function saveRoomLocally(){
 
   localStorage.setItem(
-    "tivoliRoom",
+    "tivoliMysteryRoom",
     roomCode
   );
+
+}
+
+
+function restoreSavedRoom(){
+
+  const saved =
+    localStorage.getItem(
+      "tivoliMysteryRoom"
+    );
+
+
+  if(
+    !saved
+  ){
+
+    return;
+
+  }
+
+
+  document
+    .getElementById(
+      "resumeBox"
+    )
+    .classList
+    .remove(
+      "hidden"
+    );
+
+
+  document
+    .getElementById(
+      "resumeText"
+    )
+    .textContent =
+    `Your saved room is ${saved}.`;
+
+
+}
+
+
+window.resumeSavedRoom =
+async function(){
+
+  const saved =
+    localStorage.getItem(
+      "tivoliMysteryRoom"
+    );
+
+
+  if(
+    !saved
+  ){
+
+    return;
+
+  }
+
+
+  document
+    .getElementById(
+      "roomInput"
+    )
+    .value =
+    saved;
+
+
+  await joinRoom();
+
+};
+
+
+/* =====================================================
+LISTENER RESET
+===================================================== */
+
+function resetListenerFlags(){
+
+  roomListenerStarted =
+    false;
+
+  listenersStarted =
+    false;
+
+  completedListenerStarted =
+    false;
+
+  notesListenerStarted =
+    false;
+
+  detectiveNotesListenerStarted =
+    false;
+
+  gameResultListenerStarted =
+    false;
+
+  lastCallId =
+    null;
 
 }
 
@@ -4870,7 +4764,9 @@ function enterLobby(){
       "home"
     )
     .classList
-    .add("hidden");
+    .add(
+      "hidden"
+    );
 
 
   document
@@ -4878,7 +4774,9 @@ function enterLobby(){
       "createScreen"
     )
     .classList
-    .add("hidden");
+    .add(
+      "hidden"
+    );
 
 
   document
@@ -4886,7 +4784,9 @@ function enterLobby(){
       "game"
     )
     .classList
-    .add("hidden");
+    .add(
+      "hidden"
+    );
 
 
   document
@@ -4894,7 +4794,9 @@ function enterLobby(){
       "lobby"
     )
     .classList
-    .remove("hidden");
+    .remove(
+      "hidden"
+    );
 
 
   document
@@ -4906,6 +4808,7 @@ function enterLobby(){
 
 
   startRoomExpiryWatcher();
+
 
   listenToRoom();
 
@@ -4953,38 +4856,29 @@ function listenToRoom(){
         snapshot.val();
 
 
-      const player =
-        roomData.players?.[
-          currentUser.uid
-        ];
-
+      /*
+        NEVER create a new ID here.
+        Always restore the same playerId.
+      */
 
       if(
-        !player
+        !roomData.players ||
+        !roomData.players[playerId]
       ){
-
-        /*
-          IMPORTANT:
-          If a disconnect or refresh caused
-          the player record to disappear,
-          restore the SAME uid instead of
-          generating a new player.
-        */
 
         await update(
 
           ref(
             db,
-            `rooms/${roomCode}/players/${currentUser.uid}`
+            `rooms/${roomCode}/players/${playerId}`
           ),
 
           {
 
-            uid:
-              currentUser.uid,
+            playerId,
 
             name:
-              currentUser.username,
+              myName,
 
             joinedAt:
               Date.now(),
@@ -4993,7 +4887,7 @@ function listenToRoom(){
               Date.now(),
 
             connectionStatus:
-              "online"
+              "connected"
 
           }
 
@@ -5002,30 +4896,7 @@ function listenToRoom(){
       }
       else{
 
-        await update(
-
-          ref(
-            db,
-            `rooms/${roomCode}/players/${currentUser.uid}`
-          ),
-
-          {
-
-            uid:
-              currentUser.uid,
-
-            name:
-              currentUser.username,
-
-            lastSeenAt:
-              Date.now(),
-
-            connectionStatus:
-              "online"
-
-          }
-
-        );
+        await markPlayerSeen();
 
       }
 
@@ -5048,21 +4919,29 @@ function listenToRoom(){
             "game"
           )
           .classList
-          .add("hidden");
+          .add(
+            "hidden"
+          );
+
 
         document
           .getElementById(
             "lobby"
           )
           .classList
-          .remove("hidden");
+          .remove(
+            "hidden"
+          );
+
 
         mySecret =
           null;
 
+
         clearInterval(
           globalInterval
         );
+
 
         renderLobby();
 
@@ -5083,10 +4962,6 @@ function listenToRoom(){
 
 }
 
-
-/* =====================================================
-LOBBY RENDER
-===================================================== */
 
 function renderLobby(){
 
@@ -5161,53 +5036,50 @@ function renderLobby(){
             players[id];
 
 
-          const connected =
-            player?.connectionStatus ===
-            "online";
+          const recentlySeen =
+            player &&
+            Date.now() -
+            Number(
+              player.lastSeenAt ||
+              0
+            ) <
+            45000;
 
 
           return `
 
             <div class="player">
 
-              <div class="player-row">
+              <div class="name-display">
 
-                <div>
+                👤
+                ${escapeHtml(
+                  player?.name ||
+                  "Unknown"
+                )}
 
-                  <div class="player-name">
+                ${
+                  id ===
+                  roomData.host
+                  ?
+                  `<span class="host">
+                    👑 HOST
+                  </span>`
+                  :
+                  ""
+                }
 
-                    👤
-                    ${escapeHtml(
-                      player?.name ||
-                      "Player"
-                    )}
+              </div>
 
-                    ${
-                      id ===
-                      roomData.host
-                      ?
-                      `<span class="host">
-                        👑 HOST
-                      </span>`
-                      :
-                      ""
-                    }
+              <div class="player-status">
 
-                  </div>
-
-                  <div class="player-status">
-
-                    ${
-                      connected
-                      ?
-                      "🟢 Connected"
-                      :
-                      "🟡 Reconnecting..."
-                    }
-
-                  </div>
-
-                </div>
+                ${
+                  recentlySeen
+                  ?
+                  "🟢 Connected"
+                  :
+                  "🟡 Reconnecting / temporarily offline"
+                }
 
               </div>
 
@@ -5228,12 +5100,22 @@ function renderLobby(){
 
   if(
     roomData.host ===
-    currentUser.uid
+    playerId
   ){
 
     hostPanel
       .classList
-      .remove("hidden");
+      .remove(
+        "hidden"
+      );
+
+
+    document
+      .getElementById(
+        "hostInfo"
+      )
+      .textContent =
+      `${ids.length}/${roomData.playerLimit} players joined.`;
 
 
     const startButton =
@@ -5248,27 +5130,26 @@ function renderLobby(){
 
 
     startButton.textContent =
+
       ids.length ===
       roomData.playerLimit
+
       ?
+
       "▶️ START ROUND"
+
       :
+
       "⏳ WAITING FOR PLAYERS";
-
-
-    document
-      .getElementById(
-        "hostInfo"
-      )
-      .textContent =
-      `${ids.length}/${roomData.playerLimit} players joined.`;
 
   }
   else{
 
     hostPanel
       .classList
-      .add("hidden");
+      .add(
+        "hidden"
+      );
 
   }
 
@@ -5276,7 +5157,7 @@ function renderLobby(){
 
 
 /* =====================================================
-RESET TO LOBBY
+RESET
 ===================================================== */
 
 let returnToLobbyRunning =
@@ -5347,30 +5228,17 @@ async function returnEveryoneToLobby(){
     );
 
 
-    await update(
-      ref(
-        db,
-        `users/${normalizeUsername(currentUser.username)}`
-      ),
-      {
+    mySecret =
+      null;
 
-        currentRoom:
-          roomCode,
 
-        currentGame:
-          "lobby",
-
-        lastSeenAt:
-          Date.now()
-
-      }
-    );
+    await saveDeviceRecord();
 
   }
   catch(error){
 
     console.error(
-      "Reset:",
+      "Return lobby:",
       error
     );
 
@@ -5390,7 +5258,7 @@ async function(){
 
   if(
     roomData?.host !==
-    currentUser?.uid
+    playerId
   ){
 
     alert(
@@ -5404,7 +5272,7 @@ async function(){
 
   if(
     !confirm(
-      "Reset the current game and return everyone to the lobby?"
+      "Reset the current game and send everyone back to the lobby?"
     )
   ){
 
@@ -5427,7 +5295,7 @@ async function(){
 
   if(
     roomData?.host !==
-    currentUser?.uid
+    playerId
   ){
 
     return;
@@ -5460,6 +5328,20 @@ async function(){
   }
 
 
+  if(
+    ids.length <
+    2
+  ){
+
+    alert(
+      "At least 2 players are required."
+    );
+
+    return;
+
+  }
+
+
   const roundSeed =
     freshRoundSeed();
 
@@ -5473,11 +5355,15 @@ async function(){
   const detective =
     shuffled[0];
 
+
   const murderer =
     shuffled[1];
 
+
   const innocents =
-    shuffled.slice(2);
+    shuffled.slice(
+      2
+    );
 
 
   const now =
@@ -5507,7 +5393,9 @@ async function(){
 
 
   const crimeLocation =
-    randomLocation();
+    random(
+      locations
+    );
 
 
   const victim =
@@ -5560,10 +5448,10 @@ async function(){
 
 
   innocents.forEach(
-    uid=>{
+    id=>{
 
       privateData[
-        uid
+        id
       ] = {
 
         role:
@@ -5571,7 +5459,7 @@ async function(){
 
         tasks:
           buildRandomNormalTasks(
-            uid,
+            id,
             now,
             detectiveEnd,
             crimeLocation,
@@ -5584,19 +5472,19 @@ async function(){
   );
 
 
-  Object.values(
-    privateData
-  )
-    .forEach(
-      data=>{
+  for(
+    const id of
+    Object.keys(
+      privateData
+    )
+  ){
 
-        data.tasks =
-          shuffle(
-            data.tasks
-          );
+    privateData[id].tasks =
+      shuffle(
+        privateData[id].tasks
+      );
 
-      }
-    );
+  }
 
 
   const game = {
@@ -5629,11 +5517,10 @@ async function(){
 
     murderer,
 
-    suspects:
-      [
-        murderer,
-        ...innocents
-      ]
+    suspects:[
+      murderer,
+      ...innocents
+    ]
 
   };
 
@@ -5686,8 +5573,8 @@ async function(){
 
   for(
     const [
-      uid,
-      secret
+      id,
+      data
     ]
     of Object.entries(
       privateData
@@ -5695,36 +5582,25 @@ async function(){
   ){
 
     updates[
-      `rooms/${roomCode}/private/${uid}`
+      `rooms/${roomCode}/private/${id}`
     ] =
-      secret;
+      data;
 
 
     updates[
-      `rooms/${roomCode}/completed/${uid}`
+      `rooms/${roomCode}/completed/${id}`
     ] =
       {};
 
   }
 
 
-  for(
-    const uid of ids
-  ){
+  revealRunning =
+    false;
 
-    updates[
-      `rooms/${roomCode}/players/${uid}/connectionStatus`
-    ] =
-      players[uid]
-        ?.connectionStatus ||
-      "online";
 
-    updates[
-      `rooms/${roomCode}/players/${uid}/lastSeenAt`
-    ] =
-      now;
-
-  }
+  lastRevealId =
+    null;
 
 
   await update(
@@ -5735,24 +5611,7 @@ async function(){
   );
 
 
-  await update(
-    ref(
-      db,
-      `users/${normalizeUsername(currentUser.username)}`
-    ),
-    {
-
-      currentRoom:
-        roomCode,
-
-      currentGame:
-        "game",
-
-      lastSeenAt:
-        Date.now()
-
-    }
-  );
+  await saveDeviceRecord();
 
 };
 
@@ -5768,7 +5627,9 @@ async function loadGame(){
       "lobby"
     )
     .classList
-    .add("hidden");
+    .add(
+      "hidden"
+    );
 
 
   document
@@ -5776,7 +5637,9 @@ async function loadGame(){
       "game"
     )
     .classList
-    .remove("hidden");
+    .remove(
+      "hidden"
+    );
 
 
   document
@@ -5787,47 +5650,112 @@ async function loadGame(){
     .toggle(
       "hidden",
       roomData.host !==
-      currentUser.uid
+      playerId
+    );
+
+
+  const playerSnapshot =
+    await get(
+
+      ref(
+        db,
+        `rooms/${roomCode}/players/${playerId}`
+      )
+
     );
 
 
   if(
-    !mySecret
+    !playerSnapshot.exists()
   ){
 
-    const snap =
-      await get(
+    /*
+      SAME player ID restored.
+    */
 
-        ref(
-          db,
-          `rooms/${roomCode}/private/${currentUser.uid}`
-        )
+    await set(
 
-      );
+      ref(
+        db,
+        `rooms/${roomCode}/players/${playerId}`
+      ),
+
+      {
+
+        playerId,
+
+        name:
+          myName,
+
+        joinedAt:
+          Date.now(),
+
+        lastSeenAt:
+          Date.now()
+
+      }
+
+    );
+
+  }
+  else{
+
+    const currentPlayer =
+      playerSnapshot.val();
 
 
-    if(
-      snap.exists()
-    ){
+    myName =
+      currentPlayer.name ||
+      myName;
 
-      mySecret =
-        snap.val();
 
-      renderSecret();
+    await markPlayerSeen();
 
-    }
+  }
+
+
+  /*
+    Reload the secret after reconnect.
+    It comes from the same player ID.
+  */
+
+  const snapshot =
+    await get(
+
+      ref(
+        db,
+        `rooms/${roomCode}/private/${playerId}`
+      )
+
+    );
+
+
+  if(
+    snapshot.exists()
+  ){
+
+    mySecret =
+      snapshot.val();
+
+
+    renderSecret();
 
   }
 
 
   if(
-    !completedListenerStarted
+    !listenersStarted
   ){
 
-    completedListenerStarted =
+    listenersStarted =
       true;
 
+
+    listenForCalls();
+
     listenToMyTasks();
+
+    listenForGameResult();
 
   }
 
@@ -5839,19 +5767,8 @@ async function loadGame(){
     notesListenerStarted =
       true;
 
+
     listenForPlayerNotes();
-
-  }
-
-
-  if(
-    !gameResultListenerStarted
-  ){
-
-    gameResultListenerStarted =
-      true;
-
-    listenForGameResult();
 
   }
 
@@ -5868,9 +5785,11 @@ async function loadGame(){
       detectiveNotesListenerStarted =
         true;
 
+
       listenForDetectiveNotes();
 
     }
+
 
     showDetectiveTools();
 
@@ -5882,9 +5801,6 @@ async function loadGame(){
   }
 
 
-  listenForCalls();
-
-
   updateMyNoteUI();
 
   startGlobalClock();
@@ -5893,7 +5809,7 @@ async function loadGame(){
 
 
 /* =====================================================
-GLOBAL CLOCK
+GLOBAL TIMER
 ===================================================== */
 
 function startGlobalClock(){
@@ -5917,6 +5833,7 @@ function startGlobalClock(){
     const game =
       roomData.game;
 
+
     const now =
       Date.now();
 
@@ -5926,6 +5843,7 @@ function startGlobalClock(){
         "globalTimeText"
       )
       .textContent =
+
       "Actual time: " +
       clockText(
         new Date(
@@ -6007,19 +5925,26 @@ function startGlobalClock(){
       }
 
 
+      const timerCard =
+        document
+          .getElementById(
+            "investigationTimerCard"
+          );
+
+
       if(
         now >=
         game.detectiveEnd &&
+
         now <
         game.investigationEnd
       ){
 
-        document
-          .getElementById(
-            "investigationTimerCard"
-          )
+        timerCard
           .classList
-          .remove("hidden");
+          .remove(
+            "hidden"
+          );
 
 
         document
@@ -6027,20 +5952,19 @@ function startGlobalClock(){
             "investigationTimer"
           )
           .textContent =
-        formatDuration(
-          game.investigationEnd -
-          now
-        );
+          formatDuration(
+            game.investigationEnd -
+            now
+          );
 
       }
       else{
 
-        document
-          .getElementById(
-            "investigationTimerCard"
-          )
+        timerCard
           .classList
-          .add("hidden");
+          .add(
+            "hidden"
+          );
 
       }
 
@@ -6084,20 +6008,34 @@ function renderSecret(){
     card.innerHTML = `
 
       <div class="role detective">
+
         🕵️ YOU ARE THE DETECTIVE
+
       </div>
 
       <div class="big">
+
         Leave the playing area now.
+
       </div>
 
       <p>
+
         You have exactly 5 minutes.
+
       </p>
 
       <div class="warning">
-        Do not return until the timer reaches zero.
+
+        Do not return until the timer reaches 00:00.
+
       </div>
+
+      <p>
+
+        Player notes will still arrive.
+
+      </p>
 
     `;
 
@@ -6107,7 +6045,9 @@ function renderSecret(){
         "detectiveWaiting"
       )
       .classList
-      .remove("hidden");
+      .remove(
+        "hidden"
+      );
 
 
     document
@@ -6115,7 +6055,12 @@ function renderSecret(){
         "normalWaiting"
       )
       .classList
-      .add("hidden");
+      .add(
+        "hidden"
+      );
+
+
+    showDetectiveTools();
 
 
     return;
@@ -6128,7 +6073,9 @@ function renderSecret(){
       "normalWaiting"
     )
     .classList
-    .remove("hidden");
+    .remove(
+      "hidden"
+    );
 
 
   hideDetectiveTools();
@@ -6164,15 +6111,22 @@ function renderSecret(){
       ${
         murderer
         ?
-        "The incident is completely fictional. Follow your secret timeline."
+
+        "The fictional incident is part of the game. Follow your secret timeline."
+
         :
+
         "You are innocent. Follow your own secret timeline."
+
       }
 
     </p>
 
     <div class="warning">
-      🔒 Future tasks stay hidden until their unlock time.
+
+      🔒 Future tasks stay hidden until
+      their unlock time.
+
     </div>
 
     <h2>
@@ -6190,7 +6144,7 @@ function renderSecret(){
 
 
 /* =====================================================
-TASKS
+TASK RENDER
 ===================================================== */
 
 function renderTasks(){
@@ -6227,7 +6181,7 @@ function renderTasks(){
     roomData
       ?.completed
       ?.[
-        currentUser.uid
+        playerId
       ] ||
     {};
 
@@ -6235,6 +6189,7 @@ function renderTasks(){
   container.innerHTML =
 
     mySecret.tasks
+
       .map(
         task=>{
 
@@ -6292,19 +6247,24 @@ function renderTasks(){
 
           return `
 
-            <div class="task ${
-              done
-              ?
-              "done"
-              :
-              ""
-            }">
+            <div
+              class="task ${
+                done
+                ?
+                "done"
+                :
+                ""
+              }"
+            >
 
               <div class="task-row">
 
                 <input
+
                   class="task-checkbox"
+
                   type="checkbox"
+
                   ${
                     done
                     ?
@@ -6312,12 +6272,16 @@ function renderTasks(){
                     :
                     ""
                   }
+
                   onchange="
+
                     toggleTask(
                       '${task.id}',
                       this.checked
                     )
+
                   "
+
                 >
 
                 <div class="task-text">
@@ -6368,6 +6332,10 @@ function renderTasks(){
 }
 
 
+/* =====================================================
+TASK CHECK
+===================================================== */
+
 window.toggleTask =
 async function(
   taskId,
@@ -6376,8 +6344,8 @@ async function(
 
   const task =
     mySecret?.tasks?.find(
-      t =>
-        t.id ===
+      task =>
+        task.id ===
         taskId
     );
 
@@ -6400,7 +6368,9 @@ async function(
       "🔒 This task is not unlocked yet."
     );
 
+
     renderTasks();
+
 
     return;
 
@@ -6413,7 +6383,7 @@ async function(
 
       ref(
         db,
-        `rooms/${roomCode}/completed/${currentUser.uid}`
+        `rooms/${roomCode}/completed/${playerId}`
       ),
 
       {
@@ -6425,8 +6395,6 @@ async function(
 
     );
 
-    await touchRoom();
-
   }
   catch(error){
 
@@ -6434,8 +6402,9 @@ async function(
       error
     );
 
+
     alert(
-      "Could not save task."
+      "Could not save the task."
     );
 
   }
@@ -6449,19 +6418,10 @@ function listenToMyTasks(){
 
     ref(
       db,
-      `rooms/${roomCode}/completed/${currentUser.uid}`
+      `rooms/${roomCode}/completed/${playerId}`
     ),
 
     snapshot=>{
-
-      if(
-        !roomData
-      ){
-
-        return;
-
-      }
-
 
       roomData.completed =
         roomData.completed ||
@@ -6469,7 +6429,7 @@ function listenToMyTasks(){
 
 
       roomData.completed[
-        currentUser.uid
+        playerId
       ] =
         snapshot.val() ||
         {};
@@ -6491,7 +6451,7 @@ PLAYER NOTES
 function playerNotePath(){
 
   return (
-    `rooms/${roomCode}/notes/${currentUser.uid}`
+    `rooms/${roomCode}/notes/${playerId}`
   );
 
 }
@@ -6501,7 +6461,7 @@ function getPlayerNoteData(){
 
   return (
     roomData?.notes?.[
-      currentUser.uid
+      playerId
     ] ||
     null
   );
@@ -6515,6 +6475,7 @@ function updatePlayerNoteCounter(){
     document.getElementById(
       "playerNoteInput"
     );
+
 
   const counter =
     document.getElementById(
@@ -6546,31 +6507,23 @@ async function(){
       "playerNoteInput"
     );
 
+
   const button =
     document.getElementById(
       "submitPlayerNoteButton"
     );
+
 
   const status =
     document.getElementById(
       "myNoteStatus"
     );
 
+
   const errorBox =
     document.getElementById(
       "myNoteError"
     );
-
-
-  if(
-    !input ||
-    !button ||
-    !status
-  ){
-
-    return;
-
-  }
 
 
   const text =
@@ -6607,6 +6560,7 @@ async function(){
   button.disabled =
     true;
 
+
   button.textContent =
     "⏳ SENDING...";
 
@@ -6632,6 +6586,7 @@ async function(){
 
       updateMyNoteUI();
 
+
       return;
 
     }
@@ -6643,11 +6598,10 @@ async function(){
 
     const note = {
 
-      playerId:
-        currentUser.uid,
+      playerId,
 
       playerName:
-        currentUser.username,
+        myName,
 
       text,
 
@@ -6669,7 +6623,7 @@ async function(){
 
 
     roomData.notes[
-      currentUser.uid
+      playerId
     ] =
       note;
 
@@ -6685,30 +6639,18 @@ async function(){
       "✅ Note sent to the Detective.";
 
 
-    if(
-      errorBox
-    ){
-
-      errorBox.classList.add(
-        "hidden"
-      );
-
-    }
-
-
     await touchRoom();
 
   }
   catch(error){
 
     console.error(
-      "NOTE:",
       error
     );
 
 
     status.textContent =
-      "❌ Could not send note.";
+      "❌ The note could not be sent.";
 
 
     if(
@@ -6717,7 +6659,8 @@ async function(){
 
       errorBox.textContent =
         error?.message ||
-        "Database error.";
+        "Unknown Firebase error.";
+
 
       errorBox.classList.remove(
         "hidden"
@@ -6742,10 +6685,12 @@ function updateMyNoteUI(){
       "playerNoteInput"
     );
 
+
   const button =
     document.getElementById(
       "submitPlayerNoteButton"
     );
+
 
   const status =
     document.getElementById(
@@ -6795,6 +6740,7 @@ function updateMyNoteUI(){
     status.textContent =
       "✅ Your note was sent.";
 
+
     return;
 
   }
@@ -6829,15 +6775,6 @@ function listenForPlayerNotes(){
 
     snapshot=>{
 
-      if(
-        !roomData
-      ){
-
-        return;
-
-      }
-
-
       roomData.notes =
         snapshot.val() ||
         {};
@@ -6868,16 +6805,6 @@ function listenForPlayerNotes(){
 
 function renderLivePlayerNotes(){
 
-  if(
-    mySecret?.role !==
-    "detective"
-  ){
-
-    return;
-
-  }
-
-
   const container =
     document.getElementById(
       "liveNotesList"
@@ -6893,11 +6820,23 @@ function renderLivePlayerNotes(){
     Object.values(
       notes
     )
-      .sort(
-        (a,b)=>
-          (b.timestamp || 0) -
-          (a.timestamp || 0)
-      );
+    .sort(
+      (
+        a,
+        b
+      ) =>
+        (
+          b.timestamp ||
+          0
+        )
+
+        -
+
+        (
+          a.timestamp ||
+          0
+        )
+    );
 
 
   if(
@@ -6911,6 +6850,7 @@ function renderLivePlayerNotes(){
       </div>
 
     `;
+
 
     return;
 
@@ -6930,7 +6870,7 @@ function renderLivePlayerNotes(){
               📝
               ${escapeHtml(
                 note.playerName ||
-                "Player"
+                "Unknown"
               )}
 
             </div>
@@ -6977,7 +6917,9 @@ function showDetectiveTools(){
       "detectiveNotebook"
     )
     .classList
-    .remove("hidden");
+    .remove(
+      "hidden"
+    );
 
 
   document
@@ -6985,7 +6927,9 @@ function showDetectiveTools(){
       "detectiveLiveNotes"
     )
     .classList
-    .remove("hidden");
+    .remove(
+      "hidden"
+    );
 
 
   renderDetectivePlayerButtons();
@@ -7000,7 +6944,9 @@ function hideDetectiveTools(){
       "detectiveNotebook"
     )
     .classList
-    .add("hidden");
+    .add(
+      "hidden"
+    );
 
 
   document
@@ -7008,7 +6954,9 @@ function hideDetectiveTools(){
       "detectiveLiveNotes"
     )
     .classList
-    .add("hidden");
+    .add(
+      "hidden"
+    );
 
 
   document
@@ -7016,7 +6964,9 @@ function hideDetectiveTools(){
       "selectedDossier"
     )
     .classList
-    .add("hidden");
+    .add(
+      "hidden"
+    );
 
 }
 
@@ -7035,11 +6985,11 @@ function detectiveGeneralPath(){
 
 
 function detectivePlayerPath(
-  uid
+  player
 ){
 
   return (
-    `rooms/${roomCode}/detectiveNotes/players/${uid}`
+    `rooms/${roomCode}/detectiveNotes/players/${player}`
   );
 
 }
@@ -7157,6 +7107,7 @@ function listenForDetectiveNotes(){
 
       renderDetectivePlayerButtons();
 
+
       if(
         selectedDetectivePlayerId
       ){
@@ -7207,29 +7158,49 @@ function renderDetectivePlayerButtons(){
     {};
 
 
+  if(
+    !suspects.length
+  ){
+
+    container.innerHTML =
+      `
+        <div class="note-empty">
+          No suspects loaded yet.
+        </div>
+      `;
+
+
+    return;
+
+  }
+
+
   container.innerHTML =
 
     suspects
       .map(
-        uid=>{
+        id=>{
 
           const name =
-            players[uid]?.name ||
-            "Player";
+            players[id]?.name ||
+            "Unknown";
 
 
           const active =
-            uid ===
+            id ===
             selectedDetectivePlayerId;
 
 
           const note =
-            roomData?.notes?.[uid];
+            roomData?.notes?.[
+              id
+            ];
 
 
           return `
 
             <button
+
               class="detective-player-button ${
                 active
                 ?
@@ -7237,9 +7208,11 @@ function renderDetectivePlayerButtons(){
                 :
                 ""
               }"
+
               onclick="
-                openPlayerDossier('${uid}')
+                openPlayerDossier('${id}')
               "
+
             >
 
               👤
@@ -7268,11 +7241,11 @@ function renderDetectivePlayerButtons(){
 
 window.openPlayerDossier =
 function(
-  uid
+  player
 ){
 
   selectedDetectivePlayerId =
-    uid;
+    player;
 
 
   document
@@ -7280,22 +7253,24 @@ function(
       "selectedDossier"
     )
     .classList
-    .remove("hidden");
-
-
-  loadSelectedDossier(
-    uid,
-    true
-  );
+    .remove(
+      "hidden"
+    );
 
 
   renderDetectivePlayerButtons();
+
+
+  loadSelectedDossier(
+    player,
+    true
+  );
 
 };
 
 
 async function loadSelectedDossier(
-  uid,
+  player,
   scroll
 ){
 
@@ -7319,8 +7294,8 @@ async function loadSelectedDossier(
       "selectedDossierTitle"
     )
     .textContent =
-    players[uid]?.name ||
-    "Player";
+    players[player]?.name ||
+    "Unknown";
 
 
   refreshSelectedDossierNote();
@@ -7328,21 +7303,23 @@ async function loadSelectedDossier(
 
   try{
 
-    const snap =
+    const snapshot =
       await get(
+
         ref(
           db,
           detectivePlayerPath(
-            uid
+            player
           )
         )
+
       );
 
 
     const data =
-      snap.exists()
+      snapshot.exists()
       ?
-      snap.val()
+      snapshot.val()
       :
       {};
 
@@ -7374,10 +7351,32 @@ async function loadSelectedDossier(
       "";
 
 
+    document
+      .getElementById(
+        "dossierSaveStatus"
+      )
+      .textContent =
+
+      data.updatedAt
+
+      ?
+
+      "Last saved: " +
+      clockText(
+        new Date(
+          data.updatedAt
+        )
+      )
+
+      :
+
+      "Not saved yet.";
+
   }
   catch(error){
 
-    console.warn(
+    console.error(
+      "Dossier:",
       error
     );
 
@@ -7445,6 +7444,7 @@ function refreshSelectedDossierNote(){
       </div>
 
       <div class="note-time">
+        Timestamp:
         ${escapeHtml(
           clockText(
             new Date(
@@ -7467,7 +7467,7 @@ function refreshSelectedDossierNote(){
       </div>
 
       <div class="note-text">
-        📭 No note submitted.
+        📭 This player has not submitted a note yet.
       </div>
 
     `;
@@ -7513,25 +7513,19 @@ async function(){
       {
 
         claim:
-          document
-            .getElementById(
-              "dossierClaim"
-            )
-            .value,
+          document.getElementById(
+            "dossierClaim"
+          ).value,
 
         important:
-          document
-            .getElementById(
-              "dossierImportant"
-            )
-            .value,
+          document.getElementById(
+            "dossierImportant"
+          ).value,
 
         questions:
-          document
-            .getElementById(
-              "dossierQuestions"
-            )
-            .value,
+          document.getElementById(
+            "dossierQuestions"
+          ).value,
 
         updatedAt:
           Date.now()
@@ -7589,7 +7583,9 @@ function showInvestigation(){
       "detectiveWaiting"
     )
     .classList
-    .add("hidden");
+    .add(
+      "hidden"
+    );
 
 
   document
@@ -7597,7 +7593,9 @@ function showInvestigation(){
       "normalWaiting"
     )
     .classList
-    .add("hidden");
+    .add(
+      "hidden"
+    );
 
 
   document
@@ -7605,10 +7603,13 @@ function showInvestigation(){
       "investigation"
     )
     .classList
-    .remove("hidden");
+    .remove(
+      "hidden"
+    );
 
 
   showDetectiveTools();
+
 
   renderCase();
 
@@ -7669,7 +7670,7 @@ function renderCase(){
       </p>
 
       <p>
-        <b>Fictional incident time:</b>
+        <b>Fictional murder time:</b>
         ${shortClock(
           new Date(
             game.murderAt
@@ -7677,17 +7678,12 @@ function renderCase(){
         )}
       </p>
 
-      <div class="warning">
-
-        📍 Crime location:
-        <b>UNKNOWN</b>
-
-        <br><br>
-
-        Work it out from the players'
-        tasks and notes.
-
-      </div>
+      <p>
+        <b>Crime location:</b>
+        ${escapeHtml(
+          game.crimeLocation
+        )}
+      </p>
 
       <h3>
         👥 SUSPECTS
@@ -7696,16 +7692,16 @@ function renderCase(){
       ${
         suspects
           .map(
-            uid=>`
+            id=>`
 
               <div class="player">
 
                 👤
                 ${escapeHtml(
                   roomData
-                    .players[uid]
+                    .players[id]
                     ?.name ||
-                  "Player"
+                  "Unknown"
                 )}
 
               </div>
@@ -7729,20 +7725,20 @@ function renderCase(){
 
     suspects
       .map(
-        uid=>`
+        id=>`
 
           <button
             onclick="
-              accuse('${uid}')
+              accuse('${id}')
             "
           >
 
             🔎 ACCUSE
             ${escapeHtml(
               roomData
-                .players[uid]
+                .players[id]
                 ?.name ||
-              "Player"
+              "Unknown"
             )}
 
           </button>
@@ -7762,9 +7758,19 @@ async function renderTaskProgress(){
 
 
   const container =
-    document.getElementById(
-      "taskProgress"
-    );
+    document
+      .getElementById(
+        "taskProgress"
+      );
+
+
+  if(
+    !container
+  ){
+
+    return;
+
+  }
 
 
   container.innerHTML =
@@ -7772,14 +7778,15 @@ async function renderTaskProgress(){
 
 
   for(
-    const uid of
-    suspects
+    const id of suspects
   ){
 
     const completed =
       roomData
         ?.completed
-        ?.[uid] ||
+        ?.[
+          id
+        ] ||
       {};
 
 
@@ -7787,38 +7794,42 @@ async function renderTaskProgress(){
       Object.values(
         completed
       )
-        .filter(
-          value =>
-            value ===
-            true
-        )
-        .length;
+      .filter(
+        value =>
+          value ===
+          true
+      )
+      .length;
 
 
     const total =
       await getPrivateTaskCount(
-        uid
+        id
       );
 
 
     const percent =
       total
+
       ?
+
       Math.min(
         100,
         count /
         total *
         100
       )
+
       :
+
       0;
 
 
     const name =
       roomData
-        .players[uid]
+        .players[id]
         ?.name ||
-      "Player";
+      "Unknown";
 
 
     const div =
@@ -7844,8 +7855,13 @@ async function renderTaskProgress(){
       <div class="progress">
 
         <div
+
           class="progress-bar"
-          style="width:${percent}%"
+
+          style="
+            width:${percent}%
+          "
+
         ></div>
 
       </div>
@@ -7853,12 +7869,16 @@ async function renderTaskProgress(){
       <div class="small">
 
         ${
-          count ===
-          total
+          count === total
+
           ?
+
           "✅ All tasks completed"
+
           :
-          `${total-count} unfinished`
+
+          `${total - count} task(s) unfinished`
+
         }
 
       </div>
@@ -7876,22 +7896,22 @@ async function renderTaskProgress(){
 
 
 async function getPrivateTaskCount(
-  uid
+  player
 ){
 
-  const snap =
+  const snapshot =
     await get(
 
       ref(
         db,
-        `rooms/${roomCode}/private/${uid}/tasks`
+        `rooms/${roomCode}/private/${player}/tasks`
       )
 
     );
 
 
   if(
-    !snap.exists()
+    !snapshot.exists()
   ){
 
     return 0;
@@ -7899,17 +7919,23 @@ async function getPrivateTaskCount(
   }
 
 
-  const value =
-    snap.val();
+  const tasks =
+    snapshot.val();
 
 
   return Array.isArray(
-    value
+    tasks
   )
+
   ?
-  value.length
+
+  tasks.length
+
   :
-  Object.keys(value).length;
+
+  Object.keys(
+    tasks
+  ).length;
 
 }
 
@@ -7924,7 +7950,7 @@ async function(
 ){
 
   if(
-    currentUser.uid !==
+    playerId !==
     roomData?.game?.detective
   ){
 
@@ -7946,37 +7972,53 @@ async function(
     roomData
       .players[accusedId]
       ?.name ||
-    "Player";
+    "Unknown";
 
 
-  await set(
+  try{
 
-    ref(
-      db,
-      `rooms/${roomCode}/result`
-    ),
+    await set(
 
-    {
+      ref(
+        db,
+        `rooms/${roomCode}/result`
+      ),
 
-      accusedId,
+      {
 
-      accusedName,
+        accusedId,
 
-      votedAt:
-        Date.now()
+        accusedName,
 
-    }
+        votedAt:
+          Date.now()
 
-  );
+      }
+
+    );
 
 
-  await touchRoom();
+    await touchRoom();
+
+  }
+  catch(error){
+
+    console.error(
+      error
+    );
+
+
+    alert(
+      "Could not submit the accusation."
+    );
+
+  }
 
 };
 
 
 /* =====================================================
-RESULT LISTENER
+RESULT
 ===================================================== */
 
 function listenForGameResult(){
@@ -8013,14 +8055,14 @@ function listenForGameResult(){
       }
 
 
-      const id =
+      const revealId =
         String(
           result.votedAt
         );
 
 
       if(
-        id ===
+        revealId ===
         lastRevealId
       ){
 
@@ -8030,7 +8072,7 @@ function listenForGameResult(){
 
 
       lastRevealId =
-        id;
+        revealId;
 
 
       runSuspenseReveal(
@@ -8051,39 +8093,45 @@ REVEAL
 function setReveal(
   small,
   main,
-  sub,
+  sub = "",
   details = null,
   animation = "reveal-pop"
 ){
 
-  document
-    .getElementById(
+  const smallEl =
+    document.getElementById(
       "revealSmall"
-    )
-    .textContent =
-    small;
+    );
 
 
-  document
-    .getElementById(
+  const mainEl =
+    document.getElementById(
       "revealMain"
-    )
-    .textContent =
-    main;
+    );
 
 
-  document
-    .getElementById(
+  const subEl =
+    document.getElementById(
       "revealSub"
-    )
-    .textContent =
-    sub;
+    );
 
 
   const detailsEl =
     document.getElementById(
       "revealDetails"
     );
+
+
+  smallEl.textContent =
+    small;
+
+
+  mainEl.textContent =
+    main;
+
+
+  subEl.textContent =
+    sub;
 
 
   detailsEl.innerHTML =
@@ -8102,17 +8150,12 @@ function setReveal(
     detailsEl.innerHTML =
       details;
 
+
     detailsEl.classList.remove(
       "hidden"
     );
 
   }
-
-
-  const mainEl =
-    document.getElementById(
-      "revealMain"
-    );
 
 
   mainEl.classList.remove(
@@ -8137,7 +8180,15 @@ async function runSuspenseReveal(
 ){
 
   if(
-    revealRunning ||
+    revealRunning
+  ){
+
+    return;
+
+  }
+
+
+  if(
     !roomData?.game
   ){
 
@@ -8172,7 +8223,7 @@ async function runSuspenseReveal(
   const accusedName =
     players[accusedId]?.name ||
     result.accusedName ||
-    "Player";
+    "Unknown";
 
 
   const wasMurderer =
@@ -8224,23 +8275,29 @@ async function runSuspenseReveal(
 
 
   setReveal(
+
     "ROLE REVEALED",
+
     wasMurderer
       ?
       "🔪 THE MURDERER"
       :
       "👤 INNOCENT",
+
     wasMurderer
       ?
       `${accusedName} was the Murderer.`
       :
       `${accusedName} was innocent.`,
+
     null,
+
     wasMurderer
       ?
       "reveal-shake"
       :
       "reveal-pop"
+
   );
 
 
@@ -8253,25 +8310,29 @@ async function runSuspenseReveal(
     players[
       game.detective
     ]?.name ||
-    "Player";
+    "Unknown";
 
 
   const murdererName =
     players[
       game.murderer
     ]?.name ||
-    "Player";
+    "Unknown";
+
+
+  const innocentIds =
+    (game.suspects || [])
+      .filter(
+        id =>
+          id !==
+          game.murderer
+      );
 
 
   const innocentRows =
-    (game.suspects || [])
-      .filter(
-        uid =>
-          uid !==
-          game.murderer
-      )
+    innocentIds
       .map(
-        uid=>`
+        id=>`
 
           <div class="reveal-role">
 
@@ -8279,8 +8340,8 @@ async function runSuspenseReveal(
 
               👤
               ${escapeHtml(
-                players[uid]?.name ||
-                "Player"
+                players[id]?.name ||
+                "Unknown"
               )}
 
             </div>
@@ -8296,66 +8357,58 @@ async function runSuspenseReveal(
       .join("");
 
 
+  const rolesHtml = `
+
+    <div class="reveal-role">
+
+      <div class="reveal-role-name">
+
+        🔪
+        ${escapeHtml(
+          murdererName
+        )}
+
+      </div>
+
+      <div class="reveal-role-value">
+        MURDERER
+      </div>
+
+    </div>
+
+
+    <div class="reveal-role">
+
+      <div class="reveal-role-name">
+
+        🕵️
+        ${escapeHtml(
+          detectiveName
+        )}
+
+      </div>
+
+      <div class="reveal-role-value">
+        DETECTIVE
+      </div>
+
+    </div>
+
+
+    ${innocentRows}
+
+  `;
+
+
   setReveal(
 
     "EVERY ROLE REVEALED",
 
     "🎭 THE TRUTH",
 
-    "Now everyone knows the full case.",
+    "Now everyone knows who had each role.",
 
-    `
-
-      <div class="reveal-role">
-
-        <div class="reveal-role-name">
-          🔪
-          ${escapeHtml(
-            murdererName
-          )}
-        </div>
-
-        <div class="reveal-role-value">
-          MURDERER
-        </div>
-
-      </div>
-
-
-      <div class="reveal-role">
-
-        <div class="reveal-role-name">
-          🕵️
-          ${escapeHtml(
-            detectiveName
-          )}
-        </div>
-
-        <div class="reveal-role-value">
-          DETECTIVE
-        </div>
-
-      </div>
-
-
-      ${innocentRows}
-
-
-      <div class="reveal-role">
-
-        <div class="reveal-role-name">
-          📍 Fictional location
-        </div>
-
-        <div class="reveal-role-value">
-          ${escapeHtml(
-            game.crimeLocation
-          )}
-        </div>
-
-      </div>
-
-    `,
+    rolesHtml,
 
     "reveal-fade"
 
@@ -8435,7 +8488,7 @@ async function runSuspenseReveal(
 
 
 /* =====================================================
-CALLS
+CALL SYSTEM
 ===================================================== */
 
 window.makeCall =
@@ -8444,8 +8497,7 @@ async function(
 ){
 
   if(
-    !roomCode ||
-    !currentUser
+    !roomCode
   ){
 
     return;
@@ -8467,7 +8519,7 @@ async function(
         destination,
 
         caller:
-          currentUser.username,
+          myName,
 
         time:
           Date.now(),
@@ -8475,7 +8527,9 @@ async function(
         id:
           Date.now()
             .toString() +
+
           "_" +
+
           Math.random()
             .toString(36)
             .substring(
@@ -8494,7 +8548,7 @@ async function(
   catch(error){
 
     console.error(
-      "CALL:",
+      "Call:",
       error
     );
 
@@ -8571,7 +8625,7 @@ function listenForCalls(){
 
 
 /* =====================================================
-FULL SCREEN CALL
+FULL SCREEN 15 SECOND CALL
 ===================================================== */
 
 function showCall(
@@ -8596,9 +8650,9 @@ function showCall(
     );
 
 
-  const locationEl =
+  const destinationEl =
     document.getElementById(
-      "callLocation"
+      "callDestination"
     );
 
 
@@ -8608,7 +8662,7 @@ function showCall(
     );
 
 
-  const bar =
+  const progressBar =
     document.getElementById(
       "callProgressBar"
     );
@@ -8619,13 +8673,17 @@ function showCall(
     "PLAYER";
 
 
-  locationEl.textContent =
+  destinationEl.textContent =
     "COME TO " +
     String(
       destination ||
       "THE AREA"
     )
       .toUpperCase();
+
+
+  countEl.textContent =
+    "15";
 
 
   overlay
@@ -8635,22 +8693,22 @@ function showCall(
     );
 
 
-  bar.style.transition =
+  progressBar.style.transition =
     "none";
 
 
-  bar.style.transform =
+  progressBar.style.transform =
     "scaleX(1)";
 
 
-  void bar.offsetWidth;
+  void progressBar.offsetWidth;
 
 
-  bar.style.transition =
+  progressBar.style.transition =
     `transform ${CALL_DURATION}ms linear`;
 
 
-  bar.style.transform =
+  progressBar.style.transform =
     "scaleX(0)";
 
 
@@ -8658,7 +8716,7 @@ function showCall(
     performance.now();
 
 
-  function update(){
+  function updateCallTimer(){
 
     const elapsed =
       performance.now() -
@@ -8690,7 +8748,7 @@ function showCall(
     ){
 
       requestAnimationFrame(
-        update
+        updateCallTimer
       );
 
     }
@@ -8698,7 +8756,7 @@ function showCall(
   }
 
 
-  update();
+  updateCallTimer();
 
 
   callTimer =
@@ -8716,452 +8774,6 @@ function showCall(
     );
 
 }
-
-
-/* =====================================================
-ALERTS
-===================================================== */
-
-window.enableAlerts =
-async function(){
-
-  try{
-
-    const AudioContext =
-      window.AudioContext ||
-      window.webkitAudioContext;
-
-
-    if(
-      AudioContext
-    ){
-
-      audioContext =
-        audioContext ||
-        new AudioContext();
-
-
-      if(
-        audioContext.state ===
-        "suspended"
-      ){
-
-        await audioContext.resume();
-
-      }
-
-
-      const oscillator =
-        audioContext.createOscillator();
-
-
-      const gain =
-        audioContext.createGain();
-
-
-      oscillator.frequency.value =
-        660;
-
-
-      gain.gain.value =
-        0.1;
-
-
-      oscillator.connect(
-        gain
-      );
-
-
-      gain.connect(
-        audioContext.destination
-      );
-
-
-      const now =
-        audioContext.currentTime;
-
-
-      gain.gain.exponentialRampToValueAtTime(
-        0.12,
-        now +
-        0.02
-      );
-
-
-      gain.gain.exponentialRampToValueAtTime(
-        0.0001,
-        now +
-        0.20
-      );
-
-
-      oscillator.start(
-        now
-      );
-
-
-      oscillator.stop(
-        now +
-        0.22
-      );
-
-    }
-
-
-    if(
-      "Notification" in window &&
-      Notification.permission ===
-      "default"
-    ){
-
-      try{
-
-        await Notification.requestPermission();
-
-      }
-      catch(e){}
-
-    }
-
-
-    alertsEnabled =
-      true;
-
-
-    localStorage.setItem(
-      "hotelMurderAlerts",
-      "1"
-    );
-
-
-    document
-      .getElementById(
-        "alertStatus"
-      )
-      .textContent =
-      "✅ Call alerts enabled.";
-
-
-    document
-      .getElementById(
-        "enableAlertsButton"
-      )
-      .textContent =
-      "✅ CALL ALERTS ENABLED";
-
-
-    playCallSound();
-
-  }
-  catch(error){
-
-    console.error(
-      error
-    );
-
-    alert(
-      "Tap again to enable alerts."
-    );
-
-  }
-
-};
-
-
-window.closeAlertModal =
-function(){
-
-  document
-    .getElementById(
-      "alertModal"
-    )
-    .classList
-    .add("hidden");
-
-};
-
-
-function playCallSound(){
-
-  try{
-
-    const AudioContext =
-      window.AudioContext ||
-      window.webkitAudioContext;
-
-
-    if(
-      !AudioContext
-    ){
-
-      return;
-
-    }
-
-
-    audioContext =
-      audioContext ||
-      new AudioContext();
-
-
-    if(
-      audioContext.state ===
-      "suspended"
-    ){
-
-      audioContext
-        .resume()
-        .catch(
-          ()=>{}
-        );
-
-    }
-
-
-    const start =
-      audioContext.currentTime;
-
-
-    for(
-      let group = 0;
-      group < 3;
-      group++
-    ){
-
-      const base =
-        start +
-        group *
-        3.1;
-
-
-      for(
-        let i = 0;
-        i < 2;
-        i++
-      ){
-
-        const osc =
-          audioContext.createOscillator();
-
-
-        const gain =
-          audioContext.createGain();
-
-
-        osc.type =
-          "sine";
-
-
-        osc.frequency.value =
-          i === 0
-          ?
-          880
-          :
-          660;
-
-
-        const time =
-          base +
-          i *
-          0.65;
-
-
-        gain.gain.setValueAtTime(
-          0.0001,
-          time
-        );
-
-
-        gain.gain.exponentialRampToValueAtTime(
-          0.28,
-          time +
-          0.03
-        );
-
-
-        gain.gain.exponentialRampToValueAtTime(
-          0.0001,
-          time +
-          0.50
-        );
-
-
-        osc.connect(
-          gain
-        );
-
-
-        gain.connect(
-          audioContext.destination
-        );
-
-
-        osc.start(
-          time
-        );
-
-
-        osc.stop(
-          time +
-          0.55
-        );
-
-      }
-
-    }
-
-  }
-  catch(error){
-
-    console.error(
-      error
-    );
-
-  }
-
-}
-
-
-function vibrate(){
-
-  try{
-
-    if(
-      "vibrate" in navigator
-    ){
-
-      navigator.vibrate([
-        300,
-        120,
-        300,
-        120,
-        500
-      ]);
-
-    }
-
-  }
-  catch(e){}
-
-}
-
-
-function systemNotification(
-  destination,
-  caller
-){
-
-  if(
-    !alertsEnabled
-  ){
-
-    return;
-
-  }
-
-
-  if(
-    "Notification" in window &&
-    Notification.permission ===
-    "granted"
-  ){
-
-    try{
-
-      new Notification(
-        "📞 Tivoli Mystery Call",
-        {
-
-          body:
-            `${caller} is calling everyone to ${destination}!`,
-
-          tag:
-            "tivoli-mystery-" +
-            Date.now()
-
-        }
-
-      );
-
-    }
-    catch(e){}
-
-  }
-
-}
-
-
-/* =====================================================
-INITIALIZE
-===================================================== */
-
-function initializePage(){
-
-  startHeartbeat();
-
-
-  if(
-    alertsEnabled
-  ){
-
-    document
-      .getElementById(
-        "alertStatus"
-      )
-      .textContent =
-      "✅ Call alerts enabled.";
-
-
-    document
-      .getElementById(
-        "enableAlertsButton"
-      )
-      .textContent =
-      "✅ CALL ALERTS ENABLED";
-
-  }
-
-
-  if(
-    loadLocalUser()
-  ){
-
-    loadUserProfile()
-      .then(
-        ()=>{
-
-          showLoggedInUI();
-
-        }
-      )
-      .catch(
-        error=>{
-
-          console.error(
-            "Startup:",
-            error
-          );
-
-          currentUser =
-            null;
-
-          localStorage.removeItem(
-            "tivoliUserId"
-          );
-
-          localStorage.removeItem(
-            "tivoliUsername"
-          );
-
-        }
-      );
-
-  }
-
-}
-
-
-initializePage();
 
 
 /* =====================================================
@@ -9195,7 +8807,7 @@ if(
 
 
 /* =====================================================
-ROOM FROM URL
+URL ROOM
 ===================================================== */
 
 const params =
@@ -9228,17 +8840,17 @@ if(
 NOTE COUNTER
 ===================================================== */
 
-const noteInput =
+const playerNoteInput =
   document.getElementById(
     "playerNoteInput"
   );
 
 
 if(
-  noteInput
+  playerNoteInput
 ){
 
-  noteInput.addEventListener(
+  playerNoteInput.addEventListener(
     "input",
     updatePlayerNoteCounter
   );
@@ -9247,53 +8859,84 @@ if(
 
 
 /* =====================================================
-ENTER KEY LOGIN
+INITIAL STARTUP
 ===================================================== */
 
-document
-  .getElementById(
-    "passwordInput"
-  )
-  .addEventListener(
-    "keydown",
-    event=>{
+async function initialize(){
 
-      if(
-        event.key ===
-        "Enter"
-      ){
+  const savedName =
+    loadSavedName();
 
-        submitAuth();
 
-      }
+  if(
+    savedName
+  ){
+
+    myName =
+      savedName;
+
+
+    await saveDeviceRecord();
+
+
+    showHome();
+
+  }
+  else{
+
+    document
+      .getElementById(
+        "nameSetup"
+      )
+      .classList
+      .remove(
+        "hidden"
+      );
+
+  }
+
+
+  if(
+    alertsEnabled
+  ){
+
+    const status =
+      document.getElementById(
+        "alertStatus"
+      );
+
+
+    const button =
+      document.getElementById(
+        "enableAlertsButton"
+      );
+
+
+    if(
+      status
+    ){
+
+      status.textContent =
+        "✅ Call alerts enabled.";
 
     }
-  );
 
 
-document
-  .getElementById(
-    "usernameInput"
-  )
-  .addEventListener(
-    "keydown",
-    event=>{
+    if(
+      button
+    ){
 
-      if(
-        event.key ===
-        "Enter"
-      ){
-
-        document
-          .getElementById(
-            "passwordInput"
-          )
-          .focus();
-
-      }
+      button.textContent =
+        "✅ CALL ALERTS ENABLED";
 
     }
-  );
+
+  }
+
+}
+
+
+initialize();
 
 </script>
 
