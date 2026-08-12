@@ -1,118 +1,244 @@
-const CACHE = "hotel-murder-v1";
+const CACHE_NAME = "tivoli-mystery-v4";
 
-const APP_SHELL = [
-  "./",
-  "./index.html",
-  "./manifest.json"
-];
 
-self.addEventListener("install", event => {
-  event.waitUntil(
-    caches.open(CACHE)
-      .then(cache => cache.addAll(APP_SHELL))
-      .then(() => self.skipWaiting())
-  );
-});
+self.addEventListener(
+  "install",
+  event => {
 
-self.addEventListener("activate", event => {
-  event.waitUntil(
-    caches.keys()
-      .then(keys =>
-        Promise.all(
-          keys
-            .filter(key => key !== CACHE)
-            .map(key => caches.delete(key))
-        )
-      )
-      .then(() => self.clients.claim())
-  );
-});
+    self.skipWaiting();
 
-self.addEventListener("fetch", event => {
-
-  if(event.request.method !== "GET"){
-    return;
   }
-
-  event.respondWith(
-
-    fetch(event.request)
-
-      .then(response => {
-
-        const copy =
-          response.clone();
-
-        caches.open(CACHE)
-          .then(cache =>
-            cache.put(
-              event.request,
-              copy
-            )
-          );
-
-        return response;
-
-      })
-
-      .catch(() =>
-        caches.match(
-          event.request
-        )
-      )
-
-  );
-
-});
+);
 
 
-/*
-  Background Web Push receiver.
+self.addEventListener(
+  "activate",
+  event => {
 
-  This is ready for push messages,
-  but a push message must actually be
-  sent by a server/push service.
-*/
+    event.waitUntil(
+      self.clients.claim()
+    );
+
+  }
+);
+
+
+/* =====================================================
+WEB PUSH
+===================================================== */
 
 self.addEventListener(
   "push",
   event => {
 
-    let data = {};
+    event.waitUntil(
 
-    try {
-      data =
-        event.data
-          ? event.data.json()
-          : {};
-    }
-    catch(e){}
+      (async()=>{
 
-    const title =
-      data.title ||
-      "📞 Hotel Murder";
+        let data = {};
 
-    const body =
-      data.body ||
-      "You have a game call.";
 
-    const tag =
-      data.tag ||
-      (
-        "hotel-murder-" +
-        Date.now()
-      );
+        try{
+
+          if(
+            event.data
+          ){
+
+            data =
+              event.data.json();
+
+          }
+
+        }
+        catch{
+
+          try{
+
+            data = {
+
+              body:
+                event.data.text()
+
+            };
+
+          }
+          catch{
+
+            data = {};
+
+          }
+
+        }
+
+
+        const title =
+          data.title ||
+          "🔔 Tivoli Mystery";
+
+
+        const body =
+          data.body ||
+          "You have a new Tivoli Mystery alert.";
+
+
+        await self.registration.showNotification(
+
+          title,
+
+          {
+
+            body,
+
+            icon:
+              "./icon-192.png",
+
+            badge:
+              "./icon-192.png",
+
+            tag:
+              data.tag ||
+              "tivoli-push",
+
+            renotify:
+              data.renotify !== false,
+
+            requireInteraction:
+              Boolean(
+                data.requireInteraction
+              ),
+
+            vibrate:
+              data.vibrate ||
+              [
+                250,
+                120,
+                250
+              ],
+
+            data:{
+
+              roomCode:
+                data.roomCode ||
+                null,
+
+              roundId:
+                data.roundId ||
+                null,
+
+              taskId:
+                data.taskId ||
+                null,
+
+              url:
+                data.url ||
+                "./"
+
+            }
+
+          }
+
+        );
+
+      })()
+
+    );
+
+  }
+);
+
+
+/* =====================================================
+NOTIFICATION CLICK
+===================================================== */
+
+self.addEventListener(
+  "notificationclick",
+  event => {
+
+    event.notification.close();
+
+
+    const data =
+      event.notification.data ||
+      {};
+
+
+    const targetUrl =
+      data.url ||
+      "./";
 
 
     event.waitUntil(
 
-      self.registration
-        .showNotification(
-          title,
-          {
-            body,
-            tag,
-            renotify:true
+      clients
+        .matchAll({
+
+          type:
+            "window",
+
+          includeUncontrolled:
+            true
+
+        })
+
+        .then(
+          clientList => {
+
+            for(
+              const client
+              of clientList
+            ){
+
+              try{
+
+                const clientUrl =
+                  new URL(
+                    client.url
+                  );
+
+
+                const target =
+                  new URL(
+                    targetUrl,
+                    self.location.origin
+                  );
+
+
+                if(
+                  clientUrl.origin ===
+                  target.origin
+                ){
+
+                  if(
+                    "focus" in client
+                  ){
+
+                    return client.focus();
+
+                  }
+
+                }
+
+              }
+              catch{
+
+                /* ignore */
+
+              }
+
+            }
+
+
+            if(
+              clients.openWindow
+            ){
+
+              return clients.openWindow(
+                targetUrl
+              );
+
+            }
+
           }
         )
 
@@ -122,58 +248,22 @@ self.addEventListener(
 );
 
 
-/*
-  Open/focus the app when
-  the notification is tapped.
-*/
+/* =====================================================
+PAGE -> SERVICE WORKER
+===================================================== */
 
 self.addEventListener(
-  "notificationclick",
+  "message",
   event => {
 
-    event.notification.close();
+    if(
+      event.data?.type ===
+      "SKIP_WAITING"
+    ){
 
+      self.skipWaiting();
 
-    event.waitUntil(
-
-      clients
-        .matchAll({
-          type:"window",
-          includeUncontrolled:true
-        })
-
-        .then(list => {
-
-          for(
-            const client
-            of list
-          ){
-
-            if(
-              "focus"
-              in client
-            ){
-
-              return client.focus();
-
-            }
-
-          }
-
-
-          if(
-            clients.openWindow
-          ){
-
-            return clients.openWindow(
-              "./"
-            );
-
-          }
-
-        })
-
-    );
+    }
 
   }
 );
