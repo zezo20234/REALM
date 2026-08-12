@@ -395,8 +395,6 @@ button.dark{
   font-weight:900;
 }
 
-/* USER BAR */
-
 .user-bar{
   display:flex;
   justify-content:space-between;
@@ -431,8 +429,6 @@ button.dark{
   font-size:12px;
   background:#252c40;
 }
-
-/* CALL */
 
 .call-overlay{
   position:fixed;
@@ -521,8 +517,6 @@ button.dark{
   }
 }
 
-/* ALERT MODAL */
-
 .alert-modal{
   position:fixed;
   inset:0;
@@ -545,8 +539,6 @@ button.dark{
   box-shadow:0 20px 60px rgba(0,0,0,.5);
 }
 
-/* RESET */
-
 .reset-fixed{
   position:fixed;
   top:calc(12px + env(safe-area-inset-top));
@@ -557,8 +549,6 @@ button.dark{
   font-size:13px;
   box-shadow:0 8px 25px rgba(0,0,0,.35);
 }
-
-/* NOTES */
 
 .notes-box{
   background:#202638;
@@ -601,8 +591,6 @@ button.dark{
   color:#8d97ae;
   text-align:center;
 }
-
-/* DOSSIER */
 
 .detective-player-buttons{
   display:grid;
@@ -671,8 +659,6 @@ button.dark{
   text-transform:uppercase;
   margin-bottom:5px;
 }
-
-/* REVEAL */
 
 .reveal-overlay{
   position:fixed;
@@ -853,6 +839,7 @@ button.dark{
   .reveal-sub{
     font-size:16px;
   }
+
 }
 
 </style>
@@ -860,7 +847,6 @@ button.dark{
 
 <body>
 
-<!-- FULL-SCREEN CALL -->
 <div
   id="callOverlay"
   class="call-overlay hidden"
@@ -911,7 +897,6 @@ button.dark{
 </div>
 
 
-<!-- ALERT MODAL -->
 <div
   id="alertModal"
   class="alert-modal hidden"
@@ -951,7 +936,6 @@ button.dark{
 </div>
 
 
-<!-- REVEAL -->
 <div
   id="revealOverlay"
   class="reveal-overlay hidden"
@@ -987,7 +971,6 @@ button.dark{
 <div class="app">
 
 
-<!-- NAME SETUP -->
 <section
   id="nameSetup"
 >
@@ -1038,7 +1021,6 @@ button.dark{
 </section>
 
 
-<!-- USER BAR -->
 <div
   id="userBar"
   class="user-bar hidden"
@@ -1071,7 +1053,6 @@ button.dark{
 </div>
 
 
-<!-- HOME -->
 <section
   id="home"
   class="hidden"
@@ -1193,7 +1174,6 @@ button.dark{
 </section>
 
 
-<!-- CREATE -->
 <section
   id="createScreen"
   class="hidden"
@@ -1270,7 +1250,6 @@ button.dark{
 </section>
 
 
-<!-- LOBBY -->
 <section
   id="lobby"
   class="hidden"
@@ -1338,7 +1317,6 @@ button.dark{
 </section>
 
 
-<!-- GAME -->
 <section
   id="game"
   class="hidden"
@@ -1524,8 +1502,6 @@ button.dark{
   </div>
 
 
-  <!-- DETECTIVE NOTEBOOK -->
-
   <div
     id="detectiveNotebook"
     class="card hidden"
@@ -1676,8 +1652,6 @@ button.dark{
   </div>
 
 
-  <!-- INVESTIGATION -->
-
   <div
     id="investigation"
     class="card hidden"
@@ -1760,7 +1734,7 @@ FIREBASE
 const firebaseConfig = {
 
   apiKey:
-    "AIzaSyCug0SqHKstGZAr5dvzm-DaLZAIDugo",
+    "AIzaSyCugS0qHKstGZAr5dvzm-DaLZAIDugo",
 
   authDomain:
     "money-e560a.firebaseapp.com",
@@ -1848,7 +1822,6 @@ let notesUnsubscribe = null;
 let detectiveNotesUnsubscribe = null;
 let resultUnsubscribe = null;
 
-let roomLoading = false;
 let gameLoading = false;
 
 let selectedDetectivePlayerId = null;
@@ -1861,6 +1834,14 @@ let alertsEnabled =
   ) === "1";
 
 let revealRunning = false;
+
+/*
+  FIX:
+  This variable was missing.
+  The call listener uses it.
+*/
+let lastCallId = null;
+
 let lastRevealId = null;
 
 let callTimer = null;
@@ -1890,14 +1871,6 @@ const CALL_DURATION =
 const MAX_PLAYER_NOTE_LENGTH =
   240;
 
-/*
-  Lobby rooms disappear after 15 minutes
-  with no activity.
-
-  A running game gets a much longer expiry
-  so a temporary hotspot/background problem
-  cannot kill the game.
-*/
 const LOBBY_EXPIRY =
   15 * 60 * 1000;
 
@@ -1962,11 +1935,6 @@ function isRoomStale(
   if(
     !activity
   ){
-
-    /*
-      Malformed room nodes are treated as
-      replaceable instead of active.
-    */
 
     return true;
 
@@ -2191,11 +2159,6 @@ async function saveDeviceRecord(){
   }
   catch(error){
 
-    /*
-      Don't kick the player because a temporary
-      connection failed.
-    */
-
     console.warn(
       "saveDeviceRecord:",
       error
@@ -2207,7 +2170,7 @@ async function saveDeviceRecord(){
 
 
 /* =====================================================
-PLAYER PRESENCE
+PRESENCE
 ===================================================== */
 
 async function markPlayerSeen(){
@@ -2260,8 +2223,8 @@ async function markPlayerSeen(){
   catch(error){
 
     /*
-      IMPORTANT:
-      Never delete player data on failure.
+      Network failures DO NOT remove
+      the player from Firebase.
     */
 
     console.warn(
@@ -2320,7 +2283,7 @@ window.addEventListener(
 
 
 /* =====================================================
-ROOM LOCAL STORAGE
+LOCAL ROOM
 ===================================================== */
 
 function saveLocalRoom(){
@@ -2349,7 +2312,7 @@ function getLocalRoom(){
 
 
 /* =====================================================
-UI HELPERS
+UI
 ===================================================== */
 
 function hideAllMainScreens(){
@@ -2573,15 +2536,14 @@ function restoreSavedRoom(){
   }
 
 
-  const box =
-    document.getElementById(
+  document
+    .getElementById(
       "resumeBox"
+    )
+    .classList
+    .remove(
+      "hidden"
     );
-
-
-  box.classList.remove(
-    "hidden"
-  );
 
 
   document
@@ -2650,7 +2612,7 @@ function normalizeRoomCode(
 
 
 /* =====================================================
-CREATE ROOM — FIXED
+CREATE ROOM
 ===================================================== */
 
 window.createRoom =
@@ -2682,25 +2644,27 @@ function(){
 window.finishCreateRoom =
 async function(){
 
-  const input =
-    document.getElementById(
-      "roomInput"
-    );
-
-
   roomCode =
     normalizeRoomCode(
-      input.value
+
+      document
+        .getElementById(
+          "roomInput"
+        )
+        .value
+
     );
 
 
   const playerLimit =
     Number(
+
       document
         .getElementById(
           "playerLimit"
         )
         .value
+
     );
 
 
@@ -2718,15 +2682,15 @@ async function(){
   }
 
 
+  const now =
+    Date.now();
+
+
   const roomRef =
     ref(
       db,
       `rooms/${roomCode}`
     );
-
-
-  const now =
-    Date.now();
 
 
   const newRoom = {
@@ -2774,17 +2738,6 @@ async function(){
 
 
   try{
-
-    /*
-      ATOMIC FIX:
-
-      Empty/malformed/stale rooms may be replaced.
-
-      A genuinely active room is preserved.
-
-      This removes the false "room already exists"
-      problem caused by the previous get()/if logic.
-    */
 
     const result =
       await runTransaction(
@@ -2852,12 +2805,9 @@ async function(){
 
     saveLocalRoom();
 
-
     await saveDeviceRecord();
 
-
     startRoomSession();
-
 
   }
   catch(error){
@@ -2952,10 +2902,9 @@ async function(){
       )
     ){
 
-      /*
-        Only remove stale room when joining it.
-        This doesn't remove active rooms.
-      */
+      alert(
+        "That room has expired."
+      );
 
       if(
         data.host ===
@@ -2967,11 +2916,6 @@ async function(){
         );
 
       }
-
-
-      alert(
-        "That room has expired."
-      );
 
       return;
 
@@ -3009,9 +2953,7 @@ async function(){
     if(
       data.status ===
       "lobby" &&
-
       !existingPlayer &&
-
       playerCount >=
       data.playerLimit
     ){
@@ -3074,9 +3016,7 @@ async function(){
 
     saveLocalRoom();
 
-
     await saveDeviceRecord();
-
 
     startRoomSession();
 
@@ -3109,7 +3049,28 @@ START ROOM SESSION
 function startRoomSession(){
 
   stopListeners();
+
   stopTimers();
+
+
+  lastCallId =
+    null;
+
+
+  lastRevealId =
+    null;
+
+
+  revealRunning =
+    false;
+
+
+  selectedDetectivePlayerId =
+    null;
+
+
+  mySecret =
+    null;
 
 
   hideAllMainScreens();
@@ -3133,18 +3094,6 @@ function startRoomSession(){
     roomCode;
 
 
-  selectedDetectivePlayerId =
-    null;
-
-
-  lastCallId =
-    null;
-
-
-  mySecret =
-    null;
-
-
   startHeartbeat();
 
   startRoomExpiryWatcher();
@@ -3153,6 +3102,10 @@ function startRoomSession(){
 
 }
 
+
+/* =====================================================
+ROOM LISTENER
+===================================================== */
 
 function listenToRoom(){
 
@@ -3191,12 +3144,6 @@ function listenToRoom(){
         roomData =
           snapshot.val();
 
-
-        /*
-          Keep the same player.
-
-          NEVER generate a new ID here.
-        */
 
         if(
           !roomData.players?.[
@@ -3299,7 +3246,7 @@ function listenToRoom(){
 
 
 /* =====================================================
-ROOM EXPIRY WATCHER
+ROOM EXPIRY
 ===================================================== */
 
 function startRoomExpiryWatcher(){
@@ -3359,11 +3306,6 @@ function startRoomExpiryWatcher(){
           }
 
 
-          /*
-            Only the host performs the actual deletion.
-            This avoids multiple players deleting a room.
-          */
-
           if(
             data.host ===
             playerId
@@ -3389,16 +3331,97 @@ function startRoomExpiryWatcher(){
         catch(error){
 
           console.warn(
-            "EXPIRY WATCHER:",
+            "EXPIRY:",
             error
           );
 
         }
 
       },
-
       30000
     );
+
+}
+
+
+/* =====================================================
+LEAVE ROOM
+===================================================== */
+
+function leaveRoomToHome(
+  message = ""
+){
+
+  stopListeners();
+
+  stopTimers();
+
+
+  roomCode =
+    "";
+
+
+  roomData =
+    null;
+
+
+  mySecret =
+    null;
+
+
+  selectedDetectivePlayerId =
+    null;
+
+
+  document
+    .getElementById(
+      "game"
+    )
+    .classList
+    .add(
+      "hidden"
+    );
+
+
+  document
+    .getElementById(
+      "lobby"
+    )
+    .classList
+    .add(
+      "hidden"
+    );
+
+
+  document
+    .getElementById(
+      "createScreen"
+    )
+    .classList
+    .add(
+      "hidden"
+    );
+
+
+  document
+    .getElementById(
+      "home"
+    )
+    .classList
+    .remove(
+      "hidden"
+    );
+
+
+  if(
+    message
+  ){
+
+    alert(
+      message
+    );
+
+  }
 
 }
 
@@ -3602,313 +3625,7 @@ function renderLobby(){
 
 
 /* =====================================================
-START ROUND
-===================================================== */
-
-window.startRound =
-async function(){
-
-  if(
-    roomData?.host !==
-    playerId
-  ){
-
-    return;
-
-  }
-
-
-  const players =
-    roomData.players ||
-    {};
-
-
-  const ids =
-    Object.keys(
-      players
-    );
-
-
-  if(
-    ids.length !==
-    Number(
-      roomData.playerLimit
-    )
-  ){
-
-    alert(
-      "Wait for everyone."
-    );
-
-    return;
-
-  }
-
-
-  if(
-    ids.length <
-    2
-  ){
-
-    return;
-
-  }
-
-
-  const roundSeed =
-    Date.now()
-      .toString(36) +
-    "_" +
-    Math.random()
-      .toString(36)
-      .slice(
-        2,
-        10
-      );
-
-
-  const shuffled =
-    shuffle(
-      ids
-    );
-
-
-  const detective =
-    shuffled[0];
-
-
-  const murderer =
-    shuffled[1];
-
-
-  const innocents =
-    shuffled.slice(
-      2
-    );
-
-
-  const now =
-    Date.now();
-
-
-  const murderAt =
-    now +
-    MIN_MURDER_DELAY +
-    Math.floor(
-      Math.random() *
-      (
-        MAX_MURDER_DELAY -
-        MIN_MURDER_DELAY
-      )
-    );
-
-
-  const detectiveEnd =
-    now +
-    DETECTIVE_WAIT;
-
-
-  const investigationEnd =
-    detectiveEnd +
-    INVESTIGATION_TIME;
-
-
-  const crimeLocation =
-    random(
-      locations
-    );
-
-
-  const privateData =
-    {};
-
-
-  privateData[
-    detective
-  ] = {
-
-    role:
-      "detective",
-
-    tasks:
-      []
-
-  };
-
-
-  privateData[
-    murderer
-  ] = {
-
-    role:
-      "murderer",
-
-    tasks:
-      buildMurdererTasks(
-        murderer,
-        now,
-        detectiveEnd,
-        murderAt,
-        crimeLocation,
-        roundSeed
-      )
-
-  };
-
-
-  innocents.forEach(
-    id=>{
-
-      privateData[id] = {
-
-        role:
-          "innocent",
-
-        tasks:
-          buildNormalTasks(
-            id,
-            now,
-            detectiveEnd,
-            crimeLocation,
-            roundSeed
-          )
-
-      };
-
-    }
-  );
-
-
-  const game = {
-
-    roundNumber:
-      Number(
-        roomData.roundNumber ||
-        0
-      ) +
-      1,
-
-    roundSeed,
-
-    startedAt:
-      now,
-
-    murderAt,
-
-    detectiveEnd,
-
-    investigationEnd,
-
-    crimeLocation,
-
-    victim:
-      random([
-        "a fictional visitor",
-        "a fictional guest",
-        "a fictional character"
-      ]),
-
-    caseDescription:
-      random([
-        "A fictional incident occurred during the game.",
-        "A fictional guest was involved in the mystery.",
-        "A fictional visitor became part of the case."
-      ]),
-
-    detective,
-
-    murderer,
-
-    suspects:[
-      murderer,
-      ...innocents
-    ]
-
-  };
-
-
-  const updates =
-    {};
-
-
-  updates[
-    `rooms/${roomCode}/status`
-  ] =
-    "game";
-
-
-  updates[
-    `rooms/${roomCode}/game`
-  ] =
-    game;
-
-
-  updates[
-    `rooms/${roomCode}/notes`
-  ] =
-    null;
-
-
-  updates[
-    `rooms/${roomCode}/detectiveNotes`
-  ] =
-    null;
-
-
-  updates[
-    `rooms/${roomCode}/result`
-  ] =
-    null;
-
-
-  updates[
-    `rooms/${roomCode}/lastActivityAt`
-  ] =
-    now;
-
-
-  updates[
-    `rooms/${roomCode}/roundNumber`
-  ] =
-    game.roundNumber;
-
-
-  for(
-    const [
-      id,
-      data
-    ]
-    of Object.entries(
-      privateData
-    )
-  ){
-
-    updates[
-      `rooms/${roomCode}/private/${id}`
-    ] =
-      data;
-
-
-    updates[
-      `rooms/${roomCode}/completed/${id}`
-    ] =
-      {};
-
-  }
-
-
-  await update(
-    ref(
-      db
-    ),
-    updates
-  );
-
-};
-
-
-/* =====================================================
-TASK HELPERS
+LOCATIONS / TASKS
 ===================================================== */
 
 const locations = [
@@ -4028,42 +3745,6 @@ function nextMinuteTimestamp(
 }
 
 
-function shortClock(
-  date
-){
-
-  let h =
-    date.getHours();
-
-
-  const m =
-    String(
-      date.getMinutes()
-    )
-      .padStart(
-        2,
-        "0"
-      );
-
-
-  const period =
-    h >= 12
-    ?
-    "PM"
-    :
-    "AM";
-
-
-  h =
-    h % 12 ||
-    12;
-
-
-  return `${h}:${m} ${period}`;
-
-}
-
-
 function makeUnlockTimes(
   now,
   detectiveEnd,
@@ -4166,7 +3847,7 @@ function buildNormalTasks(
         i
       )=>{
 
-        const possible =
+        let possible =
           locations.filter(
             location =>
               location !==
@@ -4177,17 +3858,23 @@ function buildNormalTasks(
           );
 
 
+        if(
+          !possible.length
+        ){
+
+          possible =
+            locations.filter(
+              location =>
+                location !==
+                crimeLocation
+            );
+
+        }
+
+
         const location =
           random(
-            possible.length
-              ?
-              possible
-              :
-              locations.filter(
-                x =>
-                  x !==
-                  crimeLocation
-              )
+            possible
           );
 
 
@@ -4196,7 +3883,14 @@ function buildNormalTasks(
         );
 
 
-        const text =
+        return createTask(
+
+          `${roundSeed}_${playerIdForSeed}_N_${i}_${Math.random()
+            .toString(36)
+            .slice(2,7)}`,
+
+          unlockAt,
+
           random(
             Math.random() <
             0.5
@@ -4208,18 +3902,7 @@ function buildNormalTasks(
             .replace(
               "{location}",
               location
-            );
-
-
-        return createTask(
-
-          `${roundSeed}_${playerIdForSeed}_N_${i}_${Math.random()
-            .toString(36)
-            .slice(2,7)}`,
-
-          unlockAt,
-
-          text
+            )
 
         );
 
@@ -4240,7 +3923,7 @@ function buildMurdererTasks(
   roundSeed
 ){
 
-  const normalCount =
+  const count =
     2 +
     Math.floor(
       Math.random() *
@@ -4251,14 +3934,12 @@ function buildMurdererTasks(
   const times =
     makeUnlockTimes(
       now,
-
       Math.min(
         detectiveEnd,
         murderAt -
         20000
       ),
-
-      normalCount
+      count
     );
 
 
@@ -4273,7 +3954,7 @@ function buildMurdererTasks(
         i
       )=>{
 
-        const possible =
+        let possible =
           locations.filter(
             location =>
               location !==
@@ -4284,17 +3965,23 @@ function buildMurdererTasks(
           );
 
 
+        if(
+          !possible.length
+        ){
+
+          possible =
+            locations.filter(
+              location =>
+                location !==
+                crimeLocation
+            );
+
+        }
+
+
         const location =
           random(
-            possible.length
-              ?
-              possible
-              :
-              locations.filter(
-                x =>
-                  x !==
-                  crimeLocation
-              )
+            possible
           );
 
 
@@ -4392,6 +4079,295 @@ function buildMurdererTasks(
 
 
 /* =====================================================
+START ROUND
+===================================================== */
+
+window.startRound =
+async function(){
+
+  if(
+    roomData?.host !==
+    playerId
+  ){
+
+    return;
+
+  }
+
+
+  const players =
+    roomData.players ||
+    {};
+
+
+  const ids =
+    Object.keys(
+      players
+    );
+
+
+  if(
+    ids.length !==
+    Number(
+      roomData.playerLimit
+    )
+  ){
+
+    alert(
+      "Wait for everyone."
+    );
+
+    return;
+
+  }
+
+
+  const shuffled =
+    shuffle(
+      ids
+    );
+
+
+  const detective =
+    shuffled[0];
+
+
+  const murderer =
+    shuffled[1];
+
+
+  const innocents =
+    shuffled.slice(
+      2
+    );
+
+
+  const now =
+    Date.now();
+
+
+  const murderAt =
+    now +
+    MIN_MURDER_DELAY +
+    Math.floor(
+      Math.random() *
+      (
+        MAX_MURDER_DELAY -
+        MIN_MURDER_DELAY
+      )
+    );
+
+
+  const detectiveEnd =
+    now +
+    DETECTIVE_WAIT;
+
+
+  const investigationEnd =
+    detectiveEnd +
+    INVESTIGATION_TIME;
+
+
+  const crimeLocation =
+    random(
+      locations
+    );
+
+
+  const roundSeed =
+    Date.now().toString(36) +
+    "_" +
+    Math.random()
+      .toString(36)
+      .slice(
+        2,
+        10
+      );
+
+
+  const privateData =
+    {};
+
+
+  privateData[
+    detective
+  ] = {
+
+    role:
+      "detective",
+
+    tasks:
+      []
+
+  };
+
+
+  privateData[
+    murderer
+  ] = {
+
+    role:
+      "murderer",
+
+    tasks:
+      buildMurdererTasks(
+        murderer,
+        now,
+        detectiveEnd,
+        murderAt,
+        crimeLocation,
+        roundSeed
+      )
+
+  };
+
+
+  innocents.forEach(
+    id=>{
+
+      privateData[
+        id
+      ] = {
+
+        role:
+          "innocent",
+
+        tasks:
+          buildNormalTasks(
+            id,
+            now,
+            detectiveEnd,
+            crimeLocation,
+            roundSeed
+          )
+
+      };
+
+    }
+  );
+
+
+  const game = {
+
+    roundNumber:
+      Number(
+        roomData.roundNumber ||
+        0
+      ) +
+      1,
+
+    roundSeed,
+
+    startedAt:
+      now,
+
+    murderAt,
+
+    detectiveEnd,
+
+    investigationEnd,
+
+    crimeLocation,
+
+    victim:
+      "a fictional guest",
+
+    caseDescription:
+      "A fictional incident occurred during the mystery.",
+
+    detective,
+
+    murderer,
+
+    suspects:[
+      murderer,
+      ...innocents
+    ]
+
+  };
+
+
+  const updates =
+    {};
+
+
+  updates[
+    `rooms/${roomCode}/status`
+  ] =
+    "game";
+
+
+  updates[
+    `rooms/${roomCode}/game`
+  ] =
+    game;
+
+
+  updates[
+    `rooms/${roomCode}/notes`
+  ] =
+    null;
+
+
+  updates[
+    `rooms/${roomCode}/detectiveNotes`
+  ] =
+    null;
+
+
+  updates[
+    `rooms/${roomCode}/result`
+  ] =
+    null;
+
+
+  updates[
+    `rooms/${roomCode}/lastActivityAt`
+  ] =
+    now;
+
+
+  updates[
+    `rooms/${roomCode}/roundNumber`
+  ] =
+    game.roundNumber;
+
+
+  for(
+    const [
+      id,
+      data
+    ]
+    of Object.entries(
+      privateData
+    )
+  ){
+
+    updates[
+      `rooms/${roomCode}/private/${id}`
+    ] =
+      data;
+
+
+    updates[
+      `rooms/${roomCode}/completed/${id}`
+    ] =
+      {};
+
+  }
+
+
+  await update(
+    ref(
+      db
+    ),
+    updates
+  );
+
+};
+
+
+/* =====================================================
 LOAD GAME
 ===================================================== */
 
@@ -4466,7 +4442,6 @@ async function loadGame(){
 
 
     renderSecret();
-
 
     startGameListeners();
 
@@ -4763,7 +4738,7 @@ function startGameListeners(){
 
 
 /* =====================================================
-GLOBAL CLOCK
+GLOBAL TIMER
 ===================================================== */
 
 function startGlobalClock(){
@@ -4807,46 +4782,48 @@ function startGlobalClock(){
           );
 
 
-        const beforeDetective =
+        if(
           now <
-          game.detectiveEnd;
+          game.detectiveEnd
+        ){
+
+          document
+            .getElementById(
+              "phaseText"
+            )
+            .textContent =
+            "DETECTIVE ARRIVES IN";
 
 
-        document
-          .getElementById(
-            "phaseText"
-          )
-          .textContent =
+          document
+            .getElementById(
+              "globalTimer"
+            )
+            .textContent =
+            formatDuration(
+              game.detectiveEnd -
+              now
+            );
 
-          beforeDetective
+        }
+        else{
 
-          ?
+          document
+            .getElementById(
+              "phaseText"
+            )
+            .textContent =
+            "DETECTIVE IS HERE";
 
-          "DETECTIVE ARRIVES IN"
 
-          :
+          document
+            .getElementById(
+              "globalTimer"
+            )
+            .textContent =
+            "00:00";
 
-          "DETECTIVE IS HERE";
-
-
-        document
-          .getElementById(
-            "globalTimer"
-          )
-          .textContent =
-
-          beforeDetective
-
-          ?
-
-          formatDuration(
-            game.detectiveEnd -
-            now
-          )
-
-          :
-
-          "00:00";
+        }
 
 
         if(
@@ -4932,7 +4909,7 @@ function startGlobalClock(){
 
 
 /* =====================================================
-SECRET UI
+SECRET
 ===================================================== */
 
 function renderSecret(){
@@ -4963,9 +4940,7 @@ function renderSecret(){
     card.innerHTML = `
 
       <div class="role detective">
-
         🕵️ YOU ARE THE DETECTIVE
-
       </div>
 
       <div class="big">
@@ -5076,14 +5051,13 @@ function renderSecret(){
 
   hideDetectiveTools();
 
-
   renderTasks();
 
 }
 
 
 /* =====================================================
-TASKS
+TASK RENDER
 ===================================================== */
 
 function renderTasks(){
@@ -5105,11 +5079,9 @@ function renderTasks(){
 
 
   const completed =
-    roomData
-      ?.completed
-      ?.[
-        playerId
-      ] ||
+    roomData?.completed?.[
+      playerId
+    ] ||
     {};
 
 
@@ -5393,25 +5365,19 @@ function updateMyNoteUI(){
       note.text ||
       "";
 
-
     input.disabled =
       true;
-
 
     button.disabled =
       true;
 
-
     button.textContent =
       "✅ NOTE SENT";
-
 
     status.textContent =
       "✅ Your note was sent.";
 
-
     updatePlayerNoteCounter();
-
 
     return;
 
@@ -5421,14 +5387,11 @@ function updateMyNoteUI(){
   input.disabled =
     false;
 
-
   button.disabled =
     false;
 
-
   button.textContent =
     "📝 SEND NOTE TO DETECTIVE";
-
 
   status.textContent =
     "You have 1 note available.";
@@ -5483,24 +5446,24 @@ async function(){
     );
 
 
-  const existing =
-    await get(
-      noteRef
-    );
-
-
-  if(
-    existing.exists()
-  ){
-
-    updateMyNoteUI();
-
-    return;
-
-  }
-
-
   try{
+
+    const existing =
+      await get(
+        noteRef
+      );
+
+
+    if(
+      existing.exists()
+    ){
+
+      updateMyNoteUI();
+
+      return;
+
+    }
+
 
     const note = {
 
@@ -5523,9 +5486,6 @@ async function(){
     );
 
 
-    await touchRoom();
-
-
     roomData.notes =
       roomData.notes ||
       {};
@@ -5535,6 +5495,9 @@ async function(){
       playerId
     ] =
       note;
+
+
+    await touchRoom();
 
 
     input.value =
@@ -5549,24 +5512,23 @@ async function(){
   catch(error){
 
     console.error(
+      "NOTE ERROR:",
       error
     );
 
 
-    document
-      .getElementById(
+    const errorBox =
+      document.getElementById(
         "myNoteError"
-      )
-      .textContent =
+      );
+
+
+    errorBox.textContent =
       error?.message ||
       "Could not send note.";
 
 
-    document
-      .getElementById(
-        "myNoteError"
-      )
-      .classList
+    errorBox.classList
       .remove(
         "hidden"
       );
@@ -5577,7 +5539,7 @@ async function(){
 
 
 /* =====================================================
-DETECTIVE
+DETECTIVE TOOLS
 ===================================================== */
 
 function showDetectiveTools(){
@@ -5647,6 +5609,15 @@ function renderLivePlayerNotes(){
     document.getElementById(
       "liveNotesList"
     );
+
+
+  if(
+    !container
+  ){
+
+    return;
+
+  }
 
 
   const notes =
@@ -5757,6 +5728,15 @@ function renderDetectivePlayerButtons(){
     );
 
 
+  if(
+    !container
+  ){
+
+    return;
+
+  }
+
+
   const suspects =
     roomData?.game?.suspects ||
     [];
@@ -5823,11 +5803,11 @@ function renderDetectivePlayerButtons(){
 
 window.openPlayerDossier =
 async function(
-  playerIdForDossier
+  selectedPlayerId
 ){
 
   selectedDetectivePlayerId =
-    playerIdForDossier;
+    selectedPlayerId;
 
 
   document
@@ -5847,7 +5827,7 @@ async function(
     roomData
       ?.players
       ?.[
-        playerIdForDossier
+        selectedPlayerId
       ];
 
 
@@ -5863,69 +5843,81 @@ async function(
   refreshSelectedDossierNote();
 
 
-  const snapshot =
-    await get(
+  try{
 
-      ref(
-        db,
-        `rooms/${roomCode}/detectiveNotes/players/${playerIdForDossier}`
+    const snapshot =
+      await get(
+
+        ref(
+          db,
+          `rooms/${roomCode}/detectiveNotes/players/${selectedPlayerId}`
+        )
+
+      );
+
+
+    const data =
+      snapshot.val() ||
+      {};
+
+
+    document
+      .getElementById(
+        "dossierClaim"
+      )
+      .value =
+      data.claim ||
+      "";
+
+
+    document
+      .getElementById(
+        "dossierImportant"
+      )
+      .value =
+      data.important ||
+      "";
+
+
+    document
+      .getElementById(
+        "dossierQuestions"
+      )
+      .value =
+      data.questions ||
+      "";
+
+
+    document
+      .getElementById(
+        "dossierSaveStatus"
+      )
+      .textContent =
+
+      data.updatedAt
+
+      ?
+
+      "Last saved: " +
+      clockText(
+        new Date(
+          data.updatedAt
+        )
       )
 
+      :
+
+      "Not saved yet.";
+
+  }
+  catch(error){
+
+    console.error(
+      "DOSSIER:",
+      error
     );
 
-
-  const data =
-    snapshot.val() ||
-    {};
-
-
-  document
-    .getElementById(
-      "dossierClaim"
-    )
-    .value =
-    data.claim ||
-    "";
-
-
-  document
-    .getElementById(
-      "dossierImportant"
-    )
-    .value =
-    data.important ||
-    "";
-
-
-  document
-    .getElementById(
-      "dossierQuestions"
-    )
-    .value =
-    data.questions ||
-    "";
-
-
-  document
-    .getElementById(
-      "dossierSaveStatus"
-    )
-    .textContent =
-
-    data.updatedAt
-
-    ?
-
-    "Last saved: " +
-    clockText(
-      new Date(
-        data.updatedAt
-      )
-    )
-
-    :
-
-    "Not saved yet.";
+  }
 
 };
 
@@ -6013,44 +6005,69 @@ async function(){
   }
 
 
-  await set(
+  try{
 
-    ref(
-      db,
-      `rooms/${roomCode}/detectiveNotes/players/${selectedDetectivePlayerId}`
-    ),
+    await set(
 
-    {
+      ref(
+        db,
+        `rooms/${roomCode}/detectiveNotes/players/${selectedDetectivePlayerId}`
+      ),
 
-      claim:
-        document.getElementById(
-          "dossierClaim"
-        ).value,
+      {
 
-      important:
-        document.getElementById(
-          "dossierImportant"
-        ).value,
+        claim:
+          document
+            .getElementById(
+              "dossierClaim"
+            )
+            .value,
 
-      questions:
-        document.getElementById(
-          "dossierQuestions"
-        ).value,
+        important:
+          document
+            .getElementById(
+              "dossierImportant"
+            )
+            .value,
 
-      updatedAt:
-        Date.now()
+        questions:
+          document
+            .getElementById(
+              "dossierQuestions"
+            )
+            .value,
 
-    }
+        updatedAt:
+          Date.now()
 
-  );
+      }
+
+    );
 
 
-  document
-    .getElementById(
-      "dossierSaveStatus"
-    )
-    .textContent =
-    "✅ Player file saved.";
+    document
+      .getElementById(
+        "dossierSaveStatus"
+      )
+      .textContent =
+      "✅ Player file saved.";
+
+  }
+  catch(error){
+
+    console.error(
+      error
+    );
+
+
+    document
+      .getElementById(
+        "dossierSaveStatus"
+      )
+      .textContent =
+      "❌ Could not save player file.";
+
+  }
 
 };
 
@@ -6058,36 +6075,55 @@ async function(){
 window.saveDetectiveGeneralNotes =
 async function(){
 
-  await set(
+  try{
 
-    ref(
-      db,
-      `rooms/${roomCode}/detectiveNotes/general`
-    ),
+    await set(
 
-    {
+      ref(
+        db,
+        `rooms/${roomCode}/detectiveNotes/general`
+      ),
 
-      text:
-        document
-          .getElementById(
-            "detectiveGeneralNotes"
-          )
-          .value,
+      {
 
-      updatedAt:
-        Date.now()
+        text:
+          document
+            .getElementById(
+              "detectiveGeneralNotes"
+            )
+            .value,
 
-    }
+        updatedAt:
+          Date.now()
 
-  );
+      }
+
+    );
 
 
-  document
-    .getElementById(
-      "detectiveGeneralSaveStatus"
-    )
-    .textContent =
-    "✅ Detective notes saved.";
+    document
+      .getElementById(
+        "detectiveGeneralSaveStatus"
+      )
+      .textContent =
+      "✅ Detective notes saved.";
+
+  }
+  catch(error){
+
+    console.error(
+      error
+    );
+
+
+    document
+      .getElementById(
+        "detectiveGeneralSaveStatus"
+      )
+      .textContent =
+      "❌ Could not save notes.";
+
+  }
 
 };
 
@@ -6273,6 +6309,15 @@ async function renderTaskProgress(){
     );
 
 
+  if(
+    !container
+  ){
+
+    return;
+
+  }
+
+
   container.innerHTML =
     "";
 
@@ -6370,9 +6415,7 @@ async function renderTaskProgress(){
 
         <div
           class="progress-bar"
-          style="
-            width:${percent}%
-          "
+          style="width:${percent}%"
         ></div>
 
       </div>
@@ -6413,35 +6456,46 @@ async function(
   }
 
 
-  const accusedName =
-    roomData
-      .players[accusedId]
-      ?.name ||
-    "Unknown";
+  try{
+
+    await set(
+
+      ref(
+        db,
+        `rooms/${roomCode}/result`
+      ),
+
+      {
+
+        accusedId,
+
+        accusedName:
+          roomData
+            .players[
+              accusedId
+            ]
+            ?.name ||
+          "Unknown",
+
+        votedAt:
+          Date.now()
+
+      }
+
+    );
 
 
-  await set(
+    await touchRoom();
 
-    ref(
-      db,
-      `rooms/${roomCode}/result`
-    ),
+  }
+  catch(error){
 
-    {
+    console.error(
+      "ACCUSE:",
+      error
+    );
 
-      accusedId,
-
-      accusedName,
-
-      votedAt:
-        Date.now()
-
-    }
-
-  );
-
-
-  await touchRoom();
+  }
 
 };
 
@@ -6553,11 +6607,13 @@ async function runReveal(
 
 
   const accusedName =
-    players[accusedId]?.name ||
+    players[
+      accusedId
+    ]?.name ||
     "Unknown";
 
 
-  const murderer =
+  const wasMurderer =
     accusedId ===
     game.murderer;
 
@@ -6615,13 +6671,13 @@ async function runReveal(
 
     "ROLE REVEALED",
 
-    murderer
+    wasMurderer
       ?
       "🔪 THE MURDERER"
       :
       "👤 INNOCENT",
 
-    murderer
+    wasMurderer
       ?
       `${accusedName} was the Murderer.`
       :
@@ -6629,7 +6685,7 @@ async function runReveal(
 
     "",
 
-    murderer
+    wasMurderer
       ?
       "reveal-shake"
       :
@@ -6746,13 +6802,13 @@ async function runReveal(
 
     "GAME OVER",
 
-    murderer
+    wasMurderer
       ?
       "🎉 DETECTIVE WINS!"
       :
       "🔪 MURDERER WINS!",
 
-    murderer
+    wasMurderer
       ?
       "Correct accusation."
       :
@@ -6763,7 +6819,7 @@ async function runReveal(
       <div class="
         reveal-winner
         ${
-          murderer
+          wasMurderer
           ?
           "detective-win"
           :
@@ -6772,7 +6828,7 @@ async function runReveal(
       ">
 
         ${
-          murderer
+          wasMurderer
           ?
           "🔎 GREAT DETECTIVE WORK"
           :
@@ -6783,7 +6839,7 @@ async function runReveal(
 
     `,
 
-    murderer
+    wasMurderer
       ?
       "reveal-pop"
       :
@@ -6882,6 +6938,14 @@ async function resetToLobby(){
   selectedDetectivePlayerId =
     null;
 
+
+  lastCallId =
+    null;
+
+
+  lastRevealId =
+    null;
+
 }
 
 
@@ -6919,7 +6983,7 @@ async function(){
 
 
 /* =====================================================
-CALLS
+CALL SYSTEM
 ===================================================== */
 
 window.makeCall =
@@ -6976,7 +7040,7 @@ async function(
   catch(error){
 
     console.error(
-      "CALL:",
+      "CALL ERROR:",
       error
     );
 
@@ -6984,10 +7048,6 @@ async function(
 
 };
 
-
-/* =====================================================
-FULL SCREEN CALL
-===================================================== */
 
 function showCall(
   destination,
@@ -7023,7 +7083,7 @@ function showCall(
     );
 
 
-  const bar =
+  const progressBar =
     document.getElementById(
       "callProgressBar"
     );
@@ -7041,7 +7101,12 @@ function showCall(
         destination ||
         "THE AREA"
       )
-    ).toUpperCase();
+    )
+    .toUpperCase();
+
+
+  countEl.textContent =
+    "15";
 
 
   overlay
@@ -7055,7 +7120,7 @@ function showCall(
     performance.now();
 
 
-  function tick(){
+  function updateCall(){
 
     const elapsed =
       performance.now() -
@@ -7081,17 +7146,19 @@ function showCall(
       );
 
 
-    bar.style.transform =
-      `scaleX(${
-        Math.max(
-          0,
-          1 -
-          (
-            elapsed /
-            CALL_DURATION
-          )
+    const progress =
+      Math.max(
+        0,
+        1 -
+        (
+          elapsed /
+          CALL_DURATION
         )
-      })`;
+      );
+
+
+    progressBar.style.transform =
+      `scaleX(${progress})`;
 
 
     if(
@@ -7100,7 +7167,7 @@ function showCall(
     ){
 
       requestAnimationFrame(
-        tick
+        updateCall
       );
 
     }
@@ -7108,11 +7175,11 @@ function showCall(
   }
 
 
-  bar.style.transition =
+  progressBar.style.transition =
     "none";
 
 
-  tick();
+  updateCall();
 
 
   callTimer =
@@ -7439,13 +7506,19 @@ function vibrate(){
 
   try{
 
-    navigator.vibrate?.([
-      300,
-      120,
-      300,
-      120,
-      500
-    ]);
+    if(
+      navigator.vibrate
+    ){
+
+      navigator.vibrate([
+        300,
+        120,
+        300,
+        120,
+        500
+      ]);
+
+    }
 
   }
   catch(e){}
@@ -7538,11 +7611,6 @@ async function reconnectCurrentRoom(){
     roomData =
       snapshot.val();
 
-
-    /*
-      SAME persistent player ID.
-      No new identity is ever generated here.
-    */
 
     if(
       !roomData.players?.[
@@ -7710,18 +7778,9 @@ async function initialize(){
     await saveDeviceRecord();
 
 
-    const savedRoom =
-      getLocalRoom();
-
-
     if(
-      savedRoom
+      getLocalRoom()
     ){
-
-      /*
-        Only show the saved-room option.
-        Do not automatically force-join it.
-      */
 
       document
         .getElementById(
