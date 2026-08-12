@@ -399,8 +399,6 @@ button.dark{
   font-weight:900;
 }
 
-/* USER BAR */
-
 .user-bar{
   display:flex;
   justify-content:space-between;
@@ -436,13 +434,10 @@ button.dark{
   background:#252c40;
 }
 
-/* CALL */
-
 .call-overlay{
   position:fixed;
   inset:0;
   z-index:150000;
-
   display:flex;
   align-items:center;
   justify-content:center;
@@ -521,18 +516,9 @@ button.dark{
 }
 
 @keyframes callPulse{
-
-  0%,100%{
-    transform:scale(1);
-  }
-
-  50%{
-    transform:scale(1.13);
-  }
-
+  0%,100%{transform:scale(1)}
+  50%{transform:scale(1.13)}
 }
-
-/* ALERT */
 
 .alert-modal{
   position:fixed;
@@ -556,8 +542,6 @@ button.dark{
   box-shadow:0 20px 60px rgba(0,0,0,.5);
 }
 
-/* RESET */
-
 .reset-fixed{
   position:fixed;
   top:calc(12px + env(safe-area-inset-top));
@@ -568,8 +552,6 @@ button.dark{
   font-size:13px;
   box-shadow:0 8px 25px rgba(0,0,0,.35);
 }
-
-/* NOTES */
 
 .notes-box{
   background:#202638;
@@ -612,8 +594,6 @@ button.dark{
   color:#8d97ae;
   text-align:center;
 }
-
-/* DOSSIER */
 
 .detective-player-buttons{
   display:grid;
@@ -682,8 +662,6 @@ button.dark{
   text-transform:uppercase;
   margin-bottom:5px;
 }
-
-/* REVEAL */
 
 .reveal-overlay{
   position:fixed;
@@ -804,53 +782,27 @@ button.dark{
 }
 
 @keyframes revealPop{
-
   0%{
     opacity:0;
     transform:scale(.72);
   }
-
   100%{
     opacity:1;
     transform:scale(1);
   }
-
 }
 
 @keyframes revealFade{
-
-  0%{
-    opacity:0;
-  }
-
-  100%{
-    opacity:1;
-  }
-
+  0%{opacity:0}
+  100%{opacity:1}
 }
 
 @keyframes revealShake{
-
-  0%,100%{
-    transform:translateX(0);
-  }
-
-  20%{
-    transform:translateX(-8px);
-  }
-
-  40%{
-    transform:translateX(8px);
-  }
-
-  60%{
-    transform:translateX(-5px);
-  }
-
-  80%{
-    transform:translateX(5px);
-  }
-
+  0%,100%{transform:translateX(0)}
+  20%{transform:translateX(-8px)}
+  40%{transform:translateX(8px)}
+  60%{transform:translateX(-5px)}
+  80%{transform:translateX(5px)}
 }
 
 @media(max-width:600px){
@@ -949,12 +901,12 @@ button.dark{
     </div>
 
     <h2>
-      Enable Call Alerts
+      Enable Notifications
     </h2>
 
     <p>
-      Tap this once so Tivoli Mystery can use
-      notifications and alerts.
+      Enable notifications so Tivoli Mystery
+      can alert you when calls or tasks happen.
     </p>
 
     <button
@@ -1528,9 +1480,7 @@ button.dark{
     </div>
 
     <div class="warning">
-
       Do not return until the timer reaches zero.
-
     </div>
 
   </div>
@@ -1783,6 +1733,10 @@ from
 "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
 
 
+/* =====================================================
+FIREBASE
+===================================================== */
+
 const firebaseConfig = {
 
   apiKey:
@@ -1811,10 +1765,12 @@ const firebaseConfig = {
 
 };
 
+
 const app =
   initializeApp(
     firebaseConfig
   );
+
 
 const db =
   getDatabase(
@@ -1822,10 +1778,15 @@ const db =
   );
 
 
+/* =====================================================
+PLAYER ID
+===================================================== */
+
 let playerId =
   localStorage.getItem(
     "tivoliMysteryPlayerId"
   );
+
 
 if(
   !playerId
@@ -1849,6 +1810,10 @@ if(
 
 }
 
+
+/* =====================================================
+STATE
+===================================================== */
 
 let roomCode = "";
 let myName = "";
@@ -1889,6 +1854,10 @@ let alertsEnabled =
   ) === "1";
 
 
+/* =====================================================
+TIMING
+===================================================== */
+
 const DETECTIVE_WAIT =
   5 * 60 * 1000;
 
@@ -1917,7 +1886,7 @@ const GAME_EXPIRY =
 
 
 /* =====================================================
-TIME
+SHARED TIME
 ===================================================== */
 
 function sharedNow(){
@@ -1930,10 +1899,14 @@ function sharedNow(){
 }
 
 
-function sharedDate(timestamp){
+function sharedDate(
+  timestamp
+){
 
   return new Date(
-    Number(timestamp)
+    Number(
+      timestamp
+    )
   );
 
 }
@@ -2051,7 +2024,9 @@ function pad(number){
 }
 
 
-function clockText(date){
+function clockText(
+  date
+){
 
   let h =
     date.getHours();
@@ -2097,7 +2072,9 @@ function clockText(date){
 }
 
 
-function shortClock(date){
+function shortClock(
+  date
+){
 
   let h =
     date.getHours();
@@ -2137,7 +2114,9 @@ function shortClock(date){
 }
 
 
-function formatDuration(ms){
+function formatDuration(
+  ms
+){
 
   const seconds =
     Math.max(
@@ -2150,14 +2129,12 @@ function formatDuration(ms){
 
 
   return (
-
     pad(
       Math.floor(
         seconds /
         60
       )
     )
-
     +
     ":"
     +
@@ -2165,39 +2142,35 @@ function formatDuration(ms){
       seconds %
       60
     )
-
   );
 
 }
 
 
-function escapeHtml(value){
+function escapeHtml(
+  value
+){
 
   return String(
     value ??
     ""
   )
-
     .replaceAll(
       "&",
       "&amp;"
     )
-
     .replaceAll(
       "<",
       "&lt;"
     )
-
     .replaceAll(
       ">",
       "&gt;"
     )
-
     .replaceAll(
       '"',
       "&quot;"
     )
-
     .replaceAll(
       "'",
       "&#039;"
@@ -2206,7 +2179,9 @@ function escapeHtml(value){
 }
 
 
-function sleep(ms){
+function sleep(
+  ms
+){
 
   return new Promise(
     resolve =>
@@ -2223,7 +2198,9 @@ function sleep(ms){
 ROOM EXPIRY
 ===================================================== */
 
-function roomActivityTime(data){
+function roomActivityTime(
+  data
+){
 
   return Number(
     data?.lastActivityAt ||
@@ -2234,7 +2211,9 @@ function roomActivityTime(data){
 }
 
 
-function roomExpiryFor(data){
+function roomExpiryFor(
+  data
+){
 
   return (
     data?.status ===
@@ -2248,7 +2227,9 @@ function roomExpiryFor(data){
 }
 
 
-function isRoomStale(data){
+function isRoomStale(
+  data
+){
 
   if(
     !data
@@ -2281,6 +2262,150 @@ function isRoomStale(data){
       data
     )
   );
+
+}
+
+
+/* =====================================================
+FIXED CLEANUP
+===================================================== */
+
+function stopGameListeners(){
+
+  if(
+    callUnsubscribe
+  ){
+
+    callUnsubscribe();
+    callUnsubscribe =
+      null;
+
+  }
+
+
+  if(
+    tasksUnsubscribe
+  ){
+
+    tasksUnsubscribe();
+    tasksUnsubscribe =
+      null;
+
+  }
+
+
+  if(
+    notesUnsubscribe
+  ){
+
+    notesUnsubscribe();
+    notesUnsubscribe =
+      null;
+
+  }
+
+
+  if(
+    detectiveNotesUnsubscribe
+  ){
+
+    detectiveNotesUnsubscribe();
+    detectiveNotesUnsubscribe =
+      null;
+
+  }
+
+
+  if(
+    resultUnsubscribe
+  ){
+
+    resultUnsubscribe();
+    resultUnsubscribe =
+      null;
+
+  }
+
+}
+
+
+/*
+  THIS WAS MISSING IN YOUR VERSION.
+*/
+
+function stopRoomListeners(){
+
+  if(
+    roomUnsubscribe
+  ){
+
+    roomUnsubscribe();
+    roomUnsubscribe =
+      null;
+
+  }
+
+
+  if(
+    presenceUnsubscribe
+  ){
+
+    presenceUnsubscribe();
+    presenceUnsubscribe =
+      null;
+
+  }
+
+
+  stopGameListeners();
+
+}
+
+
+/*
+  THIS WAS ALSO MISSING IN YOUR VERSION.
+*/
+
+function stopTimers(){
+
+  clearInterval(
+    heartbeatInterval
+  );
+
+  heartbeatInterval =
+    null;
+
+
+  clearInterval(
+    roomExpiryInterval
+  );
+
+  roomExpiryInterval =
+    null;
+
+
+  clearInterval(
+    globalInterval
+  );
+
+  globalInterval =
+    null;
+
+
+  clearInterval(
+    taskNotificationInterval
+  );
+
+  taskNotificationInterval =
+    null;
+
+
+  clearTimeout(
+    callTimer
+  );
+
+  callTimer =
+    null;
 
 }
 
@@ -2330,7 +2455,7 @@ async function registerServiceWorker(){
 
 
 /* =====================================================
-NOTIFICATION
+NOTIFICATIONS
 ===================================================== */
 
 function notificationsSupported(){
@@ -2422,22 +2547,21 @@ async function showPersistentNotification(
             200
           ],
 
-        data:
-          {
+        data:{
 
-            roomCode,
+          roomCode,
 
-            roundId:
-              currentRoundId,
+          roundId:
+            currentRoundId,
 
-            taskId:
-              options.taskId ||
-              null,
+          taskId:
+            options.taskId ||
+            null,
 
-            url:
-              location.href
+          url:
+            location.href
 
-          }
+        }
 
       }
 
@@ -2463,7 +2587,7 @@ async function showPersistentNotification(
 
 
 /* =====================================================
-ENABLE NOTIFICATIONS
+ENABLE ALERTS
 ===================================================== */
 
 window.enableAlerts =
@@ -2493,7 +2617,7 @@ async function(){
     ){
 
       alert(
-        "Notifications are blocked. Enable notifications for Tivoli Mystery in your iPhone Settings."
+        "Notifications are blocked. Enable them in iPhone Settings."
       );
 
       return;
@@ -2563,50 +2687,19 @@ async function(){
       "✅ NOTIFICATIONS ENABLED";
 
 
-    const AudioContext =
-      window.AudioContext ||
-      window.webkitAudioContext;
-
-
-    if(
-      AudioContext
-    ){
-
-      audioContext =
-        audioContext ||
-        new AudioContext();
-
-
-      if(
-        audioContext.state ===
-        "suspended"
-      ){
-
-        await audioContext.resume();
-
-      }
-
-    }
-
-
     await showPersistentNotification(
-
       "🔔 Tivoli Mystery",
-
       {
-
         body:
           "Notifications are enabled.",
-
         tag:
           "tivoli-test"
-
       }
-
     );
 
 
     startTaskNotificationWatcher();
+
 
     checkTaskNotifications();
 
@@ -2614,7 +2707,7 @@ async function(){
   catch(error){
 
     console.error(
-      "ENABLE NOTIFICATIONS:",
+      "ENABLE ALERTS:",
       error
     );
 
@@ -2648,7 +2741,7 @@ function(){
 
 
 /* =====================================================
-TASK NOTIFICATION TRACKING
+TASK NOTIFICATIONS
 ===================================================== */
 
 function taskNotificationKey(
@@ -2703,10 +2796,6 @@ function markTaskNotificationSent(
 }
 
 
-/* =====================================================
-TASK NOTIFICATION WATCHER
-===================================================== */
-
 function startTaskNotificationWatcher(){
 
   clearInterval(
@@ -2724,6 +2813,7 @@ function startTaskNotificationWatcher(){
 
 
   if(
+    !("Notification" in window) ||
     Notification.permission !==
     "granted"
   ){
@@ -2748,7 +2838,9 @@ function startTaskNotificationWatcher(){
 async function checkTaskNotifications(){
 
   if(
-    !alertsEnabled
+    !alertsEnabled ||
+    !roomData?.game ||
+    !mySecret?.tasks?.length
   ){
 
     return;
@@ -2757,26 +2849,9 @@ async function checkTaskNotifications(){
 
 
   if(
+    !("Notification" in window) ||
     Notification.permission !==
     "granted"
-  ){
-
-    return;
-
-  }
-
-
-  if(
-    !roomData?.game
-  ){
-
-    return;
-
-  }
-
-
-  if(
-    !mySecret?.tasks?.length
   ){
 
     return;
@@ -3019,7 +3094,7 @@ async function startPresence(){
         catch(error){
 
           console.warn(
-            "PRESENCE:",
+            "PRESENCE HEARTBEAT:",
             error
           );
 
@@ -3304,7 +3379,7 @@ async function(){
 
 
 /* =====================================================
-ROOM
+LOCAL ROOM
 ===================================================== */
 
 function saveLocalRoom(){
@@ -3401,6 +3476,10 @@ async function(){
 };
 
 
+/* =====================================================
+ROOM CODE
+===================================================== */
+
 function normalizeRoomCode(
   value
 ){
@@ -3422,6 +3501,10 @@ function normalizeRoomCode(
 
 }
 
+
+/* =====================================================
+CREATE/JOIN SCREEN
+===================================================== */
 
 window.createRoom =
 function(){
@@ -3461,6 +3544,10 @@ function(){
 
 };
 
+
+/* =====================================================
+CREATE ROOM
+===================================================== */
 
 window.finishCreateRoom =
 async function(){
@@ -3622,7 +3709,7 @@ async function(){
   catch(error){
 
     console.error(
-      "CREATE ROOM:",
+      "CREATE ROOM ERROR:",
       error
     );
 
@@ -3639,6 +3726,10 @@ async function(){
 
 };
 
+
+/* =====================================================
+JOIN ROOM
+===================================================== */
 
 window.joinRoom =
 async function(){
@@ -3848,7 +3939,7 @@ async function(){
   catch(error){
 
     console.error(
-      "JOIN ROOM:",
+      "JOIN ROOM ERROR:",
       error
     );
 
@@ -3867,7 +3958,7 @@ async function(){
 
 
 /* =====================================================
-SESSION
+START ROOM SESSION
 ===================================================== */
 
 async function startRoomSession(){
@@ -3941,7 +4032,20 @@ async function startRoomSession(){
 }
 
 
+/* =====================================================
+ROOM LISTENER
+===================================================== */
+
 function listenToRoom(){
+
+  if(
+    roomUnsubscribe
+  ){
+
+    roomUnsubscribe();
+
+  }
+
 
   roomUnsubscribe =
     onValue(
@@ -4003,6 +4107,10 @@ function listenToRoom(){
 }
 
 
+/* =====================================================
+LOBBY
+===================================================== */
+
 function enterLobbyFromRoom(){
 
   gameVisible =
@@ -4037,14 +4145,12 @@ function enterLobbyFromRoom(){
     null;
 
 
-  stopGameListeners();
+  clearInterval(
+    globalInterval
+  );
 
 }
 
-
-/* =====================================================
-LOBBY RENDER
-===================================================== */
 
 function renderLobby(){
 
@@ -4246,7 +4352,7 @@ function renderLobby(){
 
 
 /* =====================================================
-EXPIRY
+EXPIRY WATCHER
 ===================================================== */
 
 function startRoomExpiryWatcher(){
@@ -4440,64 +4546,6 @@ function enterGameFromRoom(){
   ){
 
     startTaskNotificationWatcher();
-
-  }
-
-}
-
-
-/* =====================================================
-GAME LISTENER CLEANUP
-===================================================== */
-
-function stopGameListeners(){
-
-  if(
-    callUnsubscribe
-  ){
-
-    callUnsubscribe();
-    callUnsubscribe = null;
-
-  }
-
-
-  if(
-    tasksUnsubscribe
-  ){
-
-    tasksUnsubscribe();
-    tasksUnsubscribe = null;
-
-  }
-
-
-  if(
-    notesUnsubscribe
-  ){
-
-    notesUnsubscribe();
-    notesUnsubscribe = null;
-
-  }
-
-
-  if(
-    detectiveNotesUnsubscribe
-  ){
-
-    detectiveNotesUnsubscribe();
-    detectiveNotesUnsubscribe = null;
-
-  }
-
-
-  if(
-    resultUnsubscribe
-  ){
-
-    resultUnsubscribe();
-    resultUnsubscribe = null;
 
   }
 
@@ -4846,7 +4894,6 @@ function startGlobalClock(){
           "phaseText"
         )
         .textContent =
-
         beforeDetective
         ?
         "DETECTIVE ARRIVES IN"
@@ -4859,7 +4906,6 @@ function startGlobalClock(){
           "globalTimer"
         )
         .textContent =
-
         beforeDetective
         ?
         formatDuration(
@@ -4986,7 +5032,154 @@ function startGlobalClock(){
 
 
 /* =====================================================
-TASKS
+SECRET UI
+===================================================== */
+
+function renderSecret(){
+
+  const card =
+    document.getElementById(
+      "secretCard"
+    );
+
+
+  if(
+    !mySecret
+  ){
+
+    card.textContent =
+      "Your secret is loading...";
+
+    return;
+
+  }
+
+
+  if(
+    mySecret.role ===
+    "detective"
+  ){
+
+    card.innerHTML = `
+
+      <div class="role detective">
+        🕵️ YOU ARE THE DETECTIVE
+      </div>
+
+      <div class="big">
+        Leave the playing area now.
+      </div>
+
+      <p>
+        Wait until the shared timestamp.
+      </p>
+
+      <div class="warning">
+        Return only when the countdown reaches 00:00.
+      </div>
+
+    `;
+
+
+    document
+      .getElementById(
+        "detectiveWaiting"
+      )
+      .classList
+      .remove(
+        "hidden"
+      );
+
+
+    document
+      .getElementById(
+        "normalWaiting"
+      )
+      .classList
+      .add(
+        "hidden"
+      );
+
+
+    showDetectiveTools();
+
+    return;
+
+  }
+
+
+  const murderer =
+    mySecret.role ===
+    "murderer";
+
+
+  card.innerHTML = `
+
+    <div class="role ${
+      murderer
+      ?
+      "murderer"
+      :
+      "innocent"
+    }">
+
+      ${
+        murderer
+        ?
+        "🔪 YOU ARE THE MURDERER"
+        :
+        "👤 YOU ARE INNOCENT"
+      }
+
+    </div>
+
+    <p>
+      Follow your secret timeline.
+    </p>
+
+    <div class="warning">
+      🔒 Future tasks are locked until their shared timestamp.
+    </div>
+
+    <h2>
+      ✅ Your Tasks
+    </h2>
+
+    <div id="myTasks"></div>
+
+  `;
+
+
+  document
+    .getElementById(
+      "normalWaiting"
+    )
+    .classList
+    .remove(
+      "hidden"
+    );
+
+
+  document
+    .getElementById(
+      "detectiveWaiting"
+    )
+    .classList
+    .add(
+      "hidden"
+    );
+
+
+  hideDetectiveTools();
+
+
+  renderTasks();
+
+}
+
+
+/* =====================================================
+TASK RENDER
 ===================================================== */
 
 function renderTasks(){
@@ -5222,7 +5415,7 @@ async function(
   catch(error){
 
     console.error(
-      "TASK:",
+      "TASK ERROR:",
       error
     );
 
@@ -5234,983 +5427,6 @@ async function(
   }
 
 };
-
-
-/* =====================================================
-TASK GENERATION
-===================================================== */
-
-const locations = [
-
-  "Sea View",
-  "Outdoor Café",
-  "Café Tables",
-  "Sea-Side Walkway",
-  "Sea-Side Edge",
-  "Dip N Dip Stairs",
-  "Central Outdoor Area",
-  "Side Seating"
-
-];
-
-
-const activityTemplates = [
-
-  "Sit quietly at {location}.",
-  "Walk around {location}.",
-  "Stand for a moment at {location}.",
-  "Look around {location}.",
-  "Wait nearby {location}.",
-  "Walk through {location}.",
-  "Sit at a nearby seat around {location}.",
-  "Check your phone near {location}.",
-  "Pause briefly at {location}.",
-  "Stay around {location} for a short moment."
-
-];
-
-
-const actionTemplates = [
-
-  "Go to {location} and stay there briefly.",
-  "Move to {location}, then continue normally.",
-  "Visit {location} for a short moment.",
-  "Pass through {location} before continuing.",
-  "Wait near {location}, then move on.",
-  "Walk to {location} and look around briefly.",
-  "Head toward {location}, pause, then continue.",
-  "Go through {location} before moving elsewhere."
-
-];
-
-
-const murderTemplates = [
-
-  "Be at {location} at {time} for the fictional event.",
-  "Reach {location} when the clock reaches {time}.",
-  "At {time}, go to {location} for the fictional event.",
-  "Be near {location} at {time} for the fictional event."
-
-];
-
-
-const afterMurderTemplates = [
-
-  "Leave {location} and continue normally.",
-  "Move away from {location} after the fictional event.",
-  "After the fictional incident, leave {location}.",
-  "Continue to another area after leaving {location}."
-
-];
-
-
-function createTask(
-  id,
-  unlockAt,
-  description
-){
-
-  return {
-
-    id,
-
-    unlockAt,
-
-    unlockText:
-      shortClock(
-        sharedDate(
-          unlockAt
-        )
-      ),
-
-    description
-
-  };
-
-}
-
-
-function nextMinuteTimestamp(
-  timestamp
-){
-
-  const date =
-    sharedDate(
-      timestamp
-    );
-
-
-  date.setSeconds(
-    0,
-    0
-  );
-
-
-  date.setMinutes(
-    date.getMinutes() +
-    1
-  );
-
-
-  return date.getTime();
-
-}
-
-
-function makeUnlockTimes(
-  now,
-  end,
-  count
-){
-
-  const first =
-    now +
-    60 *
-    1000;
-
-
-  const last =
-    Math.max(
-      first +
-      60 *
-      1000,
-      end -
-      60 *
-      1000
-    );
-
-
-  const output =
-    [];
-
-
-  for(
-    let i = 0;
-    i < count;
-    i++
-  ){
-
-    const ratio =
-      (
-        i + 1
-      ) /
-      (
-        count + 1
-      );
-
-
-    output.push(
-
-      nextMinuteTimestamp(
-
-        first +
-        (
-          last -
-          first
-        ) *
-        ratio
-
-      )
-
-    );
-
-  }
-
-
-  return output;
-
-}
-
-
-function buildNormalTasks(
-  playerIdForSeed,
-  now,
-  detectiveEnd,
-  crimeLocation,
-  roundSeed
-){
-
-  const count =
-    3 +
-    Math.floor(
-      Math.random() *
-      3
-    );
-
-
-  const times =
-    makeUnlockTimes(
-      now,
-      detectiveEnd,
-      count
-    );
-
-
-  const used =
-    [];
-
-
-  return shuffle(
-
-    times.map(
-      (
-        unlockAt,
-        index
-      )=>{
-
-        let possible =
-          locations.filter(
-            location =>
-              location !==
-              crimeLocation &&
-              !used.includes(
-                location
-              )
-          );
-
-
-        if(
-          !possible.length
-        ){
-
-          possible =
-            locations.filter(
-              location =>
-                location !==
-                crimeLocation
-            );
-
-        }
-
-
-        const location =
-          random(
-            possible
-          );
-
-
-        used.push(
-          location
-        );
-
-
-        const templatePool =
-          Math.random() <
-          0.5
-          ?
-          activityTemplates
-          :
-          actionTemplates;
-
-
-        return createTask(
-
-          `${roundSeed}_${playerIdForSeed}_${index}_${Math.random()
-            .toString(36)
-            .slice(
-              2,
-              7
-            )}`,
-
-          unlockAt,
-
-          random(
-            templatePool
-          )
-            .replace(
-              "{location}",
-              location
-            )
-
-        );
-
-      }
-    )
-
-  );
-
-}
-
-
-function buildMurdererTasks(
-  playerIdForSeed,
-  now,
-  detectiveEnd,
-  murderAt,
-  crimeLocation,
-  roundSeed
-){
-
-  const count =
-    2 +
-    Math.floor(
-      Math.random() *
-      3
-    );
-
-
-  const times =
-    makeUnlockTimes(
-
-      now,
-
-      Math.min(
-        detectiveEnd,
-        murderAt -
-        20000
-      ),
-
-      count
-
-    );
-
-
-  const used =
-    [];
-
-
-  const tasks =
-    times.map(
-      (
-        unlockAt,
-        index
-      )=>{
-
-        let possible =
-          locations.filter(
-            location =>
-              location !==
-              crimeLocation &&
-              !used.includes(
-                location
-              )
-          );
-
-
-        if(
-          !possible.length
-        ){
-
-          possible =
-            locations.filter(
-              location =>
-                location !==
-                crimeLocation
-            );
-
-        }
-
-
-        const location =
-          random(
-            possible
-          );
-
-
-        used.push(
-          location
-        );
-
-
-        return createTask(
-
-          `${roundSeed}_${playerIdForSeed}_M_${index}_${Math.random()
-            .toString(36)
-            .slice(
-              2,
-              7
-            )}`,
-
-          unlockAt,
-
-          random(
-            activityTemplates
-          )
-            .replace(
-              "{location}",
-              location
-            )
-
-        );
-
-      }
-    );
-
-
-  tasks.push(
-
-    createTask(
-
-      `${roundSeed}_${playerIdForSeed}_MURDER_${Math.random()
-        .toString(36)
-        .slice(
-          2,
-          7
-        )}`,
-
-      murderAt,
-
-      random(
-        murderTemplates
-      )
-        .replace(
-          "{location}",
-          crimeLocation
-        )
-        .replace(
-          "{time}",
-          shortClock(
-            sharedDate(
-              murderAt
-            )
-          )
-        )
-
-    )
-
-  );
-
-
-  tasks.push(
-
-    createTask(
-
-      `${roundSeed}_${playerIdForSeed}_AFTER_${Math.random()
-        .toString(36)
-        .slice(
-          2,
-          7
-        )}`,
-
-      Math.min(
-        murderAt +
-        25000,
-        detectiveEnd -
-        20000
-      ),
-
-      random(
-        afterMurderTemplates
-      )
-        .replace(
-          "{location}",
-          crimeLocation
-        )
-
-    )
-
-  );
-
-
-  return shuffle(
-    tasks
-  );
-
-}
-
-
-/* =====================================================
-START ROUND
-===================================================== */
-
-window.startRound =
-async function(){
-
-  if(
-    roomData?.host !==
-    playerId
-  ){
-
-    return;
-
-  }
-
-
-  const players =
-    roomData.players ||
-    {};
-
-
-  const ids =
-    Object.keys(
-      players
-    );
-
-
-  const limit =
-    Number(
-      roomData.playerLimit
-    );
-
-
-  if(
-    ids.length !==
-    limit
-  ){
-
-    alert(
-      `Wait for everyone. ${ids.length}/${limit} players are joined.`
-    );
-
-    return;
-
-  }
-
-
-  const shuffledPlayers =
-    shuffle(
-      ids
-    );
-
-
-  const detective =
-    shuffledPlayers[0];
-
-
-  const murderer =
-    shuffledPlayers[1];
-
-
-  const innocents =
-    shuffledPlayers.slice(
-      2
-    );
-
-
-  const now =
-    sharedNow();
-
-
-  const murderAt =
-    now +
-    MIN_MURDER_DELAY +
-    Math.floor(
-      Math.random() *
-      (
-        MAX_MURDER_DELAY -
-        MIN_MURDER_DELAY
-      )
-    );
-
-
-  const detectiveEnd =
-    now +
-    DETECTIVE_WAIT;
-
-
-  const investigationEnd =
-    detectiveEnd +
-    INVESTIGATION_TIME;
-
-
-  const crimeLocation =
-    random(
-      locations
-    );
-
-
-  const roundNumber =
-    Number(
-      roomData.roundNumber ||
-      0
-    ) +
-    1;
-
-
-  const roundId =
-    String(
-      roundNumber
-    );
-
-
-  const roundSeed =
-    Date.now().toString(36) +
-    "_" +
-    Math.random()
-      .toString(36)
-      .slice(
-        2,
-        10
-      );
-
-
-  const privateData =
-    {};
-
-
-  privateData[
-    detective
-  ] = {
-
-    role:
-      "detective",
-
-    tasks:
-      []
-
-  };
-
-
-  privateData[
-    murderer
-  ] = {
-
-    role:
-      "murderer",
-
-    tasks:
-      buildMurdererTasks(
-        murderer,
-        now,
-        detectiveEnd,
-        murderAt,
-        crimeLocation,
-        roundSeed
-      )
-
-  };
-
-
-  innocents.forEach(
-    id=>{
-
-      privateData[
-        id
-      ] = {
-
-        role:
-          "innocent",
-
-        tasks:
-          buildNormalTasks(
-            id,
-            now,
-            detectiveEnd,
-            crimeLocation,
-            roundSeed
-          )
-
-      };
-
-    }
-  );
-
-
-  const game = {
-
-    roundNumber,
-
-    roundId,
-
-    roundSeed,
-
-    startedAt:
-      now,
-
-    murderAt,
-
-    detectiveEnd,
-
-    investigationEnd,
-
-    crimeLocation,
-
-    victim:
-      "a fictional guest",
-
-    caseDescription:
-      "A fictional incident occurred during the mystery.",
-
-    detective,
-
-    murderer,
-
-    suspects:[
-      murderer,
-      ...innocents
-    ]
-
-  };
-
-
-  const updates =
-    {};
-
-
-  updates[
-    `rooms/${roomCode}/status`
-  ] =
-    "game";
-
-
-  updates[
-    `rooms/${roomCode}/roundNumber`
-  ] =
-    roundNumber;
-
-
-  updates[
-    `rooms/${roomCode}/game`
-  ] =
-    game;
-
-
-  updates[
-    `rooms/${roomCode}/private`
-  ] =
-    privateData;
-
-
-  updates[
-    `rooms/${roomCode}/completed`
-  ] =
-    {};
-
-
-  updates[
-    `rooms/${roomCode}/notes`
-  ] =
-    null;
-
-
-  updates[
-    `rooms/${roomCode}/detectiveNotes`
-  ] =
-    null;
-
-
-  updates[
-    `rooms/${roomCode}/result`
-  ] =
-    null;
-
-
-  updates[
-    `rooms/${roomCode}/call`
-  ] =
-    null;
-
-
-  updates[
-    `rooms/${roomCode}/lastActivityAt`
-  ] =
-    now;
-
-
-  roomData = {
-
-    ...roomData,
-
-    status:
-      "game",
-
-    roundNumber,
-
-    game,
-
-    private:
-      privateData,
-
-    completed:{}
-
-  };
-
-
-  currentRoundId =
-    roundId;
-
-
-  mySecret =
-    privateData[
-      playerId
-    ]
-    ||
-    null;
-
-
-  enterGameFromRoom();
-
-
-  try{
-
-    await update(
-      ref(
-        db
-      ),
-      updates
-    );
-
-  }
-  catch(error){
-
-    console.error(
-      "START ROUND:",
-      error
-    );
-
-
-    alert(
-      "Could not start the round.\n\n" +
-      (
-        error?.message ||
-        "Firebase error."
-      )
-    );
-
-  }
-
-};
-
-
-/* =====================================================
-SECRET
-===================================================== */
-
-function renderSecret(){
-
-  const card =
-    document.getElementById(
-      "secretCard"
-    );
-
-
-  if(
-    !mySecret
-  ){
-
-    card.textContent =
-      "Your secret is loading...";
-
-    return;
-
-  }
-
-
-  if(
-    mySecret.role ===
-    "detective"
-  ){
-
-    card.innerHTML = `
-
-      <div class="role detective">
-
-        🕵️ YOU ARE THE DETECTIVE
-
-      </div>
-
-      <div class="big">
-
-        Leave the playing area now.
-
-      </div>
-
-      <p>
-        Wait until the shared timestamp.
-      </p>
-
-      <div class="warning">
-        Return only when the countdown reaches 00:00.
-      </div>
-
-    `;
-
-
-    document
-      .getElementById(
-        "detectiveWaiting"
-      )
-      .classList
-      .remove(
-        "hidden"
-      );
-
-
-    document
-      .getElementById(
-        "normalWaiting"
-      )
-      .classList
-      .add(
-        "hidden"
-      );
-
-
-    showDetectiveTools();
-
-    return;
-
-  }
-
-
-  const murderer =
-    mySecret.role ===
-    "murderer";
-
-
-  card.innerHTML = `
-
-    <div class="role ${
-      murderer
-      ?
-      "murderer"
-      :
-      "innocent"
-    }">
-
-      ${
-        murderer
-        ?
-        "🔪 YOU ARE THE MURDERER"
-        :
-        "👤 YOU ARE INNOCENT"
-      }
-
-    </div>
-
-    <p>
-      Follow your secret timeline.
-    </p>
-
-    <div class="warning">
-      🔒 Future tasks are locked until their shared timestamp.
-    </div>
-
-    <h2>
-      ✅ Your Tasks
-    </h2>
-
-    <div id="myTasks"></div>
-
-  `;
-
-
-  document
-    .getElementById(
-      "normalWaiting"
-    )
-    .classList
-    .remove(
-      "hidden"
-    );
-
-
-  document
-    .getElementById(
-      "detectiveWaiting"
-    )
-    .classList
-    .add(
-      "hidden"
-    );
-
-
-  hideDetectiveTools();
-
-
-  renderTasks();
-
-}
 
 
 /* =====================================================
@@ -6427,13 +5643,14 @@ async function(){
 
     updatePlayerNoteCounter();
 
+
     updateMyNoteUI();
 
   }
   catch(error){
 
     console.error(
-      "NOTE:",
+      "NOTE ERROR:",
       error
     );
 
@@ -6843,7 +6060,7 @@ async function(
   catch(error){
 
     console.error(
-      "DOSSIER:",
+      "DOSSIER ERROR:",
       error
     );
 
@@ -6986,6 +6203,7 @@ async function(){
   catch(error){
 
     console.error(
+      "SAVE DOSSIER:",
       error
     );
 
@@ -7042,6 +6260,7 @@ async function(){
   catch(error){
 
     console.error(
+      "SAVE GENERAL NOTES:",
       error
     );
 
@@ -7179,7 +6398,6 @@ function renderCase(){
               <div class="player">
 
                 👤
-
                 ${escapeHtml(
                   roomData
                     .players[id]
@@ -7334,7 +6552,6 @@ function renderTaskProgress(){
     div.innerHTML = `
 
       <b>
-
         👤
         ${escapeHtml(
           roomData
@@ -7342,13 +6559,10 @@ function renderTaskProgress(){
             ?.name ||
           "Unknown"
         )}
-
       </b>
 
       <div class="count-number">
-
         ${count}/${total}
-
       </div>
 
       <div class="progress">
@@ -7380,6 +6594,15 @@ async function(
   if(
     roomData?.game?.detective !==
     playerId
+  ){
+
+    return;
+
+  }
+
+
+  if(
+    roomData?.result?.accusedId
   ){
 
     return;
@@ -7419,7 +6642,7 @@ async function(
   catch(error){
 
     console.error(
-      "ACCUSE:",
+      "ACCUSE ERROR:",
       error
     );
 
@@ -7800,7 +7023,7 @@ async function runReveal(
 
 
 /* =====================================================
-RESET
+RESET TO LOBBY
 ===================================================== */
 
 async function resetToLobby(){
@@ -7882,11 +7105,23 @@ async function resetToLobby(){
     lastRevealId =
       null;
 
+
+    stopGameListeners();
+
+
+    clearInterval(
+      globalInterval
+    );
+
+    globalInterval =
+      null;
+
+
   }
   catch(error){
 
     console.error(
-      "RESET:",
+      "RESET TO LOBBY ERROR:",
       error
     );
 
@@ -7983,7 +7218,7 @@ async function(
   catch(error){
 
     console.error(
-      "CALL:",
+      "CALL ERROR:",
       error
     );
 
@@ -8271,7 +7506,7 @@ function playCallSound(){
   catch(error){
 
     console.error(
-      "CALL SOUND:",
+      "CALL SOUND ERROR:",
       error
     );
 
@@ -8299,10 +7534,6 @@ function vibrate(){
 
 }
 
-
-/* =====================================================
-CALL NOTIFICATION
-===================================================== */
 
 function systemNotification(
   destination,
@@ -8411,7 +7642,7 @@ async function reconnectCurrentRoom(){
   catch(error){
 
     console.warn(
-      "RECONNECT:",
+      "RECONNECT ERROR:",
       error
     );
 
@@ -8525,6 +7756,7 @@ window.addEventListener(
 
     if(
       alertsEnabled &&
+      "Notification" in window &&
       Notification.permission ===
       "granted"
     ){
