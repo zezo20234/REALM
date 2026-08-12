@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="en">
 <head>
 
@@ -9,7 +9,7 @@
   content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"
 >
 
-<title>Hotel Murder</title>
+<title>Tivoli Mystery</title>
 
 <link rel="manifest" href="./manifest.json">
 
@@ -17,7 +17,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Hotel Murder">
+<meta name="apple-mobile-web-app-title" content="Tivoli Mystery">
 
 <style>
 
@@ -25,27 +25,52 @@
   box-sizing:border-box;
 }
 
-html,body{
+html,
+body{
   margin:0;
   min-height:100%;
 }
 
 body{
   min-height:100vh;
+
   background:
-    radial-gradient(circle at top,#202844 0%,#0b0e16 48%,#070910 100%);
+    radial-gradient(
+      circle at top,
+      #202844 0%,
+      #0b0e16 48%,
+      #070910 100%
+    );
+
   color:white;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+
+  padding:
+    env(safe-area-inset-top)
+    0
+    env(safe-area-inset-bottom);
 }
 
-button,input,select,textarea{
+button,
+input,
+select,
+textarea{
   font:inherit;
 }
 
 button{
   border:0;
   cursor:pointer;
+}
+
+button:disabled{
+  opacity:.45;
+  cursor:not-allowed;
 }
 
 .app{
@@ -89,7 +114,9 @@ label{
   margin-top:14px;
 }
 
-input,select,textarea{
+input,
+select,
+textarea{
   width:100%;
   margin-top:7px;
   padding:14px;
@@ -100,14 +127,16 @@ input,select,textarea{
   outline:none;
 }
 
+input:focus,
+select:focus,
+textarea:focus{
+  border-color:#718cff;
+}
+
 textarea{
   resize:vertical;
   min-height:100px;
   line-height:1.5;
-}
-
-input:focus,select:focus,textarea:focus{
-  border-color:#718cff;
 }
 
 button{
@@ -136,17 +165,73 @@ button.orange{
   background:#c47d35;
 }
 
-button:disabled{
-  opacity:.45;
-  cursor:not-allowed;
-}
-
 .hidden{
   display:none!important;
 }
 
 .center{
   text-align:center;
+}
+
+.top-user{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  background:#131827;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:18px;
+  padding:12px 14px;
+  margin-bottom:16px;
+}
+
+.top-user-name{
+  font-weight:900;
+  font-size:16px;
+}
+
+.top-user-status{
+  font-size:12px;
+  color:#8e9bb8;
+  margin-top:3px;
+}
+
+.logout-button{
+  width:auto;
+  margin:0;
+  padding:10px 13px;
+  background:#252c40;
+  font-size:12px;
+}
+
+.connection-pill{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  padding:7px 10px;
+  border-radius:999px;
+  background:#222a3d;
+  font-size:12px;
+  font-weight:800;
+}
+
+.connection-dot{
+  width:9px;
+  height:9px;
+  border-radius:50%;
+  background:#6f7890;
+}
+
+.connection-pill.connected .connection-dot{
+  background:#35c88b;
+}
+
+.connection-pill.reconnecting .connection-dot{
+  background:#e5af4a;
+}
+
+.connection-pill.offline .connection-dot{
+  background:#d54d5d;
 }
 
 .room-code{
@@ -165,6 +250,23 @@ button:disabled{
   padding:13px;
   border-radius:13px;
   margin:7px 0;
+}
+
+.player-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+
+.player-name{
+  font-weight:800;
+}
+
+.player-status{
+  font-size:11px;
+  color:#929db4;
+  margin-top:4px;
 }
 
 .host{
@@ -363,36 +465,156 @@ button:disabled{
   box-shadow:0 8px 25px rgba(0,0,0,.35);
 }
 
-.call-stack{
-  position:fixed;
-  left:14px;
-  right:14px;
-  top:calc(14px + env(safe-area-inset-top));
-  z-index:99999;
-  pointer-events:none;
+.install-box{
+  background:#172038;
+  border:1px solid rgba(113,140,255,.25);
+  padding:15px;
+  border-radius:16px;
+  margin-top:15px;
 }
 
-.call-banner{
-  background:#6f8cff;
-  border-radius:20px;
-  padding:20px;
-  margin-bottom:10px;
-  text-align:center;
-  box-shadow:0 15px 50px rgba(0,0,0,.5);
-  pointer-events:auto;
+.auth-tabs{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  background:#0d111b;
+  padding:6px;
+  border-radius:16px;
+  margin-bottom:16px;
 }
 
-.call-banner h2{
-  margin:0 0 5px;
-}
-
-.call-banner p{
-  color:white;
+.auth-tab{
   margin:0;
+  background:transparent;
+  color:#929db4;
+  padding:12px;
 }
 
-.call-banner button{
-  background:#111827;
+.auth-tab.active{
+  background:#2a3551;
+  color:white;
+}
+
+.password-wrap{
+  position:relative;
+}
+
+.password-wrap input{
+  padding-right:55px;
+}
+
+.show-password{
+  position:absolute;
+  right:8px;
+  top:7px;
+  width:44px;
+  padding:9px;
+  margin:0;
+  background:#252c3e;
+  font-size:12px;
+}
+
+.auth-status{
+  margin-top:12px;
+  min-height:20px;
+  font-size:13px;
+  color:#8f9ab1;
+}
+
+.username-help{
+  margin-top:7px;
+  color:#78849d;
+  font-size:12px;
+}
+
+.call-overlay{
+  position:fixed;
+  inset:0;
+  z-index:150000;
+  background:
+    radial-gradient(
+      circle at center,
+      #354779 0%,
+      #101827 45%,
+      #03050a 100%
+    );
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:
+    calc(22px + env(safe-area-inset-top))
+    22px
+    calc(22px + env(safe-area-inset-bottom));
+}
+
+.call-overlay.hidden{
+  display:none!important;
+}
+
+.call-inner{
+  width:100%;
+  max-width:700px;
+  text-align:center;
+}
+
+.call-icon{
+  font-size:78px;
+  line-height:1;
+  animation:
+    callPulse 1s ease-in-out infinite;
+}
+
+.call-title{
+  margin-top:24px;
+  font-size:20px;
+  font-weight:900;
+  color:#9eadd0;
+  letter-spacing:3px;
+  text-transform:uppercase;
+}
+
+.call-caller{
+  margin-top:15px;
+  font-size:clamp(34px,9vw,74px);
+  font-weight:1000;
+  line-height:1.02;
+}
+
+.call-destination{
+  margin-top:18px;
+  font-size:clamp(24px,6vw,48px);
+  font-weight:900;
+}
+
+.call-countdown{
+  margin-top:28px;
+  font-size:64px;
+  font-weight:1000;
+}
+
+.call-progress{
+  height:10px;
+  margin-top:24px;
+  border-radius:999px;
+  overflow:hidden;
+  background:rgba(255,255,255,.12);
+}
+
+.call-progress-bar{
+  height:100%;
+  width:100%;
+  background:#718cff;
+  transform-origin:left center;
+}
+
+@keyframes callPulse{
+  0%,100%{
+    transform:scale(1);
+  }
+
+  50%{
+    transform:scale(1.12);
+  }
 }
 
 .alert-modal{
@@ -415,14 +637,6 @@ button:disabled{
   padding:25px;
   text-align:center;
   box-shadow:0 20px 60px rgba(0,0,0,.5);
-}
-
-.install-box{
-  background:#172038;
-  border:1px solid rgba(113,140,255,.25);
-  padding:15px;
-  border-radius:16px;
-  margin-top:15px;
 }
 
 .notes-box{
@@ -550,7 +764,12 @@ button:disabled{
   inset:0;
   z-index:200000;
   background:
-    radial-gradient(circle at center,#202844 0%,#0c101b 44%,#020307 100%);
+    radial-gradient(
+      circle at center,
+      #202844 0%,
+      #0c101b 44%,
+      #020307 100%
+    );
   display:flex;
   align-items:center;
   justify-content:center;
@@ -668,16 +887,35 @@ button:disabled{
 }
 
 @keyframes revealFade{
-  0%{opacity:0;}
-  100%{opacity:1;}
+  0%{
+    opacity:0;
+  }
+
+  100%{
+    opacity:1;
+  }
 }
 
 @keyframes revealShake{
-  0%,100%{transform:translateX(0);}
-  20%{transform:translateX(-8px);}
-  40%{transform:translateX(8px);}
-  60%{transform:translateX(-5px);}
-  80%{transform:translateX(5px);}
+  0%,100%{
+    transform:translateX(0);
+  }
+
+  20%{
+    transform:translateX(-8px);
+  }
+
+  40%{
+    transform:translateX(8px);
+  }
+
+  60%{
+    transform:translateX(-5px);
+  }
+
+  80%{
+    transform:translateX(5px);
+  }
 }
 
 @media(max-width:600px){
@@ -714,7 +952,53 @@ button:disabled{
 
 <body>
 
-<div id="callStack"></div>
+<div
+  id="callOverlay"
+  class="call-overlay hidden"
+>
+  <div class="call-inner">
+
+    <div class="call-icon">
+      📞
+    </div>
+
+    <div class="call-title">
+      INCOMING GROUP CALL
+    </div>
+
+    <div
+      id="callCaller"
+      class="call-caller"
+    >
+      Player
+    </div>
+
+    <div
+      id="callDestination"
+      class="call-destination"
+    >
+      Come here
+    </div>
+
+    <div
+      id="callCountdown"
+      class="call-countdown"
+    >
+      15
+    </div>
+
+    <div class="call-progress">
+
+      <div
+        id="callProgressBar"
+        class="call-progress-bar"
+      ></div>
+
+    </div>
+
+  </div>
+</div>
+
 
 <div
   id="alertModal"
@@ -732,8 +1016,8 @@ button:disabled{
     </h2>
 
     <p>
-      Tap this once so the game can use
-      notifications and unlock its ringtone.
+      Tap once so the game can unlock
+      its ringtone and notifications.
     </p>
 
     <button
@@ -789,19 +1073,64 @@ button:disabled{
 
 <div class="app">
 
+<div
+  id="topUser"
+  class="top-user hidden"
+>
 
-<section id="home">
+  <div>
+
+    <div
+      id="topUserName"
+      class="top-user-name"
+    >
+      -
+    </div>
+
+    <div
+      id="topUserStatus"
+      class="top-user-status"
+    >
+      Logged in
+    </div>
+
+  </div>
+
+  <div style="display:flex;align-items:center;gap:8px;">
+
+    <div
+      id="connectionPill"
+      class="connection-pill"
+    >
+      <span class="connection-dot"></span>
+      <span id="connectionText">
+        Connecting
+      </span>
+    </div>
+
+    <button
+      class="logout-button"
+      onclick="logout()"
+    >
+      LOG OUT
+    </button>
+
+  </div>
+
+</div>
+
+
+<section id="authScreen">
 
   <div class="card">
 
     <h1>
-      🕵️ Hotel Murder
+      🕵️ Tivoli Mystery
     </h1>
 
     <p>
-      A real-time fictional mystery game.
-      Exactly one Detective, one Murderer,
-      and everyone else is Innocent.
+      A real-time fictional mystery game
+      designed for the outdoor sea-view area.
     </p>
 
     <div class="install-box">
@@ -815,7 +1144,138 @@ button:disabled{
 
     </div>
 
-    <div id="alertBox" class="info">
+    <div
+      class="auth-tabs"
+    >
+
+      <button
+        id="loginTab"
+        class="auth-tab active"
+        onclick="switchAuthMode('login')"
+      >
+        LOGIN
+      </button>
+
+      <button
+        id="signupTab"
+        class="auth-tab"
+        onclick="switchAuthMode('signup')"
+      >
+        CREATE ACCOUNT
+      </button>
+
+    </div>
+
+    <label>
+      Username
+    </label>
+
+    <input
+      id="authUsername"
+      placeholder="Example: Zezo"
+      autocomplete="username"
+      maxlength="20"
+    >
+
+    <div class="username-help">
+      3–20 characters: letters, numbers, "_" or "-"
+    </div>
+
+    <label>
+      Password
+    </label>
+
+    <div class="password-wrap">
+
+      <input
+        id="authPassword"
+        type="password"
+        placeholder="Your password"
+        autocomplete="current-password"
+        minlength="6"
+        maxlength="72"
+      >
+
+      <button
+        id="showPasswordButton"
+        class="show-password"
+        type="button"
+        onclick="togglePassword()"
+      >
+        SHOW
+      </button>
+
+    </div>
+
+    <button
+      id="authMainButton"
+      onclick="submitAuth()"
+    >
+      LOGIN
+    </button>
+
+    <div
+      id="authStatus"
+      class="auth-status"
+    ></div>
+
+    <div class="info">
+
+      <b>🔐 Your account stays yours</b>
+
+      <p class="small">
+        Your Firebase account has a permanent ID.
+        A temporary Wi-Fi or hotspot disconnect
+        will not create an Unknown player.
+      </p>
+
+    </div>
+
+  </div>
+
+
+  <div class="card">
+
+    <h2>
+      🎮 Rules
+    </h2>
+
+    <p>
+      🕵️ 1 Detective<br>
+      🔪 1 Murderer<br>
+      👤 Everyone else = Innocent
+    </p>
+
+    <p>
+      All locations are outdoors around the
+      sea-view café area. Nobody needs to enter
+      the cafés or restaurants.
+    </p>
+
+  </div>
+
+</section>
+
+
+<section
+  id="home"
+  class="hidden"
+>
+
+  <div class="card">
+
+    <h1>
+      🌊 Tivoli Mystery
+    </h1>
+
+    <p>
+      Ready to create or join a game?
+    </p>
+
+    <div
+      id="alertBox"
+      class="info"
+    >
 
       <b>🔔 Call Alerts</b>
 
@@ -834,23 +1294,12 @@ button:disabled{
     </div>
 
     <label>
-      Your name
-    </label>
-
-    <input
-      id="nameInput"
-      placeholder="Your name"
-      autocomplete="off"
-      maxlength="30"
-    >
-
-    <label>
       Room code
     </label>
 
     <input
       id="roomInput"
-      placeholder="Example: HOTEL123"
+      placeholder="Example: TIVOLI123"
       autocomplete="off"
       maxlength="20"
     >
@@ -866,31 +1315,51 @@ button:disabled{
       JOIN ROOM
     </button>
 
+    <div
+      id="restoreRoomBox"
+      class="info hidden"
+    >
+
+      <b>🔄 Previous game found</b>
+
+      <p id="restoreRoomText">
+        You were already in a room.
+      </p>
+
+      <button
+        class="green"
+        onclick="restorePreviousRoom()"
+      >
+        REJOIN GAME
+      </button>
+
+    </div>
+
   </div>
 
 
   <div class="card">
 
     <h2>
-      🎮 Rules
+      📍 Game Area
     </h2>
 
     <p>
-      🕵️ 1 Detective<br>
-      🔪 1 Murderer<br>
-      👤 Everyone else = Innocent
+      The game uses only nearby outdoor areas:
     </p>
 
-    <p>
-      Detective waits outside for exactly
-      5 minutes while the other players
-      complete their randomized tasks.
-    </p>
+    <div>
 
-    <p>
-      📝 Every player can submit one short
-      note. The Detective sees notes immediately.
-    </p>
+      <span class="badge">🌊 Sea View</span>
+      <span class="badge">☕ Outdoor Café</span>
+      <span class="badge">🪑 Café Tables</span>
+      <span class="badge">🚶 Sea-Side Walkway</span>
+      <span class="badge">🌴 Sea-Side Edge</span>
+      <span class="badge">🪜 Dip N Dip Stairs</span>
+      <span class="badge">💧 Central Outdoor Area</span>
+      <span class="badge">🪑 Side Seating</span>
+
+    </div>
 
   </div>
 
@@ -905,8 +1374,13 @@ button:disabled{
   <div class="card">
 
     <h1>
-      🏨 Create Room
+      🎮 Create Room
     </h1>
+
+    <p>
+      You are creating the room as
+      <b id="createRoomUser"></b>.
+    </p>
 
     <label>
       Players
@@ -981,7 +1455,7 @@ button:disabled{
   <div class="card center">
 
     <h1>
-      🏨 Lobby
+      🎮 Lobby
     </h1>
 
     <p>
@@ -1086,22 +1560,40 @@ button:disabled{
     </h2>
 
     <p>
-      Everyone currently connected gets the alert.
+      The call appears full-screen on everyone's
+      device for 15 seconds.
     </p>
 
     <div class="row">
 
       <button
-        onclick="makeCall('Lobby')"
+        onclick="makeCall('Sea View')"
       >
-        📍 CALL TO LOBBY
+        🌊 CALL TO SEA VIEW
       </button>
 
       <button
         class="orange"
-        onclick="makeCall('Cafe')"
+        onclick="makeCall('Outdoor Café')"
       >
-        ☕ CALL TO CAFE
+        ☕ CALL TO OUTDOOR CAFÉ
+      </button>
+
+    </div>
+
+    <div class="row">
+
+      <button
+        onclick="makeCall('Café Tables')"
+      >
+        🪑 CALL TO CAFÉ TABLES
+      </button>
+
+      <button
+        class="secondary"
+        onclick="makeCall('Dip N Dip Stairs')"
+      >
+        🪜 CALL TO DIP N DIP STAIRS
       </button>
 
     </div>
@@ -1128,47 +1620,42 @@ button:disabled{
 
     <p>
       Write one short note for the Detective.
-      It is timestamped automatically and sent
-      immediately.
+      It is timestamped automatically.
     </p>
 
-    <div id="myNoteArea">
+    <textarea
+      id="playerNoteInput"
+      maxlength="240"
+      placeholder="Example: I was sitting near the sea view."
+    ></textarea>
 
-      <textarea
-        id="playerNoteInput"
-        maxlength="240"
-        placeholder="Example: I was sitting near the lobby with Ahmed."
-      ></textarea>
-
-      <div
-        class="small"
-        id="playerNoteCounter"
-      >
-        0 / 240
-      </div>
-
-      <button
-        id="submitPlayerNoteButton"
-        class="green"
-        onclick="submitPlayerNote()"
-      >
-        📝 SEND NOTE TO DETECTIVE
-      </button>
-
-      <div
-        id="myNoteStatus"
-        class="small"
-        style="margin-top:10px"
-      >
-        You have 1 note available.
-      </div>
-
-      <div
-        id="myNoteError"
-        class="error-box hidden"
-      ></div>
-
+    <div
+      class="small"
+      id="playerNoteCounter"
+    >
+      0 / 240
     </div>
+
+    <button
+      id="submitPlayerNoteButton"
+      class="green"
+      onclick="submitPlayerNote()"
+    >
+      📝 SEND NOTE TO DETECTIVE
+    </button>
+
+    <div
+      id="myNoteStatus"
+      class="small"
+      style="margin-top:10px"
+    >
+      You have 1 note available.
+    </div>
+
+    <div
+      id="myNoteError"
+      class="error-box hidden"
+    ></div>
 
   </div>
 
@@ -1183,7 +1670,7 @@ button:disabled{
     </h2>
 
     <p>
-      Leave the game area.
+      Leave the playing area.
     </p>
 
     <div
@@ -1198,8 +1685,8 @@ button:disabled{
     </div>
 
     <p>
-      Player notes will still appear on your
-      Detective notebook while you are waiting.
+      Player notes will still appear in
+      your Detective notebook.
     </p>
 
   </div>
@@ -1215,8 +1702,8 @@ button:disabled{
     </h2>
 
     <p>
-      Every new match gives you a fresh randomized
-      task set. Future tasks stay locked until
+      Every round creates fresh randomized
+      tasks. Future tasks stay locked until
       their actual unlock time.
     </p>
 
@@ -1233,7 +1720,7 @@ button:disabled{
     </h2>
 
     <p>
-      These notes are private to you.
+      These notes are private to the Detective.
     </p>
 
     <div class="notes-box">
@@ -1272,7 +1759,8 @@ button:disabled{
     </h3>
 
     <p class="small">
-      Click a player to open their private investigation file.
+      Select a player to open their private
+      investigation file.
     </p>
 
     <div
@@ -1314,13 +1802,13 @@ button:disabled{
 
 
       <label>
-        📍 Where they claim to be at the murder time
+        📍 Where they claim to be
       </label>
 
       <textarea
         id="dossierClaim"
         maxlength="1200"
-        placeholder="Example: Claims he was in the cafe at 8:42 PM."
+        placeholder="Write their claimed location/alibi..."
       ></textarea>
 
 
@@ -1331,7 +1819,7 @@ button:disabled{
       <textarea
         id="dossierImportant"
         maxlength="2000"
-        placeholder="Suspicious behavior, contradictions, movements, things to check..."
+        placeholder="Contradictions, suspicious behavior, things to check..."
       ></textarea>
 
 
@@ -1375,8 +1863,7 @@ button:disabled{
     </h2>
 
     <div class="info">
-      New notes appear here immediately,
-      even before the Detective timer ends.
+      New notes appear immediately.
     </div>
 
     <div id="liveNotesList">
@@ -1412,19 +1899,13 @@ button:disabled{
     <div class="divider"></div>
 
     <h3>
-      📝 Detective Notebook
+      Who is the murderer?
     </h3>
 
     <p class="small">
-      Keep using your private notebook and
-      player dossiers while investigating.
+      The crime location is intentionally hidden
+      until after the accusation.
     </p>
-
-    <div class="divider"></div>
-
-    <h3>
-      Who is the murderer?
-    </h3>
 
     <div id="accusationButtons"></div>
 
@@ -1458,11 +1939,28 @@ button:disabled{
 
 <script type="module">
 
+/* =====================================================
+FIREBASE IMPORTS
+===================================================== */
+
 import {
   initializeApp
 }
 from
 "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+
+import {
+  getAuth,
+  setPersistence,
+  browserLocalPersistence,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut,
+  updateProfile
+}
+from
+"https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
 import {
   getDatabase,
@@ -1471,7 +1969,9 @@ import {
   set,
   update,
   remove,
-  onValue
+  onValue,
+  onDisconnect,
+  serverTimestamp
 }
 from
 "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
@@ -1512,40 +2012,28 @@ const firebaseConfig = {
 const app =
   initializeApp(firebaseConfig);
 
+const auth =
+  getAuth(app);
+
 const db =
   getDatabase(app);
 
 
 /* =====================================================
-PLAYER ID
+AUTH PERSISTENCE
 ===================================================== */
 
-let playerId =
-  localStorage.getItem(
-    "hotelMurderPlayerId"
-  );
-
-if(!playerId){
-
-  playerId =
-    "p_" +
-    Date.now().toString(36) +
-    "_" +
-    Math.random()
-      .toString(36)
-      .substring(2,10);
-
-  localStorage.setItem(
-    "hotelMurderPlayerId",
-    playerId
-  );
-
-}
+await setPersistence(
+  auth,
+  browserLocalPersistence
+);
 
 
 /* =====================================================
 STATE
 ===================================================== */
+
+let currentUser = null;
 
 let roomCode = "";
 let myName = "";
@@ -1554,245 +2042,38 @@ let mySecret = null;
 
 let globalInterval = null;
 let roomExpiryInterval = null;
+let heartbeatInterval = null;
+let connectionListenerStarted = false;
 
 let lastCallId = null;
+
+let selectedDetectivePlayerId = null;
+
+let audioContext = null;
+
+let revealRunning = false;
+let lastRevealId = null;
+
+let authMode = "login";
 
 let listenersStarted = false;
 let notesListenerStarted = false;
 let detectiveNotesListenerStarted = false;
 let gameResultListenerStarted = false;
 
-let selectedDetectivePlayerId = null;
+let roomListenerStarted = false;
+let completedListenerStarted = false;
 
-let audioContext = null;
+let callTimer = null;
 
 let alertsEnabled =
   localStorage.getItem(
     "hotelMurderAlerts"
   ) === "1";
 
-let revealRunning = false;
-let lastRevealId = null;
-
 
 /* =====================================================
-ROOM EXPIRY
-===================================================== */
-
-const ROOM_STALE_TIME =
-  15 * 60 * 1000;
-
-
-function roomActivityTime(data){
-
-  return Number(
-    data?.lastActivityAt ||
-    data?.createdAt ||
-    0
-  );
-
-}
-
-
-function isRoomStale(data){
-
-  if(!data){
-    return false;
-  }
-
-  if(
-    data.status &&
-    data.status !== "lobby"
-  ){
-
-    return false;
-
-  }
-
-  const activity =
-    roomActivityTime(data);
-
-  if(!activity){
-    return false;
-  }
-
-  return (
-    Date.now() -
-    activity >=
-    ROOM_STALE_TIME
-  );
-
-}
-
-
-async function touchRoom(){
-
-  if(!roomCode){
-    return;
-  }
-
-  try{
-
-    await update(
-
-      ref(
-        db,
-        "rooms/" +
-        roomCode
-      ),
-
-      {
-        lastActivityAt:
-          Date.now()
-      }
-
-    );
-
-  }
-  catch(error){
-
-    console.error(
-      "touchRoom:",
-      error
-    );
-
-  }
-
-}
-
-
-function startRoomExpiryWatcher(){
-
-  clearInterval(
-    roomExpiryInterval
-  );
-
-  if(!roomCode){
-    return;
-  }
-
-  roomExpiryInterval =
-    setInterval(
-      async ()=>{
-
-        try{
-
-          const snap =
-            await get(
-              ref(
-                db,
-                "rooms/" +
-                roomCode
-              )
-            );
-
-          if(
-            !snap.exists()
-          ){
-
-            return;
-
-          }
-
-          const data =
-            snap.val();
-
-          if(
-            isRoomStale(data)
-          ){
-
-            await remove(
-              ref(
-                db,
-                "rooms/" +
-                roomCode
-              )
-            );
-
-            leaveRoomToHome(
-              "This room expired after 15 minutes."
-            );
-
-          }
-
-        }
-        catch(error){
-
-          console.error(
-            "Room expiry:",
-            error
-          );
-
-        }
-
-      },
-      30000
-    );
-
-}
-
-
-function stopRoomExpiryWatcher(){
-
-  clearInterval(
-    roomExpiryInterval
-  );
-
-  roomExpiryInterval =
-    null;
-
-}
-
-
-function leaveRoomToHome(
-  message = ""
-){
-
-  stopRoomExpiryWatcher();
-
-  clearInterval(
-    globalInterval
-  );
-
-  roomData = null;
-  mySecret = null;
-  roomCode = "";
-  selectedDetectivePlayerId = null;
-
-  document
-    .getElementById("home")
-    .classList
-    .remove("hidden");
-
-  document
-    .getElementById("createScreen")
-    .classList
-    .add("hidden");
-
-  document
-    .getElementById("lobby")
-    .classList
-    .add("hidden");
-
-  document
-    .getElementById("game")
-    .classList
-    .add("hidden");
-
-  document
-    .getElementById("revealOverlay")
-    .classList
-    .add("hidden");
-
-  if(message){
-    alert(message);
-  }
-
-}
-
-
-/* =====================================================
-TIMING
+CONSTANTS
 ===================================================== */
 
 const DETECTIVE_WAIT =
@@ -1812,27 +2093,92 @@ const MAX_MURDER_DELAY =
 const MAX_PLAYER_NOTE_LENGTH =
   240;
 
+const ROOM_STALE_TIME =
+  15 * 60 * 1000;
+
+const CALL_DURATION =
+  15 * 1000;
+
 
 /* =====================================================
-HOTEL LOCATIONS
+TIVOLI OUTDOOR LOCATIONS
 ===================================================== */
 
 const locations = [
 
-  "Hotel Lobby Seating",
-  "Hotel Reception",
-  "Hotel Staircase",
-  "Hotel Floor 1 Hallway",
-  "Hotel Lobby Entrance",
-  "Hotel Lobby Window",
-  "Hotel Lobby Table",
-  "Hotel Area Beside Reception",
-  "Hotel Hallway Near Staircase",
-  "Hotel Main Hallway",
-  "Hotel Waiting Area",
-  "Hotel Elevator Area",
-  "Hotel Corner Seating",
-  "Hotel Side Hallway"
+  "Sea View",
+  "Outdoor Café",
+  "Café Tables",
+  "Sea-Side Walkway",
+  "Sea-Side Edge",
+  "Dip N Dip Stairs",
+  "Central Outdoor Area",
+  "Side Seating"
+
+];
+
+
+/* =====================================================
+LOCATION WEIGHTS
+===================================================== */
+
+const locationWeights = [
+
+  {
+    location:
+      "Sea View",
+    weight:
+      28
+  },
+
+  {
+    location:
+      "Outdoor Café",
+    weight:
+      22
+  },
+
+  {
+    location:
+      "Café Tables",
+    weight:
+      18
+  },
+
+  {
+    location:
+      "Sea-Side Walkway",
+    weight:
+      12
+  },
+
+  {
+    location:
+      "Sea-Side Edge",
+    weight:
+      8
+  },
+
+  {
+    location:
+      "Dip N Dip Stairs",
+    weight:
+      5
+  },
+
+  {
+    location:
+      "Central Outdoor Area",
+    weight:
+      5
+  },
+
+  {
+    location:
+      "Side Seating",
+    weight:
+      7
+  }
 
 ];
 
@@ -1845,13 +2191,13 @@ const activityTemplates = [
 
   "Sit quietly at {location}.",
   "Walk around {location}.",
-  "Stand for a moment at {location}.",
+  "Stand for a moment near {location}.",
   "Look around {location}.",
   "Wait nearby {location}.",
   "Walk through {location}.",
   "Sit at a nearby seat around {location}.",
   "Check your phone near {location}.",
-  "Pause briefly at {location}.",
+  "Pause briefly around {location}.",
   "Stay around {location} for a short moment.",
   "Walk past {location}, then continue normally.",
   "Spend a moment near {location} before moving on.",
@@ -1880,10 +2226,10 @@ const actionTemplates = [
 
 const murderTemplates = [
 
-  "Be at {location} at {time}. The fictional murder event happens there.",
-  "Reach {location} when the clock reaches {time} for the fictional murder event.",
-  "At {time}, go to {location}. This is the fictional murder point.",
-  "Be near {location} at {time} for the fictional murder event.",
+  "Be at {location} at {time}. The fictional incident happens there.",
+  "Reach {location} when the clock reaches {time} for the fictional incident.",
+  "At {time}, go to {location}. This is the fictional event point.",
+  "Be near {location} at {time} for the fictional event.",
   "Go to {location} around {time}. The fictional incident happens there.",
   "At exactly {time}, be at {location} for the fictional event."
 
@@ -1904,20 +2250,20 @@ const afterMurderTemplates = [
 
 const victims = [
 
-  "a fictional hotel guest",
   "a fictional visitor",
   "a fictional guest",
-  "a fictional character"
+  "a fictional character",
+  "a fictional person"
 
 ];
 
 
 const cases = [
 
-  "A fictional hotel guest was found dead in the story.",
-  "A fictional visitor was found dead in the story.",
-  "A fictional guest was discovered dead in the story.",
-  "A fictional incident happened inside the hotel."
+  "A fictional incident occurred during the game.",
+  "A fictional visitor was involved in the mystery.",
+  "A fictional guest was involved in the case.",
+  "A fictional event happened in the story."
 
 ];
 
@@ -1934,6 +2280,45 @@ function random(array){
       array.length
     )
   ];
+
+}
+
+
+function weightedLocation(){
+
+  const total =
+    locationWeights.reduce(
+      (
+        sum,
+        item
+      ) =>
+        sum + item.weight,
+      0
+    );
+
+  let roll =
+    Math.random() *
+    total;
+
+  for(
+    const item of
+    locationWeights
+  ){
+
+    roll -=
+      item.weight;
+
+    if(
+      roll <= 0
+    ){
+
+      return item.location;
+
+    }
+
+  }
+
+  return "Sea View";
 
 }
 
@@ -1975,7 +2360,10 @@ function shuffle(array){
 function pad(n){
 
   return String(n)
-    .padStart(2,"0");
+    .padStart(
+      2,
+      "0"
+    );
 
 }
 
@@ -1986,10 +2374,14 @@ function clockText(date){
     date.getHours();
 
   const m =
-    pad(date.getMinutes());
+    pad(
+      date.getMinutes()
+    );
 
   const s =
-    pad(date.getSeconds());
+    pad(
+      date.getSeconds()
+    );
 
   const period =
     h >= 12
@@ -1999,11 +2391,17 @@ function clockText(date){
   h =
     h % 12;
 
-  if(h === 0){
+  if(
+    h === 0
+  ){
+
     h = 12;
+
   }
 
-  return `${h}:${m}:${s} ${period}`;
+  return (
+    `${h}:${m}:${s} ${period}`
+  );
 
 }
 
@@ -2014,7 +2412,9 @@ function shortClock(date){
     date.getHours();
 
   const m =
-    pad(date.getMinutes());
+    pad(
+      date.getMinutes()
+    );
 
   const period =
     h >= 12
@@ -2024,11 +2424,17 @@ function shortClock(date){
   h =
     h % 12;
 
-  if(h === 0){
+  if(
+    h === 0
+  ){
+
     h = 12;
+
   }
 
-  return `${h}:${m} ${period}`;
+  return (
+    `${h}:${m} ${period}`
+  );
 
 }
 
@@ -2060,7 +2466,9 @@ function formatDuration(ms){
 
 function escapeHtml(value){
 
-  return String(value)
+  return String(
+    value
+  )
     .replaceAll(
       "&",
       "&amp;"
@@ -2098,29 +2506,38 @@ function sleep(ms){
 }
 
 
-function uniqueLocation(
-  used,
-  forbidden
+function nextMinuteTimestamp(
+  timestamp
 ){
 
-  let x;
+  const date =
+    new Date(
+      timestamp
+    );
 
-  do{
-
-    x =
-      random(
-        locations
-      );
-
-  }
-  while(
-    used.includes(x) ||
-    x === forbidden
+  date.setSeconds(
+    0,
+    0
   );
 
-  used.push(x);
+  date.setMinutes(
+    date.getMinutes() + 1
+  );
 
-  return x;
+  return date.getTime();
+
+}
+
+
+function taskUnlockText(
+  timestamp
+){
+
+  return shortClock(
+    new Date(
+      timestamp
+    )
+  );
 
 }
 
@@ -2138,10 +2555,8 @@ function createTask(
     unlockAt,
 
     unlockText:
-      shortClock(
-        new Date(
-          unlockAt
-        )
+      taskUnlockText(
+        unlockAt
       ),
 
     description
@@ -2151,47 +2566,6 @@ function createTask(
 }
 
 
-/* =====================================================
-TASK TIME FIX
-===================================================== */
-
-function nextMinuteTimestamp(
-  timestamp
-){
-
-  const date =
-    new Date(timestamp);
-
-  date.setSeconds(
-    0,
-    0
-  );
-
-  date.setMinutes(
-    date.getMinutes() +
-    1
-  );
-
-  return date.getTime();
-
-}
-
-
-function taskUnlockText(
-  timestamp
-){
-
-  return shortClock(
-    new Date(timestamp)
-  );
-
-}
-
-
-/* =====================================================
-TASK GENERATOR
-===================================================== */
-
 function freshRoundSeed(){
 
   return (
@@ -2200,7 +2574,10 @@ function freshRoundSeed(){
     "_" +
     Math.random()
       .toString(36)
-      .substring(2,12)
+      .substring(
+        2,
+        12
+      )
   );
 
 }
@@ -2220,654 +2597,1524 @@ function fillLocationTemplate(
 }
 
 
-function buildRandomNormalTask(
-  id,
-  unlockAt,
-  usedLocations,
-  forbiddenLocation
+function uniqueLocation(
+  used,
+  forbidden
 ){
 
-  const location =
-    uniqueLocation(
-      usedLocations,
-      forbiddenLocation
-    );
+  let x;
 
-  const pool =
-    Math.random() < 0.5
-    ?
-    activityTemplates
-    :
-    actionTemplates;
+  let safety = 0;
 
-  return createTask(
-    id,
-    unlockAt,
-    fillLocationTemplate(
-      random(pool),
-      location
-    )
-  );
+  do{
 
-}
+    x =
+      weightedLocation();
 
+    safety++;
 
-function makeRandomUnlockTimes(
-  now,
-  detectiveEnd,
-  count
-){
+    if(
+      safety > 50
+    ){
 
-  const startOffset =
-    60 * 1000;
+      x =
+        locations.find(
+          item =>
+            !used.includes(
+              item
+            ) &&
+            item !==
+            forbidden
+        ) ||
+        "Outdoor Café";
 
-  const endOffset =
-    Math.max(
-      startOffset + 60 * 1000,
-      detectiveEnd -
-      now -
-      60 * 1000
-    );
-
-  const values = [];
-
-  for(
-    let i = 0;
-    i < count;
-    i++
-  ){
-
-    const percentage =
-      (i + 1) /
-      (count + 1);
-
-    const spread =
-      (
-        Math.random() -
-        0.5
-      ) *
-      50 *
-      1000;
-
-    let offset =
-      startOffset +
-      (
-        endOffset -
-        startOffset
-      ) *
-      percentage +
-      spread;
-
-    offset =
-      Math.max(
-        startOffset,
-        Math.min(
-          endOffset,
-          offset
-        )
-      );
-
-    const rawTime =
-      now +
-      offset;
-
-    const minuteTime =
-      nextMinuteTimestamp(
-        rawTime
-      );
-
-    values.push(
-      minuteTime
-    );
-
-  }
-
-  values.sort(
-    (a,b)=>
-      a-b
-  );
-
-  return values.map(
-    value=>{
-
-      const latestAllowed =
-        detectiveEnd -
-        30 * 1000;
-
-      return Math.min(
-        value,
-        latestAllowed
-      );
+      break;
 
     }
-  );
-
-}
-
-
-function buildRandomNormalTasks(
-  playerIdForSeed,
-  now,
-  detectiveEnd,
-  crimeLocation,
-  roundSeed
-){
-
-  const count =
-    3 +
-    Math.floor(
-      Math.random() * 3
-    );
-
-  const unlockTimes =
-    makeRandomUnlockTimes(
-      now,
-      detectiveEnd,
-      count
-    );
-
-  const usedLocations =
-    [];
-
-  const tasks =
-    [];
-
-  for(
-    let i = 0;
-    i < count;
-    i++
-  ){
-
-    const taskId =
-      roundSeed +
-      "_" +
-      playerIdForSeed +
-      "_N_" +
-      i +
-      "_" +
-      Math.random()
-        .toString(36)
-        .substring(2,8);
-
-    tasks.push(
-
-      buildRandomNormalTask(
-        taskId,
-        unlockTimes[i],
-        usedLocations,
-        crimeLocation
-      )
-
-    );
 
   }
-
-  return shuffle(
-    tasks
+  while(
+    used.includes(x) ||
+    x === forbidden
   );
 
-}
+  used.push(x);
 
-
-function buildRandomMurdererTasks(
-  playerIdForSeed,
-  now,
-  detectiveEnd,
-  murderAt,
-  crimeLocation,
-  roundSeed
-){
-
-  const normalCount =
-    2 +
-    Math.floor(
-      Math.random() * 3
-    );
-
-  const normalTimes =
-    makeRandomUnlockTimes(
-      now,
-      Math.min(
-        detectiveEnd,
-        murderAt -
-        20 * 1000
-      ),
-      normalCount
-    );
-
-  const usedLocations =
-    [];
-
-  const tasks =
-    [];
-
-  for(
-    let i = 0;
-    i < normalCount;
-    i++
-  ){
-
-    const taskId =
-      roundSeed +
-      "_" +
-      playerIdForSeed +
-      "_M_" +
-      i +
-      "_" +
-      Math.random()
-        .toString(36)
-        .substring(2,8);
-
-    tasks.push(
-
-      buildRandomNormalTask(
-        taskId,
-        normalTimes[i],
-        usedLocations,
-        crimeLocation
-      )
-
-    );
-
-  }
-
-
-  const murderTaskId =
-    roundSeed +
-    "_" +
-    playerIdForSeed +
-    "_KILL_" +
-    Math.random()
-      .toString(36)
-      .substring(2,8);
-
-
-  const murderDescription =
-    fillLocationTemplate(
-      random(
-        murderTemplates
-      ),
-      crimeLocation
-    )
-    .replace(
-      "{time}",
-      shortClock(
-        new Date(
-          murderAt
-        )
-      )
-    );
-
-
-  tasks.push(
-
-    createTask(
-      murderTaskId,
-      murderAt,
-      murderDescription
-    )
-
-  );
-
-
-  const afterTime =
-    Math.min(
-      murderAt +
-      25 * 1000,
-      detectiveEnd -
-      20 * 1000
-    );
-
-
-  const afterTaskId =
-    roundSeed +
-    "_" +
-    playerIdForSeed +
-    "_A_" +
-    Math.random()
-      .toString(36)
-      .substring(2,8);
-
-
-  tasks.push(
-
-    createTask(
-      afterTaskId,
-      afterTime,
-      fillLocationTemplate(
-        random(
-          afterMurderTemplates
-        ),
-        crimeLocation
-      )
-    )
-
-  );
-
-
-  return shuffle(
-    tasks
-  );
+  return x;
 
 }
 
 
 /* =====================================================
-ALERTS
+USERNAME / AUTH HELPERS
 ===================================================== */
 
-window.enableAlerts =
-async function(){
+function normalizeUsername(
+  username
+){
 
-  try{
+  return String(
+    username
+  )
+    .trim()
+    .toLowerCase();
 
-    const AudioContext =
-      window.AudioContext ||
-      window.webkitAudioContext;
-
-    if(AudioContext){
-
-      audioContext =
-        audioContext ||
-        new AudioContext();
-
-      if(
-        audioContext.state ===
-        "suspended"
-      ){
-
-        await audioContext.resume();
-
-      }
-
-      const osc =
-        audioContext.createOscillator();
-
-      const gain =
-        audioContext.createGain();
-
-      osc.frequency.value =
-        660;
-
-      gain.gain.value =
-        0.1;
-
-      osc.connect(gain);
-
-      gain.connect(
-        audioContext.destination
-      );
-
-      const t =
-        audioContext.currentTime;
-
-      gain.gain.exponentialRampToValueAtTime(
-        0.12,
-        t + 0.02
-      );
-
-      gain.gain.exponentialRampToValueAtTime(
-        0.0001,
-        t + 0.20
-      );
-
-      osc.start(t);
-
-      osc.stop(
-        t + 0.22
-      );
-
-    }
+}
 
 
-    if(
-      "Notification" in window &&
-      Notification.permission ===
-      "default"
-    ){
+function isValidUsername(
+  username
+){
 
-      try{
-
-        await Notification.requestPermission();
-
-      }
-      catch(e){}
-
-    }
-
-
-    alertsEnabled =
-      true;
-
-
-    localStorage.setItem(
-      "hotelMurderAlerts",
-      "1"
+  return /^[a-zA-Z0-9_-]{3,20}$/
+    .test(
+      String(
+        username
+      )
     );
 
-
-    const status =
-      document.getElementById(
-        "alertStatus"
-      );
-
-    if(status){
-
-      status.textContent =
-        "✅ Call alerts enabled.";
-
-    }
+}
 
 
-    const enableButton =
-      document.getElementById(
-        "enableAlertsButton"
-      );
+function internalEmailForUsername(
+  username
+){
 
-    if(enableButton){
-
-      enableButton.textContent =
-        "✅ CALL ALERTS ENABLED";
-
-    }
-
-
-    playCallSound();
-
-  }
-  catch(error){
-
-    console.error(error);
-
-    alert(
-      "Tap the button again to enable alerts."
+  const normalized =
+    normalizeUsername(
+      username
     );
 
+  return (
+    `${normalized}@tivoli-mystery-game.com`
+  );
+
+}
+
+
+/*
+  The user only enters username + password.
+  Firebase Authentication receives a private
+  internal email generated from the username.
+*/
+
+
+function authErrorMessage(
+  error
+){
+
+  const code =
+    error?.code ||
+    "";
+
+  switch(code){
+
+    case
+      "auth/invalid-credential":
+
+      return (
+        "Incorrect username or password."
+      );
+
+    case
+      "auth/invalid-login-credentials":
+
+      return (
+        "Incorrect username or password."
+      );
+
+    case
+      "auth/email-already-in-use":
+
+      return (
+        "That username is already taken."
+      );
+
+    case
+      "auth/weak-password":
+
+      return (
+        "Password must be at least 6 characters."
+      );
+
+    case
+      "auth/too-many-requests":
+
+      return (
+        "Too many attempts. Please try again later."
+      );
+
+    case
+      "auth/network-request-failed":
+
+      return (
+        "Network problem. Check your Wi-Fi or hotspot."
+      );
+
+    case
+      "auth/operation-not-allowed":
+
+      return (
+        "Email/Password authentication is not enabled in Firebase."
+      );
+
+    case
+      "auth/invalid-email":
+
+      return (
+        "That username cannot be used."
+      );
+
+    case
+      "auth/user-disabled":
+
+      return (
+        "This account has been disabled."
+      );
+
+    default:
+
+      return (
+        error?.message ||
+        "Authentication failed."
+      );
+
   }
 
-};
+}
 
 
-window.closeAlertModal =
-function(){
+/* =====================================================
+AUTH UI
+===================================================== */
+
+window.switchAuthMode =
+function(
+  mode
+){
+
+  authMode =
+    mode ===
+    "signup"
+    ?
+    "signup"
+    :
+    "login";
 
   document
     .getElementById(
-      "alertModal"
+      "loginTab"
     )
     .classList
-    .add("hidden");
+    .toggle(
+      "active",
+      authMode ===
+      "login"
+    );
+
+  document
+    .getElementById(
+      "signupTab"
+    )
+    .classList
+    .toggle(
+      "active",
+      authMode ===
+      "signup"
+    );
+
+  const button =
+    document.getElementById(
+      "authMainButton"
+    );
+
+  button.textContent =
+    authMode ===
+    "signup"
+    ?
+    "CREATE ACCOUNT"
+    :
+    "LOGIN";
+
+  const passwordInput =
+    document.getElementById(
+      "authPassword"
+    );
+
+  passwordInput.autocomplete =
+    authMode ===
+    "signup"
+    ?
+    "new-password"
+    :
+    "current-password";
+
+  const status =
+    document.getElementById(
+      "authStatus"
+    );
+
+  status.textContent =
+    "";
 
 };
 
 
-function playCallSound(){
+window.togglePassword =
+function(){
 
-  try{
+  const input =
+    document.getElementById(
+      "authPassword"
+    );
 
-    const AudioContext =
-      window.AudioContext ||
-      window.webkitAudioContext;
-
-    if(!AudioContext){
-      return;
-    }
-
-    audioContext =
-      audioContext ||
-      new AudioContext();
-
-    if(
-      audioContext.state ===
-      "suspended"
-    ){
-
-      audioContext.resume()
-        .catch(()=>{});
-
-    }
-
-    const start =
-      audioContext.currentTime;
-
-    for(
-      let group = 0;
-      group < 3;
-      group++
-    ){
-
-      const base =
-        start +
-        group * 3.1;
-
-      for(
-        let i = 0;
-        i < 2;
-        i++
-      ){
-
-        const osc =
-          audioContext.createOscillator();
-
-        const gain =
-          audioContext.createGain();
-
-        osc.type =
-          "sine";
-
-        osc.frequency.value =
-          i === 0
-          ? 880
-          : 660;
-
-        const t =
-          base +
-          i * 0.65;
-
-        gain.gain.setValueAtTime(
-          0.0001,
-          t
-        );
-
-        gain.gain.exponentialRampToValueAtTime(
-          0.28,
-          t + 0.03
-        );
-
-        gain.gain.exponentialRampToValueAtTime(
-          0.0001,
-          t + 0.50
-        );
-
-        osc.connect(gain);
-
-        gain.connect(
-          audioContext.destination
-        );
-
-        osc.start(t);
-
-        osc.stop(
-          t + 0.55
-        );
-
-      }
-
-    }
-
-  }
-  catch(error){
-
-    console.error(error);
-
-  }
-
-}
-
-
-function vibrate(){
-
-  try{
-
-    if(
-      "vibrate" in navigator
-    ){
-
-      navigator.vibrate([
-        300,
-        120,
-        300,
-        120,
-        500,
-        120,
-        500
-      ]);
-
-    }
-
-  }
-  catch(e){}
-
-}
-
-
-function systemNotification(
-  destination,
-  caller
-){
+  const button =
+    document.getElementById(
+      "showPasswordButton"
+    );
 
   if(
-    !alertsEnabled
+    input.type ===
+    "password"
   ){
+
+    input.type =
+      "text";
+
+    button.textContent =
+      "HIDE";
+
+  }
+  else{
+
+    input.type =
+      "password";
+
+    button.textContent =
+      "SHOW";
+
+  }
+
+};
+
+
+window.submitAuth =
+async function(){
+
+  const usernameInput =
+    document.getElementById(
+      "authUsername"
+    );
+
+  const passwordInput =
+    document.getElementById(
+      "authPassword"
+    );
+
+  const status =
+    document.getElementById(
+      "authStatus"
+    );
+
+  const button =
+    document.getElementById(
+      "authMainButton"
+    );
+
+  const username =
+    usernameInput.value.trim();
+
+  const password =
+    passwordInput.value;
+
+  if(
+    !isValidUsername(
+      username
+    )
+  ){
+
+    status.textContent =
+      "Username must be 3–20 characters and use only letters, numbers, _ or -.";
 
     return;
 
   }
 
   if(
-    "Notification" in window &&
-    Notification.permission ===
-    "granted"
+    password.length < 6
   ){
 
-    try{
+    status.textContent =
+      "Password must be at least 6 characters.";
 
-      new Notification(
-        "📞 Hotel Murder Call",
+    return;
+
+  }
+
+  status.textContent =
+    authMode ===
+    "signup"
+    ?
+    "Creating account..."
+    :
+    "Logging in...";
+
+  button.disabled =
+    true;
+
+  const email =
+    internalEmailForUsername(
+      username
+    );
+
+  try{
+
+    if(
+      authMode ===
+      "signup"
+    ){
+
+      const credential =
+        await createUserWithEmailAndPassword(
+          auth,
+          email,
+          password
+        );
+
+      currentUser =
+        credential.user;
+
+      await updateProfile(
+        currentUser,
+        {
+          displayName:
+            username
+        }
+      );
+
+      await set(
+        ref(
+          db,
+          `users/${currentUser.uid}`
+        ),
         {
 
-          body:
-            `${caller} is calling everyone to ${destination}!`,
+          uid:
+            currentUser.uid,
 
-          tag:
-            "hotel-murder-" +
-            Date.now()
+          username,
+
+          normalizedUsername:
+            normalizeUsername(
+              username
+            ),
+
+          createdAt:
+            serverTimestamp(),
+
+          lastSeenAt:
+            serverTimestamp()
 
         }
       );
 
+      status.textContent =
+        "✅ Account created.";
+
     }
-    catch(e){}
+    else{
+
+      const credential =
+        await signInWithEmailAndPassword(
+          auth,
+          email,
+          password
+        );
+
+      currentUser =
+        credential.user;
+
+      await ensureUserProfile();
+
+      status.textContent =
+        "✅ Logged in.";
+
+    }
+
+  }
+  catch(error){
+
+    console.error(
+      "AUTH:",
+      error
+    );
+
+    status.textContent =
+      "❌ " +
+      authErrorMessage(
+        error
+      );
+
+  }
+  finally{
+
+    button.disabled =
+      false;
+
+  }
+
+};
+
+
+/* =====================================================
+AUTH PROFILE
+===================================================== */
+
+async function ensureUserProfile(){
+
+  if(
+    !auth.currentUser
+  ){
+
+    return null;
+
+  }
+
+  const uid =
+    auth.currentUser.uid;
+
+  const userRef =
+    ref(
+      db,
+      `users/${uid}`
+    );
+
+  const snapshot =
+    await get(
+      userRef
+    );
+
+  if(
+    snapshot.exists()
+  ){
+
+    const data =
+      snapshot.val();
+
+    myName =
+      data.username ||
+      auth.currentUser.displayName ||
+      "Player";
+
+    await update(
+      userRef,
+      {
+        lastSeenAt:
+          serverTimestamp()
+      }
+    );
+
+    return data;
+
+  }
+
+  const fallbackName =
+    auth.currentUser.displayName ||
+    "Player";
+
+  await set(
+    userRef,
+    {
+
+      uid,
+
+      username:
+        fallbackName,
+
+      normalizedUsername:
+        normalizeUsername(
+          fallbackName
+        ),
+
+      createdAt:
+        serverTimestamp(),
+
+      lastSeenAt:
+        serverTimestamp()
+
+    }
+  );
+
+  myName =
+    fallbackName;
+
+  return {
+
+    uid,
+
+    username:
+      fallbackName
+
+  };
+
+}
+
+
+/* =====================================================
+AUTH STATE
+===================================================== */
+
+onAuthStateChanged(
+  auth,
+  async user=>{
+
+    currentUser =
+      user;
+
+    if(
+      user
+    ){
+
+      try{
+
+        await ensureUserProfile();
+
+        showAuthenticatedUI();
+
+        restoreSavedRoomPrompt();
+
+      }
+      catch(error){
+
+        console.error(
+          "Profile load:",
+          error
+        );
+
+      }
+
+    }
+    else{
+
+      currentUser =
+        null;
+
+      stopAllGameListeners();
+
+      hideAuthenticatedUI();
+
+    }
+
+  }
+);
+
+
+/* =====================================================
+AUTH UI STATES
+===================================================== */
+
+function showAuthenticatedUI(){
+
+  document
+    .getElementById(
+      "authScreen"
+    )
+    .classList
+    .add("hidden");
+
+  document
+    .getElementById(
+      "topUser"
+    )
+    .classList
+    .remove("hidden");
+
+  document
+    .getElementById(
+      "home"
+    )
+    .classList
+    .remove("hidden");
+
+  document
+    .getElementById(
+      "topUserName"
+    )
+    .textContent =
+    myName ||
+    "Player";
+
+  document
+    .getElementById(
+      "createRoomUser"
+    )
+    .textContent =
+    myName ||
+    "Player";
+
+}
+
+
+function hideAuthenticatedUI(){
+
+  document
+    .getElementById(
+      "authScreen"
+    )
+    .classList
+    .remove("hidden");
+
+  document
+    .getElementById(
+      "topUser"
+    )
+    .classList
+    .add("hidden");
+
+  document
+    .getElementById(
+      "home"
+    )
+    .classList
+    .add("hidden");
+
+  document
+    .getElementById(
+      "createScreen"
+    )
+    .classList
+    .add("hidden");
+
+  document
+    .getElementById(
+      "lobby"
+    )
+    .classList
+    .add("hidden");
+
+  document
+    .getElementById(
+      "game"
+    )
+    .classList
+    .add("hidden");
+
+}
+
+
+/* =====================================================
+LOGOUT
+===================================================== */
+
+window.logout =
+async function(){
+
+  try{
+
+    if(
+      roomCode &&
+      currentUser
+    ){
+
+      await safeUpdatePlayerStatus(
+        "offline"
+      );
+
+    }
+
+  }
+  catch(error){
+
+    console.warn(
+      error
+    );
+
+  }
+
+  await signOut(
+    auth
+  );
+
+};
+
+
+/* =====================================================
+CONNECTION
+===================================================== */
+
+function startConnectionListener(){
+
+  if(
+    connectionListenerStarted
+  ){
+
+    return;
+
+  }
+
+  connectionListenerStarted =
+    true;
+
+  onValue(
+
+    ref(
+      db,
+      ".info/connected"
+    ),
+
+    async snapshot=>{
+
+      const connected =
+        snapshot.val() === true;
+
+      updateConnectionUI(
+        connected
+      );
+
+      if(
+        currentUser
+      ){
+
+        if(
+          connected
+        ){
+
+          await safeUpdatePlayerStatus(
+            "connected"
+          );
+
+          await setupConnectionPresence();
+
+        }
+        else{
+
+          updateConnectionUI(
+            false
+          );
+
+        }
+
+      }
+
+    }
+
+  );
+
+}
+
+
+function updateConnectionUI(
+  connected
+){
+
+  const pill =
+    document.getElementById(
+      "connectionPill"
+    );
+
+  const text =
+    document.getElementById(
+      "connectionText"
+    );
+
+  if(
+    !pill ||
+    !text
+  ){
+
+    return;
+
+  }
+
+  pill.classList.remove(
+    "connected",
+    "reconnecting",
+    "offline"
+  );
+
+  if(
+    connected
+  ){
+
+    pill.classList.add(
+      "connected"
+    );
+
+    text.textContent =
+      "Connected";
+
+    document
+      .getElementById(
+        "topUserStatus"
+      )
+      .textContent =
+      "Online";
+
+  }
+  else{
+
+    pill.classList.add(
+      "reconnecting"
+    );
+
+    text.textContent =
+      "Reconnecting...";
+
+    document
+      .getElementById(
+        "topUserStatus"
+      )
+      .textContent =
+      "Connection lost — keeping your player";
+
+  }
+
+}
+
+
+async function safeUpdatePlayerStatus(
+  status
+){
+
+  if(
+    !roomCode ||
+    !currentUser
+  ){
+
+    return;
+
+  }
+
+  try{
+
+    await update(
+
+      ref(
+        db,
+        `rooms/${roomCode}/players/${currentUser.uid}`
+      ),
+
+      {
+
+        name:
+          myName,
+
+        uid:
+          currentUser.uid,
+
+        connectionStatus:
+          status,
+
+        lastSeenAt:
+          serverTimestamp(),
+
+        lastSeenClientAt:
+          Date.now()
+
+      }
+
+    );
+
+  }
+  catch(error){
+
+    console.warn(
+      "Player status:",
+      error
+    );
+
+  }
+
+}
+
+
+/*
+  IMPORTANT:
+  We deliberately DO NOT delete the player
+  on disconnect.
+
+  We only mark the player offline.
+*/
+
+async function setupConnectionPresence(){
+
+  if(
+    !roomCode ||
+    !currentUser
+  ){
+
+    return;
+
+  }
+
+  try{
+
+    const statusRef =
+      ref(
+        db,
+        `rooms/${roomCode}/players/${currentUser.uid}/connectionStatus`
+      );
+
+    await onDisconnect(
+      statusRef
+    )
+      .set(
+        "offline"
+      );
+
+  }
+  catch(error){
+
+    console.warn(
+      "Presence setup:",
+      error
+    );
+
+  }
+
+}
+
+
+function startHeartbeat(){
+
+  clearInterval(
+    heartbeatInterval
+  );
+
+  heartbeatInterval =
+    setInterval(
+      async ()=>{
+
+        if(
+          currentUser &&
+          roomCode
+        ){
+
+          await safeUpdatePlayerStatus(
+            "connected"
+          );
+
+          try{
+
+            await update(
+              ref(
+                db,
+                `users/${currentUser.uid}`
+              ),
+              {
+                lastSeenAt:
+                  serverTimestamp()
+              }
+            );
+
+          }
+          catch(error){
+
+            console.warn(
+              "User heartbeat:",
+              error
+            );
+
+          }
+
+        }
+
+      },
+      20000
+    );
+
+}
+
+
+startConnectionListener();
+
+startHeartbeat();
+
+
+document.addEventListener(
+  "visibilitychange",
+  ()=>{
+
+    if(
+      document.visibilityState ===
+      "visible"
+    ){
+
+      if(
+        currentUser
+      ){
+
+        safeUpdatePlayerStatus(
+          "connected"
+        );
+
+      }
+
+      restoreCurrentRoomAfterResume();
+
+    }
+
+  }
+);
+
+
+window.addEventListener(
+  "online",
+  ()=>{
+
+    if(
+      currentUser
+    ){
+
+      safeUpdatePlayerStatus(
+        "connected"
+      );
+
+    }
+
+    restoreCurrentRoomAfterResume();
+
+  }
+);
+
+
+/* =====================================================
+ROOM STATE SAVING
+===================================================== */
+
+function saveCurrentRoom(){
+
+  if(
+    roomCode
+  ){
+
+    localStorage.setItem(
+      "tivoliMysteryRoom",
+      roomCode
+    );
+
+  }
+
+}
+
+
+function clearSavedRoom(){
+
+  localStorage.removeItem(
+    "tivoliMysteryRoom"
+  );
+
+}
+
+
+function restoreSavedRoomPrompt(){
+
+  const saved =
+    localStorage.getItem(
+      "tivoliMysteryRoom"
+    );
+
+  if(
+    !saved
+  ){
+
+    document
+      .getElementById(
+        "restoreRoomBox"
+      )
+      .classList
+      .add("hidden");
+
+    return;
+
+  }
+
+  document
+    .getElementById(
+      "restoreRoomBox"
+    )
+    .classList
+    .remove("hidden");
+
+  document
+    .getElementById(
+      "restoreRoomText"
+    )
+    .textContent =
+    `You were previously in room ${saved}.`;
+
+}
+
+
+window.restorePreviousRoom =
+async function(){
+
+  const saved =
+    localStorage.getItem(
+      "tivoliMysteryRoom"
+    );
+
+  if(
+    !saved
+  ){
+
+    return;
+
+  }
+
+  document
+    .getElementById(
+      "roomInput"
+    )
+    .value =
+    saved;
+
+  await joinRoom();
+
+};
+
+
+async function restoreCurrentRoomAfterResume(){
+
+  if(
+    !currentUser ||
+    !roomCode
+  ){
+
+    return;
+
+  }
+
+  try{
+
+    const snap =
+      await get(
+        ref(
+          db,
+          `rooms/${roomCode}`
+        )
+      );
+
+    if(
+      !snap.exists()
+    ){
+
+      clearSavedRoom();
+
+      return;
+
+    }
+
+    roomData =
+      snap.val();
+
+    renderLobby();
+
+    if(
+      roomData.status ===
+      "game"
+    ){
+
+      await loadGame();
+
+    }
+
+    await safeUpdatePlayerStatus(
+      "connected"
+    );
+
+  }
+  catch(error){
+
+    console.warn(
+      "Resume:",
+      error
+    );
+
+  }
+
+}
+
+
+/* =====================================================
+ROOM EXPIRY
+===================================================== */
+
+function roomActivityTime(
+  data
+){
+
+  return Number(
+    data?.lastActivityClientAt ||
+    data?.createdAtClient ||
+    0
+  );
+
+}
+
+
+function isRoomStale(
+  data
+){
+
+  if(
+    !data
+  ){
+
+    return false;
+
+  }
+
+  if(
+    data.status &&
+    data.status !==
+    "lobby"
+  ){
+
+    return false;
+
+  }
+
+  const activity =
+    roomActivityTime(
+      data
+    );
+
+  if(
+    !activity
+  ){
+
+    return false;
+
+  }
+
+  return (
+    Date.now() -
+    activity >=
+    ROOM_STALE_TIME
+  );
+
+}
+
+
+async function touchRoom(){
+
+  if(
+    !roomCode
+  ){
+
+    return;
+
+  }
+
+  try{
+
+    await update(
+
+      ref(
+        db,
+        `rooms/${roomCode}`
+      ),
+
+      {
+
+        lastActivityAt:
+          serverTimestamp(),
+
+        lastActivityClientAt:
+          Date.now()
+
+      }
+
+    );
+
+  }
+  catch(error){
+
+    console.warn(
+      "touchRoom:",
+      error
+    );
+
+  }
+
+}
+
+
+function startRoomExpiryWatcher(){
+
+  clearInterval(
+    roomExpiryInterval
+  );
+
+  if(
+    !roomCode
+  ){
+
+    return;
+
+  }
+
+  roomExpiryInterval =
+    setInterval(
+      async ()=>{
+
+        try{
+
+          const snap =
+            await get(
+              ref(
+                db,
+                `rooms/${roomCode}`
+              )
+            );
+
+          if(
+            !snap.exists()
+          ){
+
+            return;
+
+          }
+
+          const data =
+            snap.val();
+
+          if(
+            isRoomStale(
+              data
+            )
+          ){
+
+            await remove(
+              ref(
+                db,
+                `rooms/${roomCode}`
+              )
+            );
+
+            leaveRoomToHome(
+              "This lobby expired after 15 minutes of no activity."
+            );
+
+          }
+
+        }
+        catch(error){
+
+          console.warn(
+            "Room expiry:",
+            error
+          );
+
+        }
+
+      },
+      30000
+    );
+
+}
+
+
+function stopRoomExpiryWatcher(){
+
+  clearInterval(
+    roomExpiryInterval
+  );
+
+  roomExpiryInterval =
+    null;
+
+}
+
+
+function leaveRoomToHome(
+  message = ""
+){
+
+  stopRoomExpiryWatcher();
+
+  clearInterval(
+    globalInterval
+  );
+
+  roomData =
+    null;
+
+  mySecret =
+    null;
+
+  roomCode =
+    "";
+
+  selectedDetectivePlayerId =
+    null;
+
+  lastCallId =
+    null;
+
+  listenersStarted =
+    false;
+
+  notesListenerStarted =
+    false;
+
+  detectiveNotesListenerStarted =
+    false;
+
+  gameResultListenerStarted =
+    false;
+
+  roomListenerStarted =
+    false;
+
+  completedListenerStarted =
+    false;
+
+  clearSavedRoom();
+
+  document
+    .getElementById(
+      "home"
+    )
+    .classList
+    .remove("hidden");
+
+  document
+    .getElementById(
+      "createScreen"
+    )
+    .classList
+    .add("hidden");
+
+  document
+    .getElementById(
+      "lobby"
+    )
+    .classList
+    .add("hidden");
+
+  document
+    .getElementById(
+      "game"
+    )
+    .classList
+    .add("hidden");
+
+  document
+    .getElementById(
+      "revealOverlay"
+    )
+    .classList
+    .add("hidden");
+
+  if(
+    message
+  ){
+
+    alert(
+      message
+    );
 
   }
 
@@ -2881,19 +4128,9 @@ HOME
 window.createRoom =
 function(){
 
-  myName =
-    document
-      .getElementById(
-        "nameInput"
-      )
-      .value
-      .trim();
-
-  if(!myName){
-
-    alert(
-      "Enter your name first."
-    );
+  if(
+    !currentUser
+  ){
 
     return;
 
@@ -2943,13 +4180,13 @@ CREATE ROOM
 window.finishCreateRoom =
 async function(){
 
-  myName =
-    document
-      .getElementById(
-        "nameInput"
-      )
-      .value
-      .trim();
+  if(
+    !currentUser
+  ){
+
+    return;
+
+  }
 
   roomCode =
     document
@@ -2969,17 +4206,9 @@ async function(){
         .value
     );
 
-  if(!myName){
-
-    alert(
-      "Enter your name first."
-    );
-
-    return;
-
-  }
-
-  if(!roomCode){
+  if(
+    !roomCode
+  ){
 
     alert(
       "Enter a room code."
@@ -2992,8 +4221,7 @@ async function(){
   const roomRef =
     ref(
       db,
-      "rooms/" +
-      roomCode
+      `rooms/${roomCode}`
     );
 
   const existing =
@@ -3022,7 +4250,7 @@ async function(){
     else{
 
       alert(
-        "That room already exists and is still active."
+        "That room already exists and is active."
       );
 
       return;
@@ -3042,46 +4270,66 @@ async function(){
         "lobby",
 
       host:
-        playerId,
+        currentUser.uid,
 
       playerLimit:
         limit,
 
       createdAt:
+        serverTimestamp(),
+
+      createdAtClient:
         now,
 
       lastActivityAt:
+        serverTimestamp(),
+
+      lastActivityClientAt:
         now,
 
       roundNumber:
         0,
 
       players:{
-        [playerId]:{
+
+        [currentUser.uid]:{
+
+          uid:
+            currentUser.uid,
 
           name:
             myName,
 
           joinedAt:
+            serverTimestamp(),
+
+          joinedAtClient:
             now,
 
           lastSeenAt:
-            now
+            serverTimestamp(),
+
+          lastSeenClientAt:
+            now,
+
+          connectionStatus:
+            "connected"
 
         }
+
       }
 
     }
+
   );
 
-  /*
-    IMPORTANT FIX:
-    We no longer register an onDisconnect().remove()
-    for the player. This means a temporary phone
-    disconnect cannot erase the player's name.
-  */
+  saveCurrentRoom();
 
-  await markPlayerSeen();
+  await safeUpdatePlayerStatus(
+    "connected"
+  );
+
+  await setupConnectionPresence();
 
   startRoomExpiryWatcher();
 
@@ -3097,13 +4345,13 @@ JOIN ROOM
 window.joinRoom =
 async function(){
 
-  myName =
-    document
-      .getElementById(
-        "nameInput"
-      )
-      .value
-      .trim();
+  if(
+    !currentUser
+  ){
+
+    return;
+
+  }
 
   roomCode =
     document
@@ -3114,17 +4362,9 @@ async function(){
       .trim()
       .toUpperCase();
 
-  if(!myName){
-
-    alert(
-      "Enter your name."
-    );
-
-    return;
-
-  }
-
-  if(!roomCode){
+  if(
+    !roomCode
+  ){
 
     alert(
       "Enter a room code."
@@ -3137,8 +4377,7 @@ async function(){
   const roomRef =
     ref(
       db,
-      "rooms/" +
-      roomCode
+      `rooms/${roomCode}`
     );
 
   const snapshot =
@@ -3172,36 +4411,10 @@ async function(){
     );
 
     alert(
-      "That room was older than 15 minutes and has been deleted."
+      "That lobby expired."
     );
 
     return;
-
-  }
-
-  if(
-    data.status !==
-    "lobby"
-  ){
-
-    /*
-      Allow a player who was already part of
-      the game to reconnect without making them
-      "Unknown".
-    */
-
-    const existingPlayer =
-      data.players?.[playerId];
-
-    if(!existingPlayer){
-
-      alert(
-        "The game has already started."
-      );
-
-      return;
-
-    }
 
   }
 
@@ -3209,9 +4422,29 @@ async function(){
     data.players ||
     {};
 
+  const existingPlayer =
+    players[
+      currentUser.uid
+    ];
+
   if(
-    data.status === "lobby" &&
-    !players[playerId] &&
+    data.status !==
+    "lobby" &&
+    !existingPlayer
+  ){
+
+    alert(
+      "The game has already started."
+    );
+
+    return;
+
+  }
+
+  if(
+    data.status ===
+    "lobby" &&
+    !existingPlayer &&
     Object.keys(
       players
     ).length >=
@@ -3229,180 +4462,75 @@ async function(){
   const now =
     Date.now();
 
-  /*
-    IMPORTANT FIX:
-    Rejoin/update the SAME persistent player
-    instead of replacing it with a new identity.
-  */
+  const playerUpdates = {
+
+    uid:
+      currentUser.uid,
+
+    name:
+      myName,
+
+    lastSeenAt:
+      serverTimestamp(),
+
+    lastSeenClientAt:
+      now,
+
+    connectionStatus:
+      "connected"
+
+  };
+
+  if(
+    existingPlayer?.joinedAt
+  ){
+
+    playerUpdates.joinedAt =
+      existingPlayer.joinedAt;
+
+  }
+  else{
+
+    playerUpdates.joinedAt =
+      serverTimestamp();
+
+    playerUpdates.joinedAtClient =
+      now;
+
+  }
 
   await update(
     roomRef,
     {
 
       lastActivityAt:
+        serverTimestamp(),
+
+      lastActivityClientAt:
         now,
 
-      ["players/" +
-       playerId +
-       "/name"]:
-       myName,
-
-      ["players/" +
-       playerId +
-       "/joinedAt"]:
-       players[playerId]?.joinedAt ||
-       now,
-
-      ["players/" +
-       playerId +
-       "/lastSeenAt"]:
-       now
+      [`players/${currentUser.uid}`]:
+        {
+          ...existingPlayer,
+          ...playerUpdates
+        }
 
     }
   );
 
-  /*
-    No onDisconnect remove here.
-    The player stays in Firebase even if the
-    iPhone sleeps or briefly loses connection.
-  */
+  saveCurrentRoom();
 
-  await markPlayerSeen();
+  await safeUpdatePlayerStatus(
+    "connected"
+  );
+
+  await setupConnectionPresence();
 
   startRoomExpiryWatcher();
 
   enterLobby();
 
 };
-
-
-/* =====================================================
-PERSISTENT PLAYER PRESENCE
-===================================================== */
-
-/*
-  The player record is deliberately NOT deleted when
-  the phone loses connection.
-
-  Instead, we only update lastSeenAt when the player
-  returns / interacts with the page.
-
-  This keeps names, roles, tasks, notes and dossiers
-  stable across iPhone lock/background disconnects.
-*/
-
-async function markPlayerSeen(){
-
-  if(!roomCode){
-    return;
-  }
-
-  try{
-
-    await update(
-
-      ref(
-        db,
-        `rooms/${roomCode}/players/${playerId}`
-      ),
-
-      {
-
-        name:
-          myName,
-
-        lastSeenAt:
-          Date.now()
-
-      }
-
-    );
-
-  }
-  catch(error){
-
-    console.warn(
-      "Could not update player lastSeenAt:",
-      error
-    );
-
-  }
-
-}
-
-
-/*
-  Update lastSeenAt when the page becomes active again.
-*/
-
-document.addEventListener(
-  "visibilitychange",
-  ()=>{
-
-    if(
-      document.visibilityState ===
-      "visible"
-    ){
-
-      markPlayerSeen();
-
-    }
-
-  }
-);
-
-
-/*
-  Also refresh when the browser restores focus.
-*/
-
-window.addEventListener(
-  "focus",
-  ()=>{
-
-    markPlayerSeen();
-
-  }
-);
-
-
-/*
-  Periodic lightweight heartbeat.
-  This DOES NOT delete anyone.
-*/
-
-setInterval(
-  ()=>{
-
-    if(
-      roomCode
-    ){
-
-      markPlayerSeen();
-
-    }
-
-  },
-  30000
-);
-
-
-/*
-  IMPORTANT:
-  The old pagehide handler that deleted the player
-  has intentionally been removed.
-
-  DO NOT add this back:
-
-    remove(
-      ref(
-        db,
-        `rooms/${roomCode}/players/${playerId}`
-      )
-    );
-
-  That was one of the causes of the "Unknown" problem.
-*/
 
 
 /* =====================================================
@@ -3446,6 +4574,8 @@ function enterLobby(){
     .textContent =
     roomCode;
 
+  saveCurrentRoom();
+
   startRoomExpiryWatcher();
 
   listenToRoom();
@@ -3455,12 +4585,22 @@ function enterLobby(){
 
 function listenToRoom(){
 
+  if(
+    roomListenerStarted
+  ){
+
+    return;
+
+  }
+
+  roomListenerStarted =
+    true;
+
   onValue(
 
     ref(
       db,
-      "rooms/" +
-      roomCode
+      `rooms/${roomCode}`
     ),
 
     async snapshot=>{
@@ -3480,72 +4620,79 @@ function listenToRoom(){
       roomData =
         snapshot.val();
 
-      /*
-        If our player record somehow does not exist
-        because of an old room created with the broken
-        version, recreate it here safely.
-      */
-
-      if(
-        !roomData.players ||
-        !roomData.players[playerId]
-      ){
-
-        try{
-
-          await update(
-
-            ref(
-              db,
-              `rooms/${roomCode}/players/${playerId}`
-            ),
-
-            {
-
-              name:
-                myName,
-
-              joinedAt:
-                Date.now(),
-
-              lastSeenAt:
-                Date.now()
-
-            }
-
-          );
-
-        }
-        catch(error){
-
-          console.warn(
-            "Could not restore player:",
-            error
-          );
-
-        }
-
-      }
-
       if(
         isRoomStale(
           roomData
         )
       ){
 
-        await remove(
-          ref(
-            db,
-            "rooms/" +
-            roomCode
-          )
-        );
+        if(
+          roomData.host ===
+          currentUser?.uid
+        ){
+
+          await remove(
+            ref(
+              db,
+              `rooms/${roomCode}`
+            )
+          );
+
+        }
 
         leaveRoomToHome(
-          "This room expired after 15 minutes."
+          "This lobby expired after 15 minutes of no activity."
         );
 
         return;
+
+      }
+
+      const myPlayer =
+        roomData.players?.[
+          currentUser?.uid
+        ];
+
+      if(
+        !myPlayer
+      ){
+
+        const now =
+          Date.now();
+
+        await update(
+
+          ref(
+            db,
+            `rooms/${roomCode}/players/${currentUser.uid}`
+          ),
+
+          {
+
+            uid:
+              currentUser.uid,
+
+            name:
+              myName,
+
+            joinedAt:
+              serverTimestamp(),
+
+            joinedAtClient:
+              now,
+
+            lastSeenAt:
+              serverTimestamp(),
+
+            lastSeenClientAt:
+              now,
+
+            connectionStatus:
+              "connected"
+
+          }
+
+        );
 
       }
 
@@ -3556,7 +4703,7 @@ function listenToRoom(){
         "game"
       ){
 
-        loadGame();
+        await loadGame();
 
       }
       else{
@@ -3585,6 +4732,15 @@ function listenToRoom(){
         renderLobby();
 
       }
+
+    },
+
+    error=>{
+
+      console.error(
+        "Room listener:",
+        error
+      );
 
     }
 
@@ -3640,8 +4796,7 @@ function renderLobby(){
       <span class="badge">
         👤 ${Math.max(
           0,
-          roomData.playerLimit -
-          2
+          roomData.playerLimit - 2
         )} Innocent
       </span>
 
@@ -3655,31 +4810,94 @@ function renderLobby(){
 
     ids
       .map(
-        id=>`
+        id=>{
 
-          <div class="player">
+          const player =
+            players[id];
 
-            👤
-            ${escapeHtml(
-              players[id]
-                ?.name ||
-              "Unknown"
-            )}
+          const status =
+            player?.connectionStatus ||
+            "unknown";
 
-            ${
-              id ===
-              roomData.host
-              ?
-              `<span class="host">
-                👑 HOST
-              </span>`
-              :
-              ""
-            }
+          const statusText =
+            status ===
+            "connected"
+            ?
+            "🟢 Connected"
+            :
+            status ===
+            "offline"
+            ?
+            "🟡 Reconnecting..."
+            :
+            "🟡 Reconnecting...";
 
-          </div>
+          return `
 
-        `
+            <div class="player">
+
+              <div class="player-row">
+
+                <div>
+
+                  <div class="player-name">
+
+                    👤
+                    ${escapeHtml(
+                      player?.name ||
+                      "Player"
+                    )}
+
+                    ${
+                      id ===
+                      roomData.host
+                      ?
+                      `<span class="host">
+                        👑 HOST
+                      </span>`
+                      :
+                      ""
+                    }
+
+                  </div>
+
+                  <div class="player-status">
+                    ${statusText}
+                  </div>
+
+                </div>
+
+                <div
+                  class="connection-pill ${
+                    status ===
+                    "connected"
+                    ?
+                    "connected"
+                    :
+                    "reconnecting"
+                  }"
+                >
+
+                  <span class="connection-dot"></span>
+
+                  ${
+                    status ===
+                    "connected"
+                    ?
+                    "ONLINE"
+                    :
+                    "RECONNECTING"
+                  }
+
+                </div>
+
+              </div>
+
+            </div>
+
+          `;
+
+        }
       )
       .join("");
 
@@ -3690,7 +4908,7 @@ function renderLobby(){
 
   if(
     roomData.host ===
-    playerId
+    currentUser?.uid
   ){
 
     hostPanel
@@ -3734,7 +4952,7 @@ function renderLobby(){
 
 
 /* =====================================================
-RETURN EVERYONE TO LOBBY
+RETURN TO LOBBY
 ===================================================== */
 
 let returnToLobbyRunning =
@@ -3788,19 +5006,26 @@ async function returnEveryoneToLobby(){
           null,
 
         [`rooms/${roomCode}/createdAt`]:
+          serverTimestamp(),
+
+        [`rooms/${roomCode}/createdAtClient`]:
           now,
 
         [`rooms/${roomCode}/lastActivityAt`]:
+          serverTimestamp(),
+
+        [`rooms/${roomCode}/lastActivityClientAt`]:
           now
 
       }
+
     );
 
   }
   catch(error){
 
     console.error(
-      "Return to lobby failed:",
+      "Return to lobby:",
       error
     );
 
@@ -3825,7 +5050,7 @@ async function(){
   if(
     !roomData ||
     roomData.host !==
-    playerId
+    currentUser?.uid
   ){
 
     alert(
@@ -3838,7 +5063,7 @@ async function(){
 
   if(
     !confirm(
-      "Reset the current game and send everyone back to the lobby?"
+      "Reset the current game and return everyone to the lobby?"
     )
   ){
 
@@ -3861,7 +5086,7 @@ async function(){
   if(
     !roomData ||
     roomData.host !==
-    playerId
+    currentUser?.uid
   ){
 
     return;
@@ -3891,8 +5116,7 @@ async function(){
   }
 
   if(
-    ids.length <
-    2
+    ids.length < 2
   ){
 
     alert(
@@ -3943,9 +5167,7 @@ async function(){
     INVESTIGATION_TIME;
 
   const crimeLocation =
-    random(
-      locations
-    );
+    weightedLocation();
 
   const victim =
     random(
@@ -3960,7 +5182,9 @@ async function(){
   const privateData =
     {};
 
-  privateData[detective] = {
+  privateData[
+    detective
+  ] = {
 
     role:
       "detective",
@@ -3970,7 +5194,9 @@ async function(){
 
   };
 
-  privateData[murderer] = {
+  privateData[
+    murderer
+  ] = {
 
     role:
       "murderer",
@@ -4029,12 +5255,14 @@ async function(){
       (
         roomData.roundNumber ||
         0
-      ) +
-      1,
+      ) + 1,
 
     roundSeed,
 
     startedAt:
+      serverTimestamp(),
+
+    startedAtClient:
       now,
 
     murderAt,
@@ -4096,6 +5324,11 @@ async function(){
   updates[
     `rooms/${roomCode}/lastActivityAt`
   ] =
+    serverTimestamp();
+
+  updates[
+    `rooms/${roomCode}/lastActivityClientAt`
+  ] =
     now;
 
   for(
@@ -4136,10 +5369,347 @@ async function(){
 
 
 /* =====================================================
+TASK GENERATION
+===================================================== */
+
+function makeRandomUnlockTimes(
+  now,
+  detectiveEnd,
+  count
+){
+
+  const startOffset =
+    60 * 1000;
+
+  const available =
+    Math.max(
+      60 * 1000,
+      detectiveEnd -
+      now -
+      90 * 1000
+    );
+
+  const values =
+    [];
+
+  for(
+    let i = 0;
+    i < count;
+    i++
+  ){
+
+    const percentage =
+      (i + 1) /
+      (count + 1);
+
+    const spread =
+      (
+        Math.random() -
+        0.5
+      ) *
+      30 *
+      1000;
+
+    let offset =
+      startOffset +
+      (
+        available -
+        startOffset
+      ) *
+      percentage +
+      spread;
+
+    offset =
+      Math.max(
+        startOffset,
+        Math.min(
+          available,
+          offset
+        )
+      );
+
+    values.push(
+      nextMinuteTimestamp(
+        now +
+        offset
+      )
+    );
+
+  }
+
+  values.sort(
+    (
+      a,
+      b
+    ) =>
+      a - b
+  );
+
+  return values;
+
+}
+
+
+function buildRandomNormalTask(
+  id,
+  unlockAt,
+  usedLocations,
+  forbiddenLocation
+){
+
+  const location =
+    uniqueLocation(
+      usedLocations,
+      forbiddenLocation
+    );
+
+  const pool =
+    Math.random() <
+    0.5
+    ?
+    activityTemplates
+    :
+    actionTemplates;
+
+  return createTask(
+    id,
+    unlockAt,
+    fillLocationTemplate(
+      random(pool),
+      location
+    )
+  );
+
+}
+
+
+function buildRandomNormalTasks(
+  playerIdForSeed,
+  now,
+  detectiveEnd,
+  crimeLocation,
+  roundSeed
+){
+
+  const count =
+    3 +
+    Math.floor(
+      Math.random() *
+      3
+    );
+
+  const unlockTimes =
+    makeRandomUnlockTimes(
+      now,
+      detectiveEnd,
+      count
+    );
+
+  const usedLocations =
+    [];
+
+  const tasks =
+    [];
+
+  for(
+    let i = 0;
+    i < count;
+    i++
+  ){
+
+    const taskId =
+      roundSeed +
+      "_" +
+      playerIdForSeed +
+      "_N_" +
+      i +
+      "_" +
+      Math.random()
+        .toString(36)
+        .substring(
+          2,
+          8
+        );
+
+    tasks.push(
+
+      buildRandomNormalTask(
+        taskId,
+        unlockTimes[i],
+        usedLocations,
+        crimeLocation
+      )
+
+    );
+
+  }
+
+  return tasks;
+
+}
+
+
+function buildRandomMurdererTasks(
+  playerIdForSeed,
+  now,
+  detectiveEnd,
+  murderAt,
+  crimeLocation,
+  roundSeed
+){
+
+  const normalCount =
+    2 +
+    Math.floor(
+      Math.random() *
+      3
+    );
+
+  const normalTimes =
+    makeRandomUnlockTimes(
+      now,
+      Math.min(
+        detectiveEnd,
+        murderAt -
+        30 *
+        1000
+      ),
+      normalCount
+    );
+
+  const usedLocations =
+    [];
+
+  const tasks =
+    [];
+
+  for(
+    let i = 0;
+    i < normalCount;
+    i++
+  ){
+
+    const taskId =
+      roundSeed +
+      "_" +
+      playerIdForSeed +
+      "_M_" +
+      i +
+      "_" +
+      Math.random()
+        .toString(36)
+        .substring(
+          2,
+          8
+        );
+
+    tasks.push(
+
+      buildRandomNormalTask(
+        taskId,
+        normalTimes[i],
+        usedLocations,
+        crimeLocation
+      )
+
+    );
+
+  }
+
+  const murderTaskId =
+    roundSeed +
+    "_" +
+    playerIdForSeed +
+    "_KILL_" +
+    Math.random()
+      .toString(36)
+      .substring(
+        2,
+        8
+      );
+
+  const murderDescription =
+    fillLocationTemplate(
+      random(
+        murderTemplates
+      ),
+      crimeLocation
+    )
+      .replace(
+        "{time}",
+        shortClock(
+          new Date(
+            murderAt
+          )
+        )
+      );
+
+  tasks.push(
+
+    createTask(
+      murderTaskId,
+      murderAt,
+      murderDescription
+    )
+
+  );
+
+  const afterTime =
+    Math.min(
+      murderAt +
+      25 *
+      1000,
+      detectiveEnd -
+      20 *
+      1000
+    );
+
+  const afterTaskId =
+    roundSeed +
+    "_" +
+    playerIdForSeed +
+    "_A_" +
+    Math.random()
+      .toString(36)
+      .substring(
+        2,
+        8
+      );
+
+  tasks.push(
+
+    createTask(
+      afterTaskId,
+      afterTime,
+      fillLocationTemplate(
+        random(
+          afterMurderTemplates
+        ),
+        crimeLocation
+      )
+    )
+
+  );
+
+  return tasks;
+
+}
+
+
+/* =====================================================
 LOAD GAME
 ===================================================== */
 
 async function loadGame(){
+
+  if(
+    !roomData ||
+    !currentUser
+  ){
+
+    return;
+
+  }
 
   document
     .getElementById(
@@ -4157,7 +5727,7 @@ async function loadGame(){
 
   if(
     roomData.host ===
-    playerId
+    currentUser.uid
   ){
 
     document
@@ -4179,70 +5749,22 @@ async function loadGame(){
 
   }
 
-  /*
-    Always make sure our own player node exists
-    before loading game information.
-  */
+  await safeUpdatePlayerStatus(
+    "connected"
+  );
 
-  const playerSnapshot =
-    await get(
-
-      ref(
-        db,
-        `rooms/${roomCode}/players/${playerId}`
-      )
-
-    );
+  await setupConnectionPresence();
 
   if(
-    !playerSnapshot.exists()
+    !mySecret
   ){
-
-    await set(
-
-      ref(
-        db,
-        `rooms/${roomCode}/players/${playerId}`
-      ),
-
-      {
-
-        name:
-          myName,
-
-        joinedAt:
-          Date.now(),
-
-        lastSeenAt:
-          Date.now()
-
-      }
-
-    );
-
-  }
-  else{
-
-    const currentPlayer =
-      playerSnapshot.val();
-
-    myName =
-      currentPlayer.name ||
-      myName;
-
-    await markPlayerSeen();
-
-  }
-
-
-  if(!mySecret){
 
     const snapshot =
       await get(
 
         ref(
           db,
-          `rooms/${roomCode}/private/${playerId}`
+          `rooms/${roomCode}/private/${currentUser.uid}`
         )
 
       );
@@ -4260,20 +5782,33 @@ async function loadGame(){
 
   }
 
-  if(!listenersStarted){
+  if(
+    !listenersStarted
+  ){
 
     listenersStarted =
       true;
 
     listenForCalls();
 
-    listenToMyTasks();
-
     listenForGameResult();
 
   }
 
-  if(!notesListenerStarted){
+  if(
+    !completedListenerStarted
+  ){
+
+    completedListenerStarted =
+      true;
+
+    listenToMyTasks();
+
+  }
+
+  if(
+    !notesListenerStarted
+  ){
 
     notesListenerStarted =
       true;
@@ -4315,7 +5850,7 @@ async function loadGame(){
 
 
 /* =====================================================
-MAIN TIMER
+GLOBAL TIMER
 ===================================================== */
 
 function startGlobalClock(){
@@ -4327,8 +5862,7 @@ function startGlobalClock(){
   function tick(){
 
     if(
-      !roomData ||
-      !roomData.game
+      !roomData?.game
     ){
 
       return;
@@ -4350,7 +5884,6 @@ function startGlobalClock(){
       clockText(
         new Date(now)
       );
-
 
     if(
       now <
@@ -4393,10 +5926,8 @@ function startGlobalClock(){
 
     }
 
-
     if(
-      mySecret &&
-      mySecret.role ===
+      mySecret?.role ===
       "detective"
     ){
 
@@ -4413,7 +5944,6 @@ function startGlobalClock(){
           )
         );
 
-
       if(
         now >=
         game.detectiveEnd
@@ -4423,13 +5953,10 @@ function startGlobalClock(){
 
       }
 
-
       const timerCard =
-        document
-          .getElementById(
-            "investigationTimerCard"
-          );
-
+        document.getElementById(
+          "investigationTimerCard"
+        );
 
       if(
         now >=
@@ -4447,10 +5974,10 @@ function startGlobalClock(){
             "investigationTimer"
           )
           .textContent =
-          formatDuration(
-            game.investigationEnd -
-            now
-          );
+        formatDuration(
+          game.investigationEnd -
+          now
+        );
 
       }
       else{
@@ -4463,14 +5990,11 @@ function startGlobalClock(){
 
     }
 
-
     renderTasks();
 
   }
 
-
   tick();
-
 
   globalInterval =
     setInterval(
@@ -4493,7 +6017,7 @@ function renderSecret(){
     );
 
   if(
-    mySecret.role ===
+    mySecret?.role ===
     "detective"
   ){
 
@@ -4504,7 +6028,7 @@ function renderSecret(){
       </div>
 
       <div class="big">
-        Leave the game area now.
+        Leave the playing area now.
       </div>
 
       <p>
@@ -4516,8 +6040,8 @@ function renderSecret(){
       </div>
 
       <p>
-        Player notes will still arrive in
-        your Detective Notebook.
+        Player notes will continue arriving
+        in your private Detective tools.
       </p>
 
     `;
@@ -4552,21 +6076,25 @@ function renderSecret(){
   hideDetectiveTools();
 
   const murderer =
-    mySecret.role ===
+    mySecret?.role ===
     "murderer";
 
   card.innerHTML = `
 
     <div class="role ${
       murderer
-      ? "murderer"
-      : "innocent"
+      ?
+      "murderer"
+      :
+      "innocent"
     }">
 
       ${
         murderer
-        ? "🔪 YOU ARE THE MURDERER"
-        : "👤 YOU ARE INNOCENT"
+        ?
+        "🔪 YOU ARE THE MURDERER"
+        :
+        "👤 YOU ARE INNOCENT"
       }
 
     </div>
@@ -4575,7 +6103,7 @@ function renderSecret(){
       ${
         murderer
         ?
-        "The murder is completely fictional. Follow your secret timeline."
+        "The incident is completely fictional. Follow your secret timeline."
         :
         "You are innocent. Follow your own secret timeline."
       }
@@ -4605,8 +6133,7 @@ TASK RENDER
 function renderTasks(){
 
   if(
-    !mySecret ||
-    !mySecret.tasks
+    !mySecret?.tasks
   ){
 
     return;
@@ -4618,15 +6145,21 @@ function renderTasks(){
       "myTasks"
     );
 
-  if(!container){
+  if(
+    !container
+  ){
+
     return;
+
   }
 
   const now =
     Date.now();
 
   const completed =
-    roomData?.completed?.[playerId] ||
+    roomData?.completed?.[
+      currentUser?.uid
+    ] ||
     {};
 
   container.innerHTML =
@@ -4643,7 +6176,6 @@ function renderTasks(){
             completed[
               task.id
             ] === true;
-
 
           if(
             !unlocked
@@ -4684,16 +6216,15 @@ function renderTasks(){
 
           }
 
-
           return `
 
-            <div
-              class="task ${
-                done
-                ? "done"
-                : ""
-              }"
-            >
+            <div class="task ${
+              done
+              ?
+              "done"
+              :
+              ""
+            }">
 
               <div class="task-row">
 
@@ -4702,12 +6233,14 @@ function renderTasks(){
                   type="checkbox"
                   ${
                     done
-                    ? "checked"
-                    : ""
+                    ?
+                    "checked"
+                    :
+                    ""
                   }
                   onchange="
                     toggleTask(
-                      '${task.id}',
+                      '${escapeHtml(task.id)}',
                       this.checked
                     )
                   "
@@ -4727,11 +6260,9 @@ function renderTasks(){
                   </div>
 
                   <div>
-
                     ${escapeHtml(
                       task.description
                     )}
-
                   </div>
 
                   <div class="task-status">
@@ -4762,7 +6293,7 @@ function renderTasks(){
 
 
 /* =====================================================
-TASK CHECKING
+TASK TOGGLE
 ===================================================== */
 
 window.toggleTask =
@@ -4772,8 +6303,7 @@ async function(
 ){
 
   if(
-    !mySecret ||
-    !mySecret.tasks
+    !mySecret?.tasks
   ){
 
     return;
@@ -4783,12 +6313,16 @@ async function(
   const task =
     mySecret.tasks.find(
       t =>
-      t.id ===
-      taskId
+        t.id ===
+        taskId
     );
 
-  if(!task){
+  if(
+    !task
+  ){
+
     return;
+
   }
 
   if(
@@ -4812,7 +6346,7 @@ async function(
 
       ref(
         db,
-        `rooms/${roomCode}/completed/${playerId}`
+        `rooms/${roomCode}/completed/${currentUser.uid}`
       ),
 
       {
@@ -4823,6 +6357,8 @@ async function(
       }
 
     );
+
+    await touchRoom();
 
   }
   catch(error){
@@ -4847,20 +6383,26 @@ function listenToMyTasks(){
 
     ref(
       db,
-      `rooms/${roomCode}/completed/${playerId}`
+      `rooms/${roomCode}/completed/${currentUser.uid}`
     ),
 
     snapshot=>{
 
-      if(!roomData){
+      if(
+        !roomData
+      ){
+
         return;
+
       }
 
       roomData.completed =
         roomData.completed ||
         {};
 
-      roomData.completed[playerId] =
+      roomData.completed[
+        currentUser.uid
+      ] =
         snapshot.val() ||
         {};
 
@@ -4877,12 +6419,10 @@ function listenToMyTasks(){
 PLAYER NOTES
 ===================================================== */
 
-function playerNotePath(
-  player = playerId
-){
+function playerNotePath(){
 
   return (
-    `rooms/${roomCode}/notes/${player}`
+    `rooms/${roomCode}/notes/${currentUser.uid}`
   );
 
 }
@@ -4891,7 +6431,9 @@ function playerNotePath(
 function getPlayerNoteData(){
 
   return (
-    roomData?.notes?.[playerId] ||
+    roomData?.notes?.[
+      currentUser?.uid
+    ] ||
     null
   );
 
@@ -4948,7 +6490,6 @@ async function(){
       "myNoteError"
     );
 
-
   if(
     !input ||
     !button ||
@@ -4959,35 +6500,24 @@ async function(){
 
   }
 
-
-  if(errorBox){
-
-    errorBox.classList.add(
-      "hidden"
-    );
-
-    errorBox.textContent =
-      "";
-
-  }
-
+  errorBox?.classList.add(
+    "hidden"
+  );
 
   const text =
     input.value.trim();
 
-
-  if(!text){
+  if(
+    !text
+  ){
 
     alert(
       "Write a note first."
     );
 
-    input.focus();
-
     return;
 
   }
-
 
   if(
     text.length >
@@ -5002,24 +6532,11 @@ async function(){
 
   }
 
-
-  if(!roomCode){
-
-    alert(
-      "You are not currently in a room."
-    );
-
-    return;
-
-  }
-
-
   button.disabled =
     true;
 
   button.textContent =
     "⏳ SENDING...";
-
 
   try{
 
@@ -5029,10 +6546,10 @@ async function(){
         playerNotePath()
       );
 
-
     const existing =
-      await get(noteRef);
-
+      await get(
+        noteRef
+      );
 
     if(
       existing.exists()
@@ -5044,40 +6561,13 @@ async function(){
 
     }
 
-
     const now =
       Date.now();
 
+    const noteData = {
 
-    await set(
-      noteRef,
-      {
-
-        playerId,
-
-        playerName:
-          myName,
-
-        text,
-
-        timestamp:
-          now
-
-      }
-    );
-
-
-    roomData =
-      roomData ||
-      {};
-
-    roomData.notes =
-      roomData.notes ||
-      {};
-
-    roomData.notes[playerId] = {
-
-      playerId,
+      playerId:
+        currentUser.uid,
 
       playerName:
         myName,
@@ -5085,20 +6575,42 @@ async function(){
       text,
 
       timestamp:
+        serverTimestamp(),
+
+      timestampClient:
         now
 
     };
 
+    await set(
+      noteRef,
+      noteData
+    );
+
+    roomData.notes =
+      roomData.notes ||
+      {};
+
+    roomData.notes[
+      currentUser.uid
+    ] =
+      {
+
+        ...noteData,
+
+        timestamp:
+          now
+
+      };
 
     input.value =
       "";
 
     updatePlayerNoteCounter();
 
-
     status.innerHTML = `
 
-      ✅ Note sent to the Detective!
+      ✅ Note sent to the Detective.
 
       <br>
 
@@ -5115,71 +6627,32 @@ async function(){
 
     `;
 
-
-    try{
-
-      await touchRoom();
-
-    }
-    catch(e){
-
-      console.warn(
-        e
-      );
-
-    }
-
-
-    if(
-      mySecret?.role ===
-      "detective"
-    ){
-
-      renderLivePlayerNotes();
-
-      renderDetectivePlayerButtons();
-
-      if(
-        selectedDetectivePlayerId
-      ){
-
-        refreshSelectedDossierNote();
-
-      }
-
-    }
+    await touchRoom();
 
   }
   catch(error){
 
     console.error(
-      "PLAYER NOTE FIREBASE ERROR:",
+      "PLAYER NOTE:",
       error
     );
-
-    const message =
-      error?.message ||
-      "Unknown Firebase error.";
 
     status.textContent =
       "❌ The note could not be sent.";
 
-    if(errorBox){
+    if(
+      errorBox
+    ){
 
       errorBox.textContent =
         "Firebase error: " +
-        message;
+        (
+          error?.message ||
+          "Unknown error"
+        );
 
       errorBox.classList.remove(
         "hidden"
-      );
-
-    }
-    else{
-
-      alert(
-        "The note could not be sent.\n\n" +
-        message
       );
 
     }
@@ -5221,12 +6694,12 @@ function updateMyNoteUI(){
 
   }
 
-
   const note =
     getPlayerNoteData();
 
-
-  if(note){
+  if(
+    note
+  ){
 
     input.value =
       note.text ||
@@ -5256,6 +6729,7 @@ function updateMyNoteUI(){
           clockText(
             new Date(
               note.timestamp ||
+              note.timestampClient ||
               Date.now()
             )
           )
@@ -5268,7 +6742,6 @@ function updateMyNoteUI(){
     return;
 
   }
-
 
   input.disabled =
     false;
@@ -5296,8 +6769,12 @@ function listenForPlayerNotes(){
 
     snapshot=>{
 
-      if(!roomData){
+      if(
+        !roomData
+      ){
+
         return;
+
       }
 
       roomData.notes =
@@ -5324,7 +6801,7 @@ function listenForPlayerNotes(){
     error=>{
 
       console.error(
-        "Notes listener error:",
+        "Notes listener:",
         error
       );
 
@@ -5351,8 +6828,12 @@ function renderLivePlayerNotes(){
       "liveNotesList"
     );
 
-  if(!container){
+  if(
+    !container
+  ){
+
     return;
+
   }
 
   const notes =
@@ -5363,11 +6844,20 @@ function renderLivePlayerNotes(){
     Object.values(
       notes
     )
-    .sort(
-      (a,b)=>
-        (b.timestamp || 0) -
-        (a.timestamp || 0)
-    );
+      .sort(
+        (
+          a,
+          b
+        ) =>
+          (
+            b.timestampClient ||
+            0
+          ) -
+          (
+            a.timestampClient ||
+            0
+          )
+      );
 
   if(
     entries.length ===
@@ -5399,7 +6889,7 @@ function renderLivePlayerNotes(){
               📝
               ${escapeHtml(
                 note.playerName ||
-                "Unknown"
+                "Player"
               )}
 
             </div>
@@ -5409,7 +6899,7 @@ function renderLivePlayerNotes(){
               ${escapeHtml(
                 clockText(
                   new Date(
-                    note.timestamp ||
+                    note.timestampClient ||
                     Date.now()
                   )
                 )
@@ -5528,8 +7018,12 @@ async function(){
       "detectiveGeneralSaveStatus"
     );
 
-  if(!input){
+  if(
+    !input
+  ){
+
     return;
+
   }
 
   try{
@@ -5547,6 +7041,9 @@ async function(){
           input.value,
 
         updatedAt:
+          serverTimestamp(),
+
+        updatedAtClient:
           Date.now()
 
       }
@@ -5555,13 +7052,12 @@ async function(){
 
     await touchRoom();
 
-    if(status){
+    if(
+      status
+    ){
 
       status.textContent =
-        "✅ Detective notes saved at " +
-        clockText(
-          new Date()
-        );
+        "✅ Detective notes saved.";
 
     }
 
@@ -5573,14 +7069,12 @@ async function(){
       error
     );
 
-    if(status){
+    if(
+      status
+    ){
 
       status.textContent =
-        "❌ Could not save notes: " +
-        (
-          error?.message ||
-          "Unknown error"
-        );
+        "❌ Could not save notes.";
 
     }
 
@@ -5617,18 +7111,18 @@ function listenForDetectiveNotes(){
         data.general?.text ||
         "";
 
-      const generalInput =
+      const input =
         document.getElementById(
           "detectiveGeneralNotes"
         );
 
       if(
-        generalInput &&
+        input &&
         document.activeElement !==
-        generalInput
+        input
       ){
 
-        generalInput.value =
+        input.value =
           general;
 
       }
@@ -5645,15 +7139,6 @@ function listenForDetectiveNotes(){
         );
 
       }
-
-    },
-
-    error=>{
-
-      console.error(
-        "Detective notes listener:",
-        error
-      );
 
     }
 
@@ -5678,8 +7163,12 @@ function renderDetectivePlayerButtons(){
       "detectivePlayerButtons"
     );
 
-  if(!container){
+  if(
+    !container
+  ){
+
     return;
+
   }
 
   const suspects =
@@ -5712,7 +7201,7 @@ function renderDetectivePlayerButtons(){
 
           const name =
             players[id]?.name ||
-            "Unknown";
+            "Player";
 
           const active =
             id ===
@@ -5726,11 +7215,13 @@ function renderDetectivePlayerButtons(){
             <button
               class="detective-player-button ${
                 active
-                ? "active"
-                : ""
+                ?
+                "active"
+                :
+                ""
               }"
               onclick="
-                openPlayerDossier('${id}')
+                openPlayerDossier('${escapeHtml(id)}')
               "
             >
 
@@ -5812,8 +7303,12 @@ async function loadSelectedDossier(
       "selectedDossier"
     );
 
-  if(!dossier){
+  if(
+    !dossier
+  ){
+
     return;
+
   }
 
   const players =
@@ -5822,7 +7317,7 @@ async function loadSelectedDossier(
 
   const playerName =
     players[player]?.name ||
-    "Unknown";
+    "Player";
 
   document
     .getElementById(
@@ -5861,53 +7356,46 @@ async function loadSelectedDossier(
       :
       {};
 
-    const claim =
-      document.getElementById(
+    document
+      .getElementById(
         "dossierClaim"
-      );
+      )
+      .value =
+      data.claim ||
+      "";
 
-    const important =
-      document.getElementById(
+    document
+      .getElementById(
         "dossierImportant"
-      );
+      )
+      .value =
+      data.important ||
+      "";
 
-    const questions =
-      document.getElementById(
+    document
+      .getElementById(
         "dossierQuestions"
-      );
-
-    if(claim){
-      claim.value =
-        data.claim ||
-        "";
-    }
-
-    if(important){
-      important.value =
-        data.important ||
-        "";
-    }
-
-    if(questions){
-      questions.value =
-        data.questions ||
-        "";
-    }
+      )
+      .value =
+      data.questions ||
+      "";
 
     const status =
       document.getElementById(
         "dossierSaveStatus"
       );
 
-    if(status){
+    if(
+      status
+    ){
 
       status.textContent =
-        data.updatedAt
+        data.updatedAtClient
         ?
         "Last saved: " +
         clockText(
           new Date(
-            data.updatedAt
+            data.updatedAtClient
           )
         )
         :
@@ -5925,11 +7413,15 @@ async function loadSelectedDossier(
 
   }
 
-  if(scroll){
+  if(
+    scroll
+  ){
 
     dossier.scrollIntoView({
-      behavior:"smooth",
-      block:"start"
+      behavior:
+        "smooth",
+      block:
+        "start"
     });
 
   }
@@ -5952,8 +7444,12 @@ function refreshSelectedDossierNote(){
       "selectedPlayerSubmittedNote"
     );
 
-  if(!noteBox){
+  if(
+    !noteBox
+  ){
+
     return;
+
   }
 
   const playerNote =
@@ -5979,17 +7475,15 @@ function refreshSelectedDossierNote(){
       </div>
 
       <div class="note-time">
-
         Timestamp:
         ${escapeHtml(
           clockText(
             new Date(
-              playerNote.timestamp ||
+              playerNote.timestampClient ||
               Date.now()
             )
           )
         )}
-
       </div>
 
     `;
@@ -6038,26 +7532,6 @@ async function(){
 
   }
 
-  const claim =
-    document.getElementById(
-      "dossierClaim"
-    );
-
-  const important =
-    document.getElementById(
-      "dossierImportant"
-    );
-
-  const questions =
-    document.getElementById(
-      "dossierQuestions"
-    );
-
-  const status =
-    document.getElementById(
-      "dossierSaveStatus"
-    );
-
   try{
 
     await set(
@@ -6072,18 +7546,30 @@ async function(){
       {
 
         claim:
-          claim?.value ||
-          "",
+          document
+            .getElementById(
+              "dossierClaim"
+            )
+            .value,
 
         important:
-          important?.value ||
-          "",
+          document
+            .getElementById(
+              "dossierImportant"
+            )
+            .value,
 
         questions:
-          questions?.value ||
-          "",
+          document
+            .getElementById(
+              "dossierQuestions"
+            )
+            .value,
 
         updatedAt:
+          serverTimestamp(),
+
+        updatedAtClient:
           Date.now()
 
       }
@@ -6092,12 +7578,12 @@ async function(){
 
     await touchRoom();
 
-    if(status){
-
-      status.textContent =
-        "✅ Player file saved.";
-
-    }
+    document
+      .getElementById(
+        "dossierSaveStatus"
+      )
+      .textContent =
+      "✅ Player file saved.";
 
   }
   catch(error){
@@ -6107,12 +7593,12 @@ async function(){
       error
     );
 
-    if(status){
-
-      status.textContent =
-        "❌ Could not save player file.";
-
-    }
+    document
+      .getElementById(
+        "dossierSaveStatus"
+      )
+      .textContent =
+      "❌ Could not save player file.";
 
   }
 
@@ -6126,8 +7612,7 @@ INVESTIGATION
 function showInvestigation(){
 
   if(
-    !mySecret ||
-    mySecret.role !==
+    mySecret?.role !==
     "detective"
   ){
 
@@ -6166,8 +7651,7 @@ function showInvestigation(){
 function renderCase(){
 
   if(
-    !roomData ||
-    !roomData.game
+    !roomData?.game
   ){
 
     return;
@@ -6215,7 +7699,7 @@ function renderCase(){
       </p>
 
       <p>
-        <b>Fictional murder time:</b>
+        <b>Fictional incident time:</b>
         ${shortClock(
           new Date(
             game.murderAt
@@ -6223,12 +7707,17 @@ function renderCase(){
         )}
       </p>
 
-      <p>
-        <b>Crime location:</b>
-        ${escapeHtml(
-          game.crimeLocation
-        )}
-      </p>
+      <div class="warning">
+
+        📍 Crime location:
+        <b>UNKNOWN</b>
+
+        <br><br>
+
+        Work it out from the players'
+        timelines and notes.
+
+      </div>
 
       <h3>
         👥 SUSPECTS
@@ -6246,7 +7735,7 @@ function renderCase(){
                   roomData
                     .players[id]
                     ?.name ||
-                  "Unknown"
+                  "Player"
                 )}
 
               </div>
@@ -6272,7 +7761,7 @@ function renderCase(){
 
           <button
             onclick="
-              accuse('${id}')
+              accuse('${escapeHtml(id)}')
             "
           >
 
@@ -6281,7 +7770,7 @@ function renderCase(){
               roomData
                 .players[id]
                 ?.name ||
-              "Unknown"
+              "Player"
             )}
 
           </button>
@@ -6300,13 +7789,16 @@ async function renderTaskProgress(){
     [];
 
   const container =
-    document
-      .getElementById(
-        "taskProgress"
-      );
+    document.getElementById(
+      "taskProgress"
+    );
 
-  if(!container){
+  if(
+    !container
+  ){
+
     return;
+
   }
 
   container.innerHTML =
@@ -6317,18 +7809,18 @@ async function renderTaskProgress(){
   ){
 
     const completed =
-      roomData.completed?.[id] ||
+      roomData?.completed?.[id] ||
       {};
 
     const count =
       Object.values(
         completed
       )
-      .filter(
-        v =>
-        v === true
-      )
-      .length;
+        .filter(
+          value =>
+            value === true
+        )
+        .length;
 
     const total =
       await getPrivateTaskCount(
@@ -6340,8 +7832,10 @@ async function renderTaskProgress(){
       ?
       Math.min(
         100,
-        count /
-        total *
+        (
+          count /
+          total
+        ) *
         100
       )
       :
@@ -6351,7 +7845,7 @@ async function renderTaskProgress(){
       roomData
         .players[id]
         ?.name ||
-      "Unknown";
+      "Player";
 
     const div =
       document.createElement(
@@ -6442,7 +7936,7 @@ async function getPrivateTaskCount(
 
 
 /* =====================================================
-VOTE
+ACCUSE
 ===================================================== */
 
 window.accuse =
@@ -6451,7 +7945,7 @@ async function(
 ){
 
   if(
-    playerId !==
+    currentUser?.uid !==
     roomData?.game?.detective
   ){
 
@@ -6471,7 +7965,7 @@ async function(
     roomData
       .players[accusedId]
       ?.name ||
-    "Unknown";
+    "Player";
 
   try{
 
@@ -6489,6 +7983,9 @@ async function(
         accusedName,
 
         votedAt:
+          serverTimestamp(),
+
+        votedAtClient:
           Date.now()
 
       }
@@ -6501,12 +7998,12 @@ async function(
   catch(error){
 
     console.error(
-      "Vote:",
+      "Accuse:",
       error
     );
 
     alert(
-      "Could not submit the vote."
+      "Could not submit the accusation."
     );
 
   }
@@ -6519,17 +8016,6 @@ RESULT LISTENER
 ===================================================== */
 
 function listenForGameResult(){
-
-  if(
-    gameResultListenerStarted
-  ){
-
-    return;
-
-  }
-
-  gameResultListenerStarted =
-    true;
 
   onValue(
 
@@ -6552,8 +8038,7 @@ function listenForGameResult(){
         snapshot.val();
 
       if(
-        !result.accusedId ||
-        !result.votedAt
+        !result.accusedId
       ){
 
         return;
@@ -6562,7 +8047,8 @@ function listenForGameResult(){
 
       const revealId =
         String(
-          result.votedAt
+          result.votedAtClient ||
+          result.accusedId
         );
 
       if(
@@ -6636,7 +8122,9 @@ function setReveal(
     "hidden"
   );
 
-  if(details){
+  if(
+    details
+  ){
 
     detailsEl.innerHTML =
       details;
@@ -6675,8 +8163,7 @@ async function runSuspenseReveal(
   }
 
   if(
-    !roomData ||
-    !roomData.game
+    !roomData?.game
   ){
 
     return;
@@ -6702,9 +8189,11 @@ async function runSuspenseReveal(
     result.accusedId;
 
   const accusedName =
-    players[accusedId]?.name ||
+    players[
+      accusedId
+    ]?.name ||
     result.accusedName ||
-    "Unknown";
+    "Player";
 
   const wasMurderer =
     accusedId ===
@@ -6716,15 +8205,15 @@ async function runSuspenseReveal(
       "hidden"
     );
 
-
   setReveal(
     "THE DETECTIVE HAS MADE A DECISION",
     "🔎",
     "Everyone stay quiet..."
   );
 
-  await sleep(1800);
-
+  await sleep(
+    1800
+  );
 
   setReveal(
     "THE ACCUSED PLAYER",
@@ -6732,8 +8221,9 @@ async function runSuspenseReveal(
     "The Detective has chosen..."
   );
 
-  await sleep(1700);
-
+  await sleep(
+    1700
+  );
 
   setReveal(
     "THE REVEAL",
@@ -6741,51 +8231,51 @@ async function runSuspenseReveal(
     "..."
   );
 
-  await sleep(1000);
+  await sleep(
+    1000
+  );
 
-
-  if(
+  setReveal(
+    "FINAL ROLE",
     wasMurderer
-  ){
+    ?
+    "🔪 THE MURDERER"
+    :
+    "👤 INNOCENT",
+    wasMurderer
+    ?
+    `${accusedName} was the Murderer.`
+    :
+    `${accusedName} was innocent.`,
+    null,
+    wasMurderer
+    ?
+    "reveal-shake"
+    :
+    "reveal-pop"
+  );
 
-    setReveal(
-      "ROLE REVEALED",
-      "🔪 THE MURDERER",
-      `${accusedName} was the Murderer.`,
-      null,
-      "reveal-shake"
-    );
-
-  }
-  else{
-
-    setReveal(
-      "ROLE REVEALED",
-      "👤 INNOCENT",
-      `${accusedName} was innocent.`,
-      null,
-      "reveal-pop"
-    );
-
-  }
-
-  await sleep(2400);
-
+  await sleep(
+    2400
+  );
 
   const detectiveName =
     players[
       game.detective
     ]?.name ||
-    "Unknown";
+    "Player";
 
   const murdererName =
     players[
       game.murderer
     ]?.name ||
-    "Unknown";
+    "Player";
 
   const innocentIds =
-    (game.suspects || [])
+    (
+      game.suspects ||
+      []
+    )
       .filter(
         id =>
           id !==
@@ -6804,7 +8294,7 @@ async function runSuspenseReveal(
               👤
               ${escapeHtml(
                 players[id]?.name ||
-                "Unknown"
+                "Player"
               )}
 
             </div>
@@ -6838,7 +8328,6 @@ async function runSuspenseReveal(
 
     </div>
 
-
     <div class="reveal-role">
 
       <div class="reveal-role-name">
@@ -6856,21 +8345,37 @@ async function runSuspenseReveal(
 
     </div>
 
-
     ${innocentRows}
+
+    <div class="reveal-role">
+
+      <div class="reveal-role-name">
+        📍 Fictional location
+      </div>
+
+      <div class="reveal-role-value">
+
+        ${escapeHtml(
+          game.crimeLocation
+        )}
+
+      </div>
+
+    </div>
 
   `;
 
   setReveal(
-    "EVERY ROLE REVEALED",
+    "EVERYTHING REVEALED",
     "🎭 THE TRUTH",
-    "Now everyone knows who had each role.",
+    "Now everyone knows the full case.",
     rolesHtml,
     "reveal-fade"
   );
 
-  await sleep(3500);
-
+  await sleep(
+    3500
+  );
 
   if(
     wasMurderer
@@ -6905,11 +8410,15 @@ async function runSuspenseReveal(
 
   }
 
-  await sleep(4000);
+  await sleep(
+    4000
+  );
 
   overlay
     .classList
-    .add("hidden");
+    .add(
+      "hidden"
+    );
 
   await returnEveryoneToLobby();
 
@@ -6929,7 +8438,8 @@ async function(
 ){
 
   if(
-    !roomCode
+    !roomCode ||
+    !currentUser
   ){
 
     return;
@@ -6953,11 +8463,18 @@ async function(
           myName,
 
         time:
+          serverTimestamp(),
+
+        timeClient:
           Date.now(),
 
         id:
-          Date.now()
-          .toString()
+          `${Date.now()}_${Math.random()
+            .toString(36)
+            .substring(
+              2,
+              8
+            )}`
 
       }
 
@@ -7044,78 +8561,498 @@ function showCall(
   caller
 ){
 
-  const stack =
+  clearTimeout(
+    callTimer
+  );
+
+  const overlay =
     document.getElementById(
-      "callStack"
+      "callOverlay"
     );
 
-  for(
-    let i = 0;
-    i < 3;
-    i++
-  ){
+  const callerEl =
+    document.getElementById(
+      "callCaller"
+    );
 
+  const destinationEl =
+    document.getElementById(
+      "callDestination"
+    );
+
+  const countdownEl =
+    document.getElementById(
+      "callCountdown"
+    );
+
+  const progressBar =
+    document.getElementById(
+      "callProgressBar"
+    );
+
+  callerEl.textContent =
+    caller ||
+    "Player";
+
+  destinationEl.textContent =
+    "COME TO " +
+    (
+      destination ||
+      "THE AREA"
+    )
+      .toUpperCase();
+
+  overlay
+    .classList
+    .remove(
+      "hidden"
+    );
+
+  progressBar.style.transition =
+    "none";
+
+  progressBar.style.transform =
+    "scaleX(1)";
+
+  void progressBar.offsetWidth;
+
+  progressBar.style.transition =
+    `transform ${CALL_DURATION}ms linear`;
+
+  progressBar.style.transform =
+    "scaleX(0)";
+
+  const started =
+    performance.now();
+
+  function tick(){
+
+    const elapsed =
+      performance.now() -
+      started;
+
+    const remaining =
+      Math.max(
+        0,
+        Math.ceil(
+          (
+            CALL_DURATION -
+            elapsed
+          ) /
+          1000
+        )
+      );
+
+    countdownEl.textContent =
+      String(
+        remaining
+      );
+
+    if(
+      remaining > 0 &&
+      elapsed <
+      CALL_DURATION
+    ){
+
+      requestAnimationFrame(
+        tick
+      );
+
+    }
+
+  }
+
+  tick();
+
+  callTimer =
     setTimeout(
-
       ()=>{
 
-        const banner =
-          document.createElement(
-            "div"
+        overlay
+          .classList
+          .add(
+            "hidden"
           );
 
-        banner.className =
-          "call-banner";
-
-        banner.innerHTML = `
-
-          <h2>
-            📞 GROUP CALL
-          </h2>
-
-          <p>
-
-            ${escapeHtml(caller)}
-            is calling everyone to
-            <b>
-              ${escapeHtml(destination)}
-            </b>!
-
-          </p>
-
-          <button>
-            Dismiss
-          </button>
-
-        `;
-
-        banner
-          .querySelector(
-            "button"
-          )
-          .onclick =
-          ()=>{
-            banner.remove();
-          };
-
-        stack.appendChild(
-          banner
-        );
-
-        setTimeout(
-          ()=>{
-            banner.remove();
-          },
-          10000
-        );
-
       },
+      CALL_DURATION
+    );
 
-      i * 900
+}
 
+
+/* =====================================================
+ALERTS
+===================================================== */
+
+window.enableAlerts =
+async function(){
+
+  try{
+
+    const AudioContext =
+      window.AudioContext ||
+      window.webkitAudioContext;
+
+    if(
+      AudioContext
+    ){
+
+      audioContext =
+        audioContext ||
+        new AudioContext();
+
+      if(
+        audioContext.state ===
+        "suspended"
+      ){
+
+        await audioContext.resume();
+
+      }
+
+      const osc =
+        audioContext.createOscillator();
+
+      const gain =
+        audioContext.createGain();
+
+      osc.frequency.value =
+        660;
+
+      gain.gain.value =
+        0.1;
+
+      osc.connect(
+        gain
+      );
+
+      gain.connect(
+        audioContext.destination
+      );
+
+      const t =
+        audioContext.currentTime;
+
+      gain.gain.exponentialRampToValueAtTime(
+        0.12,
+        t + 0.02
+      );
+
+      gain.gain.exponentialRampToValueAtTime(
+        0.0001,
+        t + 0.20
+      );
+
+      osc.start(
+        t
+      );
+
+      osc.stop(
+        t + 0.22
+      );
+
+    }
+
+    if(
+      "Notification" in window &&
+      Notification.permission ===
+      "default"
+    ){
+
+      try{
+
+        await Notification.requestPermission();
+
+      }
+      catch(e){}
+
+    }
+
+    alertsEnabled =
+      true;
+
+    localStorage.setItem(
+      "hotelMurderAlerts",
+      "1"
+    );
+
+    document
+      .getElementById(
+        "alertStatus"
+      )
+      .textContent =
+      "✅ Call alerts enabled.";
+
+    document
+      .getElementById(
+        "enableAlertsButton"
+      )
+      .textContent =
+      "✅ CALL ALERTS ENABLED";
+
+    playCallSound();
+
+  }
+  catch(error){
+
+    console.error(
+      error
+    );
+
+    alert(
+      "Tap the button again to enable alerts."
     );
 
   }
+
+};
+
+
+window.closeAlertModal =
+function(){
+
+  document
+    .getElementById(
+      "alertModal"
+    )
+    .classList
+    .add("hidden");
+
+};
+
+
+function playCallSound(){
+
+  try{
+
+    const AudioContext =
+      window.AudioContext ||
+      window.webkitAudioContext;
+
+    if(
+      !AudioContext
+    ){
+
+      return;
+
+    }
+
+    audioContext =
+      audioContext ||
+      new AudioContext();
+
+    if(
+      audioContext.state ===
+      "suspended"
+    ){
+
+      audioContext
+        .resume()
+        .catch(
+          ()=>{}
+        );
+
+    }
+
+    const start =
+      audioContext.currentTime;
+
+    for(
+      let group = 0;
+      group < 3;
+      group++
+    ){
+
+      const base =
+        start +
+        group *
+        3.1;
+
+      for(
+        let i = 0;
+        i < 2;
+        i++
+      ){
+
+        const osc =
+          audioContext.createOscillator();
+
+        const gain =
+          audioContext.createGain();
+
+        osc.type =
+          "sine";
+
+        osc.frequency.value =
+          i === 0
+          ?
+          880
+          :
+          660;
+
+        const t =
+          base +
+          i *
+          0.65;
+
+        gain.gain.setValueAtTime(
+          0.0001,
+          t
+        );
+
+        gain.gain.exponentialRampToValueAtTime(
+          0.28,
+          t + 0.03
+        );
+
+        gain.gain.exponentialRampToValueAtTime(
+          0.0001,
+          t + 0.50
+        );
+
+        osc.connect(
+          gain
+        );
+
+        gain.connect(
+          audioContext.destination
+        );
+
+        osc.start(
+          t
+        );
+
+        osc.stop(
+          t + 0.55
+        );
+
+      }
+
+    }
+
+  }
+  catch(error){
+
+    console.error(
+      error
+    );
+
+  }
+
+}
+
+
+function vibrate(){
+
+  try{
+
+    if(
+      "vibrate" in navigator
+    ){
+
+      navigator.vibrate([
+        300,
+        120,
+        300,
+        120,
+        500
+      ]);
+
+    }
+
+  }
+  catch(e){}
+
+}
+
+
+function systemNotification(
+  destination,
+  caller
+){
+
+  if(
+    !alertsEnabled
+  ){
+
+    return;
+
+  }
+
+  if(
+    "Notification" in window &&
+    Notification.permission ===
+    "granted"
+  ){
+
+    try{
+
+      new Notification(
+        "📞 Tivoli Mystery Call",
+        {
+
+          body:
+            `${caller} is calling everyone to ${destination}!`,
+
+          tag:
+            "tivoli-mystery-" +
+            Date.now()
+
+        }
+
+      );
+
+    }
+    catch(e){}
+
+  }
+
+}
+
+
+/* =====================================================
+LISTENER CLEANUP
+===================================================== */
+
+function stopAllGameListeners(){
+
+  clearInterval(
+    globalInterval
+  );
+
+  stopRoomExpiryWatcher();
+
+  clearTimeout(
+    callTimer
+  );
+
+  roomData =
+    null;
+
+  mySecret =
+    null;
+
+  roomCode =
+    "";
+
+  listenersStarted =
+    false;
+
+  notesListenerStarted =
+    false;
+
+  detectiveNotesListenerStarted =
+    false;
+
+  gameResultListenerStarted =
+    false;
+
+  roomListenerStarted =
+    false;
+
+  completedListenerStarted =
+    false;
 
 }
 
@@ -7160,16 +9097,21 @@ const params =
   );
 
 if(
-  params.get("room")
+  params.get(
+    "room"
+  )
 ){
 
-  document
-    .getElementById(
+  const roomInput =
+    document.getElementById(
       "roomInput"
-    )
-    .value =
+    );
+
+  roomInput.value =
     params
-      .get("room")
+      .get(
+        "room"
+      )
       .toUpperCase();
 
 }
@@ -7209,7 +9151,9 @@ if(
       "alertStatus"
     );
 
-  if(status){
+  if(
+    status
+  ){
 
     status.textContent =
       "✅ Call alerts enabled.";
@@ -7221,7 +9165,9 @@ if(
       "enableAlertsButton"
     );
 
-  if(button){
+  if(
+    button
+  ){
 
     button.textContent =
       "✅ CALL ALERTS ENABLED";
