@@ -9,7 +9,7 @@
   content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"
 >
 
-<title>Tivoli Mystery</title>
+<title>House Mystery</title>
 
 <link rel="manifest" href="./manifest.json">
 
@@ -17,7 +17,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Tivoli Mystery">
+<meta name="apple-mobile-web-app-title" content="House Mystery">
 
 <style>
 
@@ -864,7 +864,7 @@ button.dark{
       id="callDestination"
       class="call-destination"
     >
-      COME TO SEA VIEW
+      COME TO THE HOUSE
     </div>
 
     <div
@@ -901,7 +901,7 @@ button.dark{
     </h2>
 
     <p>
-      Enable notifications so Tivoli Mystery
+      Enable notifications so House Mystery
       can alert you when calls or tasks happen.
     </p>
 
@@ -960,7 +960,7 @@ button.dark{
   <div class="card center">
 
     <h1>
-      🕵️ Tivoli Mystery
+      🏠 House Mystery
     </h1>
 
     <p>
@@ -1034,7 +1034,7 @@ button.dark{
   <div class="card">
 
     <h1>
-      🌊 Tivoli Mystery
+      🏠 House Mystery
     </h1>
 
     <p>
@@ -1080,7 +1080,7 @@ button.dark{
 
     <input
       id="roomInput"
-      placeholder="Example: TIVOLI123"
+      placeholder="Example: HOUSE123"
       autocomplete="off"
       maxlength="20"
     >
@@ -1121,20 +1121,20 @@ button.dark{
   <div class="card">
 
     <h2>
-      📍 Outdoor Game Area
+      🏠 House Game Area
     </h2>
 
-    <span class="badge">🌊 Sea View</span>
-    <span class="badge">☕ Outdoor Café</span>
-    <span class="badge">🪑 Café Tables</span>
-    <span class="badge">🚶 Sea-Side Walkway</span>
-    <span class="badge">🌴 Sea-Side Edge</span>
-    <span class="badge">🪜 Dip N Dip Stairs</span>
-    <span class="badge">🌿 Central Outdoor Area</span>
-    <span class="badge">🪑 Side Seating</span>
+    <span class="badge">🚪 Main Door / Entrance</span>
+    <span class="badge">🏠 Hallway</span>
+    <span class="badge">🛋️ Sofa / Living Room</span>
+    <span class="badge">🍳 Kitchen</span>
+    <span class="badge">👦 Boys' Room</span>
+    <span class="badge">👧 Girls' Room</span>
+    <span class="badge">🚿 Bathroom 1 — Outside Only</span>
+    <span class="badge">🚿 Bathroom 2 — Outside Only</span>
 
     <p class="small">
-      Players stay in the outdoor area.
+      The bathrooms are outside-only locations. Players should stay outside the bathroom doors and do not enter.
     </p>
 
   </div>
@@ -1311,30 +1311,42 @@ button.dark{
 
     <div class="row">
 
-      <button onclick="makeCall('Sea View')">
-        🌊 CALL SEA VIEW
+      <button onclick="makeCall('Main Door / Entrance')">
+        🚪 CALL MAIN DOOR
       </button>
 
       <button
         class="orange"
-        onclick="makeCall('Outdoor Café')"
+        onclick="makeCall('Hallway')"
       >
-        ☕ CALL OUTDOOR CAFÉ
+        🏠 CALL HALLWAY
       </button>
 
     </div>
 
     <div class="row">
 
-      <button onclick="makeCall('Café Tables')">
-        🪑 CALL CAFÉ TABLES
+      <button onclick="makeCall('Sofa / Living Room')">
+        🛋️ CALL SOFA
       </button>
 
       <button
         class="secondary"
-        onclick="makeCall('Dip N Dip Stairs')"
+        onclick="makeCall('Kitchen')"
       >
-        🪜 CALL DIP N DIP STAIRS
+        🍳 CALL KITCHEN
+      </button>
+
+    </div>
+
+    <div class="row">
+
+      <button onclick="makeCall(\"Boys' Room\")">
+        👦 CALL BOYS' ROOM
+      </button>
+
+      <button onclick="makeCall(\"Girls' Room\")">
+        👧 CALL GIRLS' ROOM
       </button>
 
     </div>
@@ -1361,7 +1373,7 @@ button.dark{
     <textarea
       id="playerNoteInput"
       maxlength="240"
-      placeholder="Example: I was sitting near the sea view."
+      placeholder="Example: I was sitting near the sofa."
     ></textarea>
 
     <div
@@ -1442,8 +1454,7 @@ button.dark{
     </h2>
 
     <p>
-      Future tasks stay locked until their
-      exact timestamp.
+      Future tasks stay locked until their exact timestamp.
     </p>
 
   </div>
@@ -1669,7 +1680,7 @@ FIREBASE
 const firebaseConfig = {
 
   apiKey:
-    "AIzaSyCug0S0qHKstGZAr5dvzm-DaLZAIDugo",
+    "AIzaSyCug0S0qHKstGAr5vdzm-DaLZAIDugo",
 
   authDomain:
     "money-e560a.firebaseapp.com",
@@ -1827,14 +1838,10 @@ function sharedNow(){
 }
 
 
-function sharedDate(
-  timestamp
-){
+function sharedDate(timestamp){
 
   return new Date(
-    Number(
-      timestamp
-    )
+    Number(timestamp)
   );
 
 }
@@ -1952,9 +1959,7 @@ function pad(number){
 }
 
 
-function clockText(
-  date
-){
+function clockText(date){
 
   let h =
     date.getHours();
@@ -1998,9 +2003,7 @@ function clockText(
 }
 
 
-function shortClock(
-  date
-){
+function shortClock(date){
 
   let h =
     date.getHours();
@@ -2038,9 +2041,7 @@ function shortClock(
 }
 
 
-function formatDuration(
-  ms
-){
+function formatDuration(ms){
 
   const seconds =
     Math.max(
@@ -2071,41 +2072,22 @@ function formatDuration(
 }
 
 
-function escapeHtml(
-  value
-){
+function escapeHtml(value){
 
   return String(
     value ??
     ""
   )
-    .replaceAll(
-      "&",
-      "&amp;"
-    )
-    .replaceAll(
-      "<",
-      "&lt;"
-    )
-    .replaceAll(
-      ">",
-      "&gt;"
-    )
-    .replaceAll(
-      '"',
-      "&quot;"
-    )
-    .replaceAll(
-      "'",
-      "&#039;"
-    );
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
 
 }
 
 
-function sleep(
-  ms
-){
+function sleep(ms){
 
   return new Promise(
     resolve =>
@@ -2122,9 +2104,7 @@ function sleep(
 EXPIRY
 ===================================================== */
 
-function roomActivityTime(
-  data
-){
+function roomActivityTime(data){
 
   return Number(
     data?.lastActivityAt ||
@@ -2135,9 +2115,7 @@ function roomActivityTime(
 }
 
 
-function roomExpiryFor(
-  data
-){
+function roomExpiryFor(data){
 
   return (
     data?.status ===
@@ -2151,9 +2129,7 @@ function roomExpiryFor(
 }
 
 
-function isRoomStale(
-  data
-){
+function isRoomStale(data){
 
   if(
     !data
@@ -2247,40 +2223,31 @@ function stopTimers(){
     heartbeatInterval
   );
 
-  heartbeatInterval =
-    null;
-
+  heartbeatInterval = null;
 
   clearInterval(
     roomExpiryInterval
   );
 
-  roomExpiryInterval =
-    null;
-
+  roomExpiryInterval = null;
 
   clearInterval(
     globalInterval
   );
 
-  globalInterval =
-    null;
-
+  globalInterval = null;
 
   clearInterval(
     taskNotificationInterval
   );
 
-  taskNotificationInterval =
-    null;
-
+  taskNotificationInterval = null;
 
   clearTimeout(
     callTimer
   );
 
-  callTimer =
-    null;
+  callTimer = null;
 
 }
 
@@ -2310,7 +2277,6 @@ async function registerServiceWorker(){
 
     await navigator.serviceWorker.ready;
 
-
     return serviceWorkerRegistration;
 
   }
@@ -2320,7 +2286,6 @@ async function registerServiceWorker(){
       "SERVICE WORKER:",
       error
     );
-
 
     return null;
 
@@ -2402,7 +2367,7 @@ async function showPersistentNotification(
         tag:
           options.tag ||
           (
-            "tivoli-" +
+            "house-mystery-" +
             Date.now()
           ),
 
@@ -2453,7 +2418,6 @@ async function showPersistentNotification(
       error
     );
 
-
     return false;
 
   }
@@ -2492,7 +2456,7 @@ async function(){
     ){
 
       alert(
-        "Notifications are blocked. Enable notifications for Tivoli Mystery in iPhone Settings."
+        "Notifications are blocked. Enable notifications for House Mystery in iPhone Settings."
       );
 
       return;
@@ -2514,8 +2478,7 @@ async function(){
         "granted"
       ){
 
-        alertsEnabled =
-          false;
+        alertsEnabled = false;
 
         localStorage.removeItem(
           "tivoliMysteryAlerts"
@@ -2536,8 +2499,7 @@ async function(){
     }
 
 
-    alertsEnabled =
-      true;
+    alertsEnabled = true;
 
 
     localStorage.setItem(
@@ -2563,19 +2525,17 @@ async function(){
 
 
     await showPersistentNotification(
-      "🔔 Tivoli Mystery",
+      "🔔 House Mystery",
       {
         body:
           "Notifications are enabled.",
         tag:
-          "tivoli-test"
+          "house-test"
       }
     );
 
 
     startTaskNotificationWatcher();
-
-
     checkTaskNotifications();
 
   }
@@ -2616,7 +2576,7 @@ function(){
 
 
 /* =====================================================
-TASK NOTIFICATION SYSTEM
+TASK NOTIFICATIONS
 ===================================================== */
 
 function taskNotificationKey(
@@ -2625,7 +2585,7 @@ function taskNotificationKey(
 ){
 
   return (
-    "tivoliTaskNotification_" +
+    "houseTaskNotification_" +
     String(roundId) +
     "_" +
     String(taskId)
@@ -2645,8 +2605,7 @@ function taskNotificationWasSent(
         roundId,
         taskId
       )
-    ) ===
-    "1"
+    ) === "1"
   );
 
 }
@@ -2658,14 +2617,11 @@ function markTaskNotificationSent(
 ){
 
   localStorage.setItem(
-
     taskNotificationKey(
       roundId,
       taskId
     ),
-
     "1"
-
   );
 
 }
@@ -2713,7 +2669,9 @@ function startTaskNotificationWatcher(){
 async function checkTaskNotifications(){
 
   if(
-    !alertsEnabled
+    !alertsEnabled ||
+    !notificationsSupported() ||
+    Notification.permission !== "granted"
   ){
 
     return;
@@ -2722,37 +2680,8 @@ async function checkTaskNotifications(){
 
 
   if(
-    !notificationsSupported()
-  ){
-
-    return;
-
-  }
-
-
-  if(
-    Notification.permission !==
-    "granted"
-  ){
-
-    return;
-
-  }
-
-
-  if(
-    !roomData?.game
-  ){
-
-    return;
-
-  }
-
-
-  if(
-    !Array.isArray(
-      mySecret?.tasks
-    )
+    !roomData?.game ||
+    !Array.isArray(mySecret?.tasks)
   ){
 
     return;
@@ -2773,8 +2702,7 @@ async function checkTaskNotifications(){
 
 
   for(
-    const task of
-    mySecret.tasks
+    const task of mySecret.tasks
   ){
 
     const unlockAt =
@@ -2812,37 +2740,25 @@ async function checkTaskNotifications(){
 
 
     await showPersistentNotification(
-
       "🔔 Task Unlocked",
-
       {
-
         body:
           task.description ||
           "A new task is available.",
-
         tag:
-          "tivoli-task-" +
+          "house-task-" +
           task.id,
-
         taskId:
           task.id,
-
         renotify:
           true,
-
-        requireInteraction:
-          false,
-
         vibrate:
           [
             250,
             120,
             250
           ]
-
       }
-
     );
 
   }
@@ -2937,8 +2853,7 @@ async function startPresence(){
       presenceRef
     ).set({
 
-      connected:
-        false,
+      connected:false,
 
       lastSeenAt:
         serverTimestamp()
@@ -2950,14 +2865,12 @@ async function startPresence(){
       presenceRef,
       {
 
-        connected:
-          true,
+        connected:true,
 
         lastSeenAt:
           serverTimestamp()
 
       }
-
     );
 
   }
@@ -2986,14 +2899,12 @@ async function startPresence(){
             presenceRef,
             {
 
-              connected:
-                true,
+              connected:true,
 
               lastSeenAt:
                 serverTimestamp()
 
             }
-
           );
 
         }
@@ -3195,8 +3106,7 @@ async function(){
 
 
   if(
-    value ===
-    null
+    value === null
   ){
 
     return;
@@ -3382,13 +3292,10 @@ async function(){
 };
 
 
-function normalizeRoomCode(
-  value
-){
+function normalizeRoomCode(value){
 
   return String(
-    value ||
-    ""
+    value || ""
   )
     .trim()
     .toUpperCase()
@@ -3471,8 +3378,7 @@ async function(){
 
 
   if(
-    code.length <
-    2
+    code.length < 2
   ){
 
     alert(
@@ -3484,8 +3390,7 @@ async function(){
   }
 
 
-  roomCode =
-    code;
+  roomCode = code;
 
 
   const roomRef =
@@ -3501,35 +3406,30 @@ async function(){
 
   const newRoom = {
 
-    status:
-      "lobby",
+    status:"lobby",
 
-    host:
-      playerId,
+    host:playerId,
 
     playerLimit,
 
-    createdAt:
-      now,
+    createdAt:now,
 
-    lastActivityAt:
-      now,
+    lastActivityAt:now,
 
-    roundNumber:
-      0,
+    roundNumber:0,
 
     players:{
+
       [playerId]:{
 
         playerId,
 
-        name:
-          myName,
+        name:myName,
 
-        joinedAt:
-          now
+        joinedAt:now
 
       }
+
     }
 
   };
@@ -3545,8 +3445,7 @@ async function(){
         current=>{
 
           if(
-            current ===
-            null
+            current === null
           ){
 
             return newRoom;
@@ -3555,9 +3454,7 @@ async function(){
 
 
           if(
-            isRoomStale(
-              current
-            )
+            isRoomStale(current)
           ){
 
             return newRoom;
@@ -3633,8 +3530,7 @@ async function(){
 
 
   if(
-    code.length <
-    2
+    code.length < 2
   ){
 
     alert(
@@ -3646,8 +3542,7 @@ async function(){
   }
 
 
-  roomCode =
-    code;
+  roomCode = code;
 
 
   const roomRef =
@@ -3683,14 +3578,11 @@ async function(){
 
 
     if(
-      isRoomStale(
-        data
-      )
+      isRoomStale(data)
     ){
 
       if(
-        data.host ===
-        playerId
+        data.host === playerId
       ){
 
         await remove(
@@ -3710,14 +3602,11 @@ async function(){
 
 
     const existingPlayer =
-      data.players?.[
-        playerId
-      ];
+      data.players?.[playerId];
 
 
     if(
-      data.status ===
-      "game" &&
+      data.status === "game" &&
       !existingPlayer
     ){
 
@@ -3732,19 +3621,15 @@ async function(){
 
     const playerCount =
       Object.keys(
-        data.players ||
-        {}
+        data.players || {}
       ).length;
 
 
     if(
-      data.status ===
-      "lobby" &&
+      data.status === "lobby" &&
       !existingPlayer &&
       playerCount >=
-      Number(
-        data.playerLimit
-      )
+      Number(data.playerLimit)
     ){
 
       alert(
@@ -3768,18 +3653,15 @@ async function(){
         roomRef,
         {
 
-          lastActivityAt:
-            now,
+          lastActivityAt:now,
 
           [`players/${playerId}`]:{
 
             playerId,
 
-            name:
-              myName,
+            name:myName,
 
-            joinedAt:
-              now
+            joinedAt:now
 
           }
 
@@ -3797,8 +3679,7 @@ async function(){
         ),
 
         {
-          name:
-            myName
+          name:myName
         }
 
       );
@@ -3854,23 +3735,12 @@ async function startRoomSession(){
   stopTimers();
 
 
-  lastCallId =
-    null;
-
-  lastRevealId =
-    null;
-
-  revealRunning =
-    false;
-
-  currentRoundId =
-    null;
-
-  gameVisible =
-    false;
-
-  selectedDetectivePlayerId =
-    null;
+  lastCallId = null;
+  lastRevealId = null;
+  revealRunning = false;
+  currentRoundId = null;
+  gameVisible = false;
+  selectedDetectivePlayerId = null;
 
 
   hideAllMainScreens();
@@ -3908,8 +3778,7 @@ async function startRoomSession(){
 
   if(
     alertsEnabled &&
-    Notification.permission ===
-    "granted"
+    Notification.permission === "granted"
   ){
 
     startTaskNotificationWatcher();
@@ -3965,8 +3834,7 @@ function listenToRoom(){
 
 
         if(
-          roomData.status ===
-          "game"
+          roomData.status === "game"
         ){
 
           enterGameFromRoom();
@@ -4000,8 +3868,7 @@ LOBBY
 
 function enterLobbyFromRoom(){
 
-  gameVisible =
-    false;
+  gameVisible = false;
 
 
   document
@@ -4024,12 +3891,8 @@ function enterLobbyFromRoom(){
     );
 
 
-  mySecret =
-    null;
-
-
-  currentRoundId =
-    null;
+  mySecret = null;
+  currentRoundId = null;
 
 
   stopGameListeners();
@@ -4039,16 +3902,14 @@ function enterLobbyFromRoom(){
     globalInterval
   );
 
-  globalInterval =
-    null;
+  globalInterval = null;
 
 
   clearInterval(
     taskNotificationInterval
   );
 
-  taskNotificationInterval =
-    null;
+  taskNotificationInterval = null;
 
 }
 
@@ -4065,14 +3926,11 @@ function renderLobby(){
 
 
   const players =
-    roomData.players ||
-    {};
+    roomData.players || {};
 
 
   const ids =
-    Object.keys(
-      players
-    );
+    Object.keys(players);
 
 
   document
@@ -4116,8 +3974,7 @@ function renderLobby(){
 
 
   const presence =
-    roomData.__presence ||
-    {};
+    roomData.__presence || {};
 
 
   document
@@ -4131,8 +3988,7 @@ function renderLobby(){
         id=>{
 
           const player =
-            players[id] ||
-            {};
+            players[id] || {};
 
 
           const status =
@@ -4140,8 +3996,7 @@ function renderLobby(){
 
 
           const connected =
-            status?.connected ===
-            true;
+            status?.connected === true;
 
 
           return `
@@ -4157,8 +4012,7 @@ function renderLobby(){
                 )}
 
                 ${
-                  id ===
-                  roomData.host
+                  id === roomData.host
                   ?
                   `<span class="host">
                     👑 HOST
@@ -4191,8 +4045,7 @@ function renderLobby(){
 
 
   const isHost =
-    roomData.host ===
-    playerId;
+    roomData.host === playerId;
 
 
   const hostPanel =
@@ -4218,8 +4071,7 @@ function renderLobby(){
 
 
     const full =
-      ids.length ===
-      limit;
+      ids.length === limit;
 
 
     document
@@ -4236,8 +4088,7 @@ function renderLobby(){
       );
 
 
-    button.disabled =
-      !full;
+    button.disabled = !full;
 
 
     button.textContent =
@@ -4253,7 +4104,7 @@ function renderLobby(){
 
 
 /* =====================================================
-EXPIRY WATCHER
+EXPIRY
 ===================================================== */
 
 function startRoomExpiryWatcher(){
@@ -4303,9 +4154,7 @@ function startRoomExpiryWatcher(){
 
 
           if(
-            !isRoomStale(
-              data
-            )
+            !isRoomStale(data)
           ){
 
             return;
@@ -4314,8 +4163,7 @@ function startRoomExpiryWatcher(){
 
 
           if(
-            data.host ===
-            playerId
+            data.host === playerId
           ){
 
             await remove(
@@ -4376,8 +4224,7 @@ function enterGameFromRoom(){
 
 
   if(
-    currentRoundId ===
-    roundId &&
+    currentRoundId === roundId &&
     gameVisible
   ){
 
@@ -4388,12 +4235,8 @@ function enterGameFromRoom(){
   }
 
 
-  currentRoundId =
-    roundId;
-
-
-  gameVisible =
-    true;
+  currentRoundId = roundId;
+  gameVisible = true;
 
 
   hideAllMainScreens();
@@ -4416,18 +4259,14 @@ function enterGameFromRoom(){
     .classList
     .toggle(
       "hidden",
-      roomData.host !==
-      playerId
+      roomData.host !== playerId
     );
 
 
   mySecret =
     roomData
       ?.private
-      ?.[
-        playerId
-      ]
-    ||
+      ?.[playerId] ||
     null;
 
 
@@ -4435,8 +4274,6 @@ function enterGameFromRoom(){
 
 
   startGameListeners();
-
-
   startGlobalClock();
 
 
@@ -4494,8 +4331,7 @@ function startGameListeners(){
 
         if(
           !call.id ||
-          call.id ===
-          lastCallId
+          call.id === lastCallId
         ){
 
           return;
@@ -4503,8 +4339,7 @@ function startGameListeners(){
         }
 
 
-        lastCallId =
-          call.id;
+        lastCallId = call.id;
 
 
         showCall(
@@ -4518,7 +4353,6 @@ function startGameListeners(){
         ){
 
           playCallSound();
-
           vibrate();
 
         }
@@ -4554,8 +4388,7 @@ function startGameListeners(){
 
 
         roomData.completed =
-          snapshot.val() ||
-          {};
+          snapshot.val() || {};
 
 
         renderTasks();
@@ -4585,8 +4418,7 @@ function startGameListeners(){
 
 
         roomData.notes =
-          snapshot.val() ||
-          {};
+          snapshot.val() || {};
 
 
         updateMyNoteUI();
@@ -4659,8 +4491,7 @@ function startGameListeners(){
         }
 
 
-        lastRevealId =
-          revealId;
+        lastRevealId = revealId;
 
 
         runReveal(
@@ -4688,8 +4519,7 @@ function startGameListeners(){
         snapshot=>{
 
           const data =
-            snapshot.val() ||
-            {};
+            snapshot.val() || {};
 
 
           const input =
@@ -4700,8 +4530,7 @@ function startGameListeners(){
 
           if(
             input &&
-            document.activeElement !==
-            input
+            document.activeElement !== input
           ){
 
             input.value =
@@ -4733,185 +4562,179 @@ function startGlobalClock(){
   );
 
 
-  const tick =
-    ()=>{
+  const tick = ()=>{
 
-      const game =
-        roomData?.game;
-
-
-      if(
-        !game
-      ){
-
-        return;
-
-      }
+    const game =
+      roomData?.game;
 
 
-      const now =
-        sharedNow();
+    if(
+      !game
+    ){
+
+      return;
+
+    }
 
 
-      const detectiveEnd =
-        Number(
-          game.detectiveEnd
+    const now =
+      sharedNow();
+
+
+    const detectiveEnd =
+      Number(
+        game.detectiveEnd
+      );
+
+
+    const investigationEnd =
+      Number(
+        game.investigationEnd
+      );
+
+
+    const beforeDetective =
+      now <
+      detectiveEnd;
+
+
+    document
+      .getElementById(
+        "globalTimeText"
+      )
+      .textContent =
+      "Shared time: " +
+      clockText(
+        sharedDate(now)
+      );
+
+
+    document
+      .getElementById(
+        "phaseText"
+      )
+      .textContent =
+      beforeDetective
+      ?
+      "DETECTIVE ARRIVES IN"
+      :
+      "DETECTIVE IS HERE";
+
+
+    document
+      .getElementById(
+        "globalTimer"
+      )
+      .textContent =
+      beforeDetective
+      ?
+      formatDuration(
+        detectiveEnd -
+        now
+      )
+      :
+      "00:00";
+
+
+    if(
+      mySecret?.role ===
+      "detective"
+    ){
+
+      document
+        .getElementById(
+          "detectiveArrivalTime"
+        )
+        .textContent =
+        shortClock(
+          sharedDate(
+            detectiveEnd
+          )
         );
-
-
-      const investigationEnd =
-        Number(
-          game.investigationEnd
-        );
-
-
-      const beforeDetective =
-        now <
-        detectiveEnd;
 
 
       document
         .getElementById(
-          "globalTimeText"
+          "detectiveTimer"
         )
         .textContent =
-        "Shared time: " +
-        clockText(
-          sharedDate(
+        formatDuration(
+          Math.max(
+            0,
+            detectiveEnd -
             now
           )
         );
 
 
-      document
-        .getElementById(
-          "phaseText"
-        )
-        .textContent =
-        beforeDetective
-        ?
-        "DETECTIVE ARRIVES IN"
-        :
-        "DETECTIVE IS HERE";
-
-
-      document
-        .getElementById(
-          "globalTimer"
-        )
-        .textContent =
-        beforeDetective
-        ?
-        formatDuration(
-          detectiveEnd -
-          now
-        )
-        :
-        "00:00";
-
-
       if(
-        mySecret?.role ===
-        "detective"
+        now >= detectiveEnd
       ){
 
-        document
-          .getElementById(
-            "detectiveArrivalTime"
-          )
-          .textContent =
-          shortClock(
-            sharedDate(
-              detectiveEnd
-            )
-          );
-
-
-        document
-          .getElementById(
-            "detectiveTimer"
-          )
-          .textContent =
-          formatDuration(
-            Math.max(
-              0,
-              detectiveEnd -
-              now
-            )
-          );
-
-
-        if(
-          now >=
-          detectiveEnd
-        ){
-
-          showInvestigation();
-
-        }
-
-
-        const investigationTimerCard =
-          document.getElementById(
-            "investigationTimerCard"
-          );
-
-
-        if(
-          now >= detectiveEnd &&
-          now < investigationEnd
-        ){
-
-          investigationTimerCard
-            .classList
-            .remove(
-              "hidden"
-            );
-
-
-          document
-            .getElementById(
-              "investigationArrivalTime"
-            )
-            .textContent =
-            "Investigation ends at " +
-            shortClock(
-              sharedDate(
-                investigationEnd
-              )
-            );
-
-
-          document
-            .getElementById(
-              "investigationTimer"
-            )
-            .textContent =
-            formatDuration(
-              investigationEnd -
-              now
-            );
-
-        }
-        else{
-
-          investigationTimerCard
-            .classList
-            .add(
-              "hidden"
-            );
-
-        }
+        showInvestigation();
 
       }
 
 
-      renderTasks();
+      const investigationTimerCard =
+        document.getElementById(
+          "investigationTimerCard"
+        );
 
 
-      checkTaskNotifications();
+      if(
+        now >= detectiveEnd &&
+        now < investigationEnd
+      ){
 
-    };
+        investigationTimerCard
+          .classList
+          .remove(
+            "hidden"
+          );
+
+
+        document
+          .getElementById(
+            "investigationArrivalTime"
+          )
+          .textContent =
+          "Investigation ends at " +
+          shortClock(
+            sharedDate(
+              investigationEnd
+            )
+          );
+
+
+        document
+          .getElementById(
+            "investigationTimer"
+          )
+          .textContent =
+          formatDuration(
+            investigationEnd -
+            now
+          );
+
+      }
+      else{
+
+        investigationTimerCard
+          .classList
+          .add(
+            "hidden"
+          );
+
+      }
+
+    }
+
+
+    renderTasks();
+    checkTaskNotifications();
+
+  };
 
 
   tick();
@@ -4927,275 +4750,33 @@ function startGlobalClock(){
 
 
 /* =====================================================
-TASKS
-===================================================== */
-
-function renderTasks(){
-
-  const container =
-    document.getElementById(
-      "myTasks"
-    );
-
-
-  if(
-    !container ||
-    !Array.isArray(
-      mySecret?.tasks
-    )
-  ){
-
-    return;
-
-  }
-
-
-  const now =
-    sharedNow();
-
-
-  const completed =
-    roomData?.completed?.[
-      playerId
-    ]
-    ||
-    {};
-
-
-  container.innerHTML =
-
-    mySecret.tasks
-      .map(
-        task=>{
-
-          const unlockAt =
-            Number(
-              task.unlockAt
-            );
-
-
-          const unlocked =
-            now >=
-            unlockAt;
-
-
-          const done =
-            completed[
-              task.id
-            ] ===
-            true;
-
-
-          const unlockText =
-            task.unlockText ||
-            shortClock(
-              sharedDate(
-                unlockAt
-              )
-            );
-
-
-          if(
-            !unlocked
-          ){
-
-            return `
-
-              <div class="task locked">
-
-                <div class="task-time">
-
-                  🔒 Opens at ${escapeHtml(
-                    unlockText
-                  )}
-
-                </div>
-
-                <div class="locked-text">
-
-                  Secret task — not available yet.
-
-                </div>
-
-              </div>
-
-            `;
-
-          }
-
-
-          return `
-
-            <div
-              class="task ${
-                done
-                ?
-                "done"
-                :
-                ""
-              }"
-            >
-
-              <div class="task-row">
-
-                <input
-                  class="task-checkbox"
-                  type="checkbox"
-                  ${
-                    done
-                    ?
-                    "checked"
-                    :
-                    ""
-                  }
-                  onchange="
-                    toggleTask(
-                      '${task.id}',
-                      this.checked
-                    )
-                  "
-                >
-
-                <div class="task-text">
-
-                  <div class="task-time">
-
-                    ⏰ Opened at
-                    ${escapeHtml(
-                      unlockText
-                    )}
-
-                  </div>
-
-                  <div>
-
-                    ${escapeHtml(
-                      task.description
-                    )}
-
-                  </div>
-
-                  <div class="task-status">
-
-                    ${
-                      done
-                      ?
-                      "✅ Completed"
-                      :
-                      "⬜ Not completed"
-                    }
-
-                  </div>
-
-                </div>
-
-              </div>
-
-            </div>
-
-          `;
-
-        }
-      )
-      .join("");
-
-}
-
-
-window.toggleTask =
-async function(
-  taskId,
-  checked
-){
-
-  const task =
-    mySecret?.tasks?.find(
-      item =>
-        item.id ===
-        taskId
-    );
-
-
-  if(
-    !task
-  ){
-
-    return;
-
-  }
-
-
-  if(
-    sharedNow() <
-    Number(
-      task.unlockAt
-    )
-  ){
-
-    alert(
-      "🔒 This task is not unlocked yet."
-    );
-
-    renderTasks();
-
-    return;
-
-  }
-
-
-  try{
-
-    await update(
-
-      ref(
-        db,
-        `rooms/${roomCode}/completed/${playerId}`
-      ),
-
-      {
-
-        [taskId]:
-          checked
-
-      }
-
-    );
-
-  }
-  catch(error){
-
-    console.error(
-      "TASK ERROR:",
-      error
-    );
-
-
-    alert(
-      "Could not save the task."
-    );
-
-  }
-
-};
-
-
-/* =====================================================
-TASK GENERATION
+HOUSE LOCATIONS
 ===================================================== */
 
 const locations = [
 
-  "Sea View",
-  "Outdoor Café",
-  "Café Tables",
-  "Sea-Side Walkway",
-  "Sea-Side Edge",
-  "Dip N Dip Stairs",
-  "Central Outdoor Area",
-  "Side Seating"
+  "Main Door / Entrance",
+
+  "Hallway",
+
+  "Sofa / Living Room",
+
+  "Kitchen",
+
+  "Boys' Room",
+
+  "Girls' Room",
+
+  "Bathroom 1 — Outside Only",
+
+  "Bathroom 2 — Outside Only"
 
 ];
 
+
+/* =====================================================
+TASK TEMPLATES
+===================================================== */
 
 const activityTemplates = [
 
@@ -5203,9 +4784,9 @@ const activityTemplates = [
   "Walk around {location}.",
   "Stand for a moment at {location}.",
   "Look around {location}.",
-  "Wait nearby {location}.",
+  "Wait near {location}.",
   "Walk through {location}.",
-  "Sit at a nearby seat around {location}.",
+  "Sit near {location}.",
   "Check your phone near {location}.",
   "Pause briefly at {location}.",
   "Stay around {location} for a short moment."
@@ -5273,9 +4854,7 @@ function createTask(
 }
 
 
-function nextMinuteTimestamp(
-  timestamp
-){
+function nextMinuteTimestamp(timestamp){
 
   const date =
     sharedDate(
@@ -5290,8 +4869,7 @@ function nextMinuteTimestamp(
 
 
   date.setMinutes(
-    date.getMinutes() +
-    1
+    date.getMinutes() + 1
   );
 
 
@@ -5308,23 +4886,17 @@ function makeUnlockTimes(
 
   const first =
     now +
-    60 *
-    1000;
+    60 * 1000;
 
 
   const last =
     Math.max(
-      first +
-      60 *
-      1000,
-      end -
-      60 *
-      1000
+      first + 60 * 1000,
+      end - 60 * 1000
     );
 
 
-  const output =
-    [];
+  const output = [];
 
 
   for(
@@ -5334,12 +4906,8 @@ function makeUnlockTimes(
   ){
 
     const ratio =
-      (
-        i + 1
-      ) /
-      (
-        count + 1
-      );
+      (i + 1) /
+      (count + 1);
 
 
     output.push(
@@ -5365,6 +4933,10 @@ function makeUnlockTimes(
 }
 
 
+/* =====================================================
+NORMAL TASKS
+===================================================== */
+
 function buildNormalTasks(
   playerIdForSeed,
   now,
@@ -5376,8 +4948,7 @@ function buildNormalTasks(
   const count =
     3 +
     Math.floor(
-      Math.random() *
-      3
+      Math.random() * 3
     );
 
 
@@ -5389,8 +4960,7 @@ function buildNormalTasks(
     );
 
 
-  const used =
-    [];
+  const used = [];
 
 
   return shuffle(
@@ -5438,8 +5008,7 @@ function buildNormalTasks(
 
 
         const templatePool =
-          Math.random() <
-          0.5
+          Math.random() < 0.5
           ?
           activityTemplates
           :
@@ -5450,20 +5019,16 @@ function buildNormalTasks(
 
           `${roundSeed}_${playerIdForSeed}_${index}_${Math.random()
             .toString(36)
-            .slice(
-              2,
-              7
-            )}`,
+            .slice(2,7)}`,
 
           unlockAt,
 
           random(
             templatePool
+          ).replace(
+            "{location}",
+            location
           )
-            .replace(
-              "{location}",
-              location
-            )
 
         );
 
@@ -5474,6 +5039,10 @@ function buildNormalTasks(
 
 }
 
+
+/* =====================================================
+MURDERER TASKS
+===================================================== */
 
 function buildMurdererTasks(
   playerIdForSeed,
@@ -5487,8 +5056,7 @@ function buildMurdererTasks(
   const count =
     2 +
     Math.floor(
-      Math.random() *
-      3
+      Math.random() * 3
     );
 
 
@@ -5499,8 +5067,7 @@ function buildMurdererTasks(
 
       Math.min(
         detectiveEnd,
-        murderAt -
-        20000
+        murderAt - 20000
       ),
 
       count
@@ -5508,8 +5075,7 @@ function buildMurdererTasks(
     );
 
 
-  const used =
-    [];
+  const used = [];
 
 
   const tasks =
@@ -5559,20 +5125,16 @@ function buildMurdererTasks(
 
           `${roundSeed}_${playerIdForSeed}_M_${index}_${Math.random()
             .toString(36)
-            .slice(
-              2,
-              7
-            )}`,
+            .slice(2,7)}`,
 
           unlockAt,
 
           random(
             activityTemplates
+          ).replace(
+            "{location}",
+            location
           )
-            .replace(
-              "{location}",
-              location
-            )
 
         );
 
@@ -5586,10 +5148,7 @@ function buildMurdererTasks(
 
       `${roundSeed}_${playerIdForSeed}_MURDER_${Math.random()
         .toString(36)
-        .slice(
-          2,
-          7
-        )}`,
+        .slice(2,7)}`,
 
       murderAt,
 
@@ -5620,25 +5179,19 @@ function buildMurdererTasks(
 
       `${roundSeed}_${playerIdForSeed}_AFTER_${Math.random()
         .toString(36)
-        .slice(
-          2,
-          7
-        )}`,
+        .slice(2,7)}`,
 
       Math.min(
-        murderAt +
-        25000,
-        detectiveEnd -
-        20000
+        murderAt + 25000,
+        detectiveEnd - 20000
       ),
 
       random(
         afterMurderTemplates
+      ).replace(
+        "{location}",
+        crimeLocation
       )
-        .replace(
-          "{location}",
-          crimeLocation
-        )
 
     )
 
@@ -5675,9 +5228,7 @@ async function(){
 
 
   const ids =
-    Object.keys(
-      players
-    );
+    Object.keys(players);
 
 
   const limit =
@@ -5701,8 +5252,7 @@ async function(){
 
 
   if(
-    ids.length <
-    2
+    ids.length < 2
   ){
 
     return;
@@ -5711,9 +5261,7 @@ async function(){
 
 
   const shuffledPlayers =
-    shuffle(
-      ids
-    );
+    shuffle(ids);
 
 
   const detective =
@@ -5725,9 +5273,7 @@ async function(){
 
 
   const innocents =
-    shuffledPlayers.slice(
-      2
-    );
+    shuffledPlayers.slice(2);
 
 
   const now =
@@ -5766,8 +5312,7 @@ async function(){
     Number(
       roomData.roundNumber ||
       0
-    ) +
-    1;
+    ) + 1;
 
 
   const roundId =
@@ -5787,29 +5332,21 @@ async function(){
       );
 
 
-  const privateData =
-    {};
+  const privateData = {};
 
 
-  privateData[
-    detective
-  ] = {
+  privateData[detective] = {
 
-    role:
-      "detective",
+    role:"detective",
 
-    tasks:
-      []
+    tasks:[]
 
   };
 
 
-  privateData[
-    murderer
-  ] = {
+  privateData[murderer] = {
 
-    role:
-      "murderer",
+    role:"murderer",
 
     tasks:
       buildMurdererTasks(
@@ -5827,12 +5364,9 @@ async function(){
   innocents.forEach(
     id=>{
 
-      privateData[
-        id
-      ] = {
+      privateData[id] = {
 
-        role:
-          "innocent",
+        role:"innocent",
 
         tasks:
           buildNormalTasks(
@@ -5857,8 +5391,7 @@ async function(){
 
     roundSeed,
 
-    startedAt:
-      now,
+    startedAt:now,
 
     murderAt,
 
@@ -5872,7 +5405,7 @@ async function(){
       "a fictional guest",
 
     caseDescription:
-      "A fictional incident occurred during the mystery.",
+      "A fictional incident occurred inside the house during the mystery.",
 
     detective,
 
@@ -5886,8 +5419,7 @@ async function(){
   };
 
 
-  const updates =
-    {};
+  const updates = {};
 
 
   updates[
@@ -5954,15 +5486,13 @@ async function(){
 
     ...roomData,
 
-    status:
-      "game",
+    status:"game",
 
     roundNumber,
 
     game,
 
-    private:
-      privateData,
+    private:privateData,
 
     completed:{}
 
@@ -5974,9 +5504,7 @@ async function(){
 
 
   mySecret =
-    privateData[
-      playerId
-    ] ||
+    privateData[playerId] ||
     null;
 
 
@@ -5986,9 +5514,7 @@ async function(){
   try{
 
     await update(
-      ref(
-        db
-      ),
+      ref(db),
       updates
     );
 
@@ -6162,6 +5688,242 @@ function renderSecret(){
 
 
 /* =====================================================
+TASK RENDERING
+===================================================== */
+
+function renderTasks(){
+
+  const container =
+    document.getElementById(
+      "myTasks"
+    );
+
+
+  if(
+    !container ||
+    !Array.isArray(
+      mySecret?.tasks
+    )
+  ){
+
+    return;
+
+  }
+
+
+  const now =
+    sharedNow();
+
+
+  const completed =
+    roomData?.completed?.[playerId] ||
+    {};
+
+
+  container.innerHTML =
+
+    mySecret.tasks
+      .map(
+        task=>{
+
+          const unlockAt =
+            Number(
+              task.unlockAt
+            );
+
+
+          const unlocked =
+            now >= unlockAt;
+
+
+          const done =
+            completed[task.id] === true;
+
+
+          const unlockText =
+            task.unlockText ||
+            shortClock(
+              sharedDate(
+                unlockAt
+              )
+            );
+
+
+          if(
+            !unlocked
+          ){
+
+            return `
+
+              <div class="task locked">
+
+                <div class="task-time">
+                  🔒 Opens at ${escapeHtml(
+                    unlockText
+                  )}
+                </div>
+
+                <div class="locked-text">
+                  Secret task — not available yet.
+                </div>
+
+              </div>
+
+            `;
+
+          }
+
+
+          return `
+
+            <div
+              class="task ${
+                done
+                ?
+                "done"
+                :
+                ""
+              }"
+            >
+
+              <div class="task-row">
+
+                <input
+                  class="task-checkbox"
+                  type="checkbox"
+                  ${
+                    done
+                    ?
+                    "checked"
+                    :
+                    ""
+                  }
+                  onchange="
+                    toggleTask(
+                      '${task.id}',
+                      this.checked
+                    )
+                  "
+                >
+
+                <div class="task-text">
+
+                  <div class="task-time">
+                    ⏰ Opened at
+                    ${escapeHtml(
+                      unlockText
+                    )}
+                  </div>
+
+                  <div>
+                    ${escapeHtml(
+                      task.description
+                    )}
+                  </div>
+
+                  <div class="task-status">
+                    ${
+                      done
+                      ?
+                      "✅ Completed"
+                      :
+                      "⬜ Not completed"
+                    }
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          `;
+
+        }
+      )
+      .join("");
+
+}
+
+
+window.toggleTask =
+async function(
+  taskId,
+  checked
+){
+
+  const task =
+    mySecret?.tasks?.find(
+      item =>
+        item.id ===
+        taskId
+    );
+
+
+  if(
+    !task
+  ){
+
+    return;
+
+  }
+
+
+  if(
+    sharedNow() <
+    Number(
+      task.unlockAt
+    )
+  ){
+
+    alert(
+      "🔒 This task is not unlocked yet."
+    );
+
+    renderTasks();
+
+    return;
+
+  }
+
+
+  try{
+
+    await update(
+
+      ref(
+        db,
+        `rooms/${roomCode}/completed/${playerId}`
+      ),
+
+      {
+
+        [taskId]:
+          checked
+
+      }
+
+    );
+
+  }
+  catch(error){
+
+    console.error(
+      "TASK ERROR:",
+      error
+    );
+
+
+    alert(
+      "Could not save the task."
+    );
+
+  }
+
+};
+
+
+/* =====================================================
 PLAYER NOTES
 ===================================================== */
 
@@ -6185,7 +5947,7 @@ function updatePlayerNoteCounter(){
   ){
 
     counter.textContent =
-      `${input.value.length} / ${MAX_PLAYER_NOTE_LENGTH}`;
+      `${input.value.length} / 240`;
 
   }
 
@@ -6224,9 +5986,7 @@ function updateMyNoteUI(){
 
 
   const note =
-    roomData?.notes?.[
-      playerId
-    ];
+    roomData?.notes?.[playerId];
 
 
   if(
@@ -6237,14 +5997,9 @@ function updateMyNoteUI(){
       note.text ||
       "";
 
-    input.disabled =
-      true;
-
-    button.disabled =
-      true;
-
-    button.textContent =
-      "✅ NOTE SENT";
+    input.disabled = true;
+    button.disabled = true;
+    button.textContent = "✅ NOTE SENT";
 
     status.textContent =
       "✅ Your note was sent.";
@@ -6256,12 +6011,8 @@ function updateMyNoteUI(){
   }
 
 
-  input.disabled =
-    false;
-
-  button.disabled =
-    false;
-
+  input.disabled = false;
+  button.disabled = false;
   button.textContent =
     "📝 SEND NOTE TO DETECTIVE";
 
@@ -6298,8 +6049,7 @@ async function(){
 
 
   if(
-    text.length >
-    MAX_PLAYER_NOTE_LENGTH
+    text.length > 240
   ){
 
     alert(
@@ -6363,19 +6113,14 @@ async function(){
       {};
 
 
-    roomData.notes[
-      playerId
-    ] =
+    roomData.notes[playerId] =
       note;
 
 
-    input.value =
-      "";
+    input.value = "";
 
 
     updatePlayerNoteCounter();
-
-
     updateMyNoteUI();
 
   }
@@ -6500,18 +6245,12 @@ function renderLivePlayerNotes(){
       notes
     )
     .sort(
-      (
-        a,
-        b
-      ) =>
+      (a,b)=>
         (
-          b.timestamp ||
-          0
-        )
-        -
+          b.timestamp || 0
+        ) -
         (
-          a.timestamp ||
-          0
+          a.timestamp || 0
         )
     );
 
@@ -6627,9 +6366,7 @@ function renderDetectivePlayerButtons(){
         id=>{
 
           const note =
-            roomData?.notes?.[
-              id
-            ];
+            roomData?.notes?.[id];
 
 
           const active =
@@ -6675,9 +6412,7 @@ function renderDetectivePlayerButtons(){
 
 
 window.openPlayerDossier =
-async function(
-  selectedId
-){
+async function(selectedId){
 
   selectedDetectivePlayerId =
     selectedId;
@@ -6697,9 +6432,7 @@ async function(
 
 
   const player =
-    roomData?.players?.[
-      selectedId
-    ];
+    roomData?.players?.[selectedId];
 
 
   document
@@ -6764,7 +6497,6 @@ async function(
         "dossierSaveStatus"
       )
       .textContent =
-
       data.updatedAt
       ?
       "Last saved: " +
@@ -6922,9 +6654,7 @@ async function(){
   }
   catch(error){
 
-    console.error(
-      error
-    );
+    console.error(error);
 
 
     document
@@ -6978,9 +6708,7 @@ async function(){
   }
   catch(error){
 
-    console.error(
-      error
-    );
+    console.error(error);
 
 
     document
@@ -7183,8 +6911,7 @@ function renderTaskProgress(){
   }
 
 
-  container.innerHTML =
-    "";
+  container.innerHTML = "";
 
 
   for(
@@ -7194,9 +6921,7 @@ function renderTaskProgress(){
     const completed =
       roomData
         ?.completed
-        ?.[
-          id
-        ] ||
+        ?.[id] ||
       {};
 
 
@@ -7206,8 +6931,7 @@ function renderTaskProgress(){
       )
       .filter(
         value =>
-          value ===
-          true
+          value === true
       )
       .length;
 
@@ -7215,23 +6939,17 @@ function renderTaskProgress(){
     const tasks =
       roomData
         ?.private
-        ?.[
-          id
-        ]
+        ?.[id]
         ?.tasks ||
       [];
 
 
     const total =
-      Array.isArray(
-        tasks
-      )
+      Array.isArray(tasks)
       ?
       tasks.length
       :
-      Object.keys(
-        tasks
-      ).length;
+      Object.keys(tasks).length;
 
 
     const percent =
@@ -7430,9 +7148,7 @@ function setReveal(
 }
 
 
-async function runReveal(
-  result
-){
+async function runReveal(result){
 
   if(
     revealRunning ||
@@ -7444,8 +7160,7 @@ async function runReveal(
   }
 
 
-  revealRunning =
-    true;
+  revealRunning = true;
 
 
   const game =
@@ -7493,9 +7208,7 @@ async function runReveal(
   );
 
 
-  await sleep(
-    1800
-  );
+  await sleep(1800);
 
 
   setReveal(
@@ -7505,9 +7218,7 @@ async function runReveal(
   );
 
 
-  await sleep(
-    1700
-  );
+  await sleep(1700);
 
 
   setReveal(
@@ -7517,9 +7228,7 @@ async function runReveal(
   );
 
 
-  await sleep(
-    1000
-  );
+  await sleep(1000);
 
 
   setReveal(
@@ -7549,9 +7258,7 @@ async function runReveal(
   );
 
 
-  await sleep(
-    2500
-  );
+  await sleep(2500);
 
 
   const detectiveName =
@@ -7650,9 +7357,7 @@ async function runReveal(
   );
 
 
-  await sleep(
-    3500
-  );
+  await sleep(3500);
 
 
   setReveal(
@@ -7705,9 +7410,7 @@ async function runReveal(
   );
 
 
-  await sleep(
-    4000
-  );
+  await sleep(4000);
 
 
   overlay
@@ -7720,8 +7423,7 @@ async function runReveal(
   await resetToLobby();
 
 
-  revealRunning =
-    false;
+  revealRunning = false;
 
 }
 
@@ -7783,31 +7485,16 @@ async function resetToLobby(){
   try{
 
     await update(
-      ref(
-        db
-      ),
+      ref(db),
       updates
     );
 
 
-    mySecret =
-      null;
-
-
-    currentRoundId =
-      null;
-
-
-    gameVisible =
-      false;
-
-
-    lastCallId =
-      null;
-
-
-    lastRevealId =
-      null;
+    mySecret = null;
+    currentRoundId = null;
+    gameVisible = false;
+    lastCallId = null;
+    lastRevealId = null;
 
 
     stopGameListeners();
@@ -7817,16 +7504,14 @@ async function resetToLobby(){
       globalInterval
     );
 
-    globalInterval =
-      null;
+    globalInterval = null;
 
 
     clearInterval(
       taskNotificationInterval
     );
 
-    taskNotificationInterval =
-      null;
+    taskNotificationInterval = null;
 
   }
   catch(error){
@@ -7879,9 +7564,7 @@ CALLS
 ===================================================== */
 
 window.makeCall =
-async function(
-  destination
-){
+async function(destination){
 
   if(
     !roomCode
@@ -7908,10 +7591,7 @@ async function(
           "_" +
           Math.random()
             .toString(36)
-            .slice(
-              2,
-              8
-            ),
+            .slice(2,8),
 
         caller:
           myName,
@@ -7972,10 +7652,9 @@ function showCall(
       "COME TO " +
       (
         destination ||
-        "THE AREA"
+        "THE HOUSE"
       )
-    )
-    .toUpperCase();
+    ).toUpperCase();
 
 
   document
@@ -8021,8 +7700,7 @@ function showCall(
           (
             CALL_DURATION -
             elapsed
-          ) /
-          1000
+          ) / 1000
         )
       );
 
@@ -8133,8 +7811,7 @@ function playCallSound(){
 
       const base =
         start +
-        group *
-        3.1;
+        group * 3.1;
 
 
       for(
@@ -8161,8 +7838,7 @@ function playCallSound(){
 
         const t =
           base +
-          i *
-          0.65;
+          i * 0.65;
 
 
         gain.gain.setValueAtTime(
@@ -8173,15 +7849,13 @@ function playCallSound(){
 
         gain.gain.exponentialRampToValueAtTime(
           0.28,
-          t +
-          0.03
+          t + 0.03
         );
 
 
         gain.gain.exponentialRampToValueAtTime(
           0.0001,
-          t +
-          0.50
+          t + 0.50
         );
 
 
@@ -8195,15 +7869,8 @@ function playCallSound(){
         );
 
 
-        osc.start(
-          t
-        );
-
-
-        osc.stop(
-          t +
-          0.55
-        );
+        osc.start(t);
+        osc.stop(t + 0.55);
 
       }
 
@@ -8262,7 +7929,7 @@ function systemNotification(
 
   showPersistentNotification(
 
-    "📞 Tivoli Mystery Call",
+    "📞 House Mystery Call",
 
     {
 
@@ -8270,7 +7937,7 @@ function systemNotification(
         `${caller} is calling everyone to ${destination}!`,
 
       tag:
-        "tivoli-call-" +
+        "house-call-" +
         Date.now(),
 
       requireInteraction:
@@ -8372,7 +8039,6 @@ document.addEventListener(
     ){
 
       reconnectCurrentRoom();
-
       checkTaskNotifications();
 
     }
@@ -8386,7 +8052,6 @@ window.addEventListener(
   ()=>{
 
     reconnectCurrentRoom();
-
     checkTaskNotifications();
 
   }
@@ -8405,23 +8070,12 @@ function leaveRoomToHome(
   stopTimers();
 
 
-  roomCode =
-    "";
-
-  roomData =
-    null;
-
-  mySecret =
-    null;
-
-  currentRoundId =
-    null;
-
-  gameVisible =
-    false;
-
-  selectedDetectivePlayerId =
-    null;
+  roomCode = "";
+  roomData = null;
+  mySecret = null;
+  currentRoundId = null;
+  gameVisible = false;
+  selectedDetectivePlayerId = null;
 
 
   hideAllMainScreens();
@@ -8451,7 +8105,7 @@ function leaveRoomToHome(
 
 
 /* =====================================================
-SERVICE WORKER STARTUP
+STARTUP
 ===================================================== */
 
 window.addEventListener(
@@ -8476,10 +8130,6 @@ window.addEventListener(
 );
 
 
-/* =====================================================
-URL ROOM
-===================================================== */
-
 const params =
   new URLSearchParams(
     location.search
@@ -8487,9 +8137,7 @@ const params =
 
 
 if(
-  params.get(
-    "room"
-  )
+  params.get("room")
 ){
 
   document
@@ -8498,17 +8146,11 @@ if(
     )
     .value =
     normalizeRoomCode(
-      params.get(
-        "room"
-      )
+      params.get("room")
     );
 
 }
 
-
-/* =====================================================
-NOTE COUNTER
-===================================================== */
 
 document
   .getElementById(
@@ -8519,10 +8161,6 @@ document
     updatePlayerNoteCounter
   );
 
-
-/* =====================================================
-STARTUP
-===================================================== */
 
 async function initialize(){
 
@@ -8592,8 +8230,7 @@ async function initialize(){
   }
   else{
 
-    alertsEnabled =
-      false;
+    alertsEnabled = false;
 
   }
 
