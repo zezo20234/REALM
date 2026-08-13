@@ -22,37 +22,14 @@ FIREBASE CONFIG
 ===================================================== */
 
 firebase.initializeApp({
-
-  /*
-    IMPORTANT:
-    This is the EXACT apiKey from the Firebase
-    configuration you provided.
-  */
-
-  apiKey:
-    "AIzaSyCug0S0qHKstXGZArd5vEBzm-DaLZAIDugo",
-
-  authDomain:
-    "money-e560a.firebaseapp.com",
-
-  databaseURL:
-    "https://money-e560a-default-rtdb.firebaseio.com",
-
-  projectId:
-    "money-e560a",
-
-  storageBucket:
-    "money-e560a.firebasestorage.app",
-
-  messagingSenderId:
-    "477551627159",
-
-  appId:
-    "1:477551627159:web:b19f853905331f71ee92d2",
-
-  measurementId:
-    "G-YYQD2E5J7J"
-
+  apiKey: "AIzaSyCug0S0qHKstGAr5vdzm-DaLZAIDugo",
+  authDomain: "money-e560a.firebaseapp.com",
+  databaseURL: "https://money-e560a-default-rtdb.firebaseio.com",
+  projectId: "money-e560a",
+  storageBucket: "money-e560a.firebasestorage.app",
+  messagingSenderId: "477551627159",
+  appId: "1:477551627159:web:b19f853905331f71ee92d2",
+  measurementId: "G-YYQD2E5J7J"
 });
 
 /* =====================================================
