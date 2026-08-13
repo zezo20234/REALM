@@ -1107,8 +1107,6 @@ button.dark{
 
 <div class="app">
 
-<!-- NAME -->
-
 <section id="nameSetup">
 
   <div class="card center">
@@ -1153,8 +1151,6 @@ button.dark{
 
 </section>
 
-<!-- USER BAR -->
-
 <div
   id="userBar"
   class="user-bar hidden"
@@ -1180,8 +1176,6 @@ button.dark{
   </button>
 
 </div>
-
-<!-- HOME -->
 
 <section
   id="home"
@@ -1320,8 +1314,6 @@ button.dark{
 
 </section>
 
-<!-- CREATE -->
-
 <section
   id="createScreen"
   class="hidden"
@@ -1386,8 +1378,6 @@ button.dark{
   </div>
 
 </section>
-
-<!-- LOBBY -->
 
 <section
   id="lobby"
@@ -1455,8 +1445,6 @@ button.dark{
 
 </section>
 
-<!-- GAME -->
-
 <section
   id="game"
   class="hidden"
@@ -1492,8 +1480,6 @@ button.dark{
 
   </div>
 
-  <!-- CALLS -->
-
   <div class="card">
 
     <h2>
@@ -1508,16 +1494,12 @@ button.dark{
 
   </div>
 
-  <!-- SECRET -->
-
   <div
     id="secretCard"
     class="card"
   >
     Loading your secret...
   </div>
-
-  <!-- NOTE -->
 
   <div
     id="playerNoteCard"
@@ -1568,8 +1550,6 @@ button.dark{
 
   </div>
 
-  <!-- DETECTIVE WAIT -->
-
   <div
     id="detectiveWaiting"
     class="card hidden center"
@@ -1611,8 +1591,6 @@ button.dark{
 
   </div>
 
-  <!-- NORMAL -->
-
   <div
     id="normalWaiting"
     class="card hidden"
@@ -1632,8 +1610,6 @@ button.dark{
     </div>
 
   </div>
-
-  <!-- DETECTIVE NOTES -->
 
   <div
     id="detectiveNotebook"
@@ -1755,8 +1731,6 @@ button.dark{
 
   </div>
 
-  <!-- LIVE NOTES -->
-
   <div
     id="detectiveLiveNotes"
     class="card hidden"
@@ -1775,8 +1749,6 @@ button.dark{
     </div>
 
   </div>
-
-  <!-- INVESTIGATION -->
 
   <div
     id="investigation"
@@ -1919,211 +1891,169 @@ const DISCORD_WEBHOOKS = {
 
 };
 
-function getDiscordWebhookForName(
-  name
-){
+function getDiscordWebhookForName(name){
 
   const key =
-    String(
-      name || ""
-    )
+    String(name || "")
       .trim()
       .toLowerCase();
 
-  return (
-    DISCORD_WEBHOOKS[key] ||
-    ""
-  );
+  return DISCORD_WEBHOOKS[key] || "";
 
 }
 
 /* =====================================================
-DISCORD SEND
+DISCORD
 ===================================================== */
 
-/*
-  We use a real multipart/form-data POST through a hidden
-  iframe/form instead of reading Discord with fetch().
-  This avoids relying on browser CORS behavior.
+function discordEscape(value){
 
-  Discord webhooks accept POST webhook messages.
-*/
+  return String(value ?? "")
+    .replaceAll("\\","\\\\")
+    .replaceAll("`","\\`");
+
+}
 
 function submitWebhookForm(
   webhook,
   payload
 ){
 
-  return new Promise(
-    resolve=>{
+  return new Promise(resolve=>{
 
-      if(
-        !webhook
-      ){
+    if(!webhook){
 
-        resolve(false);
-        return;
-
-      }
-
-      const iframe =
-        document.createElement("iframe");
-
-      const frameName =
-        "discord_hook_" +
-        Date.now() +
-        "_" +
-        Math.random()
-          .toString(36)
-          .slice(2);
-
-      iframe.name =
-        frameName;
-
-      iframe.style.display =
-        "none";
-
-      document.body.appendChild(
-        iframe
-      );
-
-      const form =
-        document.createElement("form");
-
-      form.method =
-        "POST";
-
-      form.action =
-        webhook;
-
-      form.target =
-        frameName;
-
-      form.enctype =
-        "multipart/form-data";
-
-      form.encoding =
-        "multipart/form-data";
-
-      form.style.display =
-        "none";
-
-      const payloadInput =
-        document.createElement("textarea");
-
-      payloadInput.name =
-        "payload_json";
-
-      payloadInput.value =
-        JSON.stringify(
-          payload
-        );
-
-      form.appendChild(
-        payloadInput
-      );
-
-      document.body.appendChild(
-        form
-      );
-
-      let finished =
-        false;
-
-      function finish(
-        value
-      ){
-
-        if(
-          finished
-        ){
-
-          return;
-
-        }
-
-        finished =
-          true;
-
-        form.remove();
-        iframe.remove();
-
-        resolve(value);
-
-      }
-
-      iframe.onload =
-        ()=>{
-          finish(true);
-        };
-
-      iframe.onerror =
-        ()=>{
-          finish(false);
-        };
-
-      try{
-
-        form.submit();
-
-      }
-      catch(error){
-
-        console.warn(
-          "DISCORD FORM:",
-          error
-        );
-
-        finish(false);
-        return;
-
-      }
-
-      /*
-        Cross-origin iframe responses cannot be read by
-        JavaScript. We therefore treat a completed
-        submission as sent and provide a timeout fallback.
-      */
-
-      setTimeout(
-        ()=>{
-          finish(true);
-        },
-        2500
-      );
+      resolve(false);
+      return;
 
     }
-  );
 
-}
+    const iframe =
+      document.createElement("iframe");
 
-function discordEscape(
-  value
-){
+    const frameName =
+      "discord_hook_" +
+      Date.now() +
+      "_" +
+      Math.random()
+        .toString(36)
+        .slice(2);
 
-  return String(
-    value ??
-    ""
-  )
-    .replaceAll(
-      "\\",
-      "\\\\"
-    )
-    .replaceAll(
-      "`",
-      "\\`"
+    iframe.name =
+      frameName;
+
+    iframe.style.display =
+      "none";
+
+    document.body.appendChild(
+      iframe
     );
+
+    const form =
+      document.createElement("form");
+
+    form.method =
+      "POST";
+
+    form.action =
+      webhook;
+
+    form.target =
+      frameName;
+
+    form.enctype =
+      "multipart/form-data";
+
+    form.encoding =
+      "multipart/form-data";
+
+    form.style.display =
+      "none";
+
+    const payloadInput =
+      document.createElement("textarea");
+
+    payloadInput.name =
+      "payload_json";
+
+    payloadInput.value =
+      JSON.stringify(payload);
+
+    form.appendChild(
+      payloadInput
+    );
+
+    document.body.appendChild(
+      form
+    );
+
+    let finished = false;
+
+    function finish(value){
+
+      if(finished){
+        return;
+      }
+
+      finished = true;
+
+      form.remove();
+      iframe.remove();
+
+      resolve(value);
+
+    }
+
+    iframe.onload =
+      ()=>{
+        finish(true);
+      };
+
+    iframe.onerror =
+      ()=>{
+        finish(false);
+      };
+
+    try{
+
+      form.submit();
+
+    }
+    catch(error){
+
+      console.warn(
+        "DISCORD FORM:",
+        error
+      );
+
+      finish(false);
+      return;
+
+    }
+
+    setTimeout(
+      ()=>{
+        finish(true);
+      },
+      3000
+    );
+
+  });
 
 }
 
 async function sendDiscordTaskNotification(
   task,
+  recipientName,
+  recipientId,
+  notificationRoundId,
+  notificationRoomCode,
   attempt = 0
 ){
 
   const webhook =
     getDiscordWebhookForName(
-      myName
+      recipientName
     );
 
   if(
@@ -2132,8 +2062,8 @@ async function sendDiscordTaskNotification(
   ){
 
     console.warn(
-      "No Discord webhook for:",
-      myName
+      "No Discord webhook for recipient:",
+      recipientName
     );
 
     return false;
@@ -2154,11 +2084,11 @@ async function sendDiscordTaskNotification(
 
     content:
       `🔔 **NEW TASK UNLOCKED**\n\n` +
-      `👤 **Player:** ${discordEscape(myName)}\n` +
+      `👤 **Player:** ${discordEscape(recipientName)}\n` +
       `📋 **Task:** ${discordEscape(task.description || "New task")}\n` +
       `⏰ **Opened:** ${discordEscape(unlockTime)}\n` +
-      `🏠 **Room:** ${discordEscape(roomCode)}\n` +
-      `🎮 **Round:** ${discordEscape(currentRoundId || "1")}\n\n` +
+      `🏠 **Room:** ${discordEscape(notificationRoomCode)}\n` +
+      `🎮 **Round:** ${discordEscape(notificationRoundId || "1")}\n\n` +
       `👉 Go check your new task.`
 
   };
@@ -2169,24 +2099,20 @@ async function sendDiscordTaskNotification(
       payload
     );
 
-  if(
-    sent
-  ){
-
+  if(sent){
     return true;
-
   }
 
-  if(
-    attempt < 2
-  ){
+  if(attempt < 2){
 
-    await sleep(
-      1500
-    );
+    await sleep(1500);
 
     return sendDiscordTaskNotification(
       task,
+      recipientName,
+      recipientId,
+      notificationRoundId,
+      notificationRoomCode,
       attempt + 1
     );
 
@@ -2208,9 +2134,7 @@ async function testMyDiscordWebhook(){
       myName
     );
 
-  if(
-    !webhook
-  ){
+  if(!webhook){
 
     status.textContent =
       `❌ No webhook configured for "${myName}".`;
@@ -2224,11 +2148,9 @@ async function testMyDiscordWebhook(){
 
   const fakeTask = {
 
-    id:
-      "TEST",
+    id:"TEST",
 
-    unlockAt:
-      sharedNow(),
+    unlockAt:sharedNow(),
 
     description:
       "This is a Discord webhook test. No real task has opened."
@@ -2237,15 +2159,19 @@ async function testMyDiscordWebhook(){
 
   const result =
     await sendDiscordTaskNotification(
-      fakeTask
+      fakeTask,
+      myName,
+      playerId,
+      "TEST",
+      roomCode || "TEST"
     );
 
   status.textContent =
     result
-    ?
-    "✅ Discord test submitted. Check your Discord channel."
-    :
-    "❌ Discord test could not be submitted.";
+      ?
+      "✅ Discord test submitted. Check your Discord channel."
+      :
+      "❌ Discord test could not be submitted.";
 
 }
 
@@ -2258,9 +2184,7 @@ let playerId =
     "tivoliMysteryPlayerId"
   );
 
-if(
-  !playerId
-){
+if(!playerId){
 
   playerId =
     "p_" +
@@ -2296,6 +2220,7 @@ let tasksUnsubscribe = null;
 let notesUnsubscribe = null;
 let detectiveNotesUnsubscribe = null;
 let resultUnsubscribe = null;
+let taskQueueUnsubscribe = null;
 
 let serverOffsetUnsubscribe = null;
 let firebaseConnectionUnsubscribe = null;
@@ -2308,6 +2233,8 @@ let callTimer = null;
 
 let taskTimers = new Map();
 let taskNotificationBusy = new Set();
+
+let taskQueuePollInterval = null;
 
 let currentRoundId = null;
 let gameVisible = false;
@@ -2359,6 +2286,12 @@ const LOBBY_EXPIRY =
 
 const GAME_EXPIRY =
   2 * 60 * 60 * 1000;
+
+const TASK_QUEUE_POLL =
+  5000;
+
+const TASK_CLAIM_TIMEOUT =
+  30000;
 
 /* =====================================================
 MAPS
@@ -2438,9 +2371,7 @@ function renderMapBadges(
       : "house"
     ];
 
-  if(
-    !map
-  ){
+  if(!map){
 
     return "";
 
@@ -2520,9 +2451,7 @@ function setConnectionState(
       "connectionStatusSub"
     );
 
-  if(
-    !bar
-  ){
+  if(!bar){
 
     return;
 
@@ -2538,9 +2467,7 @@ function setConnectionState(
   yellow.classList.remove("active");
   green.classList.remove("active");
 
-  if(
-    state === "red"
-  ){
+  if(state === "red"){
 
     bar.classList.add("red-state");
     red.classList.add("active");
@@ -2552,9 +2479,7 @@ function setConnectionState(
       "Device offline";
 
   }
-  else if(
-    state === "green"
-  ){
+  else if(state === "green"){
 
     bar.classList.add("green-state");
     green.classList.add("active");
@@ -2576,10 +2501,10 @@ function setConnectionState(
 
     sub.textContent =
       browserOnline
-      ?
-      "Connecting to Firebase"
-      :
-      "Checking connection";
+        ?
+        "Connecting to Firebase"
+        :
+        "Checking connection";
 
   }
 
@@ -2587,18 +2512,14 @@ function setConnectionState(
 
 function updateConnectionState(){
 
-  if(
-    !browserOnline
-  ){
+  if(!browserOnline){
 
     setConnectionState("red");
     return;
 
   }
 
-  if(
-    firebaseConnected
-  ){
+  if(firebaseConnected){
 
     setConnectionState("green");
     return;
@@ -2613,9 +2534,7 @@ function startConnectionMonitoring(){
 
   updateConnectionState();
 
-  if(
-    !firebaseConnectionUnsubscribe
-  ){
+  if(!firebaseConnectionUnsubscribe){
 
     firebaseConnectionUnsubscribe =
       onValue(
@@ -2632,11 +2551,21 @@ function startConnectionMonitoring(){
 
           updateConnectionState();
 
+          if(
+            firebaseConnected &&
+            roomCode &&
+            roomData?.status === "game"
+          ){
+
+            startTaskQueueProcessor();
+
+          }
+
         },
 
         ()=>{
-          firebaseConnected =
-            false;
+
+          firebaseConnected = false;
 
           updateConnectionState();
 
@@ -2646,9 +2575,7 @@ function startConnectionMonitoring(){
 
   }
 
-  if(
-    onlineListenerAdded
-  ){
+  if(onlineListenerAdded){
 
     return;
 
@@ -2690,16 +2617,11 @@ TIME
 
 function sharedNow(){
 
-  return (
-    Date.now() +
-    serverTimeOffset
-  );
+  return Date.now() + serverTimeOffset;
 
 }
 
-function sharedDate(
-  timestamp
-){
+function sharedDate(timestamp){
 
   return new Date(
     Number(timestamp)
@@ -2709,9 +2631,7 @@ function sharedDate(
 
 function startServerClock(){
 
-  if(
-    serverOffsetUnsubscribe
-  ){
+  if(serverOffsetUnsubscribe){
 
     serverOffsetUnsubscribe();
 
@@ -2729,8 +2649,7 @@ function startServerClock(){
 
         serverTimeOffset =
           Number(
-            snapshot.val() ||
-            0
+            snapshot.val() || 0
           );
 
       }
@@ -2743,9 +2662,7 @@ function startServerClock(){
 HELPERS
 ===================================================== */
 
-function random(
-  array
-){
+function random(array){
 
   if(
     !Array.isArray(array) ||
@@ -2764,20 +2681,17 @@ function random(
 
 }
 
-function shuffle(
-  array
-){
+function shuffle(array){
 
   const result =
     Array.isArray(array)
-    ?
-    [...array]
-    :
-    [];
+      ?
+      [...array]
+      :
+      [];
 
   for(
-    let i =
-      result.length - 1;
+    let i = result.length - 1;
     i > 0;
     i--
   ){
@@ -2802,9 +2716,7 @@ function shuffle(
 
 }
 
-function pad(
-  number
-){
+function pad(number){
 
   return String(
     number
@@ -2815,9 +2727,7 @@ function pad(
 
 }
 
-function clockText(
-  date
-){
+function clockText(date){
 
   let h =
     date.getHours();
@@ -2834,15 +2744,15 @@ function clockText(
 
   const period =
     h >= 12
-    ? "PM"
-    : "AM";
+      ?
+      "PM"
+      :
+      "AM";
 
   h =
     h % 12;
 
-  if(
-    h === 0
-  ){
+  if(h === 0){
 
     h = 12;
 
@@ -2852,9 +2762,7 @@ function clockText(
 
 }
 
-function shortClock(
-  date
-){
+function shortClock(date){
 
   let h =
     date.getHours();
@@ -2866,15 +2774,15 @@ function shortClock(
 
   const period =
     h >= 12
-    ? "PM"
-    : "AM";
+      ?
+      "PM"
+      :
+      "AM";
 
   h =
     h % 12;
 
-  if(
-    h === 0
-  ){
+  if(h === 0){
 
     h = 12;
 
@@ -2884,9 +2792,7 @@ function shortClock(
 
 }
 
-function formatDuration(
-  ms
-){
+function formatDuration(ms){
 
   const seconds =
     Math.max(
@@ -2903,8 +2809,7 @@ function formatDuration(
       )
     )
     +
-    ":"
-    +
+    ":" +
     pad(
       seconds % 60
     )
@@ -2912,9 +2817,7 @@ function formatDuration(
 
 }
 
-function escapeHtml(
-  value
-){
+function escapeHtml(value){
 
   return String(
     value ?? ""
@@ -2927,9 +2830,7 @@ function escapeHtml(
 
 }
 
-function sleep(
-  ms
-){
+function sleep(ms){
 
   return new Promise(
     resolve =>
@@ -2945,9 +2846,7 @@ function sleep(
 EXPIRY
 ===================================================== */
 
-function roomActivityTime(
-  data
-){
+function roomActivityTime(data){
 
   return Number(
     data?.lastActivityAt ||
@@ -2957,32 +2856,22 @@ function roomActivityTime(
 
 }
 
-function roomExpiryFor(
-  data
-){
+function roomExpiryFor(data){
 
-  return (
-    data?.status === "game"
-  )
-  ?
-  GAME_EXPIRY
-  :
-  LOBBY_EXPIRY;
+  return data?.status === "game"
+    ?
+    GAME_EXPIRY
+    :
+    LOBBY_EXPIRY;
 
 }
 
-function isRoomStale(
-  data
-){
+function isRoomStale(data){
 
   const activity =
-    roomActivityTime(
-      data
-    );
+    roomActivityTime(data);
 
-  if(
-    !activity
-  ){
+  if(!activity){
 
     return true;
 
@@ -3006,9 +2895,7 @@ function clearTaskTimers(){
     const timer of taskTimers.values()
   ){
 
-    clearTimeout(
-      timer
-    );
+    clearTimeout(timer);
 
   }
 
@@ -3016,9 +2903,27 @@ function clearTaskTimers(){
 
 }
 
+function stopTaskQueueProcessor(){
+
+  if(taskQueueUnsubscribe){
+
+    taskQueueUnsubscribe();
+    taskQueueUnsubscribe = null;
+
+  }
+
+  clearInterval(
+    taskQueuePollInterval
+  );
+
+  taskQueuePollInterval = null;
+
+}
+
 function stopGameListeners(){
 
   clearTaskTimers();
+  stopTaskQueueProcessor();
 
   if(callsUnsubscribe){
     callsUnsubscribe();
@@ -3088,6 +2993,8 @@ function stopTimers(){
   globalInterval = null;
   callTimer = null;
 
+  stopTaskQueueProcessor();
+
 }
 
 /* =====================================================
@@ -3155,9 +3062,7 @@ async function showPersistentNotification(
       serviceWorkerRegistration ||
       await navigator.serviceWorker.ready;
 
-    if(
-      !registration
-    ){
+    if(!registration){
 
       return false;
 
@@ -3265,8 +3170,7 @@ async function(){
 
     }
 
-    alertsEnabled =
-      true;
+    alertsEnabled = true;
 
     localStorage.setItem(
       "tivoliMysteryAlerts",
@@ -3334,87 +3238,324 @@ function(){
 };
 
 /* =====================================================
-TASK NOTIFICATIONS
+NEW FIREBASE TASK QUEUE
 ===================================================== */
 
 /*
-  This is the important fix.
+  ROUND START:
+  The host creates every task.
 
-  Every task gets its own timer.
+  Each task is copied into:
+  rooms/ROOM/taskQueue/QUEUE_ID
 
-  When the unlock time arrives:
-  1. The page checks that this is still the current round.
-  2. The task is sent to the correct user's webhook.
-  3. Only after successful submission is it stored as sent.
-  4. Failed sends stay unsent and are retried.
+  Example:
+
+  {
+    task:{...},
+    recipientId:"...",
+    recipientName:"Zezo",
+    unlockAt:123456789,
+    roundId:"1",
+    status:"pending"
+  }
+
+  Any connected client can process the queue.
+
+  IMPORTANT:
+  This removes the requirement that Zezo's own page
+  stays open.
+
+  However, at least one copy of the game must remain
+  connected somewhere for browser-only processing.
 */
 
-function taskNotificationKey(
-  roundId,
-  taskId
+function taskQueueRef(
+  queueId
 ){
 
-  return (
-    "houseDiscordTaskNotification_" +
-    String(roundId) +
-    "_" +
-    String(taskId)
+  return ref(
+    db,
+    `rooms/${roomCode}/taskQueue/${queueId}`
   );
 
 }
 
-function taskNotificationWasSent(
+function queueTaskKey(
   roundId,
+  recipientId,
   taskId
 ){
 
   return (
-    localStorage.getItem(
-      taskNotificationKey(
-        roundId,
-        taskId
+    `${String(roundId)}__${String(recipientId)}__${String(taskId)}`
+      .replaceAll("/","_")
+      .replaceAll(".","_")
+      .replaceAll("#","_")
+      .replaceAll("$","_")
+      .replaceAll("[","_")
+      .replaceAll("]","_")
+  );
+
+}
+
+async function createTaskNotificationQueue(
+  room,
+  roundId,
+  privateData,
+  players
+){
+
+  const updates = {};
+
+  const oldQueue =
+    await get(
+      ref(
+        db,
+        `rooms/${room}/taskQueue`
       )
-    ) === "1"
-  );
-
-}
-
-function markTaskNotificationSent(
-  roundId,
-  taskId
-){
-
-  localStorage.setItem(
-    taskNotificationKey(
-      roundId,
-      taskId
-    ),
-    "1"
-  );
-
-}
-
-async function sendTaskDiscordOnce(
-  task,
-  roundId
-){
-
-  const key =
-    `${roundId}_${task.id}`;
+    );
 
   if(
-    taskNotificationBusy.has(key)
+    oldQueue.exists()
+  ){
+
+    updates[
+      `rooms/${room}/taskQueue`
+    ] = null;
+
+  }
+
+  for(
+    const playerIdForTask
+    of Object.keys(
+      privateData || {}
+    )
+  ){
+
+    const secret =
+      privateData[playerIdForTask];
+
+    const tasks =
+      Array.isArray(secret?.tasks)
+      ?
+      secret.tasks
+      :
+      [];
+
+    const recipientName =
+      players?.[playerIdForTask]?.name ||
+      "Unknown";
+
+    for(
+      const task
+      of tasks
+    ){
+
+      const queueId =
+        queueTaskKey(
+          roundId,
+          playerIdForTask,
+          task.id
+        );
+
+      updates[
+        `rooms/${room}/taskQueue/${queueId}`
+      ] = {
+
+        queueId,
+
+        task,
+
+        recipientId:
+          playerIdForTask,
+
+        recipientName,
+
+        unlockAt:
+          Number(task.unlockAt),
+
+        roundId:
+          String(roundId),
+
+        roomCode:room,
+
+        status:"pending",
+
+        attempts:0,
+
+        createdAt:
+          sharedNow(),
+
+        claimedBy:"",
+        claimedAt:0,
+        sentAt:0,
+        lastError:""
+
+      };
+
+    }
+
+  }
+
+  if(
+    Object.keys(updates).length
+  ){
+
+    await update(
+      ref(db),
+      updates
+    );
+
+  }
+
+}
+
+/* =====================================================
+QUEUE CLAIM
+===================================================== */
+
+async function claimQueueItem(
+  queueId,
+  currentItem
+){
+
+  const itemRef =
+    taskQueueRef(
+      queueId
+    );
+
+  const result =
+    await runTransaction(
+      itemRef,
+      current=>{
+
+        if(
+          !current
+        ){
+
+          return;
+
+        }
+
+        const status =
+          current.status ||
+          "pending";
+
+        const now =
+          sharedNow();
+
+        if(
+          status === "sent"
+        ){
+
+          return;
+
+        }
+
+        if(
+          status === "sending"
+        ){
+
+          const claimedAt =
+            Number(
+              current.claimedAt || 0
+            );
+
+          if(
+            now -
+            claimedAt <
+            TASK_CLAIM_TIMEOUT
+          ){
+
+            return;
+
+          }
+
+        }
+
+        const unlockAt =
+          Number(
+            current.unlockAt
+          );
+
+        const nextTryAt =
+          Number(
+            current.nextTryAt ||
+            0
+          );
+
+        if(
+          now <
+          unlockAt
+        ){
+
+          return;
+
+        }
+
+        if(
+          nextTryAt &&
+          now <
+          nextTryAt
+        ){
+
+          return;
+
+        }
+
+        return {
+
+          ...current,
+
+          status:"sending",
+
+          claimedBy:
+            playerId,
+
+          claimedAt:now,
+
+          attempts:
+            Number(
+              current.attempts || 0
+            ) + 1
+
+        };
+
+      }
+    );
+
+  return result.committed
+    ?
+    result.snapshot.val()
+    :
+    null;
+
+}
+
+/* =====================================================
+QUEUE SEND
+===================================================== */
+
+async function processQueueItem(
+  item
+){
+
+  if(
+    !item ||
+    !roomCode
   ){
 
     return;
 
   }
 
+  const key =
+    String(
+      item.queueId
+    );
+
   if(
-    taskNotificationWasSent(
-      roundId,
-      task.id
-    )
+    taskNotificationBusy.has(key)
   ){
 
     return;
@@ -3427,26 +3568,125 @@ async function sendTaskDiscordOnce(
 
   try{
 
+    const currentRoom =
+      roomCode;
+
     const sent =
       await sendDiscordTaskNotification(
-        task
+        item.task,
+        item.recipientName,
+        item.recipientId,
+        item.roundId,
+        currentRoom
       );
 
-    if(
-      sent
-    ){
+    const itemRef =
+      taskQueueRef(
+        item.queueId
+      );
 
-      markTaskNotificationSent(
-        roundId,
-        task.id
+    if(sent){
+
+      await update(
+        itemRef,
+        {
+
+          status:"sent",
+
+          sentAt:
+            sharedNow(),
+
+          claimedBy:
+            playerId
+
+        }
       );
 
     }
     else{
 
-      console.warn(
-        "Discord task notification failed:",
-        task.id
+      const attempts =
+        Number(
+          item.attempts || 1
+        );
+
+      const retryDelay =
+        Math.min(
+          60000,
+          5000 *
+          Math.pow(
+            2,
+            Math.max(
+              0,
+              attempts - 1
+            )
+          )
+        );
+
+      await update(
+        itemRef,
+        {
+
+          status:"pending",
+
+          claimedBy:"",
+
+          claimedAt:0,
+
+          nextTryAt:
+            sharedNow() +
+            retryDelay,
+
+          lastError:
+            "Discord submission failed"
+
+        }
+      );
+
+    }
+
+  }
+  catch(error){
+
+    console.error(
+      "QUEUE SEND:",
+      error
+    );
+
+    try{
+
+      await update(
+
+        taskQueueRef(
+          item.queueId
+        ),
+
+        {
+
+          status:"pending",
+
+          claimedBy:"",
+
+          claimedAt:0,
+
+          nextTryAt:
+            sharedNow() +
+            5000,
+
+          lastError:
+            error?.message ||
+            "Unknown queue error"
+
+        }
+
+      );
+
+    }
+    catch(updateError){
+
+      console.error(
+        "QUEUE RESET:",
+        updateError
       );
 
     }
@@ -3462,153 +3702,204 @@ async function sendTaskDiscordOnce(
 
 }
 
-function scheduleTaskNotifications(){
+/* =====================================================
+QUEUE PROCESSOR
+===================================================== */
 
-  clearTaskTimers();
+async function processDueTaskQueue(){
 
   if(
-    !roomData?.game ||
-    !Array.isArray(
-      mySecret?.tasks
-    )
+    !roomCode ||
+    !browserOnline ||
+    !firebaseConnected
   ){
 
     return;
 
   }
 
-  const roundId =
-    String(
-      roomData.game.roundId ||
-      roomData.game.roundNumber ||
-      "1"
-    );
-
-  const now =
-    sharedNow();
-
-  for(
-    const task of mySecret.tasks
+  if(
+    roomData?.status !==
+    "game"
   ){
 
-    const unlockAt =
-      Number(
-        task.unlockAt
-      );
-
-    if(
-      taskNotificationWasSent(
-        roundId,
-        task.id
-      )
-    ){
-
-      continue;
-
-    }
-
-    const delay =
-      Math.max(
-        0,
-        unlockAt - now
-      );
-
-    const timer =
-      setTimeout(
-        async()=>{
-
-          if(
-            !roomData?.game ||
-            String(
-              roomData.game.roundId ||
-              roomData.game.roundNumber ||
-              "1"
-            ) !==
-            roundId
-          ){
-
-            return;
-
-          }
-
-          if(
-            sharedNow() <
-            unlockAt
-          ){
-
-            scheduleTaskNotifications();
-            return;
-
-          }
-
-          await sendTaskDiscordOnce(
-            task,
-            roundId
-          );
-
-          /*
-            Keep a long-running retry alive if the webhook
-            request failed.
-          */
-
-          setTimeout(
-            ()=>{
-              if(
-                !taskNotificationWasSent(
-                  roundId,
-                  task.id
-                )
-              ){
-
-                sendTaskDiscordOnce(
-                  task,
-                  roundId
-                );
-
-              }
-            },
-            5000
-          );
-
-        },
-        delay
-      );
-
-    taskTimers.set(
-      task.id,
-      timer
-    );
+    return;
 
   }
 
-  /*
-    Also immediately check anything that is already
-    unlocked, which matters after reloading/rejoining.
-  */
+  try{
 
-  for(
-    const task of mySecret.tasks
-  ){
+    const snapshot =
+      await get(
+
+        ref(
+          db,
+          `rooms/${roomCode}/taskQueue`
+        )
+
+      );
 
     if(
-      sharedNow() >=
-      Number(task.unlockAt)
+      !snapshot.exists()
     ){
 
-      sendTaskDiscordOnce(
-        task,
-        roundId
+      return;
+
+    }
+
+    const queue =
+      snapshot.val() || {};
+
+    const now =
+      sharedNow();
+
+    const entries =
+      Object.entries(
+        queue
+      )
+      .filter(
+        ([,item])=>{
+
+          if(
+            !item
+          ){
+
+            return false;
+
+          }
+
+          if(
+            item.status ===
+            "sent"
+          ){
+
+            return false;
+
+          }
+
+          if(
+            Number(
+              item.unlockAt
+            ) >
+            now
+          ){
+
+            return false;
+
+          }
+
+          if(
+            Number(
+              item.nextTryAt ||
+              0
+            ) >
+            now
+          ){
+
+            return false;
+
+          }
+
+          if(
+            item.status ===
+            "sending" &&
+            now -
+            Number(
+              item.claimedAt || 0
+            ) <
+            TASK_CLAIM_TIMEOUT
+          ){
+
+            return false;
+
+          }
+
+          return true;
+
+        }
+      )
+      .sort(
+        (a,b)=>
+          Number(
+            a[1]?.unlockAt || 0
+          ) -
+          Number(
+            b[1]?.unlockAt || 0
+          )
+      );
+
+    for(
+      const [
+        queueId,
+        item
+      ]
+      of entries
+    ){
+
+      if(
+        taskNotificationBusy.has(
+          queueId
+        )
+      ){
+
+        continue;
+
+      }
+
+      const claimed =
+        await claimQueueItem(
+          queueId,
+          item
+        );
+
+      if(
+        !claimed
+      ){
+
+        continue;
+
+      }
+
+      await processQueueItem(
+        claimed
       );
 
     }
+
+  }
+  catch(error){
+
+    console.warn(
+      "TASK QUEUE:",
+      error
+    );
 
   }
 
 }
 
-function checkTaskNotifications(){
+function startTaskQueueProcessor(){
 
-  scheduleTaskNotifications();
+  stopTaskQueueProcessor();
+
+  if(
+    !roomCode ||
+    !browserOnline ||
+    !firebaseConnected ||
+    roomData?.status !== "game"
+  ){
+
+    return;
+
+  }
+
+  processDueTaskQueue();
+
+  taskQueuePollInterval =
+    setInterval(
+      processDueTaskQueue,
+      TASK_QUEUE_POLL
+    );
 
 }
 
@@ -3618,9 +3909,7 @@ DEVICE
 
 async function saveDeviceRecord(){
 
-  if(
-    !myName
-  ){
+  if(!myName){
 
     return;
 
@@ -3636,14 +3925,22 @@ async function saveDeviceRecord(){
       ),
 
       {
+
         playerId,
-        name:myName,
+
+        name:
+          myName,
+
         lastSeenAt:
           serverTimestamp(),
+
         currentRoom:
           roomCode || null,
+
         currentGame:
-          roomData?.status || null
+          roomData?.status ||
+          null
+
       }
 
     );
@@ -3666,9 +3963,7 @@ PRESENCE
 
 async function startPresence(){
 
-  if(
-    !roomCode
-  ){
+  if(!roomCode){
 
     return;
 
@@ -3685,17 +3980,23 @@ async function startPresence(){
     await onDisconnect(
       presenceRef
     ).set({
+
       connected:false,
+
       lastSeenAt:
         serverTimestamp()
+
     });
 
     await set(
       presenceRef,
       {
+
         connected:true,
+
         lastSeenAt:
           serverTimestamp()
+
       }
     );
 
@@ -3717,9 +4018,7 @@ async function startPresence(){
     setInterval(
       async()=>{
 
-        if(
-          !browserOnline
-        ){
+        if(!browserOnline){
 
           return;
 
@@ -3730,9 +4029,12 @@ async function startPresence(){
           await update(
             presenceRef,
             {
+
               connected:true,
+
               lastSeenAt:
                 serverTimestamp()
+
             }
           );
 
@@ -3750,9 +4052,7 @@ async function startPresence(){
       30000
     );
 
-  if(
-    presenceUnsubscribe
-  ){
+  if(presenceUnsubscribe){
 
     presenceUnsubscribe();
 
@@ -3768,9 +4068,7 @@ async function startPresence(){
 
       snapshot=>{
 
-        if(
-          roomData
-        ){
+        if(roomData){
 
           roomData.__presence =
             snapshot.val() || {};
@@ -3800,10 +4098,12 @@ function hideAllMainScreens(){
   ]
   .forEach(
     id=>{
+
       document
         .getElementById(id)
         ?.classList
         .add("hidden");
+
     }
   );
 
@@ -3833,8 +4133,10 @@ function updateCreateMapPreview(){
   box.innerHTML =
     renderMapBadges(
       select.value === "mall"
-      ? "mall"
-      : "house"
+        ?
+        "mall"
+        :
+        "house"
     );
 
 }
@@ -3852,13 +4154,21 @@ function renderHomeMaps(){
     );
 
   if(house){
+
     house.innerHTML =
-      renderMapBadges("house");
+      renderMapBadges(
+        "house"
+      );
+
   }
 
   if(mall){
+
     mall.innerHTML =
-      renderMapBadges("mall");
+      renderMapBadges(
+        "mall"
+      );
+
   }
 
 }
@@ -3892,7 +4202,13 @@ function renderLobbyMap(){
       <br>
 
       This room uses the
-      ${getMapType() === "mall" ? "Mall" : "House"}
+      ${
+        getMapType() === "mall"
+          ?
+          "Mall"
+          :
+          "House"
+      }
       map.
 
     </div>
@@ -3973,9 +4289,7 @@ async function(){
   const value =
     input.value.trim();
 
-  if(
-    !value
-  ){
+  if(!value){
 
     alert(
       "Enter your name."
@@ -4012,9 +4326,7 @@ async function(){
       myName
     );
 
-  if(
-    value === null
-  ){
+  if(value === null){
 
     return;
 
@@ -4023,9 +4335,7 @@ async function(){
   const name =
     value.trim();
 
-  if(
-    !name
-  ){
+  if(!name){
 
     return;
 
@@ -4042,9 +4352,7 @@ async function(){
     myName
   );
 
-  if(
-    roomCode
-  ){
+  if(roomCode){
 
     try{
 
@@ -4097,9 +4405,7 @@ ROOM
 
 function saveLocalRoom(){
 
-  if(
-    roomCode
-  ){
+  if(roomCode){
 
     localStorage.setItem(
       "tivoliMysteryRoom",
@@ -4128,16 +4434,19 @@ function restoreSavedRoom(){
       "resumeBox"
     );
 
-  if(
-    !saved
-  ){
+  if(!saved){
 
-    box.classList.add("hidden");
+    box.classList.add(
+      "hidden"
+    );
+
     return;
 
   }
 
-  box.classList.remove("hidden");
+  box.classList.remove(
+    "hidden"
+  );
 
   document
     .getElementById(
@@ -4154,9 +4463,7 @@ async function(){
   const saved =
     getLocalRoom();
 
-  if(
-    !saved
-  ){
+  if(!saved){
 
     return;
 
@@ -4173,9 +4480,7 @@ async function(){
 
 };
 
-function normalizeRoomCode(
-  value
-){
+function normalizeRoomCode(value){
 
   return String(
     value || ""
@@ -4196,9 +4501,7 @@ function normalizeRoomCode(
 window.createRoom =
 function(){
 
-  if(
-    !myName
-  ){
+  if(!myName){
 
     alert(
       "Enter your name first."
@@ -4231,9 +4534,7 @@ function(){
 window.finishCreateRoom =
 async function(){
 
-  if(
-    !browserOnline
-  ){
+  if(!browserOnline){
 
     alert(
       "You are offline."
@@ -4271,12 +4572,12 @@ async function(){
         "mapType"
       )
       .value === "mall"
-      ? "mall"
-      : "house";
+      ?
+      "mall"
+      :
+      "house";
 
-  if(
-    code.length < 2
-  ){
+  if(code.length < 2){
 
     alert(
       "Enter a valid room code."
@@ -4286,8 +4587,7 @@ async function(){
 
   }
 
-  roomCode =
-    code;
+  roomCode = code;
 
   const roomRef =
     ref(
@@ -4319,9 +4619,15 @@ async function(){
 
     players:{
       [playerId]:{
+
         playerId,
-        name:myName,
-        joinedAt:now
+
+        name:
+          myName,
+
+        joinedAt:
+          now
+
       }
     }
 
@@ -4336,9 +4642,7 @@ async function(){
 
         current=>{
 
-          if(
-            current === null
-          ){
+          if(current === null){
 
             return newRoom;
 
@@ -4360,9 +4664,7 @@ async function(){
 
       );
 
-    if(
-      !result.committed
-    ){
+    if(!result.committed){
 
       alert(
         "That room already exists and is still active."
@@ -4404,9 +4706,7 @@ JOIN
 window.joinRoom =
 async function(){
 
-  if(
-    !browserOnline
-  ){
+  if(!browserOnline){
 
     alert(
       "You are offline."
@@ -4427,9 +4727,7 @@ async function(){
 
     );
 
-  if(
-    code.length < 2
-  ){
+  if(code.length < 2){
 
     alert(
       "Enter a valid room code."
@@ -4439,8 +4737,7 @@ async function(){
 
   }
 
-  roomCode =
-    code;
+  roomCode = code;
 
   const roomRef =
     ref(
@@ -4455,9 +4752,7 @@ async function(){
         roomRef
       );
 
-    if(
-      !snapshot.exists()
-    ){
+    if(!snapshot.exists()){
 
       alert(
         "Room not found."
@@ -4470,9 +4765,7 @@ async function(){
     const data =
       snapshot.val();
 
-    if(
-      isRoomStale(data)
-    ){
+    if(isRoomStale(data)){
 
       if(
         data.host ===
@@ -4533,22 +4826,27 @@ async function(){
 
     }
 
-    if(
-      !existingPlayer
-    ){
+    if(!existingPlayer){
 
       await update(
         roomRef,
         {
+
           lastActivityAt:
             sharedNow(),
 
           [`players/${playerId}`]:{
+
             playerId,
-            name:myName,
+
+            name:
+              myName,
+
             joinedAt:
               sharedNow()
+
           }
+
         }
       );
 
@@ -4563,7 +4861,10 @@ async function(){
         ),
 
         {
-          name:myName
+
+          name:
+            myName
+
         }
 
       );
@@ -4572,7 +4873,9 @@ async function(){
 
     roomData =
       (
-        await get(roomRef)
+        await get(
+          roomRef
+        )
       ).val();
 
     saveLocalRoom();
@@ -4646,9 +4949,7 @@ ROOM LISTENER
 
 function listenToRoom(){
 
-  if(
-    roomUnsubscribe
-  ){
+  if(roomUnsubscribe){
 
     roomUnsubscribe();
 
@@ -4664,9 +4965,7 @@ function listenToRoom(){
 
       snapshot=>{
 
-        if(
-          !snapshot.exists()
-        ){
+        if(!snapshot.exists()){
 
           leaveRoomToHome(
             "This room no longer exists."
@@ -4716,8 +5015,7 @@ LOBBY
 
 function enterLobbyFromRoom(){
 
-  gameVisible =
-    false;
+  gameVisible = false;
 
   document
     .getElementById(
@@ -4748,9 +5046,7 @@ function enterLobbyFromRoom(){
 
 function renderLobby(){
 
-  if(
-    !roomData
-  ){
+  if(!roomData){
 
     return;
 
@@ -4888,9 +5184,7 @@ function renderLobby(){
     !isHost
   );
 
-  if(
-    isHost
-  ){
+  if(isHost){
 
     const full =
       ids.length ===
@@ -4956,9 +5250,7 @@ function startRoomExpiryWatcher(){
               )
             );
 
-          if(
-            !snap.exists()
-          ){
+          if(!snap.exists()){
 
             return;
 
@@ -4967,9 +5259,7 @@ function startRoomExpiryWatcher(){
           const data =
             snap.val();
 
-          if(
-            !isRoomStale(data)
-          ){
+          if(!isRoomStale(data)){
 
             return;
 
@@ -5018,9 +5308,7 @@ function enterGameFromRoom(){
   const game =
     roomData?.game;
 
-  if(
-    !game
-  ){
+  if(!game){
 
     return;
 
@@ -5034,11 +5322,12 @@ function enterGameFromRoom(){
 
   if(
     currentRoundId ===
-      roundId &&
+    roundId &&
     gameVisible
   ){
 
-    checkTaskNotifications();
+    startTaskQueueProcessor();
+
     return;
 
   }
@@ -5046,8 +5335,7 @@ function enterGameFromRoom(){
   currentRoundId =
     roundId;
 
-  gameVisible =
-    true;
+  gameVisible = true;
 
   hideAllMainScreens();
 
@@ -5080,12 +5368,7 @@ function enterGameFromRoom(){
   startGameListeners();
   startGlobalClock();
 
-  /*
-    This is now scheduled whenever the game entry
-    happens, including after reconnect/reload.
-  */
-
-  scheduleTaskNotifications();
+  startTaskQueueProcessor();
 
 }
 
@@ -5100,9 +5383,7 @@ function renderCallButtons(){
       "callButtons"
     );
 
-  if(
-    !container
-  ){
+  if(!container){
 
     return;
 
@@ -5121,10 +5402,14 @@ function renderCallButtons(){
           <button
             class="${
               index % 3 === 1
-              ? "orange"
-              : index % 3 === 2
-              ? "secondary"
-              : ""
+              ?
+              "orange"
+              :
+              index % 3 === 2
+              ?
+              "secondary"
+              :
+              ""
             }"
             data-call-location="${escapeHtml(location)}"
           >
@@ -5146,9 +5431,11 @@ function renderCallButtons(){
         button.addEventListener(
           "click",
           ()=>{
+
             makeCall(
               button.dataset.callLocation
             );
+
           }
         );
 
@@ -5165,9 +5452,7 @@ function startGameListeners(){
 
   stopGameListeners();
 
-  if(
-    !roomCode
-  ){
+  if(!roomCode){
 
     return;
 
@@ -5183,9 +5468,7 @@ function startGameListeners(){
 
       snapshot=>{
 
-        if(
-          !snapshot.exists()
-        ){
+        if(!snapshot.exists()){
 
           return;
 
@@ -5209,9 +5492,7 @@ function startGameListeners(){
               )
           );
 
-        if(
-          !entries.length
-        ){
+        if(!entries.length){
 
           return;
 
@@ -5250,9 +5531,7 @@ function startGameListeners(){
               lastSeenTime
           );
 
-        if(
-          !lastSeen
-        ){
+        if(!lastSeen){
 
           localStorage.setItem(
             lastSeenKey,
@@ -5271,9 +5550,7 @@ function startGameListeners(){
           of newCalls
         ){
 
-          if(
-            !call?.id
-          ){
+          if(!call?.id){
 
             continue;
 
@@ -5284,9 +5561,7 @@ function startGameListeners(){
             call.caller
           );
 
-          if(
-            alertsEnabled
-          ){
+          if(alertsEnabled){
 
             playCallSound();
             vibrate();
@@ -5368,9 +5643,7 @@ function startGameListeners(){
 
       snapshot=>{
 
-        if(
-          !snapshot.exists()
-        ){
+        if(!snapshot.exists()){
 
           return;
 
@@ -5379,9 +5652,7 @@ function startGameListeners(){
         const result =
           snapshot.val();
 
-        if(
-          !result?.accusedId
-        ){
+        if(!result?.accusedId){
 
           return;
 
@@ -5473,9 +5744,7 @@ function startGlobalClock(){
       const game =
         roomData?.game;
 
-      if(
-        !game
-      ){
+      if(!game){
 
         return;
 
@@ -5495,7 +5764,8 @@ function startGlobalClock(){
         );
 
       const beforeDetective =
-        now < detectiveEnd;
+        now <
+        detectiveEnd;
 
       document
         .getElementById(
@@ -5526,7 +5796,8 @@ function startGlobalClock(){
         beforeDetective
         ?
         formatDuration(
-          detectiveEnd - now
+          detectiveEnd -
+          now
         )
         :
         "00:00";
@@ -5555,7 +5826,8 @@ function startGlobalClock(){
           formatDuration(
             Math.max(
               0,
-              detectiveEnd - now
+              detectiveEnd -
+              now
             )
           );
 
@@ -5600,7 +5872,8 @@ function startGlobalClock(){
             )
             .textContent =
             formatDuration(
-              investigationEnd - now
+              investigationEnd -
+              now
             );
 
         }
@@ -5685,13 +5958,20 @@ function createTask(
 ){
 
   return {
+
     id,
+
     unlockAt,
+
     unlockText:
       shortClock(
-        sharedDate(unlockAt)
+        sharedDate(
+          unlockAt
+        )
       ),
+
     description
+
   };
 
 }
@@ -5701,9 +5981,14 @@ function nextMinuteTimestamp(
 ){
 
   const date =
-    sharedDate(timestamp);
+    sharedDate(
+      timestamp
+    );
 
-  date.setSeconds(0,0);
+  date.setSeconds(
+    0,
+    0
+  );
 
   date.setMinutes(
     date.getMinutes() + 1
@@ -5743,7 +6028,10 @@ function makeUnlockTimes(
     output.push(
       nextMinuteTimestamp(
         first +
-        (last - first) *
+        (
+          last -
+          first
+        ) *
         ratio
       )
     );
@@ -5798,17 +6086,15 @@ function buildNormalTasks(
 
         let possible =
           locations.filter(
-            location=>
+            location =>
               location !==
-                crimeLocation &&
+              crimeLocation &&
               !used.includes(
                 location
               )
           );
 
-        if(
-          !possible.length
-        ){
+        if(!possible.length){
 
           possible =
             locations.filter(
@@ -5820,9 +6106,13 @@ function buildNormalTasks(
         }
 
         const location =
-          random(possible);
+          random(
+            possible
+          );
 
-        used.push(location);
+        used.push(
+          location
+        );
 
         const pool =
           Math.random() < .5
@@ -5837,11 +6127,13 @@ function buildNormalTasks(
 
           unlockAt,
 
-          random(pool)
-            .replace(
-              "{location}",
-              location
-            )
+          random(
+            pool
+          )
+          .replace(
+            "{location}",
+            location
+          )
 
         );
 
@@ -5886,12 +6178,16 @@ function buildMurdererTasks(
 
   const times =
     makeUnlockTimes(
+
       now,
+
       Math.max(
         now + 60000,
         usableTaskEnd
       ),
+
       count
+
     );
 
   const used = [];
@@ -5907,26 +6203,32 @@ function buildMurdererTasks(
         let possible =
           locations.filter(
             location =>
-              location !== crimeLocation &&
-              !used.includes(location)
+              location !==
+              crimeLocation &&
+              !used.includes(
+                location
+              )
           );
 
-        if(
-          !possible.length
-        ){
+        if(!possible.length){
 
           possible =
             locations.filter(
               location =>
-                location !== crimeLocation
+                location !==
+                crimeLocation
             );
 
         }
 
         const location =
-          random(possible);
+          random(
+            possible
+          );
 
-        used.push(location);
+        used.push(
+          location
+        );
 
         return createTask(
 
@@ -5934,11 +6236,13 @@ function buildMurdererTasks(
 
           unlockAt,
 
-          random(activityTemplates)
-            .replace(
-              "{location}",
-              location
-            )
+          random(
+            activityTemplates
+          )
+          .replace(
+            "{location}",
+            location
+          )
 
         );
 
@@ -5954,17 +6258,21 @@ function buildMurdererTasks(
 
       murderAt,
 
-      random(murderTemplates)
-        .replace(
-          "{location}",
-          crimeLocation
-        )
-        .replace(
-          "{time}",
-          shortClock(
-            sharedDate(murderAt)
+      random(
+        murderTemplates
+      )
+      .replace(
+        "{location}",
+        crimeLocation
+      )
+      .replace(
+        "{time}",
+        shortClock(
+          sharedDate(
+            murderAt
           )
         )
+      )
 
     )
 
@@ -5978,17 +6286,21 @@ function buildMurdererTasks(
 
       murderAt + 25000,
 
-      random(afterMurderTemplates)
-        .replace(
-          "{location}",
-          crimeLocation
-        )
+      random(
+        afterMurderTemplates
+      )
+      .replace(
+        "{location}",
+        crimeLocation
+      )
 
     )
 
   );
 
-  return shuffle(tasks);
+  return shuffle(
+    tasks
+  );
 
 }
 
@@ -6055,7 +6367,9 @@ async function(){
   }
 
   const shuffledPlayers =
-    shuffle(ids);
+    shuffle(
+      ids
+    );
 
   const detective =
     shuffledPlayers[0];
@@ -6064,7 +6378,9 @@ async function(){
     shuffledPlayers[1];
 
   const innocents =
-    shuffledPlayers.slice(2);
+    shuffledPlayers.slice(
+      2
+    );
 
   const now =
     sharedNow();
@@ -6090,8 +6406,10 @@ async function(){
 
   const mapType =
     roomData.mapType === "mall"
-    ? "mall"
-    : "house";
+      ?
+      "mall"
+      :
+      "house";
 
   const locations =
     mapLocationList(
@@ -6099,7 +6417,9 @@ async function(){
     );
 
   const crimeLocation =
-    random(locations);
+    random(
+      locations
+    );
 
   const roundNumber =
     Number(
@@ -6107,50 +6427,82 @@ async function(){
     ) + 1;
 
   const roundId =
-    String(roundNumber);
+    String(
+      roundNumber
+    );
 
   const roundSeed =
     Date.now().toString(36) +
     "_" +
     Math.random()
       .toString(36)
-      .slice(2,10);
+      .slice(
+        2,
+        10
+      );
 
   const privateData = {};
 
   privateData[detective] = {
-    role:"detective",
+
+    role:
+      "detective",
+
     tasks:[]
+
   };
 
   privateData[murderer] = {
-    role:"murderer",
+
+    role:
+      "murderer",
+
     tasks:
       buildMurdererTasks(
+
         murderer,
+
         now,
+
         detectiveEnd,
+
         murderAt,
+
         crimeLocation,
+
         roundSeed,
+
         mapType
+
       )
+
   };
 
   innocents.forEach(
     id=>{
 
       privateData[id] = {
-        role:"innocent",
+
+        role:
+          "innocent",
+
         tasks:
           buildNormalTasks(
+
             id,
+
             now,
+
             detectiveEnd,
+
             crimeLocation,
+
             roundSeed,
+
             mapType
+
           )
+
       };
 
     }
@@ -6159,22 +6511,40 @@ async function(){
   const game = {
 
     roundNumber,
+
     roundId,
+
     roundSeed,
+
     mapType,
-    startedAt:now,
+
+    startedAt:
+      now,
+
     murderAt,
+
     detectiveEnd,
+
     investigationEnd,
+
     crimeLocation,
-    victim:"a fictional guest",
+
+    victim:
+      "a fictional guest",
+
     caseDescription:
       "A fictional incident occurred during the mystery.",
+
     detective,
+
     murderer,
+
     suspects:[
+
       murderer,
+
       ...innocents
+
     ]
 
   };
@@ -6227,6 +6597,11 @@ async function(){
     null;
 
   updates[
+    `rooms/${roomCode}/taskQueue`
+  ] =
+    null;
+
+  updates[
     `rooms/${roomCode}/lastActivityAt`
   ] =
     now;
@@ -6238,11 +6613,22 @@ async function(){
       updates
     );
 
+    const queuePlayers =
+      players;
+
+    await createTaskNotificationQueue(
+      roomCode,
+      roundId,
+      privateData,
+      queuePlayers
+    );
+
     roomData = {
 
       ...roomData,
 
-      status:"game",
+      status:
+        "game",
 
       roundNumber,
 
@@ -6251,7 +6637,10 @@ async function(){
       private:
         privateData,
 
-      completed:{}
+      completed:{},
+
+      taskQueue:
+        {}
 
     };
 
@@ -6296,9 +6685,7 @@ function renderSecret(){
       "secretCard"
     );
 
-  if(
-    !mySecret
-  ){
+  if(!mySecret){
 
     card.textContent =
       "Your secret is loading...";
@@ -6363,16 +6750,18 @@ function renderSecret(){
 
     <div class="role ${
       murderer
-      ? "murderer"
-      : "innocent"
+        ?
+        "murderer"
+        :
+        "innocent"
     }">
 
       ${
         murderer
-        ?
-        "🔎 YOU ARE THE MYSTERY PLAYER"
-        :
-        "👤 YOU ARE INNOCENT"
+          ?
+          "🔎 YOU ARE THE MYSTERY PLAYER"
+          :
+          "👤 YOU ARE INNOCENT"
       }
 
     </div>
@@ -6460,7 +6849,8 @@ function renderTasks(){
             );
 
           const unlocked =
-            now >= unlockAt;
+            now >=
+            unlockAt;
 
           const done =
             completed[
@@ -6475,9 +6865,7 @@ function renderTasks(){
               )
             );
 
-          if(
-            !unlocked
-          ){
+          if(!unlocked){
 
             return `
 
@@ -6502,7 +6890,13 @@ function renderTasks(){
 
           return `
 
-            <div class="task ${done ? "done" : ""}">
+            <div class="task ${
+              done
+                ?
+                "done"
+                :
+                ""
+            }">
 
               <div class="task-row">
 
@@ -6531,10 +6925,10 @@ function renderTasks(){
                   <div class="task-status">
                     ${
                       done
-                      ?
-                      "✅ Completed"
-                      :
-                      "⬜ Not completed"
+                        ?
+                        "✅ Completed"
+                        :
+                        "⬜ Not completed"
                     }
                   </div>
 
@@ -6597,13 +6991,16 @@ async function(
   const task =
     mySecret?.tasks?.find(
       item =>
-        item.id === taskId
+        item.id ===
+        taskId
     );
 
   if(
     !task ||
     sharedNow() <
-    Number(task.unlockAt)
+    Number(
+      task.unlockAt
+    )
   ){
 
     renderTasks();
@@ -6700,9 +7097,7 @@ function updateMyNoteUI(){
       ?.notes
       ?.[playerId];
 
-  if(
-    note
-  ){
+  if(note){
 
     input.value =
       note.text || "";
@@ -6757,9 +7152,7 @@ async function(){
   const text =
     input.value.trim();
 
-  if(
-    !text
-  ){
+  if(!text){
 
     alert(
       "Write a note first."
@@ -6791,9 +7184,7 @@ async function(){
         noteRef
       );
 
-    if(
-      existing.exists()
-    ){
+    if(existing.exists()){
 
       updateMyNoteUI();
       return;
@@ -6907,9 +7298,7 @@ function renderLivePlayerNotes(){
       "liveNotesList"
     );
 
-  if(
-    !container
-  ){
+  if(!container){
 
     return;
 
@@ -6919,20 +7308,20 @@ function renderLivePlayerNotes(){
     roomData?.notes || {};
 
   const entries =
-    Object.values(notes)
-      .sort(
-        (a,b)=>
-          (
-            b.timestamp || 0
-          ) -
-          (
-            a.timestamp || 0
-          )
-      );
+    Object.values(
+      notes
+    )
+    .sort(
+      (a,b)=>
+        (
+          b.timestamp || 0
+        ) -
+        (
+          a.timestamp || 0
+        )
+    );
 
-  if(
-    !entries.length
-  ){
+  if(!entries.length){
 
     container.innerHTML =
       `<div class="note-empty">
@@ -7006,9 +7395,7 @@ function renderDetectivePlayerButtons(){
     roomData?.players ||
     {};
 
-  if(
-    !suspects.length
-  ){
+  if(!suspects.length){
 
     container.innerHTML =
       `<div class="note-empty">
@@ -7158,7 +7545,9 @@ async function(
   }
   catch(error){
 
-    console.error(error);
+    console.error(
+      error
+    );
 
   }
 
@@ -7184,9 +7573,7 @@ function refreshSelectedDossierNote(){
       ?.notes
       ?.[selectedDetectivePlayerId];
 
-  if(
-    note
-  ){
+  if(note){
 
     box.innerHTML = `
 
@@ -7293,7 +7680,9 @@ async function(){
   }
   catch(error){
 
-    console.error(error);
+    console.error(
+      error
+    );
 
   }
 
@@ -7346,7 +7735,9 @@ async function(){
   }
   catch(error){
 
-    console.error(error);
+    console.error(
+      error
+    );
 
   }
 
@@ -7397,9 +7788,7 @@ function renderCase(){
   const game =
     roomData?.game;
 
-  if(
-    !game
-  ){
+  if(!game){
 
     return;
 
@@ -7425,8 +7814,10 @@ function renderCase(){
         ${escapeHtml(
           MAPS[
             game.mapType === "mall"
-            ? "mall"
-            : "house"
+              ?
+              "mall"
+              :
+              "house"
           ].name
         )}
       </p>
@@ -7539,9 +7930,7 @@ function renderTaskProgress(){
       "taskProgress"
     );
 
-  if(
-    !container
-  ){
+  if(!container){
 
     return;
 
@@ -7670,9 +8059,7 @@ async function(
         )
       );
 
-    if(
-      existing.exists()
-    ){
+    if(existing.exists()){
 
       return;
 
@@ -7706,7 +8093,9 @@ async function(
   }
   catch(error){
 
-    console.error(error);
+    console.error(
+      error
+    );
 
   }
 
@@ -7845,24 +8234,24 @@ async function runReveal(
     "ROLE REVEALED",
 
     wasMurderer
-    ?
-    "🔎 THE MYSTERY PLAYER"
-    :
-    "👤 INNOCENT",
+      ?
+      "🔎 THE MYSTERY PLAYER"
+      :
+      "👤 INNOCENT",
 
     wasMurderer
-    ?
-    `${accusedName} was the mystery player.`
-    :
-    `${accusedName} was innocent.`,
+      ?
+      `${accusedName} was the mystery player.`
+      :
+      `${accusedName} was innocent.`,
 
     "",
 
     wasMurderer
-    ?
-    "reveal-shake"
-    :
-    "reveal-pop"
+      ?
+      "reveal-shake"
+      :
+      "reveal-pop"
 
   );
 
@@ -7887,7 +8276,8 @@ async function runReveal(
     )
     .filter(
       id =>
-        id !== game.murderer
+        id !==
+        game.murderer
     )
     .map(
       id=>`
@@ -7967,16 +8357,16 @@ async function runReveal(
     "GAME OVER",
 
     wasMurderer
-    ?
-    "🎉 DETECTIVE WINS!"
-    :
-    "🔎 MYSTERY PLAYER WINS!",
+      ?
+      "🎉 DETECTIVE WINS!"
+      :
+      "🔎 MYSTERY PLAYER WINS!",
 
     wasMurderer
-    ?
-    "Correct accusation."
-    :
-    "The Detective accused an innocent.",
+      ?
+      "Correct accusation."
+      :
+      "The Detective accused an innocent.",
 
     `
 
@@ -7985,20 +8375,20 @@ async function runReveal(
           reveal-winner
           ${
             wasMurderer
-            ?
-            "detective-win"
-            :
-            "murderer-win"
+              ?
+              "detective-win"
+              :
+              "murderer-win"
           }
         "
       >
 
         ${
           wasMurderer
-          ?
-          "🔎 GREAT DETECTIVE WORK"
-          :
-          "😎 GREAT MYSTERY PLAY"
+            ?
+            "🔎 GREAT DETECTIVE WORK"
+            :
+            "😎 GREAT MYSTERY PLAY"
         }
 
       </div>
@@ -8006,10 +8396,10 @@ async function runReveal(
     `,
 
     wasMurderer
-    ?
-    "reveal-pop"
-    :
-    "reveal-shake"
+      ?
+      "reveal-pop"
+      :
+      "reveal-shake"
 
   );
 
@@ -8070,6 +8460,9 @@ async function resetToLobby(){
     [`rooms/${roomCode}/calls`]:
       null,
 
+    [`rooms/${roomCode}/taskQueue`]:
+      null,
+
     [`rooms/${roomCode}/createdAt`]:
       now,
 
@@ -8100,7 +8493,9 @@ async function resetToLobby(){
   }
   catch(error){
 
-    console.error(error);
+    console.error(
+      error
+    );
 
     alert(
       "Could not reset the game."
@@ -8308,7 +8703,9 @@ function showCall(
         "callCount"
       )
       .textContent =
-      String(remaining);
+      String(
+        remaining
+      );
 
     bar.style.transform =
       `scaleX(${
@@ -8359,9 +8756,7 @@ function playCallSound(){
       window.AudioContext ||
       window.webkitAudioContext;
 
-    if(
-      !AudioCtx
-    ){
+    if(!AudioCtx){
 
       return;
 
@@ -8395,8 +8790,7 @@ function playCallSound(){
 
       const base =
         start +
-        group *
-        3.1;
+        group * 3.1;
 
       for(
         let i = 0;
@@ -8414,8 +8808,10 @@ function playCallSound(){
 
         osc.frequency.value =
           i === 0
-          ? 880
-          : 660;
+          ?
+          880
+          :
+          660;
 
         const t =
           base +
@@ -8492,9 +8888,7 @@ function systemNotification(
   caller
 ){
 
-  if(
-    !alertsEnabled
-  ){
+  if(!alertsEnabled){
 
     return;
 
@@ -8553,9 +8947,7 @@ async function reconnectCurrentRoom(){
 
       );
 
-    if(
-      !snap.exists()
-    ){
+    if(!snap.exists()){
 
       return;
 
@@ -8593,7 +8985,7 @@ async function reconnectCurrentRoom(){
 }
 
 /* =====================================================
-VISIBILITY / FOCUS
+VISIBILITY
 ===================================================== */
 
 document.addEventListener(
@@ -8612,7 +9004,14 @@ document.addEventListener(
 
       await reconnectCurrentRoom();
 
-      scheduleTaskNotifications();
+      if(
+        roomData?.status ===
+        "game"
+      ){
+
+        startTaskQueueProcessor();
+
+      }
 
     }
 
@@ -8630,7 +9029,14 @@ window.addEventListener(
 
     await reconnectCurrentRoom();
 
-    scheduleTaskNotifications();
+    if(
+      roomData?.status ===
+      "game"
+    ){
+
+      startTaskQueueProcessor();
+
+    }
 
   }
 );
@@ -8664,11 +9070,11 @@ function leaveRoomToHome(
 
   renderHomeMaps();
 
-  if(
-    message
-  ){
+  if(message){
 
-    alert(message);
+    alert(
+      message
+    );
 
   }
 
@@ -8738,9 +9144,7 @@ async function initialize(){
   const savedName =
     loadSavedName();
 
-  if(
-    savedName
-  ){
+  if(savedName){
 
     myName =
       savedName;
@@ -8799,4 +9203,4 @@ initialize();
 </script>
 
 </body>
-</html>make sure everything is working if not fix 
+</html>
