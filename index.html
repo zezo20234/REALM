@@ -188,7 +188,9 @@ button.dark{
 
 .install-box{
   background:#172038;
-  border:1px solid rgba(113,140,255,.25);
+  border:
+    1px solid
+    rgba(113,140,255,.25);
   padding:15px;
   border-radius:16px;
   margin-top:15px;
@@ -557,6 +559,7 @@ button.dark{
   display:flex;
   align-items:center;
   justify-content:center;
+
   background:
     radial-gradient(
       circle at center,
@@ -564,10 +567,12 @@ button.dark{
       #111a2a 43%,
       #020307 100%
     );
+
   padding:
     calc(20px + env(safe-area-inset-top))
     20px
     calc(20px + env(safe-area-inset-bottom));
+
   overflow:hidden;
 }
 
@@ -782,6 +787,7 @@ button.dark{
   position:fixed;
   inset:0;
   z-index:200000;
+
   background:
     radial-gradient(
       circle at center,
@@ -789,6 +795,7 @@ button.dark{
       #0c101b 44%,
       #020307 100%
     );
+
   display:flex;
   align-items:center;
   justify-content:center;
@@ -1702,9 +1709,11 @@ button.dark{
     </h2>
 
     <div id="liveNotesList">
+
       <div class="note-empty">
         No player notes yet.
       </div>
+
     </div>
 
   </div>
@@ -1799,16 +1808,13 @@ from
 
 /* =====================================================
 FIREBASE
+EXACT CONFIG YOU ORIGINALLY PROVIDED
 ===================================================== */
 
 const firebaseConfig = {
 
-  /*
-    THIS IS THE CORRECT KEY FROM THE FIREBASE CONFIG
-    YOU SENT.
-  */
-
-  apiKey: "AIzaSyCug0S0qHKstGAr5vdzm-DaLZAIDugo"
+  apiKey:
+    "AIzaSyCug0S0qHKstXGZArd5vEBzm-DaLZAIDugo",
 
   authDomain:
     "money-e560a.firebaseapp.com",
@@ -1833,14 +1839,10 @@ const firebaseConfig = {
 
 };
 
-/*
-  IMPORTANT:
-  This must be the Web Push public VAPID key shown in:
-  Firebase Console
-  → Project settings
-  → Cloud Messaging
-  → Web Push certificates
-*/
+/* =====================================================
+VAPID
+EXACT VAPID KEY YOU PROVIDED
+===================================================== */
 
 const FIREBASE_VAPID_PUBLIC_KEY =
   "BL7rsvWz4BsL0CnbBLrrLUoWtNO4r5TMLygYl8A_YT1qVCfVr8ZjBW7OLjbBswac1fHs74-Aw6Wl1gxG6ipyf78";
@@ -1860,16 +1862,22 @@ FCM
 ===================================================== */
 
 let messaging = null;
+
 let fcmToken = "";
+
 let fcmReady = false;
+
 let foregroundMessagingStarted = false;
+
 let messagingSupported = false;
 
 /* =====================================================
 DEBUG
 ===================================================== */
 
-function setNotificationDebug(text){
+function setNotificationDebug(
+  text
+){
 
   const box =
     document.getElementById(
@@ -1891,7 +1899,9 @@ function setNotificationDebug(text){
 
 }
 
-function formatFirebaseError(error){
+function formatFirebaseError(
+  error
+){
 
   if(!error){
     return "Unknown error";
@@ -1900,24 +1910,30 @@ function formatFirebaseError(error){
   const output = [];
 
   if(error.name){
+
     output.push(
       "name: " +
       error.name
     );
+
   }
 
   if(error.code){
+
     output.push(
       "code: " +
       error.code
     );
+
   }
 
   if(error.message){
+
     output.push(
       "message: " +
       error.message
     );
+
   }
 
   return output.length
@@ -1957,33 +1973,51 @@ STATE
 ===================================================== */
 
 let roomCode = "";
+
 let myName = "";
+
 let roomData = null;
+
 let mySecret = null;
 
 let roomUnsubscribe = null;
+
 let presenceUnsubscribe = null;
+
 let callsUnsubscribe = null;
+
 let tasksUnsubscribe = null;
+
 let notesUnsubscribe = null;
+
 let detectiveNotesUnsubscribe = null;
+
 let resultUnsubscribe = null;
 
 let serverOffsetUnsubscribe = null;
+
 let firebaseConnectionUnsubscribe = null;
+
 let onlineListenerAdded = false;
 
 let heartbeatInterval = null;
+
 let roomExpiryInterval = null;
+
 let globalInterval = null;
+
 let callTimer = null;
+
 let taskNotificationInterval = null;
 
 let currentRoundId = null;
+
 let gameVisible = false;
+
 let selectedDetectivePlayerId = null;
 
 let revealRunning = false;
+
 let lastRevealId = null;
 
 let audioContext = null;
@@ -2040,7 +2074,9 @@ const MAPS = {
 
   house:{
     id:"house",
+
     name:"🏠 House",
+
     locations:[
       "Main Door / Entrance",
       "Hallway",
@@ -2051,11 +2087,14 @@ const MAPS = {
       "Bathroom 1 — Outside Only",
       "Bathroom 2 — Outside Only"
     ]
+
   },
 
   mall:{
     id:"mall",
+
     name:"🏬 Mall",
+
     locations:[
       "Open Area",
       "Aura Cafe",
@@ -2063,6 +2102,7 @@ const MAPS = {
       "Mollys Cafe",
       "Automatic Door Entrance"
     ]
+
   }
 
 };
@@ -2083,7 +2123,9 @@ function getMap(){
 
 }
 
-function mapLocationList(mapType){
+function mapLocationList(
+  mapType
+){
 
   return (
     MAPS[
@@ -2188,6 +2230,7 @@ async function initializeMessaging(){
   catch(error){
 
     messaging = null;
+
     messagingSupported = false;
 
     setNotificationDebug(
@@ -2239,25 +2282,29 @@ async function registerServiceWorker(){
 
     serviceWorkerRegistration =
       await navigator.serviceWorker.register(
+
         "./firebase-messaging-sw.js",
+
         {
           scope:"./",
-          updateViaCache:"none"
+
+          updateViaCache:
+            "none"
         }
+
       );
 
     await navigator.serviceWorker.ready;
-
-    /*
-      Make sure a waiting worker activates.
-    */
 
     if(
       serviceWorkerRegistration.waiting
     ){
 
       serviceWorkerRegistration.waiting.postMessage({
-        type:"SKIP_WAITING"
+
+        type:
+          "SKIP_WAITING"
+
       });
 
     }
@@ -2267,13 +2314,25 @@ async function registerServiceWorker(){
   }
   catch(error){
 
-    serviceWorkerRegistration = null;
+    serviceWorkerRegistration =
+      null;
 
     setNotificationDebug(
+
       "Service worker registration failed:\n\n" +
-      formatFirebaseError(error) +
+
+      formatFirebaseError(
+        error
+      ) +
+
       "\n\n" +
-      "Make sure firebase-messaging-sw.js is beside index.html."
+
+      "Required file:\n" +
+
+      "firebase-messaging-sw.js\n\n" +
+
+      "It must be beside index.html."
+
     );
 
     return null;
@@ -2305,7 +2364,8 @@ async function registerPushNotifications(){
   }
 
   if(
-    Notification.permission !== "granted"
+    Notification.permission !==
+    "granted"
   ){
 
     setNotificationDebug(
@@ -2350,17 +2410,13 @@ async function registerPushNotifications(){
 
   try{
 
-    /*
-      Firebase's getToken() accepts the explicit
-      ServiceWorkerRegistration and VAPID key.
-    */
-
     const token =
       await getToken(
 
         messaging,
 
         {
+
           vapidKey:
             FIREBASE_VAPID_PUBLIC_KEY,
 
@@ -2374,6 +2430,7 @@ async function registerPushNotifications(){
     if(!token){
 
       fcmToken = "";
+
       fcmReady = false;
 
       setNotificationDebug(
@@ -2448,6 +2505,7 @@ async function registerPushNotifications(){
   catch(error){
 
     fcmToken = "";
+
     fcmReady = false;
 
     const text =
@@ -2456,15 +2514,23 @@ async function registerPushNotifications(){
       );
 
     setNotificationDebug(
+
       "FCM TOKEN ERROR\n\n" +
+
       text +
+
       "\n\n" +
-      "Check:\n" +
-      "1. Firebase API key matches this exact Firebase app.\n" +
-      "2. VAPID key belongs to this project.\n" +
-      "3. firebase-messaging-sw.js exists at the site root.\n" +
-      "4. The site is HTTPS.\n" +
-      "5. FCM Registration API is enabled."
+
+      "Using Firebase project:\n" +
+
+      "money-e560a\n\n" +
+
+      "Messaging sender:\n" +
+
+      "477551627159\n\n" +
+
+      "VAPID key configured."
+
     );
 
     updateNotificationUI(
@@ -2537,10 +2603,13 @@ function startForegroundMessaging(){
     return;
   }
 
-  foregroundMessagingStarted = true;
+  foregroundMessagingStarted =
+    true;
 
   onMessage(
+
     messaging,
+
     async payload=>{
 
       console.log(
@@ -2595,7 +2664,15 @@ function startForegroundMessaging(){
 
           notificationType:
             data.notificationType ||
-            null
+            null,
+
+          roomCode:
+            data.roomCode ||
+            roomCode,
+
+          roundId:
+            data.roundId ||
+            currentRoundId
 
         }
 
@@ -2618,7 +2695,8 @@ async function showPersistentNotification(
 
   if(
     !("Notification" in window) ||
-    Notification.permission !== "granted"
+    Notification.permission !==
+    "granted"
   ){
 
     return false;
@@ -2743,16 +2821,12 @@ async function(){
     ){
 
       alert(
-        "Notifications are blocked. Enable them in iPhone Settings."
+        "Notifications are blocked. Enable notifications in iPhone Settings."
       );
 
       return;
 
     }
-
-    /*
-      Ask permission first.
-    */
 
     if(
       Notification.permission !==
@@ -2777,10 +2851,6 @@ async function(){
 
     }
 
-    /*
-      Register the Firebase messaging worker.
-    */
-
     const sw =
       await registerServiceWorker();
 
@@ -2793,10 +2863,6 @@ async function(){
       return;
 
     }
-
-    /*
-      Initialize messaging.
-    */
 
     const readyMessaging =
       await initializeMessaging();
@@ -2861,8 +2927,13 @@ async function(){
     );
 
     setNotificationDebug(
+
       "NOTIFICATION SETUP ERROR\n\n" +
-      formatFirebaseError(error)
+
+      formatFirebaseError(
+        error
+      )
+
     );
 
   }
@@ -2884,7 +2955,7 @@ function(){
 };
 
 /* =====================================================
-PLAYER ID
+PLAYER NAME
 ===================================================== */
 
 function loadSavedName(){
@@ -2934,6 +3005,7 @@ async function saveDeviceRecord(){
           fcmReady,
 
         notificationPermission:
+
           (
             "Notification" in window
             ?
@@ -3006,9 +3078,17 @@ function setConnectionState(
     "green-state"
   );
 
-  red.classList.remove("active");
-  yellow.classList.remove("active");
-  green.classList.remove("active");
+  red.classList.remove(
+    "active"
+  );
+
+  yellow.classList.remove(
+    "active"
+  );
+
+  green.classList.remove(
+    "active"
+  );
 
   if(state === "red"){
 
@@ -3129,6 +3209,7 @@ function startConnectionMonitoring(){
           updateConnectionState();
 
           console.warn(
+            "FIREBASE CONNECTION:",
             error
           );
 
@@ -3164,7 +3245,8 @@ function startConnectionMonitoring(){
       if(
         alertsEnabled &&
         "Notification" in window &&
-        Notification.permission === "granted"
+        Notification.permission ===
+        "granted"
       ){
 
         await registerPushNotifications();
@@ -3516,35 +3598,45 @@ function stopGameListeners(){
   if(callsUnsubscribe){
 
     callsUnsubscribe();
-    callsUnsubscribe = null;
+
+    callsUnsubscribe =
+      null;
 
   }
 
   if(tasksUnsubscribe){
 
     tasksUnsubscribe();
-    tasksUnsubscribe = null;
+
+    tasksUnsubscribe =
+      null;
 
   }
 
   if(notesUnsubscribe){
 
     notesUnsubscribe();
-    notesUnsubscribe = null;
+
+    notesUnsubscribe =
+      null;
 
   }
 
   if(detectiveNotesUnsubscribe){
 
     detectiveNotesUnsubscribe();
-    detectiveNotesUnsubscribe = null;
+
+    detectiveNotesUnsubscribe =
+      null;
 
   }
 
   if(resultUnsubscribe){
 
     resultUnsubscribe();
-    resultUnsubscribe = null;
+
+    resultUnsubscribe =
+      null;
 
   }
 
@@ -3555,14 +3647,18 @@ function stopRoomListeners(){
   if(roomUnsubscribe){
 
     roomUnsubscribe();
-    roomUnsubscribe = null;
+
+    roomUnsubscribe =
+      null;
 
   }
 
   if(presenceUnsubscribe){
 
     presenceUnsubscribe();
-    presenceUnsubscribe = null;
+
+    presenceUnsubscribe =
+      null;
 
   }
 
@@ -3592,11 +3688,20 @@ function stopTimers(){
     callTimer
   );
 
-  heartbeatInterval = null;
-  roomExpiryInterval = null;
-  globalInterval = null;
-  taskNotificationInterval = null;
-  callTimer = null;
+  heartbeatInterval =
+    null;
+
+  roomExpiryInterval =
+    null;
+
+  globalInterval =
+    null;
+
+  taskNotificationInterval =
+    null;
+
+  callTimer =
+    null;
 
 }
 
@@ -3631,7 +3736,9 @@ async function startPresence(){
     });
 
     await set(
+
       presenceRef,
+
       {
 
         connected:true,
@@ -3640,6 +3747,7 @@ async function startPresence(){
           serverTimestamp()
 
       }
+
     );
 
   }
@@ -3658,6 +3766,7 @@ async function startPresence(){
 
   heartbeatInterval =
     setInterval(
+
       async()=>{
 
         if(
@@ -3669,29 +3778,40 @@ async function startPresence(){
         try{
 
           await update(
+
             presenceRef,
+
             {
+
               connected:true,
+
               lastSeenAt:
                 serverTimestamp()
+
             }
+
           );
 
         }
         catch(error){
 
           console.warn(
+            "PRESENCE HEARTBEAT:",
             error
           );
 
         }
 
       },
+
       30000
+
     );
 
   if(presenceUnsubscribe){
+
     presenceUnsubscribe();
+
   }
 
   presenceUnsubscribe =
@@ -3737,7 +3857,9 @@ function hideAllMainScreens(){
     id=>{
 
       document
-        .getElementById(id)
+        .getElementById(
+          id
+        )
         ?.classList
         .add(
           "hidden"
@@ -3769,9 +3891,11 @@ function updateCreateMapPreview(){
 
   box.innerHTML =
     renderMapBadges(
+
       select.value === "mall"
       ? "mall"
       : "house"
+
     );
 
 }
@@ -3819,7 +3943,9 @@ function renderLobbyMap(){
     !box ||
     !roomData
   ){
+
     return;
+
   }
 
   box.innerHTML = `
@@ -3859,7 +3985,9 @@ function renderGameMap(){
     !box ||
     !roomData
   ){
+
     return;
+
   }
 
   box.innerHTML =
@@ -3951,7 +4079,9 @@ async function(){
   showHome();
 
   if(
-    alertsEnabled
+    alertsEnabled &&
+    Notification.permission ===
+    "granted"
   ){
 
     await registerPushNotifications();
@@ -3970,14 +4100,18 @@ async function(){
     );
 
   if(value === null){
+
     return;
+
   }
 
   const name =
     value.trim();
 
   if(!name){
+
     return;
+
   }
 
   myName =
@@ -4003,8 +4137,10 @@ async function(){
         ),
 
         {
+
           name:
             myName
+
         }
 
       );
@@ -4013,6 +4149,7 @@ async function(){
     catch(error){
 
       console.warn(
+        "NAME UPDATE:",
         error
       );
 
@@ -4032,10 +4169,13 @@ async function(){
       ),
 
       {
+
         name:
           myName,
+
         updatedAt:
           serverTimestamp()
+
       }
 
     );
@@ -4093,6 +4233,12 @@ function restoreSavedRoom(){
       "resumeBox"
     );
 
+  if(!box){
+
+    return;
+
+  }
+
   if(!saved){
 
     box.classList.add(
@@ -4123,7 +4269,9 @@ async function(){
     getLocalRoom();
 
   if(!saved){
+
     return;
+
   }
 
   document
@@ -4211,20 +4359,24 @@ async function(){
 
   const code =
     normalizeRoomCode(
+
       document
         .getElementById(
           "roomInput"
         )
         .value
+
     );
 
   const playerLimit =
     Number(
+
       document
         .getElementById(
           "playerLimit"
         )
         .value
+
     );
 
   const mapType =
@@ -4260,19 +4412,24 @@ async function(){
 
   const newRoom = {
 
-    status:"lobby",
+    status:
+      "lobby",
 
     mapType,
 
-    host:playerId,
+    host:
+      playerId,
 
     playerLimit,
 
-    createdAt:now,
+    createdAt:
+      now,
 
-    lastActivityAt:now,
+    lastActivityAt:
+      now,
 
-    roundNumber:0,
+    roundNumber:
+      0,
 
     players:{
 
@@ -4280,9 +4437,11 @@ async function(){
 
         playerId,
 
-        name:myName,
+        name:
+          myName,
 
-        joinedAt:now
+        joinedAt:
+          now
 
       }
 
@@ -4300,11 +4459,15 @@ async function(){
         current=>{
 
           if(current === null){
+
             return newRoom;
+
           }
 
           if(isRoomStale(current)){
+
             return newRoom;
+
           }
 
           return;
@@ -4332,7 +4495,8 @@ async function(){
 
     if(
       alertsEnabled &&
-      Notification.permission === "granted"
+      Notification.permission ===
+      "granted"
     ){
 
       await registerPushNotifications();
@@ -4349,11 +4513,14 @@ async function(){
     );
 
     alert(
+
       "Could not create the room.\n\n" +
+
       (
         error?.message ||
         "Firebase error."
       )
+
     );
 
   }
@@ -4379,11 +4546,13 @@ async function(){
 
   const code =
     normalizeRoomCode(
+
       document
         .getElementById(
           "roomInput"
         )
         .value
+
     );
 
   if(code.length < 2){
@@ -4452,7 +4621,8 @@ async function(){
       ];
 
     if(
-      data.status === "game" &&
+      data.status ===
+      "game" &&
       !existingPlayer
     ){
 
@@ -4470,7 +4640,8 @@ async function(){
       ).length;
 
     if(
-      data.status === "lobby" &&
+      data.status ===
+      "lobby" &&
       !existingPlayer &&
       playerCount >=
       Number(
@@ -4497,15 +4668,18 @@ async function(){
 
         {
 
-          lastActivityAt:now,
+          lastActivityAt:
+            now,
 
           [`players/${playerId}`]:{
 
             playerId,
 
-            name:myName,
+            name:
+              myName,
 
-            joinedAt:now
+            joinedAt:
+              now
 
           }
 
@@ -4524,7 +4698,10 @@ async function(){
         ),
 
         {
-          name:myName
+
+          name:
+            myName
+
         }
 
       );
@@ -4544,7 +4721,8 @@ async function(){
 
     if(
       alertsEnabled &&
-      Notification.permission === "granted"
+      Notification.permission ===
+      "granted"
     ){
 
       await registerPushNotifications();
@@ -4561,11 +4739,14 @@ async function(){
     );
 
     alert(
+
       "Could not join the room.\n\n" +
+
       (
         error?.message ||
         "Firebase error."
       )
+
     );
 
   }
@@ -4579,13 +4760,23 @@ SESSION
 async function startRoomSession(){
 
   stopRoomListeners();
+
   stopTimers();
 
-  lastRevealId = null;
-  revealRunning = false;
-  currentRoundId = null;
-  gameVisible = false;
-  selectedDetectivePlayerId = null;
+  lastRevealId =
+    null;
+
+  revealRunning =
+    false;
+
+  currentRoundId =
+    null;
+
+  gameVisible =
+    false;
+
+  selectedDetectivePlayerId =
+    null;
 
   hideAllMainScreens();
 
@@ -4613,9 +4804,7 @@ async function startRoomSession(){
 
   listenToRoom();
 
-  if(
-    alertsEnabled
-  ){
+  if(alertsEnabled){
 
     startTaskNotificationWatcher();
 
@@ -4630,7 +4819,9 @@ ROOM LISTENER
 function listenToRoom(){
 
   if(roomUnsubscribe){
+
     roomUnsubscribe();
+
   }
 
   roomUnsubscribe =
@@ -4714,8 +4905,11 @@ function enterLobbyFromRoom(){
       "hidden"
     );
 
-  mySecret = null;
-  currentRoundId = null;
+  mySecret =
+    null;
+
+  currentRoundId =
+    null;
 
   stopGameListeners();
 
@@ -4731,12 +4925,13 @@ function enterLobbyFromRoom(){
 function renderLobby(){
 
   if(!roomData){
+
     return;
+
   }
 
   const players =
-    roomData.players ||
-    {};
+    roomData.players || {};
 
   const ids =
     Object.keys(
@@ -4811,7 +5006,8 @@ function renderLobby(){
             {};
 
           const connected =
-            presence[id]?.connected === true;
+            presence[id]?.connected ===
+            true;
 
           return `
 
@@ -4921,27 +5117,34 @@ function startRoomExpiryWatcher(){
 
   roomExpiryInterval =
     setInterval(
+
       async()=>{
 
         if(
           !roomCode ||
           !browserOnline
         ){
+
           return;
+
         }
 
         try{
 
           const snap =
             await get(
+
               ref(
                 db,
                 `rooms/${roomCode}`
               )
+
             );
 
           if(!snap.exists()){
+
             return;
+
           }
 
           const data =
@@ -4952,7 +5155,9 @@ function startRoomExpiryWatcher(){
               data
             )
           ){
+
             return;
+
           }
 
           if(
@@ -4961,10 +5166,12 @@ function startRoomExpiryWatcher(){
           ){
 
             await remove(
+
               ref(
                 db,
                 `rooms/${roomCode}`
               )
+
             );
 
           }
@@ -4984,7 +5191,9 @@ function startRoomExpiryWatcher(){
         }
 
       },
+
       60000
+
     );
 
 }
@@ -4999,7 +5208,9 @@ function enterGameFromRoom(){
     roomData?.game;
 
   if(!game){
+
     return;
+
   }
 
   const roundId =
@@ -5009,7 +5220,8 @@ function enterGameFromRoom(){
     );
 
   if(
-    currentRoundId === roundId &&
+    currentRoundId ===
+    roundId &&
     gameVisible
   ){
 
@@ -5056,10 +5268,13 @@ function enterGameFromRoom(){
     null;
 
   renderSecret();
+
   renderGameMap();
+
   renderCallButtons();
 
   startGameListeners();
+
   startGlobalClock();
 
   if(fcmToken){
@@ -5092,9 +5307,7 @@ function enterGameFromRoom(){
 
   }
 
-  if(
-    alertsEnabled
-  ){
+  if(alertsEnabled){
 
     startTaskNotificationWatcher();
 
@@ -5114,7 +5327,9 @@ function renderCallButtons(){
     );
 
   if(!container){
+
     return;
+
   }
 
   const locations =
@@ -5184,7 +5399,9 @@ function startGameListeners(){
   stopGameListeners();
 
   if(!roomCode){
+
     return;
+
   }
 
   callsUnsubscribe =
@@ -5198,7 +5415,9 @@ function startGameListeners(){
       snapshot=>{
 
         if(!snapshot.exists()){
+
           return;
+
         }
 
         const calls =
@@ -5210,6 +5429,7 @@ function startGameListeners(){
             calls
           )
           .sort(
+
             (a,b)=>
               Number(
                 a[1]?.time ||
@@ -5220,10 +5440,13 @@ function startGameListeners(){
                 b[1]?.time ||
                 0
               )
+
           );
 
         if(!entries.length){
+
           return;
+
         }
 
         const newest =
@@ -5261,15 +5484,15 @@ function startGameListeners(){
 
         const newCalls =
           entries.filter(
-            (
-              [id,value]
-            )=>
+
+            ([id,value])=>
               id !== lastSeen &&
               Number(
                 value?.time ||
                 0
               ) >
               lastSeenTime
+
           );
 
         for(
@@ -5281,7 +5504,9 @@ function startGameListeners(){
         ){
 
           if(!call?.id){
+
             continue;
+
           }
 
           if(
@@ -5299,6 +5524,7 @@ function startGameListeners(){
             ){
 
               playCallSound();
+
               vibrate();
 
             }
@@ -5315,10 +5541,12 @@ function startGameListeners(){
       },
 
       error=>{
+
         console.warn(
           "CALL LISTENER:",
           error
         );
+
       }
 
     );
@@ -5334,7 +5562,9 @@ function startGameListeners(){
       snapshot=>{
 
         if(!roomData){
+
           return;
+
         }
 
         roomData.completed =
@@ -5358,7 +5588,9 @@ function startGameListeners(){
       snapshot=>{
 
         if(!roomData){
+
           return;
+
         }
 
         roomData.notes =
@@ -5373,7 +5605,9 @@ function startGameListeners(){
         ){
 
           renderLivePlayerNotes();
+
           renderDetectivePlayerButtons();
+
           refreshSelectedDossierNote();
 
         }
@@ -5395,7 +5629,9 @@ function startGameListeners(){
         if(
           !snapshot.exists()
         ){
+
           return;
+
         }
 
         const result =
@@ -5404,7 +5640,9 @@ function startGameListeners(){
         if(
           !result?.accusedId
         ){
+
           return;
+
         }
 
         const revealId =
@@ -5417,7 +5655,9 @@ function startGameListeners(){
           revealId ===
           lastRevealId
         ){
+
           return;
+
         }
 
         lastRevealId =
@@ -5494,7 +5734,9 @@ function startGlobalClock(){
         roomData?.game;
 
       if(!game){
+
         return;
+
       }
 
       const now =
@@ -5595,8 +5837,10 @@ function startGlobalClock(){
           );
 
         if(
-          now >= detectiveEnd &&
-          now < investigationEnd
+          now >=
+          detectiveEnd &&
+          now <
+          investigationEnd
         ){
 
           investigationCard
@@ -5641,6 +5885,7 @@ function startGlobalClock(){
       }
 
       renderTasks();
+
       checkTaskNotifications();
 
     };
@@ -5656,7 +5901,7 @@ function startGlobalClock(){
 }
 
 /* =====================================================
-TASKS
+TASK TEMPLATES
 ===================================================== */
 
 const activityTemplates = [
@@ -5841,6 +6086,7 @@ function buildNormalTasks(
   return shuffle(
 
     times.map(
+
       (
         unlockAt,
         index
@@ -5848,11 +6094,14 @@ function buildNormalTasks(
 
         let possible =
           locations.filter(
-            location=>
-              location !== crimeLocation &&
+
+            location =>
+              location !==
+                crimeLocation &&
               !used.includes(
                 location
               )
+
           );
 
         if(
@@ -5861,9 +6110,11 @@ function buildNormalTasks(
 
           possible =
             locations.filter(
-              location=>
+
+              location =>
                 location !==
                 crimeLocation
+
             );
 
         }
@@ -5878,7 +6129,8 @@ function buildNormalTasks(
         );
 
         const pool =
-          Math.random() < .5
+          Math.random() <
+          .5
           ?
           activityTemplates
           :
@@ -5903,6 +6155,7 @@ function buildNormalTasks(
         );
 
       }
+
     )
 
   );
@@ -5940,19 +6193,27 @@ function buildMurdererTasks(
 
   const times =
     makeUnlockTimes(
+
       now,
+
       Math.max(
+
         now +
         60000,
+
         usableTaskEnd
+
       ),
+
       count
+
     );
 
   const used = [];
 
   const tasks =
     times.map(
+
       (
         unlockAt,
         index
@@ -5960,12 +6221,14 @@ function buildMurdererTasks(
 
         let possible =
           locations.filter(
-            location=>
+
+            location =>
               location !==
-              crimeLocation &&
+                crimeLocation &&
               !used.includes(
                 location
               )
+
           );
 
         if(
@@ -5974,9 +6237,11 @@ function buildMurdererTasks(
 
           possible =
             locations.filter(
-              location=>
+
+              location =>
                 location !==
                 crimeLocation
+
             );
 
         }
@@ -6009,6 +6274,7 @@ function buildMurdererTasks(
         );
 
       }
+
     );
 
   tasks.push(
@@ -6094,14 +6360,18 @@ async function(){
     roomData?.host !==
     playerId
   ){
+
     return;
+
   }
 
   if(
     roomData.status !==
     "lobby"
   ){
+
     return;
+
   }
 
   const players =
@@ -6154,11 +6424,13 @@ async function(){
     now +
     MIN_MURDER_DELAY +
     Math.floor(
+
       Math.random() *
       (
         MAX_MURDER_DELAY -
         MIN_MURDER_DELAY
       )
+
     );
 
   const detectiveEnd =
@@ -6215,7 +6487,8 @@ async function(){
     role:
       "detective",
 
-    tasks:[]
+    tasks:
+      []
 
   };
 
@@ -6230,11 +6503,17 @@ async function(){
       buildMurdererTasks(
 
         murderer,
+
         now,
+
         detectiveEnd,
+
         murderAt,
+
         crimeLocation,
+
         roundSeed,
+
         mapType
 
       )
@@ -6242,6 +6521,7 @@ async function(){
   };
 
   innocents.forEach(
+
     id=>{
 
       privateData[
@@ -6255,10 +6535,15 @@ async function(){
           buildNormalTasks(
 
             id,
+
             now,
+
             detectiveEnd,
+
             crimeLocation,
+
             roundSeed,
+
             mapType
 
           )
@@ -6266,12 +6551,15 @@ async function(){
       };
 
     }
+
   );
 
   const game = {
 
     roundNumber,
+
     roundId,
+
     roundSeed,
 
     mapType,
@@ -6280,7 +6568,9 @@ async function(){
       now,
 
     murderAt,
+
     detectiveEnd,
+
     investigationEnd,
 
     crimeLocation,
@@ -6292,6 +6582,7 @@ async function(){
       "A fictional incident occurred during the mystery.",
 
     detective,
+
     murderer,
 
     suspects:[
@@ -6426,11 +6717,14 @@ async function(){
     );
 
     alert(
+
       "Could not start the round.\n\n" +
+
       (
         error?.message ||
         "Firebase error."
       )
+
     );
 
   }
@@ -6605,7 +6899,9 @@ function renderTasks(){
       mySecret?.tasks
     )
   ){
+
     return;
+
   }
 
   const now =
@@ -6623,6 +6919,7 @@ function renderTasks(){
 
     mySecret.tasks
       .map(
+
         task=>{
 
           const unlockAt =
@@ -6637,7 +6934,8 @@ function renderTasks(){
           const done =
             completed[
               task.id
-            ] === true;
+            ] ===
+            true;
 
           const unlockText =
             task.unlockText ||
@@ -6673,7 +6971,10 @@ function renderTasks(){
           return `
 
             <div
-              class="task ${done ? "done" : ""}"
+              class="
+                task
+                ${done ? "done" : ""}
+              "
             >
 
               <div class="task-row">
@@ -6703,6 +7004,7 @@ function renderTasks(){
                   </div>
 
                   <div class="task-status">
+
                     ${
                       done
                       ?
@@ -6710,6 +7012,7 @@ function renderTasks(){
                       :
                       "⬜ Not completed"
                     }
+
                   </div>
 
                 </div>
@@ -6721,6 +7024,7 @@ function renderTasks(){
           `;
 
         }
+
       )
       .join("");
 
@@ -6729,6 +7033,7 @@ function renderTasks(){
       "input[data-task-id]"
     )
     .forEach(
+
       input=>{
 
         input.addEventListener(
@@ -6744,6 +7049,7 @@ function renderTasks(){
         );
 
       }
+
     );
 
 }
@@ -6871,7 +7177,9 @@ function updateMyNoteUI(){
     !button ||
     !status
   ){
+
     return;
+
   }
 
   const note =
@@ -6957,7 +7265,9 @@ async function(){
     text.length >
     MAX_PLAYER_NOTE_LENGTH
   ){
+
     return;
+
   }
 
   try{
@@ -7102,7 +7412,9 @@ function renderLivePlayerNotes(){
     );
 
   if(!container){
+
     return;
+
   }
 
   const notes =
@@ -7112,7 +7424,8 @@ function renderLivePlayerNotes(){
   const entries =
     Object.values(
       notes
-    ).sort(
+    )
+    .sort(
       (a,b)=>
         (b.timestamp || 0) -
         (a.timestamp || 0)
@@ -7177,7 +7490,9 @@ function renderDetectivePlayerButtons(){
     mySecret?.role !==
     "detective"
   ){
+
     return;
+
   }
 
   const container =
@@ -7285,7 +7600,9 @@ async function(
     mySecret?.role !==
     "detective"
   ){
+
     return;
+
   }
 
   selectedDetectivePlayerId =
@@ -7323,10 +7640,12 @@ async function(
 
     const snap =
       await get(
+
         ref(
           db,
           `rooms/${roomCode}/detectiveNotes/players/${selectedId}`
         )
+
       );
 
     const data =
@@ -7373,7 +7692,9 @@ function refreshSelectedDossierNote(){
   if(
     !selectedDetectivePlayerId
   ){
+
     return;
+
   }
 
   const box =
@@ -7441,7 +7762,9 @@ async function(){
     "detective" ||
     !selectedDetectivePlayerId
   ){
+
     return;
+
   }
 
   try{
@@ -7508,7 +7831,9 @@ async function(){
     mySecret?.role !==
     "detective"
   ){
+
     return;
+
   }
 
   try{
@@ -7564,7 +7889,9 @@ function showInvestigation(){
     mySecret?.role !==
     "detective"
   ){
+
     return;
+
   }
 
   document
@@ -7604,7 +7931,9 @@ function renderCase(){
     roomData?.game;
 
   if(!game){
+
     return;
+
   }
 
   const suspects =
@@ -7618,36 +7947,56 @@ function renderCase(){
     .innerHTML = `
 
       <div class="success">
+
         ⏰ Detective timer finished.
+
         <br><br>
+
         Investigation started.
+
       </div>
 
       <p>
-        <b>Map:</b>
+
+        <b>
+          Map:
+        </b>
+
         ${escapeHtml(
           MAPS[
-            game.mapType === "mall"
-              ? "mall"
-              : "house"
+            game.mapType ===
+            "mall"
+            ? "mall"
+            : "house"
           ].name
         )}
+
       </p>
 
       <p>
-        <b>Fictional event time:</b>
+
+        <b>
+          Fictional event time:
+        </b>
+
         ${shortClock(
           sharedDate(
             game.murderAt
           )
         )}
+
       </p>
 
       <p>
-        <b>Location:</b>
+
+        <b>
+          Location:
+        </b>
+
         ${escapeHtml(
           game.crimeLocation
         )}
+
       </p>
 
       <h3>
@@ -7662,6 +8011,7 @@ function renderCase(){
               <div class="player">
 
                 👤
+
                 ${escapeHtml(
                   roomData
                     .players[id]
@@ -7697,6 +8047,7 @@ function renderCase(){
           >
 
             🔎 ACCUSE
+
             ${escapeHtml(
               roomData
                 .players[id]
@@ -7747,7 +8098,9 @@ function renderTaskProgress(){
     );
 
   if(!container){
+
     return;
+
   }
 
   container.innerHTML =
@@ -7812,7 +8165,9 @@ function renderTaskProgress(){
     div.innerHTML = `
 
       <b>
+
         👤
+
         ${escapeHtml(
           roomData
             ?.players
@@ -7820,6 +8175,7 @@ function renderTaskProgress(){
             ?.name ||
           "Unknown"
         )}
+
       </b>
 
       <div class="count-number">
@@ -7854,20 +8210,26 @@ async function(
     mySecret?.role !==
     "detective"
   ){
+
     return;
+
   }
 
   if(
     roomData?.game?.detective !==
     playerId
   ){
+
     return;
+
   }
 
   if(
     roomData?.result?.accusedId
   ){
+
     return;
+
   }
 
   try{
@@ -7979,7 +8341,9 @@ async function runReveal(
     revealRunning ||
     !roomData?.game
   ){
+
     return;
+
   }
 
   revealRunning =
@@ -8017,9 +8381,13 @@ async function runReveal(
     );
 
   setReveal(
+
     "THE DETECTIVE HAS MADE A DECISION",
+
     "🔎",
+
     "Everyone stay quiet..."
+
   );
 
   await sleep(
@@ -8027,9 +8395,13 @@ async function runReveal(
   );
 
   setReveal(
+
     "THE ACCUSED PLAYER",
+
     accusedName,
+
     "The Detective has chosen..."
+
   );
 
   await sleep(
@@ -8037,9 +8409,13 @@ async function runReveal(
   );
 
   setReveal(
+
     "THE REVEAL",
+
     `${accusedName} WAS...`,
+
     "..."
+
   );
 
   await sleep(
@@ -8051,24 +8427,24 @@ async function runReveal(
     "ROLE REVEALED",
 
     wasMurderer
-      ?
-      "🔎 THE MYSTERY PLAYER"
-      :
-      "👤 INNOCENT",
+    ?
+    "🔎 THE MYSTERY PLAYER"
+    :
+    "👤 INNOCENT",
 
     wasMurderer
-      ?
-      `${accusedName} was the mystery player.`
-      :
-      `${accusedName} was innocent.`,
+    ?
+    `${accusedName} was the mystery player.`
+    :
+    `${accusedName} was innocent.`,
 
     "",
 
     wasMurderer
-      ?
-      "reveal-shake"
-      :
-      "reveal-pop"
+    ?
+    "reveal-shake"
+    :
+    "reveal-pop"
 
   );
 
@@ -8106,6 +8482,7 @@ async function runReveal(
           <div class="reveal-role-name">
 
             👤
+
             ${escapeHtml(
               players[id]?.name ||
               "Unknown"
@@ -8136,10 +8513,13 @@ async function runReveal(
       <div class="reveal-role">
 
         <div class="reveal-role-name">
+
           🔎
+
           ${escapeHtml(
             murdererName
           )}
+
         </div>
 
         <div class="reveal-role-value">
@@ -8151,10 +8531,13 @@ async function runReveal(
       <div class="reveal-role">
 
         <div class="reveal-role-name">
+
           🕵️
+
           ${escapeHtml(
             detectiveName
           )}
+
         </div>
 
         <div class="reveal-role-value">
@@ -8180,16 +8563,16 @@ async function runReveal(
     "GAME OVER",
 
     wasMurderer
-      ?
-      "🎉 DETECTIVE WINS!"
-      :
-      "🔎 MYSTERY PLAYER WINS!",
+    ?
+    "🎉 DETECTIVE WINS!"
+    :
+    "🔎 MYSTERY PLAYER WINS!",
 
     wasMurderer
-      ?
-      "Correct accusation."
-      :
-      "The Detective accused an innocent.",
+    ?
+    "Correct accusation."
+    :
+    "The Detective accused an innocent.",
 
     `
 
@@ -8198,20 +8581,20 @@ async function runReveal(
           reveal-winner
           ${
             wasMurderer
-              ?
-              "detective-win"
-              :
-              "murderer-win"
+            ?
+            "detective-win"
+            :
+            "murderer-win"
           }
         "
       >
 
         ${
           wasMurderer
-            ?
-            "🔎 GREAT DETECTIVE WORK"
-            :
-            "😎 GREAT MYSTERY PLAY"
+          ?
+          "🔎 GREAT DETECTIVE WORK"
+          :
+          "😎 GREAT MYSTERY PLAY"
         }
 
       </div>
@@ -8219,10 +8602,10 @@ async function runReveal(
     `,
 
     wasMurderer
-      ?
-      "reveal-pop"
-      :
-      "reveal-shake"
+    ?
+    "reveal-pop"
+    :
+    "reveal-shake"
 
   );
 
@@ -8254,7 +8637,9 @@ async function resetToLobby(){
     !browserOnline ||
     !firebaseConnected
   ){
+
     return;
+
   }
 
   const now =
@@ -8301,9 +8686,14 @@ async function resetToLobby(){
       updates
     );
 
-    mySecret = null;
-    currentRoundId = null;
-    gameVisible = false;
+    mySecret =
+      null;
+
+    currentRoundId =
+      null;
+
+    gameVisible =
+      false;
 
     stopGameListeners();
 
@@ -8311,7 +8701,8 @@ async function resetToLobby(){
       globalInterval
     );
 
-    globalInterval = null;
+    globalInterval =
+      null;
 
     if(fcmToken){
 
@@ -8378,7 +8769,9 @@ async function(){
       "Reset the game and return everyone to the lobby?"
     )
   ){
+
     return;
+
   }
 
   await resetToLobby();
@@ -8412,7 +8805,9 @@ async function(
     roomData?.status !==
     "game"
   ){
+
     return;
+
   }
 
   try{
@@ -8585,6 +8980,7 @@ function showCall(
 
   callTimer =
     setTimeout(
+
       ()=>{
 
         overlay
@@ -8594,7 +8990,9 @@ function showCall(
           );
 
       },
+
       CALL_DURATION
+
     );
 
 }
@@ -8612,7 +9010,9 @@ function playCallSound(){
       window.webkitAudioContext;
 
     if(!AudioCtx){
+
       return;
+
     }
 
     audioContext =
@@ -8643,7 +9043,8 @@ function playCallSound(){
 
       const base =
         start +
-        group * 3.1;
+        group *
+        3.1;
 
       for(
         let i = 0;
@@ -8666,7 +9067,8 @@ function playCallSound(){
 
         const t =
           base +
-          i * .65;
+          i *
+          .65;
 
         gain.gain.setValueAtTime(
           .0001,
@@ -8676,13 +9078,15 @@ function playCallSound(){
         gain.gain
           .exponentialRampToValueAtTime(
             .28,
-            t + .03
+            t +
+            .03
           );
 
         gain.gain
           .exponentialRampToValueAtTime(
             .0001,
-            t + .50
+            t +
+            .50
           );
 
         osc.connect(
@@ -8693,12 +9097,11 @@ function playCallSound(){
           audioContext.destination
         );
 
-        osc.start(
-          t
-        );
+        osc.start(t);
 
         osc.stop(
-          t + .55
+          t +
+          .55
         );
 
       }
@@ -8722,7 +9125,8 @@ function vibrate(){
   try{
 
     if(
-      "vibrate" in navigator
+      "vibrate" in
+      navigator
     ){
 
       navigator.vibrate([
@@ -8765,11 +9169,14 @@ function taskNotificationWasSent(
 
   return (
     localStorage.getItem(
+
       taskNotificationKey(
         roundId,
         taskId
       )
-    ) === "1"
+
+    ) ===
+    "1"
   );
 
 }
@@ -8811,8 +9218,11 @@ function startTaskNotificationWatcher(){
 
   taskNotificationInterval =
     setInterval(
+
       checkTaskNotifications,
+
       1000
+
     );
 
   checkTaskNotifications();
@@ -8845,9 +9255,11 @@ async function checkTaskNotifications(){
 
   const roundId =
     String(
+
       roomData.game.roundId ||
       roomData.game.roundNumber ||
       "1"
+
     );
 
   const now =
@@ -8866,7 +9278,9 @@ async function checkTaskNotifications(){
       now <
       unlockAt
     ){
+
       continue;
+
     }
 
     if(
@@ -8875,7 +9289,9 @@ async function checkTaskNotifications(){
         task.id
       )
     ){
+
       continue;
+
     }
 
     const shown =
@@ -8950,7 +9366,9 @@ async function reconnectCurrentRoom(){
       );
 
     if(!snap.exists()){
+
       return;
+
     }
 
     roomData =
@@ -9003,14 +9421,26 @@ function leaveRoomToHome(
 ){
 
   stopRoomListeners();
+
   stopTimers();
 
-  roomCode = "";
-  roomData = null;
-  mySecret = null;
-  currentRoundId = null;
-  gameVisible = false;
-  selectedDetectivePlayerId = null;
+  roomCode =
+    "";
+
+  roomData =
+    null;
+
+  mySecret =
+    null;
+
+  currentRoundId =
+    null;
+
+  gameVisible =
+    false;
+
+  selectedDetectivePlayerId =
+    null;
 
   hideAllMainScreens();
 
@@ -9040,7 +9470,9 @@ VISIBILITY
 ===================================================== */
 
 document.addEventListener(
+
   "visibilitychange",
+
   async()=>{
 
     if(
@@ -9049,7 +9481,8 @@ document.addEventListener(
     ){
 
       browserOnline =
-        navigator.onLine !== false;
+        navigator.onLine !==
+        false;
 
       updateConnectionState();
 
@@ -9072,14 +9505,18 @@ document.addEventListener(
     }
 
   }
+
 );
 
 window.addEventListener(
+
   "focus",
+
   async()=>{
 
     browserOnline =
-      navigator.onLine !== false;
+      navigator.onLine !==
+      false;
 
     updateConnectionState();
 
@@ -9088,6 +9525,7 @@ window.addEventListener(
     checkTaskNotifications();
 
   }
+
 );
 
 /* =====================================================
@@ -9158,17 +9596,10 @@ async function initialize(){
     startServerClock();
 
     renderHomeMaps();
+
     updateCreateMapPreview();
 
-    /*
-      Service worker first.
-    */
-
     await registerServiceWorker();
-
-    /*
-      Messaging second.
-    */
 
     await initializeMessaging();
 
@@ -9201,10 +9632,6 @@ async function initialize(){
         );
 
     }
-
-    /*
-      Restore notification state.
-    */
 
     if(
       alertsEnabled &&
@@ -9249,8 +9676,13 @@ async function initialize(){
     );
 
     setNotificationDebug(
+
       "INITIALIZATION ERROR\n\n" +
-      formatFirebaseError(error)
+
+      formatFirebaseError(
+        error
+      )
+
     );
 
   }
