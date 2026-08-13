@@ -3,7 +3,8 @@ HOUSE MYSTERY SERVICE WORKER
 Firebase Cloud Messaging + Web Push
 ===================================================== */
 
-const CACHE_NAME = "house-mystery-v5";
+const CACHE_NAME =
+  "house-mystery-v6";
 
 /* =====================================================
 FIREBASE COMPAT
@@ -50,7 +51,7 @@ firebase.initializeApp({
 });
 
 /* =====================================================
-FIREBASE MESSAGING
+MESSAGING
 ===================================================== */
 
 let messaging = null;
@@ -64,7 +65,7 @@ try{
 catch(error){
 
   console.error(
-    "Firebase Messaging initialization failed:",
+    "FCM INIT ERROR:",
     error
   );
 
@@ -76,10 +77,28 @@ INSTALL
 
 self.addEventListener(
   "install",
-  event => {
+  event=>{
 
     event.waitUntil(
-      self.skipWaiting()
+
+      (async()=>{
+
+        try{
+
+          await self.skipWaiting();
+
+        }
+        catch(error){
+
+          console.warn(
+            "SKIP WAITING:",
+            error
+          );
+
+        }
+
+      })()
+
     );
 
   }
@@ -91,7 +110,7 @@ ACTIVATE
 
 self.addEventListener(
   "activate",
-  event => {
+  event=>{
 
     event.waitUntil(
 
@@ -107,11 +126,14 @@ self.addEventListener(
             cacheNames
               .filter(
                 name =>
-                  name !== CACHE_NAME
+                  name !==
+                  CACHE_NAME
               )
               .map(
                 name =>
-                  caches.delete(name)
+                  caches.delete(
+                    name
+                  )
               )
 
           );
@@ -144,10 +166,11 @@ if(
 ){
 
   messaging.onBackgroundMessage(
-    payload => {
+
+    payload=>{
 
       console.log(
-        "FCM background message:",
+        "FCM BACKGROUND MESSAGE:",
         payload
       );
 
@@ -177,6 +200,10 @@ if(
           Date.now()
         );
 
+      const notificationType =
+        data.notificationType ||
+        "general";
+
       return self.registration.showNotification(
 
         title,
@@ -195,15 +222,38 @@ if(
 
           tag,
 
+          /*
+            IMPORTANT:
+
+            A unique tag is used for every call/task,
+            so a later notification doesn't replace
+            the previous one.
+          */
+
           renotify:
-            data.renotify === "true" ||
-            notification.renotify === true,
+            true,
 
           requireInteraction:
-            data.requireInteraction === "true" ||
-            notification.requireInteraction === true,
+            data.requireInteraction ===
+            "true",
 
           vibrate:
+
+            notificationType ===
+            "call"
+
+            ?
+
+            [
+              400,
+              120,
+              400,
+              120,
+              700
+            ]
+
+            :
+
             [
               250,
               120,
@@ -224,9 +274,11 @@ if(
               data.taskId ||
               null,
 
-            notificationType:
-              data.notificationType ||
+            callId:
+              data.callId ||
               null,
+
+            notificationType,
 
             url:
               data.url ||
@@ -239,6 +291,7 @@ if(
       );
 
     }
+
   );
 
 }
@@ -249,14 +302,7 @@ RAW WEB PUSH FALLBACK
 
 self.addEventListener(
   "push",
-  event => {
-
-    /*
-      FCM normally handles its own messages.
-
-      This fallback keeps the service worker compatible
-      with direct Web Push payloads as well.
-    */
+  event=>{
 
     event.waitUntil(
 
@@ -284,10 +330,10 @@ self.addEventListener(
 
               body:
                 event.data
-                  ?.
-                  text()
-                ||
-                ""
+                  ?
+                  event.data.text()
+                  :
+                  ""
 
             };
 
@@ -301,8 +347,7 @@ self.addEventListener(
         }
 
         /*
-          Avoid displaying a duplicate notification when
-          the FCM SDK is already handling an FCM push.
+          Ignore payloads intended for the FCM SDK.
         */
 
         if(
@@ -356,7 +401,7 @@ self.addEventListener(
             tag,
 
             renotify:
-              notification.renotify !== false,
+              true,
 
             requireInteraction:
               Boolean(
@@ -364,7 +409,21 @@ self.addEventListener(
               ),
 
             vibrate:
-              notification.vibrate ||
+              notification.notificationType ===
+              "call"
+
+              ?
+
+              [
+                400,
+                120,
+                400,
+                120,
+                700
+              ]
+
+              :
+
               [
                 250,
                 120,
@@ -385,9 +444,13 @@ self.addEventListener(
                 data.taskId ||
                 null,
 
+              callId:
+                data.callId ||
+                null,
+
               notificationType:
                 data.notificationType ||
-                null,
+                "general",
 
               url:
                 data.url ||
@@ -404,6 +467,7 @@ self.addEventListener(
     );
 
   }
+
 );
 
 /* =====================================================
@@ -412,7 +476,7 @@ NOTIFICATION CLICK
 
 self.addEventListener(
   "notificationclick",
-  event => {
+  event=>{
 
     event.notification.close();
 
@@ -420,9 +484,45 @@ self.addEventListener(
       event.notification.data ||
       {};
 
-    const targetUrl =
+    let targetUrl =
       data.url ||
       "./";
+
+    /*
+      Preserve the room when possible.
+    */
+
+    if(
+      data.roomCode
+    ){
+
+      try{
+
+        const url =
+          new URL(
+            targetUrl,
+            self.location.origin
+          );
+
+        url.searchParams.set(
+          "room",
+          data.roomCode
+        );
+
+        targetUrl =
+          url.href;
+
+      }
+      catch(error){
+
+        console.warn(
+          "TARGET URL:",
+          error
+        );
+
+      }
+
+    }
 
     event.waitUntil(
 
@@ -446,11 +546,6 @@ self.addEventListener(
               targetUrl,
               self.location.origin
             );
-
-          /*
-            First try to focus an existing House Mystery
-            window.
-          */
 
           for(
             const client
@@ -491,10 +586,6 @@ self.addEventListener(
 
           }
 
-          /*
-            Otherwise open the notification destination.
-          */
-
           if(
             clients.openWindow
           ){
@@ -520,6 +611,7 @@ self.addEventListener(
     );
 
   }
+
 );
 
 /* =====================================================
@@ -528,22 +620,24 @@ NOTIFICATION CLOSE
 
 self.addEventListener(
   "notificationclose",
-  event => {
+  event=>{
 
     console.log(
-      "House Mystery notification closed."
+      "House Mystery notification closed:",
+      event.notification?.tag
     );
 
   }
+
 );
 
 /* =====================================================
-MESSAGE HANDLER
+MESSAGE
 ===================================================== */
 
 self.addEventListener(
   "message",
-  event => {
+  event=>{
 
     if(
       event.data?.type ===
@@ -555,4 +649,5 @@ self.addEventListener(
     }
 
   }
+
 );
