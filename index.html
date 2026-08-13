@@ -188,9 +188,11 @@ button.dark{
 
 .install-box{
   background:#172038;
+
   border:
     1px solid
     rgba(113,140,255,.25);
+
   padding:15px;
   border-radius:16px;
   margin-top:15px;
@@ -198,19 +200,28 @@ button.dark{
 
 .room-code{
   background:#0c1019;
+
   padding:16px;
+
   border-radius:15px;
+
   font-size:30px;
   font-weight:900;
+
   letter-spacing:4px;
+
   text-align:center;
+
   margin:15px 0;
 }
 
 .player{
   background:#202638;
+
   padding:13px;
+
   border-radius:13px;
+
   margin:7px 0;
 }
 
@@ -252,9 +263,15 @@ button.dark{
 
 .task{
   background:#202638;
-  border:1px solid rgba(255,255,255,.07);
+
+  border:
+    1px solid
+    rgba(255,255,255,.07);
+
   padding:15px;
+
   border-radius:15px;
+
   margin:9px 0;
 }
 
@@ -361,6 +378,12 @@ button.dark{
   line-height:1.5;
 }
 
+.row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
 .badge{
   display:inline-block;
   padding:7px 11px;
@@ -424,8 +447,13 @@ button.dark{
   align-items:center;
   gap:10px;
   margin-bottom:14px;
+
   background:#151a29;
-  border:1px solid rgba(255,255,255,.08);
+
+  border:
+    1px solid
+    rgba(255,255,255,.08);
+
   border-radius:18px;
   padding:13px 15px;
 }
@@ -453,15 +481,21 @@ button.dark{
   background:#252c40;
 }
 
+/* CONNECTION */
+
 .connection-bar{
   position:sticky;
   top:0;
   z-index:8000;
+
   width:100%;
   max-width:900px;
   margin:0 auto;
+
   padding:8px 8px 4px;
+
   background:rgba(7,10,18,.72);
+
   backdrop-filter:blur(16px);
   -webkit-backdrop-filter:blur(16px);
 }
@@ -471,12 +505,22 @@ button.dark{
   align-items:center;
   justify-content:center;
   gap:11px;
+
   min-height:42px;
+
   padding:8px 12px;
+
   border-radius:16px;
+
   background:rgba(18,23,37,.94);
-  border:1px solid rgba(255,255,255,.09);
-  box-shadow:0 8px 25px rgba(0,0,0,.28);
+
+  border:
+    1px solid
+    rgba(255,255,255,.09);
+
+  box-shadow:
+    0 8px 25px
+    rgba(0,0,0,.28);
 }
 
 .connection-lights{
@@ -491,7 +535,11 @@ button.dark{
   flex:none;
   border-radius:50%;
   opacity:.18;
-  transition:opacity .2s,transform .2s,box-shadow .2s;
+
+  transition:
+    opacity .2s,
+    transform .2s,
+    box-shadow .2s;
 }
 
 .connection-light.red{
@@ -509,7 +557,10 @@ button.dark{
 .connection-light.active{
   opacity:1;
   transform:scale(1.08);
-  box-shadow:0 0 12px currentColor;
+
+  box-shadow:
+    0 0 12px
+    currentColor;
 }
 
 .connection-status-text{
@@ -539,23 +590,14 @@ button.dark{
   color:#8bf1ad;
 }
 
-.debug-box{
-  margin-top:12px;
-  padding:12px;
-  border-radius:14px;
-  background:#0d111b;
-  border:1px solid rgba(255,255,255,.08);
-  color:#aab4cb;
-  font-size:11px;
-  text-align:left;
-  word-break:break-word;
-  white-space:pre-wrap;
-}
+/* CALL */
 
 .call-overlay{
   position:fixed;
   inset:0;
+
   z-index:150000;
+
   display:flex;
   align-items:center;
   justify-content:center;
@@ -636,9 +678,16 @@ button.dark{
 }
 
 @keyframes callPulse{
-  0%,100%{transform:scale(1);}
-  50%{transform:scale(1.13);}
+  0%,100%{
+    transform:scale(1);
+  }
+
+  50%{
+    transform:scale(1.13);
+  }
 }
+
+/* ALERT */
 
 .alert-modal{
   position:fixed;
@@ -664,14 +713,29 @@ button.dark{
 
 .reset-fixed{
   position:fixed;
-  top:calc(58px + env(safe-area-inset-top));
+
+  top:
+    calc(
+      58px +
+      env(safe-area-inset-top)
+    );
+
   right:12px;
+
   z-index:9000;
+
   width:auto;
+
   padding:11px 15px;
+
   font-size:13px;
-  box-shadow:0 8px 25px rgba(0,0,0,.35);
+
+  box-shadow:
+    0 8px 25px
+    rgba(0,0,0,.35);
 }
+
+/* NOTES */
 
 .notes-box{
   background:#202638;
@@ -783,9 +847,12 @@ button.dark{
   margin-bottom:5px;
 }
 
+/* REVEAL */
+
 .reveal-overlay{
   position:fixed;
   inset:0;
+
   z-index:200000;
 
   background:
@@ -797,9 +864,12 @@ button.dark{
     );
 
   display:flex;
+
   align-items:center;
   justify-content:center;
+
   padding:20px;
+
   overflow:hidden;
 }
 
@@ -914,19 +984,46 @@ button.dark{
 }
 
 @keyframes revealFade{
-  0%{opacity:0;}
-  100%{opacity:1;}
+  0%{
+    opacity:0;
+  }
+
+  100%{
+    opacity:1;
+  }
 }
 
 @keyframes revealShake{
-  0%,100%{transform:translateX(0);}
-  20%{transform:translateX(-8px);}
-  40%{transform:translateX(8px);}
-  60%{transform:translateX(-5px);}
-  80%{transform:translateX(5px);}
+  0%,100%{
+    transform:translateX(0);
+  }
+
+  20%{
+    transform:translateX(-8px);
+  }
+
+  40%{
+    transform:translateX(8px);
+  }
+
+  60%{
+    transform:translateX(-5px);
+  }
+
+  80%{
+    transform:translateX(5px);
+  }
 }
 
 @media(max-width:600px){
+
+  .row{
+    grid-template-columns:1fr;
+  }
+
+  .detective-player-buttons{
+    grid-template-columns:1fr;
+  }
 
   h1{
     font-size:31px;
@@ -934,10 +1031,6 @@ button.dark{
 
   .timer{
     font-size:48px;
-  }
-
-  .detective-player-buttons{
-    grid-template-columns:1fr;
   }
 
   .reveal-main{
@@ -964,7 +1057,10 @@ button.dark{
 
 <body>
 
-<div id="connectionBar" class="connection-bar yellow-state">
+<div
+  id="connectionBar"
+  class="connection-bar yellow-state"
+>
 
   <div class="connection-inner">
 
@@ -1005,11 +1101,18 @@ button.dark{
 
 </div>
 
-<div id="callOverlay" class="call-overlay hidden">
+<!-- CALL -->
+
+<div
+  id="callOverlay"
+  class="call-overlay hidden"
+>
 
   <div class="call-inner">
 
-    <div class="call-icon">📞</div>
+    <div class="call-icon">
+      📞
+    </div>
 
     <div class="call-small">
       INCOMING GROUP CALL
@@ -1037,19 +1140,22 @@ button.dark{
     </div>
 
     <div class="call-progress">
-
       <div
         id="callProgressBar"
         class="call-progress-bar"
       ></div>
-
     </div>
 
   </div>
 
 </div>
 
-<div id="alertModal" class="alert-modal hidden">
+<!-- ALERT -->
+
+<div
+  id="alertModal"
+  class="alert-modal hidden"
+>
 
   <div class="alert-inner">
 
@@ -1062,8 +1168,8 @@ button.dark{
     </h2>
 
     <p>
-      Enable notifications so House Mystery
-      can alert you when calls or tasks happen.
+      Enable local notifications so House Mystery
+      can alert you about calls while the game is open.
     </p>
 
     <button
@@ -1084,7 +1190,12 @@ button.dark{
 
 </div>
 
-<div id="revealOverlay" class="reveal-overlay hidden">
+<!-- REVEAL -->
+
+<div
+  id="revealOverlay"
+  class="reveal-overlay hidden"
+>
 
   <div class="reveal-inner">
 
@@ -1113,6 +1224,8 @@ button.dark{
 </div>
 
 <div class="app">
+
+<!-- NAME -->
 
 <section id="nameSetup">
 
@@ -1160,6 +1273,8 @@ button.dark{
 
 </section>
 
+<!-- USER BAR -->
+
 <div
   id="userBar"
   class="user-bar hidden"
@@ -1186,7 +1301,12 @@ button.dark{
 
 </div>
 
-<section id="home" class="hidden">
+<!-- HOME -->
+
+<section
+  id="home"
+  class="hidden"
+>
 
   <div class="card">
 
@@ -1211,14 +1331,17 @@ button.dark{
 
     </div>
 
-    <div id="alertBox" class="info">
+    <div
+      id="alertBox"
+      class="info"
+    >
 
       <b>
-        🔔 Notifications
+        🔔 Local Notifications
       </b>
 
       <p id="alertStatus">
-        Enable this before playing.
+        Enable this before playing if you want call notifications.
       </p>
 
       <button
@@ -1228,11 +1351,6 @@ button.dark{
       >
         🔔 ENABLE NOTIFICATIONS
       </button>
-
-      <div
-        id="notificationDebug"
-        class="debug-box hidden"
-      ></div>
 
     </div>
 
@@ -1296,7 +1414,12 @@ button.dark{
 
 </section>
 
-<section id="createScreen" class="hidden">
+<!-- CREATE -->
+
+<section
+  id="createScreen"
+  class="hidden"
+>
 
   <div class="card">
 
@@ -1331,15 +1454,41 @@ button.dark{
 
     <select id="playerLimit">
 
-      <option value="2">2 Players</option>
-      <option value="3" selected>3 Players</option>
-      <option value="4">4 Players</option>
-      <option value="5">5 Players</option>
-      <option value="6">6 Players</option>
-      <option value="7">7 Players</option>
-      <option value="8">8 Players</option>
-      <option value="9">9 Players</option>
-      <option value="10">10 Players</option>
+      <option value="2">
+        2 Players
+      </option>
+
+      <option value="3" selected>
+        3 Players
+      </option>
+
+      <option value="4">
+        4 Players
+      </option>
+
+      <option value="5">
+        5 Players
+      </option>
+
+      <option value="6">
+        6 Players
+      </option>
+
+      <option value="7">
+        7 Players
+      </option>
+
+      <option value="8">
+        8 Players
+      </option>
+
+      <option value="9">
+        9 Players
+      </option>
+
+      <option value="10">
+        10 Players
+      </option>
 
     </select>
 
@@ -1358,7 +1507,12 @@ button.dark{
 
 </section>
 
-<section id="lobby" class="hidden">
+<!-- LOBBY -->
+
+<section
+  id="lobby"
+  class="hidden"
+>
 
   <div class="card center">
 
@@ -1421,7 +1575,12 @@ button.dark{
 
 </section>
 
-<section id="game" class="hidden">
+<!-- GAME -->
+
+<section
+  id="game"
+  class="hidden"
+>
 
   <button
     id="resetFixed"
@@ -1453,6 +1612,8 @@ button.dark{
 
   </div>
 
+  <!-- CALLS -->
+
   <div class="card">
 
     <h2>
@@ -1467,12 +1628,16 @@ button.dark{
 
   </div>
 
+  <!-- SECRET -->
+
   <div
     id="secretCard"
     class="card"
   >
     Loading your secret...
   </div>
+
+  <!-- NOTE -->
 
   <div
     id="playerNoteCard"
@@ -1523,6 +1688,8 @@ button.dark{
 
   </div>
 
+  <!-- DETECTIVE WAIT -->
+
   <div
     id="detectiveWaiting"
     class="card hidden center"
@@ -1544,7 +1711,11 @@ button.dark{
 
       <div
         id="detectiveArrivalTime"
-        style="font-size:28px;font-weight:900;margin-top:8px"
+        style="
+          font-size:28px;
+          font-weight:900;
+          margin-top:8px
+        "
       >
         --
       </div>
@@ -1564,6 +1735,8 @@ button.dark{
 
   </div>
 
+  <!-- NORMAL -->
+
   <div
     id="normalWaiting"
     class="card hidden"
@@ -1575,9 +1748,12 @@ button.dark{
 
     <p>
       Future tasks stay locked until their exact timestamp.
+      When a task unlocks, its assigned Discord webhook is notified.
     </p>
 
   </div>
+
+  <!-- DETECTIVE NOTES -->
 
   <div
     id="detectiveNotebook"
@@ -1699,6 +1875,8 @@ button.dark{
 
   </div>
 
+  <!-- LIVE NOTES -->
+
   <div
     id="detectiveLiveNotes"
     class="card hidden"
@@ -1717,6 +1895,8 @@ button.dark{
     </div>
 
   </div>
+
+  <!-- INVESTIGATION -->
 
   <div
     id="investigation"
@@ -1797,24 +1977,14 @@ import {
 from
 "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
 
-import {
-  getMessaging,
-  getToken,
-  onMessage,
-  isSupported
-}
-from
-"https://www.gstatic.com/firebasejs/12.1.0/firebase-messaging.js";
-
 /* =====================================================
 FIREBASE
-EXACT CONFIG YOU ORIGINALLY PROVIDED
 ===================================================== */
 
 const firebaseConfig = {
 
   apiKey:
-    "AIzaSyCug0S0qHKstXGZArd5vEBzm-DaLZAIDugo",
+    "AIzaSyCug0S0qHKstGAr5vdzm-DaLZAIDugo",
 
   authDomain:
     "money-e560a.firebaseapp.com",
@@ -1839,14 +2009,6 @@ const firebaseConfig = {
 
 };
 
-/* =====================================================
-VAPID
-EXACT VAPID KEY YOU PROVIDED
-===================================================== */
-
-const FIREBASE_VAPID_PUBLIC_KEY =
-  "BL7rsvWz4BsL0CnbBLrrLUoWtNO4r5TMLygYl8A_YT1qVCfVr8ZjBW7OLjbBswac1fHs74-Aw6Wl1gxG6ipyf78";
-
 const app =
   initializeApp(
     firebaseConfig
@@ -1858,87 +2020,162 @@ const db =
   );
 
 /* =====================================================
-FCM
+DISCORD WEBHOOK MAPPING
 ===================================================== */
 
-let messaging = null;
+/*
+  IMPORTANT:
+  Replace these with NEW webhook URLs after regenerating
+  the four webhooks that were previously exposed.
 
-let fcmToken = "";
+  Names are matched case-insensitively.
+*/
 
-let fcmReady = false;
+const DISCORD_WEBHOOKS = {
 
-let foregroundMessagingStarted = false;
+  zezo:
+    "PASTE_NEW_WEBHOOK_1_HERE",
 
-let messagingSupported = false;
+  asser:
+    "PASTE_NEW_WEBHOOK_2_HERE",
 
-/* =====================================================
-DEBUG
-===================================================== */
+  lilly:
+    "PASTE_NEW_WEBHOOK_3_HERE",
 
-function setNotificationDebug(
-  text
+  lara:
+    "PASTE_NEW_WEBHOOK_4_HERE"
+
+};
+
+function getDiscordWebhookForName(
+  name
 ){
 
-  const box =
-    document.getElementById(
-      "notificationDebug"
-    );
-
-  if(!box){
-    return;
-  }
-
-  box.textContent =
+  const key =
     String(
-      text || ""
-    );
+      name || ""
+    )
+      .trim()
+      .toLowerCase();
 
-  box.classList.remove(
-    "hidden"
+  return (
+    DISCORD_WEBHOOKS[key] ||
+    ""
   );
 
 }
 
-function formatFirebaseError(
-  error
+/*
+  Browser-to-Discord webhook requests can be restricted by
+  Discord/browser CORS behavior. The game catches failures
+  so a Discord failure does NOT break the game.
+*/
+
+async function sendDiscordTaskNotification(
+  task
 ){
 
-  if(!error){
-    return "Unknown error";
-  }
-
-  const output = [];
-
-  if(error.name){
-
-    output.push(
-      "name: " +
-      error.name
+  const webhook =
+    getDiscordWebhookForName(
+      myName
     );
 
+  if(
+    !webhook ||
+    webhook.startsWith(
+      "PASTE_NEW_WEBHOOK_"
+    )
+  ){
+
+    return false;
+
   }
 
-  if(error.code){
+  if(
+    !task
+  ){
 
-    output.push(
-      "code: " +
-      error.code
+    return false;
+
+  }
+
+  const unlockTime =
+    shortClock(
+      sharedDate(
+        task.unlockAt
+      )
     );
 
+  const payload = {
+
+    username:
+      "House Mystery",
+
+    content:
+      `🔔 **NEW TASK UNLOCKED — ${escapeDiscord(myName)}**\n\n` +
+      `📍 **Task:** ${escapeDiscord(task.description || "New task")}\n` +
+      `⏰ **Unlocked:** ${escapeDiscord(unlockTime)}\n` +
+      `🏠 **Room:** ${escapeDiscord(roomCode)}\n` +
+      `🎮 **Round:** ${escapeDiscord(currentRoundId || "1")}`
+
+  };
+
+  try{
+
+    const response =
+      await fetch(
+        webhook,
+        {
+
+          method:
+            "POST",
+
+          headers:{
+            "Content-Type":
+              "application/json"
+
+          },
+
+          body:
+            JSON.stringify(
+              payload
+            )
+
+        }
+      );
+
+    return response.ok;
+
   }
+  catch(error){
 
-  if(error.message){
-
-    output.push(
-      "message: " +
-      error.message
+    console.warn(
+      "DISCORD WEBHOOK:",
+      error
     );
 
+    return false;
+
   }
 
-  return output.length
-    ? output.join("\n")
-    : String(error);
+}
+
+function escapeDiscord(
+  value
+){
+
+  return String(
+    value ??
+    ""
+  )
+    .replaceAll(
+      "\\",
+      "\\\\"
+    )
+    .replaceAll(
+      "`",
+      "\\`"
+    );
 
 }
 
@@ -1948,10 +2185,12 @@ PLAYER ID
 
 let playerId =
   localStorage.getItem(
-    "houseMysteryPlayerId"
+    "tivoliMysteryPlayerId"
   );
 
-if(!playerId){
+if(
+  !playerId
+){
 
   playerId =
     "p_" +
@@ -1959,10 +2198,13 @@ if(!playerId){
     "_" +
     Math.random()
       .toString(36)
-      .slice(2,10);
+      .slice(
+        2,
+        10
+      );
 
   localStorage.setItem(
-    "houseMysteryPlayerId",
+    "tivoliMysteryPlayerId",
     playerId
   );
 
@@ -1973,59 +2215,39 @@ STATE
 ===================================================== */
 
 let roomCode = "";
-
 let myName = "";
-
 let roomData = null;
-
 let mySecret = null;
 
 let roomUnsubscribe = null;
-
 let presenceUnsubscribe = null;
-
 let callsUnsubscribe = null;
-
 let tasksUnsubscribe = null;
-
 let notesUnsubscribe = null;
-
 let detectiveNotesUnsubscribe = null;
-
 let resultUnsubscribe = null;
 
 let serverOffsetUnsubscribe = null;
-
 let firebaseConnectionUnsubscribe = null;
-
 let onlineListenerAdded = false;
 
 let heartbeatInterval = null;
-
 let roomExpiryInterval = null;
-
 let globalInterval = null;
-
 let callTimer = null;
-
 let taskNotificationInterval = null;
 
 let currentRoundId = null;
-
 let gameVisible = false;
-
 let selectedDetectivePlayerId = null;
 
 let revealRunning = false;
-
 let lastRevealId = null;
 
 let audioContext = null;
-
 let serverTimeOffset = 0;
 
 let serviceWorkerRegistration = null;
-
 let firebaseConnected = false;
 
 let browserOnline =
@@ -2033,7 +2255,7 @@ let browserOnline =
 
 let alertsEnabled =
   localStorage.getItem(
-    "houseMysteryAlerts"
+    "tivoliMysteryAlerts"
   ) === "1";
 
 /* =====================================================
@@ -2073,11 +2295,15 @@ MAPS
 const MAPS = {
 
   house:{
-    id:"house",
 
-    name:"🏠 House",
+    id:
+      "house",
+
+    name:
+      "🏠 House",
 
     locations:[
+
       "Main Door / Entrance",
       "Hallway",
       "Sofa / Living Room",
@@ -2086,21 +2312,27 @@ const MAPS = {
       "Girls Room",
       "Bathroom 1 — Outside Only",
       "Bathroom 2 — Outside Only"
+
     ]
 
   },
 
   mall:{
-    id:"mall",
 
-    name:"🏬 Mall",
+    id:
+      "mall",
+
+    name:
+      "🏬 Mall",
 
     locations:[
+
       "Open Area",
       "Aura Cafe",
       "Carlito Cafe",
       "Mollys Cafe",
       "Automatic Door Entrance"
+
     ]
 
   }
@@ -2130,8 +2362,10 @@ function mapLocationList(
   return (
     MAPS[
       mapType === "mall"
-        ? "mall"
-        : "house"
+      ?
+      "mall"
+      :
+      "house"
     ]?.locations ||
     MAPS.house.locations
   );
@@ -2146,12 +2380,18 @@ function renderMapBadges(
   const map =
     MAPS[
       mapType === "mall"
-        ? "mall"
-        : "house"
+      ?
+      "mall"
+      :
+      "house"
     ];
 
-  if(!map){
+  if(
+    !map
+  ){
+
     return "";
+
   }
 
   return `
@@ -2197,840 +2437,6 @@ function renderMapBadges(
 }
 
 /* =====================================================
-MESSAGING SUPPORT
-===================================================== */
-
-async function initializeMessaging(){
-
-  try{
-
-    messagingSupported =
-      await isSupported();
-
-    if(!messagingSupported){
-
-      messaging = null;
-
-      setNotificationDebug(
-        "Firebase Messaging is not supported in this browser/app environment."
-      );
-
-      return false;
-
-    }
-
-    messaging =
-      getMessaging(
-        app
-      );
-
-    return true;
-
-  }
-  catch(error){
-
-    messaging = null;
-
-    messagingSupported = false;
-
-    setNotificationDebug(
-      "FCM initialization failed:\n\n" +
-      formatFirebaseError(error)
-    );
-
-    return false;
-
-  }
-
-}
-
-/* =====================================================
-SERVICE WORKER
-===================================================== */
-
-async function registerServiceWorker(){
-
-  if(
-    !("serviceWorker" in navigator)
-  ){
-
-    setNotificationDebug(
-      "Service workers are not supported."
-    );
-
-    return null;
-
-  }
-
-  if(
-    location.protocol !== "https:" &&
-    location.hostname !== "localhost" &&
-    location.hostname !== "127.0.0.1"
-  ){
-
-    setNotificationDebug(
-      "FCM requires HTTPS.\n\n" +
-      "Current page:\n" +
-      location.href
-    );
-
-    return null;
-
-  }
-
-  try{
-
-    serviceWorkerRegistration =
-      await navigator.serviceWorker.register(
-
-        "./firebase-messaging-sw.js",
-
-        {
-          scope:"./",
-
-          updateViaCache:
-            "none"
-        }
-
-      );
-
-    await navigator.serviceWorker.ready;
-
-    if(
-      serviceWorkerRegistration.waiting
-    ){
-
-      serviceWorkerRegistration.waiting.postMessage({
-
-        type:
-          "SKIP_WAITING"
-
-      });
-
-    }
-
-    return serviceWorkerRegistration;
-
-  }
-  catch(error){
-
-    serviceWorkerRegistration =
-      null;
-
-    setNotificationDebug(
-
-      "Service worker registration failed:\n\n" +
-
-      formatFirebaseError(
-        error
-      ) +
-
-      "\n\n" +
-
-      "Required file:\n" +
-
-      "firebase-messaging-sw.js\n\n" +
-
-      "It must be beside index.html."
-
-    );
-
-    return null;
-
-  }
-
-}
-
-/* =====================================================
-FCM REGISTRATION
-===================================================== */
-
-async function registerPushNotifications(){
-
-  setNotificationDebug(
-    "Starting push registration..."
-  );
-
-  if(
-    !("Notification" in window)
-  ){
-
-    setNotificationDebug(
-      "This browser does not provide the Notification API."
-    );
-
-    return false;
-
-  }
-
-  if(
-    Notification.permission !==
-    "granted"
-  ){
-
-    setNotificationDebug(
-      "Notification permission is not granted.\n\n" +
-      "Current state: " +
-      Notification.permission
-    );
-
-    return false;
-
-  }
-
-  if(
-    !messagingSupported ||
-    !messaging
-  ){
-
-    const initialized =
-      await initializeMessaging();
-
-    if(!initialized){
-      return false;
-    }
-
-  }
-
-  if(
-    !serviceWorkerRegistration
-  ){
-
-    await registerServiceWorker();
-
-  }
-
-  if(
-    !serviceWorkerRegistration
-  ){
-
-    return false;
-
-  }
-
-  try{
-
-    const token =
-      await getToken(
-
-        messaging,
-
-        {
-
-          vapidKey:
-            FIREBASE_VAPID_PUBLIC_KEY,
-
-          serviceWorkerRegistration:
-            serviceWorkerRegistration
-
-        }
-
-      );
-
-    if(!token){
-
-      fcmToken = "";
-
-      fcmReady = false;
-
-      setNotificationDebug(
-        "Firebase did not return an FCM registration token."
-      );
-
-      return false;
-
-    }
-
-    fcmToken =
-      token;
-
-    fcmReady =
-      true;
-
-    await set(
-
-      ref(
-        db,
-        `pushTokens/${playerId}`
-      ),
-
-      {
-
-        token,
-
-        playerId,
-
-        name:
-          myName || null,
-
-        currentRoom:
-          roomCode || null,
-
-        currentGame:
-          roomData?.status || null,
-
-        roundId:
-          currentRoundId || null,
-
-        platform:
-          "web",
-
-        permission:
-          Notification.permission,
-
-        updatedAt:
-          serverTimestamp(),
-
-        userAgent:
-          navigator.userAgent
-
-      }
-
-    );
-
-    await saveDeviceRecord();
-
-    setNotificationDebug(
-      "✅ PUSH READY\n\n" +
-      "Firebase registration succeeded."
-    );
-
-    updateNotificationUI(
-      true
-    );
-
-    return true;
-
-  }
-  catch(error){
-
-    fcmToken = "";
-
-    fcmReady = false;
-
-    const text =
-      formatFirebaseError(
-        error
-      );
-
-    setNotificationDebug(
-
-      "FCM TOKEN ERROR\n\n" +
-
-      text +
-
-      "\n\n" +
-
-      "Using Firebase project:\n" +
-
-      "money-e560a\n\n" +
-
-      "Messaging sender:\n" +
-
-      "477551627159\n\n" +
-
-      "VAPID key configured."
-
-    );
-
-    updateNotificationUI(
-      false
-    );
-
-    console.error(
-      "FCM TOKEN ERROR",
-      error
-    );
-
-    return false;
-
-  }
-
-}
-
-function updateNotificationUI(
-  ready
-){
-
-  const status =
-    document.getElementById(
-      "alertStatus"
-    );
-
-  const button =
-    document.getElementById(
-      "enableAlertsButton"
-    );
-
-  if(
-    !status ||
-    !button
-  ){
-    return;
-  }
-
-  if(ready){
-
-    status.textContent =
-      "✅ Push notifications ready.";
-
-    button.textContent =
-      "✅ PUSH NOTIFICATIONS ENABLED";
-
-  }
-  else{
-
-    status.textContent =
-      "⚠️ Push setup needs fixing.";
-
-    button.textContent =
-      "⚠️ RETRY PUSH SETUP";
-
-  }
-
-}
-
-/* =====================================================
-FOREGROUND FCM
-===================================================== */
-
-function startForegroundMessaging(){
-
-  if(
-    foregroundMessagingStarted ||
-    !messaging
-  ){
-    return;
-  }
-
-  foregroundMessagingStarted =
-    true;
-
-  onMessage(
-
-    messaging,
-
-    async payload=>{
-
-      console.log(
-        "FOREGROUND FCM:",
-        payload
-      );
-
-      const notification =
-        payload?.notification ||
-        {};
-
-      const data =
-        payload?.data ||
-        {};
-
-      const title =
-        notification.title ||
-        data.title ||
-        "🔔 House Mystery";
-
-      const body =
-        notification.body ||
-        data.body ||
-        "New House Mystery alert.";
-
-      await showPersistentNotification(
-
-        title,
-
-        {
-
-          body,
-
-          tag:
-            data.tag ||
-            (
-              "house-fcm-" +
-              Date.now()
-            ),
-
-          requireInteraction:
-            data.requireInteraction ===
-            "true" ||
-            data.requireInteraction ===
-            true,
-
-          renotify:
-            data.renotify ===
-            "true" ||
-            data.renotify ===
-            true,
-
-          notificationType:
-            data.notificationType ||
-            null,
-
-          roomCode:
-            data.roomCode ||
-            roomCode,
-
-          roundId:
-            data.roundId ||
-            currentRoundId
-
-        }
-
-      );
-
-    }
-
-  );
-
-}
-
-/* =====================================================
-LOCAL SYSTEM NOTIFICATION
-===================================================== */
-
-async function showPersistentNotification(
-  title,
-  options = {}
-){
-
-  if(
-    !("Notification" in window) ||
-    Notification.permission !==
-    "granted"
-  ){
-
-    return false;
-
-  }
-
-  try{
-
-    const registration =
-      serviceWorkerRegistration ||
-      await navigator.serviceWorker.ready;
-
-    if(!registration){
-      return false;
-    }
-
-    await registration.showNotification(
-
-      title,
-
-      {
-
-        body:
-          options.body ||
-          "",
-
-        icon:
-          "./icon-192.png",
-
-        badge:
-          "./icon-192.png",
-
-        tag:
-          options.tag ||
-          (
-            "house-mystery-" +
-            Date.now()
-          ),
-
-        renotify:
-          options.renotify ??
-          true,
-
-        requireInteraction:
-          options.requireInteraction ??
-          false,
-
-        vibrate:
-          options.vibrate ||
-          [250,120,250],
-
-        data:{
-
-          roomCode:
-            options.roomCode ||
-            roomCode ||
-            null,
-
-          roundId:
-            options.roundId ||
-            currentRoundId ||
-            null,
-
-          taskId:
-            options.taskId ||
-            null,
-
-          notificationType:
-            options.notificationType ||
-            null,
-
-          url:
-            options.url ||
-            location.href
-
-        }
-
-      }
-
-    );
-
-    return true;
-
-  }
-  catch(error){
-
-    console.warn(
-      "NOTIFICATION ERROR",
-      error
-    );
-
-    return false;
-
-  }
-
-}
-
-/* =====================================================
-ENABLE ALERTS
-===================================================== */
-
-window.enableAlerts =
-async function(){
-
-  try{
-
-    if(
-      !("Notification" in window)
-    ){
-
-      alert(
-        "Notifications are not supported here."
-      );
-
-      return;
-
-    }
-
-    if(
-      Notification.permission ===
-      "denied"
-    ){
-
-      alert(
-        "Notifications are blocked. Enable notifications in iPhone Settings."
-      );
-
-      return;
-
-    }
-
-    if(
-      Notification.permission !==
-      "granted"
-    ){
-
-      const permission =
-        await Notification.requestPermission();
-
-      if(
-        permission !==
-        "granted"
-      ){
-
-        setNotificationDebug(
-          "Notification permission was not granted."
-        );
-
-        return;
-
-      }
-
-    }
-
-    const sw =
-      await registerServiceWorker();
-
-    if(!sw){
-
-      updateNotificationUI(
-        false
-      );
-
-      return;
-
-    }
-
-    const readyMessaging =
-      await initializeMessaging();
-
-    if(!readyMessaging){
-
-      updateNotificationUI(
-        false
-      );
-
-      return;
-
-    }
-
-    startForegroundMessaging();
-
-    alertsEnabled =
-      true;
-
-    localStorage.setItem(
-      "houseMysteryAlerts",
-      "1"
-    );
-
-    const ready =
-      await registerPushNotifications();
-
-    if(ready){
-
-      await showPersistentNotification(
-
-        "🔔 House Mystery",
-
-        {
-
-          body:
-            "Push registration successful.",
-
-          tag:
-            "house-test",
-
-          requireInteraction:
-            true,
-
-          notificationType:
-            "test"
-
-        }
-
-      );
-
-    }
-
-    startTaskNotificationWatcher();
-
-  }
-  catch(error){
-
-    console.error(
-      "NOTIFICATION SETUP",
-      error
-    );
-
-    setNotificationDebug(
-
-      "NOTIFICATION SETUP ERROR\n\n" +
-
-      formatFirebaseError(
-        error
-      )
-
-    );
-
-  }
-
-};
-
-window.closeAlertModal =
-function(){
-
-  document
-    .getElementById(
-      "alertModal"
-    )
-    .classList
-    .add(
-      "hidden"
-    );
-
-};
-
-/* =====================================================
-PLAYER NAME
-===================================================== */
-
-function loadSavedName(){
-
-  return localStorage.getItem(
-    "houseMysteryName"
-  );
-
-}
-
-/* =====================================================
-DEVICE
-===================================================== */
-
-async function saveDeviceRecord(){
-
-  if(!myName){
-    return;
-  }
-
-  try{
-
-    await update(
-
-      ref(
-        db,
-        `devices/${playerId}`
-      ),
-
-      {
-
-        playerId,
-
-        name:
-          myName,
-
-        lastSeenAt:
-          serverTimestamp(),
-
-        currentRoom:
-          roomCode || null,
-
-        currentGame:
-          roomData?.status || null,
-
-        pushReady:
-          fcmReady,
-
-        notificationPermission:
-
-          (
-            "Notification" in window
-            ?
-            Notification.permission
-            :
-            "unsupported"
-          )
-
-      }
-
-    );
-
-  }
-  catch(error){
-
-    console.warn(
-      "DEVICE:",
-      error
-    );
-
-  }
-
-}
-
-/* =====================================================
 CONNECTION
 ===================================================== */
 
@@ -3042,10 +2448,6 @@ function setConnectionState(
     document.getElementById(
       "connectionBar"
     );
-
-  if(!bar){
-    return;
-  }
 
   const red =
     document.getElementById(
@@ -3072,25 +2474,27 @@ function setConnectionState(
       "connectionStatusSub"
     );
 
+  if(
+    !bar
+  ){
+
+    return;
+
+  }
+
   bar.classList.remove(
     "red-state",
     "yellow-state",
     "green-state"
   );
 
-  red.classList.remove(
-    "active"
-  );
+  red.classList.remove("active");
+  yellow.classList.remove("active");
+  green.classList.remove("active");
 
-  yellow.classList.remove(
-    "active"
-  );
-
-  green.classList.remove(
-    "active"
-  );
-
-  if(state === "red"){
+  if(
+    state === "red"
+  ){
 
     bar.classList.add(
       "red-state"
@@ -3107,7 +2511,9 @@ function setConnectionState(
       "Device offline";
 
   }
-  else if(state === "green"){
+  else if(
+    state === "green"
+  ){
 
     bar.classList.add(
       "green-state"
@@ -3150,7 +2556,9 @@ function setConnectionState(
 
 function updateConnectionState(){
 
-  if(!browserOnline){
+  if(
+    !browserOnline
+  ){
 
     setConnectionState(
       "red"
@@ -3160,7 +2568,9 @@ function updateConnectionState(){
 
   }
 
-  if(firebaseConnected){
+  if(
+    firebaseConnected
+  ){
 
     setConnectionState(
       "green"
@@ -3203,15 +2613,15 @@ function startConnectionMonitoring(){
 
         error=>{
 
-          firebaseConnected =
-            false;
-
-          updateConnectionState();
-
           console.warn(
             "FIREBASE CONNECTION:",
             error
           );
+
+          firebaseConnected =
+            false;
+
+          updateConnectionState();
 
         }
 
@@ -3222,36 +2632,23 @@ function startConnectionMonitoring(){
   if(
     onlineListenerAdded
   ){
+
     return;
+
   }
 
-  onlineListenerAdded =
-    true;
+  onlineListenerAdded = true;
 
   window.addEventListener(
     "online",
     async()=>{
 
-      browserOnline =
-        true;
-
-      firebaseConnected =
-        false;
+      browserOnline = true;
+      firebaseConnected = false;
 
       updateConnectionState();
 
       await reconnectCurrentRoom();
-
-      if(
-        alertsEnabled &&
-        "Notification" in window &&
-        Notification.permission ===
-        "granted"
-      ){
-
-        await registerPushNotifications();
-
-      }
 
     }
   );
@@ -3260,11 +2657,8 @@ function startConnectionMonitoring(){
     "offline",
     ()=>{
 
-      browserOnline =
-        false;
-
-      firebaseConnected =
-        false;
+      browserOnline = false;
+      firebaseConnected = false;
 
       updateConnectionState();
 
@@ -3360,8 +2754,10 @@ function shuffle(
 
   const result =
     Array.isArray(array)
-    ? [...array]
-    : [];
+    ?
+    [...array]
+    :
+    [];
 
   for(
     let i =
@@ -3423,17 +2819,25 @@ function clockText(
 
   const period =
     h >= 12
-    ? "PM"
-    : "AM";
+    ?
+    "PM"
+    :
+    "AM";
 
   h =
     h % 12;
 
-  if(h === 0){
+  if(
+    h === 0
+  ){
+
     h = 12;
+
   }
 
-  return `${h}:${m}:${s} ${period}`;
+  return (
+    `${h}:${m}:${s} ${period}`
+  );
 
 }
 
@@ -3451,17 +2855,25 @@ function shortClock(
 
   const period =
     h >= 12
-    ? "PM"
-    : "AM";
+    ?
+    "PM"
+    :
+    "AM";
 
   h =
     h % 12;
 
-  if(h === 0){
+  if(
+    h === 0
+  ){
+
     h = 12;
+
   }
 
-  return `${h}:${m} ${period}`;
+  return (
+    `${h}:${m} ${period}`
+  );
 
 }
 
@@ -3501,28 +2913,14 @@ function escapeHtml(
 ){
 
   return String(
-    value ?? ""
+    value ??
+    ""
   )
-    .replaceAll(
-      "&",
-      "&amp;"
-    )
-    .replaceAll(
-      "<",
-      "&lt;"
-    )
-    .replaceAll(
-      ">",
-      "&gt;"
-    )
-    .replaceAll(
-      '"',
-      "&quot;"
-    )
-    .replaceAll(
-      "'",
-      "&#039;"
-    );
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
 
 }
 
@@ -3541,7 +2939,7 @@ function sleep(
 }
 
 /* =====================================================
-ROOM EXPIRY
+EXPIRY
 ===================================================== */
 
 function roomActivityTime(
@@ -3560,9 +2958,13 @@ function roomExpiryFor(
   data
 ){
 
-  return data?.status === "game"
-    ? GAME_EXPIRY
-    : LOBBY_EXPIRY;
+  return (
+    data?.status === "game"
+  )
+  ?
+  GAME_EXPIRY
+  :
+  LOBBY_EXPIRY;
 
 }
 
@@ -3575,16 +2977,20 @@ function isRoomStale(
       data
     );
 
-  if(!activity){
+  if(
+    !activity
+  ){
+
     return true;
+
   }
 
   return (
     sharedNow() -
-    activity
-  ) >=
-  roomExpiryFor(
-    data
+    activity >=
+    roomExpiryFor(
+      data
+    )
   );
 
 }
@@ -3595,48 +3001,48 @@ CLEANUP
 
 function stopGameListeners(){
 
-  if(callsUnsubscribe){
+  if(
+    callsUnsubscribe
+  ){
 
     callsUnsubscribe();
-
-    callsUnsubscribe =
-      null;
+    callsUnsubscribe = null;
 
   }
 
-  if(tasksUnsubscribe){
+  if(
+    tasksUnsubscribe
+  ){
 
     tasksUnsubscribe();
-
-    tasksUnsubscribe =
-      null;
+    tasksUnsubscribe = null;
 
   }
 
-  if(notesUnsubscribe){
+  if(
+    notesUnsubscribe
+  ){
 
     notesUnsubscribe();
-
-    notesUnsubscribe =
-      null;
+    notesUnsubscribe = null;
 
   }
 
-  if(detectiveNotesUnsubscribe){
+  if(
+    detectiveNotesUnsubscribe
+  ){
 
     detectiveNotesUnsubscribe();
-
-    detectiveNotesUnsubscribe =
-      null;
+    detectiveNotesUnsubscribe = null;
 
   }
 
-  if(resultUnsubscribe){
+  if(
+    resultUnsubscribe
+  ){
 
     resultUnsubscribe();
-
-    resultUnsubscribe =
-      null;
+    resultUnsubscribe = null;
 
   }
 
@@ -3644,21 +3050,21 @@ function stopGameListeners(){
 
 function stopRoomListeners(){
 
-  if(roomUnsubscribe){
+  if(
+    roomUnsubscribe
+  ){
 
     roomUnsubscribe();
-
-    roomUnsubscribe =
-      null;
+    roomUnsubscribe = null;
 
   }
 
-  if(presenceUnsubscribe){
+  if(
+    presenceUnsubscribe
+  ){
 
     presenceUnsubscribe();
-
-    presenceUnsubscribe =
-      null;
+    presenceUnsubscribe = null;
 
   }
 
@@ -3688,20 +3094,466 @@ function stopTimers(){
     callTimer
   );
 
-  heartbeatInterval =
-    null;
+  heartbeatInterval = null;
+  roomExpiryInterval = null;
+  globalInterval = null;
+  taskNotificationInterval = null;
+  callTimer = null;
 
-  roomExpiryInterval =
-    null;
+}
 
-  globalInterval =
-    null;
+/* =====================================================
+SERVICE WORKER / LOCAL NOTIFICATIONS
+===================================================== */
+
+async function registerServiceWorker(){
+
+  if(
+    !("serviceWorker" in navigator)
+  ){
+
+    return null;
+
+  }
+
+  try{
+
+    serviceWorkerRegistration =
+      await navigator.serviceWorker.register(
+        "./sw.js",
+        {
+          updateViaCache:
+            "none"
+        }
+      );
+
+    await navigator.serviceWorker.ready;
+
+    return serviceWorkerRegistration;
+
+  }
+  catch(error){
+
+    console.warn(
+      "SERVICE WORKER:",
+      error
+    );
+
+    serviceWorkerRegistration =
+      null;
+
+    return null;
+
+  }
+
+}
+
+async function showPersistentNotification(
+  title,
+  options = {}
+){
+
+  if(
+    !("Notification" in window) ||
+    Notification.permission !== "granted"
+  ){
+
+    return false;
+
+  }
+
+  try{
+
+    const registration =
+      serviceWorkerRegistration ||
+      await navigator.serviceWorker.ready;
+
+    if(
+      !registration
+    ){
+
+      return false;
+
+    }
+
+    await registration.showNotification(
+
+      title,
+
+      {
+
+        body:
+          options.body ||
+          "",
+
+        icon:
+          "./icon-192.png",
+
+        badge:
+          "./icon-192.png",
+
+        tag:
+          options.tag ||
+          (
+            "house-mystery-" +
+            Date.now()
+          ),
+
+        renotify:
+          true,
+
+        requireInteraction:
+          options.requireInteraction ??
+          false,
+
+        data:{
+          roomCode,
+          roundId:
+            currentRoundId,
+          notificationType:
+            options.notificationType ||
+            null,
+          url:
+            location.href
+        }
+
+      }
+
+    );
+
+    return true;
+
+  }
+  catch(error){
+
+    console.warn(
+      "LOCAL NOTIFICATION:",
+      error
+    );
+
+    return false;
+
+  }
+
+}
+
+/* =====================================================
+NOTIFICATIONS
+===================================================== */
+
+window.enableAlerts =
+async function(){
+
+  try{
+
+    await registerServiceWorker();
+
+    if(
+      !("Notification" in window)
+    ){
+
+      alert(
+        "This browser does not support notifications."
+      );
+
+      return;
+
+    }
+
+    if(
+      Notification.permission ===
+      "denied"
+    ){
+
+      alert(
+        "Notifications are blocked. Enable notifications for House Mystery in iPhone Settings."
+      );
+
+      return;
+
+    }
+
+    if(
+      Notification.permission !==
+      "granted"
+    ){
+
+      const permission =
+        await Notification.requestPermission();
+
+      if(
+        permission !==
+        "granted"
+      ){
+
+        return;
+
+      }
+
+    }
+
+    alertsEnabled =
+      true;
+
+    localStorage.setItem(
+      "tivoliMysteryAlerts",
+      "1"
+    );
+
+    document
+      .getElementById(
+        "alertStatus"
+      )
+      .textContent =
+      "✅ Local call notifications enabled.";
+
+    document
+      .getElementById(
+        "enableAlertsButton"
+      )
+      .textContent =
+      "✅ NOTIFICATIONS ENABLED";
+
+    await showPersistentNotification(
+
+      "🔔 House Mystery",
+
+      {
+
+        body:
+          "Call notifications are enabled.",
+
+        tag:
+          "house-test",
+
+        notificationType:
+          "test"
+
+      }
+
+    );
+
+  }
+  catch(error){
+
+    console.error(
+      "NOTIFICATION SETUP:",
+      error
+    );
+
+    alert(
+      "Could not enable notifications.\n\n" +
+      (
+        error?.message ||
+        "Please try again."
+      )
+    );
+
+  }
+
+};
+
+window.closeAlertModal =
+function(){
+
+  document
+    .getElementById(
+      "alertModal"
+    )
+    .classList
+    .add(
+      "hidden"
+    );
+
+};
+
+/* =====================================================
+TASK -> DISCORD
+===================================================== */
+
+function taskNotificationKey(
+  roundId,
+  taskId
+){
+
+  return (
+    "houseDiscordTaskNotification_" +
+    String(roundId) +
+    "_" +
+    String(taskId)
+  );
+
+}
+
+function taskNotificationWasSent(
+  roundId,
+  taskId
+){
+
+  return (
+    localStorage.getItem(
+      taskNotificationKey(
+        roundId,
+        taskId
+      )
+    ) === "1"
+  );
+
+}
+
+function markTaskNotificationSent(
+  roundId,
+  taskId
+){
+
+  localStorage.setItem(
+
+    taskNotificationKey(
+      roundId,
+      taskId
+    ),
+
+    "1"
+
+  );
+
+}
+
+function startTaskNotificationWatcher(){
+
+  clearInterval(
+    taskNotificationInterval
+  );
 
   taskNotificationInterval =
-    null;
+    setInterval(
+      checkTaskNotifications,
+      1000
+    );
 
-  callTimer =
-    null;
+  checkTaskNotifications();
+
+}
+
+async function checkTaskNotifications(){
+
+  if(
+    !roomData?.game ||
+    !Array.isArray(
+      mySecret?.tasks
+    )
+  ){
+
+    return;
+
+  }
+
+  const roundId =
+    String(
+      roomData.game.roundId ||
+      roomData.game.roundNumber ||
+      "1"
+    );
+
+  const now =
+    sharedNow();
+
+  for(
+    const task of mySecret.tasks
+  ){
+
+    if(
+      now <
+      Number(
+        task.unlockAt
+      )
+    ){
+
+      continue;
+
+    }
+
+    if(
+      taskNotificationWasSent(
+        roundId,
+        task.id
+      )
+    ){
+
+      continue;
+
+    }
+
+    /*
+      Mark first so a slow webhook request cannot cause
+      duplicate messages on the next 1-second tick.
+    */
+
+    markTaskNotificationSent(
+      roundId,
+      task.id
+    );
+
+    await sendDiscordTaskNotification(
+      task
+    );
+
+  }
+
+}
+
+/* =====================================================
+DEVICE
+===================================================== */
+
+async function saveDeviceRecord(){
+
+  if(
+    !myName
+  ){
+
+    return;
+
+  }
+
+  try{
+
+    await update(
+
+      ref(
+        db,
+        `devices/${playerId}`
+      ),
+
+      {
+
+        playerId,
+
+        name:
+          myName,
+
+        lastSeenAt:
+          serverTimestamp(),
+
+        currentRoom:
+          roomCode || null,
+
+        currentGame:
+          roomData?.status || null
+
+      }
+
+    );
+
+  }
+  catch(error){
+
+    console.warn(
+      "DEVICE:",
+      error
+    );
+
+  }
 
 }
 
@@ -3711,8 +3563,12 @@ PRESENCE
 
 async function startPresence(){
 
-  if(!roomCode){
+  if(
+    !roomCode
+  ){
+
     return;
+
   }
 
   const presenceRef =
@@ -3725,10 +3581,10 @@ async function startPresence(){
 
     await onDisconnect(
       presenceRef
-    )
-    .set({
+    ).set({
 
-      connected:false,
+      connected:
+        false,
 
       lastSeenAt:
         serverTimestamp()
@@ -3736,18 +3592,16 @@ async function startPresence(){
     });
 
     await set(
-
       presenceRef,
-
       {
 
-        connected:true,
+        connected:
+          true,
 
         lastSeenAt:
           serverTimestamp()
 
       }
-
     );
 
   }
@@ -3772,7 +3626,9 @@ async function startPresence(){
         if(
           !browserOnline
         ){
+
           return;
+
         }
 
         try{
@@ -3783,7 +3639,8 @@ async function startPresence(){
 
             {
 
-              connected:true,
+              connected:
+                true,
 
               lastSeenAt:
                 serverTimestamp()
@@ -3808,7 +3665,9 @@ async function startPresence(){
 
     );
 
-  if(presenceUnsubscribe){
+  if(
+    presenceUnsubscribe
+  ){
 
     presenceUnsubscribe();
 
@@ -3824,7 +3683,9 @@ async function startPresence(){
 
       snapshot=>{
 
-        if(roomData){
+        if(
+          roomData
+        ){
 
           roomData.__presence =
             snapshot.val() ||
@@ -3886,16 +3747,18 @@ function updateCreateMapPreview(){
     !select ||
     !box
   ){
+
     return;
+
   }
 
   box.innerHTML =
     renderMapBadges(
-
       select.value === "mall"
-      ? "mall"
-      : "house"
-
+      ?
+      "mall"
+      :
+      "house"
     );
 
 }
@@ -3912,7 +3775,9 @@ function renderHomeMaps(){
       "mallPreview"
     );
 
-  if(house){
+  if(
+    house
+  ){
 
     house.innerHTML =
       renderMapBadges(
@@ -3921,7 +3786,9 @@ function renderHomeMaps(){
 
   }
 
-  if(mall){
+  if(
+    mall
+  ){
 
     mall.innerHTML =
       renderMapBadges(
@@ -3961,11 +3828,7 @@ function renderLobbyMap(){
       <br>
 
       This room uses the
-      ${
-        getMapType() === "mall"
-        ? "Mall"
-        : "House"
-      }
+      ${getMapType() === "mall" ? "Mall" : "House"}
       map.
 
     </div>
@@ -4040,6 +3903,14 @@ function showHome(){
 
 }
 
+function loadSavedName(){
+
+  return localStorage.getItem(
+    "tivoliMysteryName"
+  );
+
+}
+
 window.saveNameAndContinue =
 async function(){
 
@@ -4051,7 +3922,9 @@ async function(){
   const value =
     input.value.trim();
 
-  if(!value){
+  if(
+    !value
+  ){
 
     alert(
       "Enter your name."
@@ -4070,23 +3943,13 @@ async function(){
     );
 
   localStorage.setItem(
-    "houseMysteryName",
+    "tivoliMysteryName",
     myName
   );
 
   await saveDeviceRecord();
 
   showHome();
-
-  if(
-    alertsEnabled &&
-    Notification.permission ===
-    "granted"
-  ){
-
-    await registerPushNotifications();
-
-  }
 
 };
 
@@ -4099,7 +3962,9 @@ async function(){
       myName
     );
 
-  if(value === null){
+  if(
+    value === null
+  ){
 
     return;
 
@@ -4108,7 +3973,9 @@ async function(){
   const name =
     value.trim();
 
-  if(!name){
+  if(
+    !name
+  ){
 
     return;
 
@@ -4121,11 +3988,13 @@ async function(){
     );
 
   localStorage.setItem(
-    "houseMysteryName",
+    "tivoliMysteryName",
     myName
   );
 
-  if(roomCode){
+  if(
+    roomCode
+  ){
 
     try{
 
@@ -4137,10 +4006,8 @@ async function(){
         ),
 
         {
-
           name:
             myName
-
         }
 
       );
@@ -4158,29 +4025,6 @@ async function(){
   }
 
   await saveDeviceRecord();
-
-  if(fcmToken){
-
-    await update(
-
-      ref(
-        db,
-        `pushTokens/${playerId}`
-      ),
-
-      {
-
-        name:
-          myName,
-
-        updatedAt:
-          serverTimestamp()
-
-      }
-
-    );
-
-  }
 
   document
     .getElementById(
@@ -4204,10 +4048,12 @@ ROOM HELPERS
 
 function saveLocalRoom(){
 
-  if(roomCode){
+  if(
+    roomCode
+  ){
 
     localStorage.setItem(
-      "houseMysteryRoom",
+      "tivoliMysteryRoom",
       roomCode
     );
 
@@ -4218,7 +4064,7 @@ function saveLocalRoom(){
 function getLocalRoom(){
 
   return localStorage.getItem(
-    "houseMysteryRoom"
+    "tivoliMysteryRoom"
   );
 
 }
@@ -4233,13 +4079,9 @@ function restoreSavedRoom(){
       "resumeBox"
     );
 
-  if(!box){
-
-    return;
-
-  }
-
-  if(!saved){
+  if(
+    !saved
+  ){
 
     box.classList.add(
       "hidden"
@@ -4268,7 +4110,9 @@ async function(){
   const saved =
     getLocalRoom();
 
-  if(!saved){
+  if(
+    !saved
+  ){
 
     return;
 
@@ -4306,13 +4150,15 @@ function normalizeRoomCode(
 }
 
 /* =====================================================
-CREATE
+CREATE ROOM
 ===================================================== */
 
 window.createRoom =
 function(){
 
-  if(!myName){
+  if(
+    !myName
+  ){
 
     alert(
       "Enter your name first."
@@ -4347,7 +4193,9 @@ function(){
 window.finishCreateRoom =
 async function(){
 
-  if(!browserOnline){
+  if(
+    !browserOnline
+  ){
 
     alert(
       "You are offline."
@@ -4385,10 +4233,14 @@ async function(){
         "mapType"
       )
       .value === "mall"
-      ? "mall"
-      : "house";
+      ?
+      "mall"
+      :
+      "house";
 
-  if(code.length < 2){
+  if(
+    code.length < 2
+  ){
 
     alert(
       "Enter a valid room code."
@@ -4458,13 +4310,19 @@ async function(){
 
         current=>{
 
-          if(current === null){
+          if(
+            current === null
+          ){
 
             return newRoom;
 
           }
 
-          if(isRoomStale(current)){
+          if(
+            isRoomStale(
+              current
+            )
+          ){
 
             return newRoom;
 
@@ -4476,7 +4334,9 @@ async function(){
 
       );
 
-    if(!result.committed){
+    if(
+      !result.committed
+    ){
 
       alert(
         "That room already exists and is still active."
@@ -4493,16 +4353,6 @@ async function(){
 
     await saveDeviceRecord();
 
-    if(
-      alertsEnabled &&
-      Notification.permission ===
-      "granted"
-    ){
-
-      await registerPushNotifications();
-
-    }
-
     await startRoomSession();
 
   }
@@ -4513,14 +4363,11 @@ async function(){
     );
 
     alert(
-
       "Could not create the room.\n\n" +
-
       (
         error?.message ||
         "Firebase error."
       )
-
     );
 
   }
@@ -4528,13 +4375,15 @@ async function(){
 };
 
 /* =====================================================
-JOIN
+JOIN ROOM
 ===================================================== */
 
 window.joinRoom =
 async function(){
 
-  if(!browserOnline){
+  if(
+    !browserOnline
+  ){
 
     alert(
       "You are offline."
@@ -4555,7 +4404,9 @@ async function(){
 
     );
 
-  if(code.length < 2){
+  if(
+    code.length < 2
+  ){
 
     alert(
       "Enter a valid room code."
@@ -4581,7 +4432,9 @@ async function(){
         roomRef
       );
 
-    if(!snapshot.exists()){
+    if(
+      !snapshot.exists()
+    ){
 
       alert(
         "Room not found."
@@ -4594,11 +4447,14 @@ async function(){
     const data =
       snapshot.val();
 
-    if(isRoomStale(data)){
+    if(
+      isRoomStale(
+        data
+      )
+    ){
 
       if(
-        data.host ===
-        playerId
+        data.host === playerId
       ){
 
         await remove(
@@ -4621,8 +4477,7 @@ async function(){
       ];
 
     if(
-      data.status ===
-      "game" &&
+      data.status === "game" &&
       !existingPlayer
     ){
 
@@ -4640,13 +4495,10 @@ async function(){
       ).length;
 
     if(
-      data.status ===
-      "lobby" &&
+      data.status === "lobby" &&
       !existingPlayer &&
       playerCount >=
-      Number(
-        data.playerLimit
-      )
+      Number(data.playerLimit)
     ){
 
       alert(
@@ -4657,7 +4509,9 @@ async function(){
 
     }
 
-    if(!existingPlayer){
+    if(
+      !existingPlayer
+    ){
 
       const now =
         sharedNow();
@@ -4719,16 +4573,6 @@ async function(){
 
     await saveDeviceRecord();
 
-    if(
-      alertsEnabled &&
-      Notification.permission ===
-      "granted"
-    ){
-
-      await registerPushNotifications();
-
-    }
-
     await startRoomSession();
 
   }
@@ -4739,14 +4583,11 @@ async function(){
     );
 
     alert(
-
       "Could not join the room.\n\n" +
-
       (
         error?.message ||
         "Firebase error."
       )
-
     );
 
   }
@@ -4760,23 +4601,13 @@ SESSION
 async function startRoomSession(){
 
   stopRoomListeners();
-
   stopTimers();
 
-  lastRevealId =
-    null;
-
-  revealRunning =
-    false;
-
-  currentRoundId =
-    null;
-
-  gameVisible =
-    false;
-
-  selectedDetectivePlayerId =
-    null;
+  lastRevealId = null;
+  revealRunning = false;
+  currentRoundId = null;
+  gameVisible = false;
+  selectedDetectivePlayerId = null;
 
   hideAllMainScreens();
 
@@ -4804,11 +4635,7 @@ async function startRoomSession(){
 
   listenToRoom();
 
-  if(alertsEnabled){
-
-    startTaskNotificationWatcher();
-
-  }
+  startTaskNotificationWatcher();
 
 }
 
@@ -4818,7 +4645,9 @@ ROOM LISTENER
 
 function listenToRoom(){
 
-  if(roomUnsubscribe){
+  if(
+    roomUnsubscribe
+  ){
 
     roomUnsubscribe();
 
@@ -4834,7 +4663,9 @@ function listenToRoom(){
 
       snapshot=>{
 
-        if(!snapshot.exists()){
+        if(
+          !snapshot.exists()
+        ){
 
           leaveRoomToHome(
             "This room no longer exists."
@@ -4850,8 +4681,7 @@ function listenToRoom(){
         renderLobby();
 
         if(
-          roomData.status ===
-          "game"
+          roomData.status === "game"
         ){
 
           enterGameFromRoom();
@@ -4905,11 +4735,8 @@ function enterLobbyFromRoom(){
       "hidden"
     );
 
-  mySecret =
-    null;
-
-  currentRoundId =
-    null;
+  mySecret = null;
+  currentRoundId = null;
 
   stopGameListeners();
 
@@ -4917,14 +4744,15 @@ function enterLobbyFromRoom(){
     globalInterval
   );
 
-  globalInterval =
-    null;
+  globalInterval = null;
 
 }
 
 function renderLobby(){
 
-  if(!roomData){
+  if(
+    !roomData
+  ){
 
     return;
 
@@ -4934,9 +4762,7 @@ function renderLobby(){
     roomData.players || {};
 
   const ids =
-    Object.keys(
-      players
-    );
+    Object.keys(players);
 
   const playerLimit =
     Number(
@@ -4988,8 +4814,7 @@ function renderLobby(){
     `;
 
   const presence =
-    roomData.__presence ||
-    {};
+    roomData.__presence || {};
 
   document
     .getElementById(
@@ -5002,12 +4827,10 @@ function renderLobby(){
         id=>{
 
           const player =
-            players[id] ||
-            {};
+            players[id] || {};
 
           const connected =
-            presence[id]?.connected ===
-            true;
+            presence[id]?.connected === true;
 
           return `
 
@@ -5056,8 +4879,7 @@ function renderLobby(){
       .join("");
 
   const isHost =
-    roomData.host ===
-    playerId;
+    roomData.host === playerId;
 
   const hostPanel =
     document.getElementById(
@@ -5069,17 +4891,19 @@ function renderLobby(){
     !isHost
   );
 
-  if(isHost){
+  if(
+    isHost
+  ){
 
     const full =
-      ids.length ===
-      playerLimit;
+      ids.length === playerLimit;
 
     document
       .getElementById(
         "hostInfo"
       )
       .textContent =
+
       `${ids.length}/${playerLimit} players joined • ${
         MAPS[
           getMapType()
@@ -5106,7 +4930,7 @@ function renderLobby(){
 }
 
 /* =====================================================
-ROOM EXPIRY
+EXPIRY
 ===================================================== */
 
 function startRoomExpiryWatcher(){
@@ -5141,7 +4965,9 @@ function startRoomExpiryWatcher(){
 
             );
 
-          if(!snap.exists()){
+          if(
+            !snap.exists()
+          ){
 
             return;
 
@@ -5151,9 +4977,7 @@ function startRoomExpiryWatcher(){
             snap.val();
 
           if(
-            !isRoomStale(
-              data
-            )
+            !isRoomStale(data)
           ){
 
             return;
@@ -5161,17 +4985,14 @@ function startRoomExpiryWatcher(){
           }
 
           if(
-            data.host ===
-            playerId
+            data.host === playerId
           ){
 
             await remove(
-
               ref(
                 db,
                 `rooms/${roomCode}`
               )
-
             );
 
           }
@@ -5207,7 +5028,9 @@ function enterGameFromRoom(){
   const game =
     roomData?.game;
 
-  if(!game){
+  if(
+    !game
+  ){
 
     return;
 
@@ -5220,13 +5043,11 @@ function enterGameFromRoom(){
     );
 
   if(
-    currentRoundId ===
-    roundId &&
+    currentRoundId === roundId &&
     gameVisible
   ){
 
     checkTaskNotifications();
-
     return;
 
   }
@@ -5255,8 +5076,7 @@ function enterGameFromRoom(){
     .classList
     .toggle(
       "hidden",
-      roomData.host !==
-      playerId
+      roomData.host !== playerId
     );
 
   mySecret =
@@ -5268,50 +5088,11 @@ function enterGameFromRoom(){
     null;
 
   renderSecret();
-
   renderGameMap();
-
   renderCallButtons();
-
   startGameListeners();
-
   startGlobalClock();
-
-  if(fcmToken){
-
-    update(
-
-      ref(
-        db,
-        `pushTokens/${playerId}`
-      ),
-
-      {
-
-        currentRoom:
-          roomCode,
-
-        currentGame:
-          "game",
-
-        roundId,
-
-        updatedAt:
-          serverTimestamp()
-
-      }
-
-    ).catch(
-      ()=>{}
-    );
-
-  }
-
-  if(alertsEnabled){
-
-    startTaskNotificationWatcher();
-
-  }
+  startTaskNotificationWatcher();
 
 }
 
@@ -5326,7 +5107,9 @@ function renderCallButtons(){
       "callButtons"
     );
 
-  if(!container){
+  if(
+    !container
+  ){
 
     return;
 
@@ -5340,22 +5123,29 @@ function renderCallButtons(){
   container.innerHTML =
     locations
       .map(
-        (
-          location,
-          index
-        )=>`
+        (location,index)=>`
 
           <button
             class="${
               index % 3 === 1
-              ? "orange"
-              : index % 3 === 2
-              ? "secondary"
-              : ""
+              ?
+              "orange"
+              :
+              index % 3 === 2
+              ?
+              "secondary"
+              :
+              ""
             }"
-            data-location="${escapeHtml(
-              location
-            )}"
+            onclick="
+              makeCall(
+                '${escapeHtml(location)
+                  .replaceAll(
+                    "'",
+                    "\\'"
+                  )}'
+              )
+            "
           >
             📞 CALL
             ${escapeHtml(
@@ -5367,27 +5157,6 @@ function renderCallButtons(){
       )
       .join("");
 
-  container
-    .querySelectorAll(
-      "button[data-location]"
-    )
-    .forEach(
-      button=>{
-
-        button.addEventListener(
-          "click",
-          ()=>{
-
-            makeCall(
-              button.dataset.location
-            );
-
-          }
-        );
-
-      }
-    );
-
 }
 
 /* =====================================================
@@ -5398,7 +5167,9 @@ function startGameListeners(){
 
   stopGameListeners();
 
-  if(!roomCode){
+  if(
+    !roomCode
+  ){
 
     return;
 
@@ -5414,23 +5185,26 @@ function startGameListeners(){
 
       snapshot=>{
 
-        if(!snapshot.exists()){
+        if(
+          !snapshot.exists()
+        ){
 
           return;
 
         }
 
         const calls =
-          snapshot.val() ||
-          {};
+          snapshot.val() || {};
 
         const entries =
           Object.entries(
             calls
           )
           .sort(
-
-            (a,b)=>
+            (
+              a,
+              b
+            ) =>
               Number(
                 a[1]?.time ||
                 0
@@ -5440,10 +5214,11 @@ function startGameListeners(){
                 b[1]?.time ||
                 0
               )
-
           );
 
-        if(!entries.length){
+        if(
+          !entries.length
+        ){
 
           return;
 
@@ -5465,7 +5240,22 @@ function startGameListeners(){
             lastSeenKey
           );
 
-        if(!lastSeen){
+        const newCalls =
+          entries.filter(
+            ([id]) =>
+              id !== lastSeen &&
+              Number(
+                calls[id]?.time ||
+                0
+              ) > Number(
+                calls[lastSeen]?.time ||
+                0
+              )
+          );
+
+        if(
+          !lastSeen
+        ){
 
           localStorage.setItem(
             lastSeenKey,
@@ -5476,25 +5266,6 @@ function startGameListeners(){
 
         }
 
-        const lastSeenTime =
-          Number(
-            calls[lastSeen]?.time ||
-            0
-          );
-
-        const newCalls =
-          entries.filter(
-
-            ([id,value])=>
-              id !== lastSeen &&
-              Number(
-                value?.time ||
-                0
-              ) >
-              lastSeenTime
-
-          );
-
         for(
           const [
             id,
@@ -5503,31 +5274,30 @@ function startGameListeners(){
           of newCalls
         ){
 
-          if(!call?.id){
+          if(
+            !call?.id
+          ){
 
             continue;
 
           }
 
+          showCall(
+            call.destination,
+            call.caller
+          );
+
           if(
-            call.callerId !==
-            playerId
+            alertsEnabled
           ){
 
-            showCall(
+            playCallSound();
+            vibrate();
+
+            systemNotification(
               call.destination,
               call.caller
             );
-
-            if(
-              alertsEnabled
-            ){
-
-              playCallSound();
-
-              vibrate();
-
-            }
 
           }
 
@@ -5561,15 +5331,8 @@ function startGameListeners(){
 
       snapshot=>{
 
-        if(!roomData){
-
-          return;
-
-        }
-
         roomData.completed =
-          snapshot.val() ||
-          {};
+          snapshot.val() || {};
 
         renderTasks();
 
@@ -5587,15 +5350,8 @@ function startGameListeners(){
 
       snapshot=>{
 
-        if(!roomData){
-
-          return;
-
-        }
-
         roomData.notes =
-          snapshot.val() ||
-          {};
+          snapshot.val() || {};
 
         updateMyNoteUI();
 
@@ -5605,9 +5361,7 @@ function startGameListeners(){
         ){
 
           renderLivePlayerNotes();
-
           renderDetectivePlayerButtons();
-
           refreshSelectedDossierNote();
 
         }
@@ -5687,8 +5441,7 @@ function startGameListeners(){
         snapshot=>{
 
           const data =
-            snapshot.val() ||
-            {};
+            snapshot.val() || {};
 
           const input =
             document.getElementById(
@@ -5702,8 +5455,7 @@ function startGameListeners(){
           ){
 
             input.value =
-              data.general?.text ||
-              "";
+              data.general?.text || "";
 
           }
 
@@ -5733,7 +5485,9 @@ function startGlobalClock(){
       const game =
         roomData?.game;
 
-      if(!game){
+      if(
+        !game
+      ){
 
         return;
 
@@ -5753,8 +5507,7 @@ function startGlobalClock(){
         );
 
       const beforeDetective =
-        now <
-        detectiveEnd;
+        now < detectiveEnd;
 
       document
         .getElementById(
@@ -5763,9 +5516,7 @@ function startGlobalClock(){
         .textContent =
         "Shared time: " +
         clockText(
-          sharedDate(
-            now
-          )
+          sharedDate(now)
         );
 
       document
@@ -5787,8 +5538,7 @@ function startGlobalClock(){
         beforeDetective
         ?
         formatDuration(
-          detectiveEnd -
-          now
+          detectiveEnd - now
         )
         :
         "00:00";
@@ -5817,14 +5567,12 @@ function startGlobalClock(){
           formatDuration(
             Math.max(
               0,
-              detectiveEnd -
-              now
+              detectiveEnd - now
             )
           );
 
         if(
-          now >=
-          detectiveEnd
+          now >= detectiveEnd
         ){
 
           showInvestigation();
@@ -5837,10 +5585,8 @@ function startGlobalClock(){
           );
 
         if(
-          now >=
-          detectiveEnd &&
-          now <
-          investigationEnd
+          now >= detectiveEnd &&
+          now < investigationEnd
         ){
 
           investigationCard
@@ -5867,8 +5613,7 @@ function startGlobalClock(){
             )
             .textContent =
             formatDuration(
-              investigationEnd -
-              now
+              investigationEnd - now
             );
 
         }
@@ -5885,7 +5630,6 @@ function startGlobalClock(){
       }
 
       renderTasks();
-
       checkTaskNotifications();
 
     };
@@ -5990,8 +5734,7 @@ function nextMinuteTimestamp(
   );
 
   date.setMinutes(
-    date.getMinutes() +
-    1
+    date.getMinutes() + 1
   );
 
   return date.getTime();
@@ -6006,14 +5749,17 @@ function makeUnlockTimes(
 
   const first =
     now +
-    60000;
+    60 *
+    1000;
 
   const last =
     Math.max(
       first +
-      60000,
+      60 *
+      1000,
       end -
-      60000
+      60 *
+      1000
     );
 
   const output = [];
@@ -6053,6 +5799,10 @@ function makeUnlockTimes(
 
 }
 
+/* =====================================================
+NORMAL TASKS
+===================================================== */
+
 function buildNormalTasks(
   playerIdForSeed,
   now,
@@ -6070,8 +5820,7 @@ function buildNormalTasks(
   const count =
     3 +
     Math.floor(
-      Math.random() *
-      3
+      Math.random() * 3
     );
 
   const times =
@@ -6094,14 +5843,9 @@ function buildNormalTasks(
 
         let possible =
           locations.filter(
-
             location =>
-              location !==
-                crimeLocation &&
-              !used.includes(
-                location
-              )
-
+              location !== crimeLocation &&
+              !used.includes(location)
           );
 
         if(
@@ -6110,27 +5854,19 @@ function buildNormalTasks(
 
           possible =
             locations.filter(
-
               location =>
-                location !==
-                crimeLocation
-
+                location !== crimeLocation
             );
 
         }
 
         const location =
-          random(
-            possible
-          );
+          random(possible);
 
-        used.push(
-          location
-        );
+        used.push(location);
 
         const pool =
-          Math.random() <
-          .5
+          Math.random() < .5
           ?
           activityTemplates
           :
@@ -6144,13 +5880,11 @@ function buildNormalTasks(
 
           unlockAt,
 
-          random(
-            pool
-          )
-          .replace(
-            "{location}",
-            location
-          )
+          random(pool)
+            .replace(
+              "{location}",
+              location
+            )
 
         );
 
@@ -6161,6 +5895,10 @@ function buildNormalTasks(
   );
 
 }
+
+/* =====================================================
+MURDERER TASKS
+===================================================== */
 
 function buildMurdererTasks(
   playerIdForSeed,
@@ -6180,33 +5918,23 @@ function buildMurdererTasks(
   const count =
     2 +
     Math.floor(
-      Math.random() *
-      3
+      Math.random() * 3
     );
 
   const usableTaskEnd =
     Math.min(
       detectiveEnd,
-      murderAt -
-      20000
+      murderAt - 20000
     );
 
   const times =
     makeUnlockTimes(
-
       now,
-
       Math.max(
-
-        now +
-        60000,
-
+        now + 60000,
         usableTaskEnd
-
       ),
-
       count
-
     );
 
   const used = [];
@@ -6221,14 +5949,9 @@ function buildMurdererTasks(
 
         let possible =
           locations.filter(
-
             location =>
-              location !==
-                crimeLocation &&
-              !used.includes(
-                location
-              )
-
+              location !== crimeLocation &&
+              !used.includes(location)
           );
 
         if(
@@ -6237,23 +5960,16 @@ function buildMurdererTasks(
 
           possible =
             locations.filter(
-
               location =>
-                location !==
-                crimeLocation
-
+                location !== crimeLocation
             );
 
         }
 
         const location =
-          random(
-            possible
-          );
+          random(possible);
 
-        used.push(
-          location
-        );
+        used.push(location);
 
         return createTask(
 
@@ -6263,13 +5979,11 @@ function buildMurdererTasks(
 
           unlockAt,
 
-          random(
-            activityTemplates
-          )
-          .replace(
-            "{location}",
-            location
-          )
+          random(activityTemplates)
+            .replace(
+              "{location}",
+              location
+            )
 
         );
 
@@ -6287,21 +6001,17 @@ function buildMurdererTasks(
 
       murderAt,
 
-      random(
-        murderTemplates
-      )
-      .replace(
-        "{location}",
-        crimeLocation
-      )
-      .replace(
-        "{time}",
-        shortClock(
-          sharedDate(
-            murderAt
+      random(murderTemplates)
+        .replace(
+          "{location}",
+          crimeLocation
+        )
+        .replace(
+          "{time}",
+          shortClock(
+            sharedDate(murderAt)
           )
         )
-      )
 
     )
 
@@ -6315,24 +6025,19 @@ function buildMurdererTasks(
         .toString(36)
         .slice(2,7)}`,
 
-      murderAt +
-      25000,
+      murderAt + 25000,
 
-      random(
-        afterMurderTemplates
-      )
-      .replace(
-        "{location}",
-        crimeLocation
-      )
+      random(afterMurderTemplates)
+        .replace(
+          "{location}",
+          crimeLocation
+        )
 
     )
 
   );
 
-  return shuffle(
-    tasks
-  );
+  return shuffle(tasks);
 
 }
 
@@ -6375,13 +6080,10 @@ async function(){
   }
 
   const players =
-    roomData.players ||
-    {};
+    roomData.players || {};
 
   const ids =
-    Object.keys(
-      players
-    );
+    Object.keys(players);
 
   const limit =
     Number(
@@ -6389,8 +6091,7 @@ async function(){
     );
 
   if(
-    ids.length !==
-    limit
+    ids.length !== limit
   ){
 
     alert(
@@ -6402,9 +6103,7 @@ async function(){
   }
 
   const shuffledPlayers =
-    shuffle(
-      ids
-    );
+    shuffle(ids);
 
   const detective =
     shuffledPlayers[0];
@@ -6413,9 +6112,7 @@ async function(){
     shuffledPlayers[1];
 
   const innocents =
-    shuffledPlayers.slice(
-      2
-    );
+    shuffledPlayers.slice(2);
 
   const now =
     sharedNow();
@@ -6424,13 +6121,11 @@ async function(){
     now +
     MIN_MURDER_DELAY +
     Math.floor(
-
       Math.random() *
       (
         MAX_MURDER_DELAY -
         MIN_MURDER_DELAY
       )
-
     );
 
   const detectiveEnd =
@@ -6442,8 +6137,7 @@ async function(){
     INVESTIGATION_TIME;
 
   const mapType =
-    roomData.mapType ===
-    "mall"
+    roomData.mapType === "mall"
     ?
     "mall"
     :
@@ -6455,21 +6149,15 @@ async function(){
     );
 
   const crimeLocation =
-    random(
-      locations
-    );
+    random(locations);
 
   const roundNumber =
     Number(
-      roomData.roundNumber ||
-      0
-    ) +
-    1;
+      roomData.roundNumber || 0
+    ) + 1;
 
   const roundId =
-    String(
-      roundNumber
-    );
+    String(roundNumber);
 
   const roundSeed =
     Date.now().toString(36) +
@@ -6480,21 +6168,16 @@ async function(){
 
   const privateData = {};
 
-  privateData[
-    detective
-  ] = {
+  privateData[detective] = {
 
     role:
       "detective",
 
-    tasks:
-      []
+    tasks:[]
 
   };
 
-  privateData[
-    murderer
-  ] = {
+  privateData[murderer] = {
 
     role:
       "murderer",
@@ -6503,17 +6186,11 @@ async function(){
       buildMurdererTasks(
 
         murderer,
-
         now,
-
         detectiveEnd,
-
         murderAt,
-
         crimeLocation,
-
         roundSeed,
-
         mapType
 
       )
@@ -6521,12 +6198,9 @@ async function(){
   };
 
   innocents.forEach(
-
     id=>{
 
-      privateData[
-        id
-      ] = {
+      privateData[id] = {
 
         role:
           "innocent",
@@ -6535,15 +6209,10 @@ async function(){
           buildNormalTasks(
 
             id,
-
             now,
-
             detectiveEnd,
-
             crimeLocation,
-
             roundSeed,
-
             mapType
 
           )
@@ -6551,26 +6220,20 @@ async function(){
       };
 
     }
-
   );
 
   const game = {
 
     roundNumber,
-
     roundId,
-
     roundSeed,
-
     mapType,
 
     startedAt:
       now,
 
     murderAt,
-
     detectiveEnd,
-
     investigationEnd,
 
     crimeLocation,
@@ -6582,7 +6245,6 @@ async function(){
       "A fictional incident occurred during the mystery.",
 
     detective,
-
     murderer,
 
     suspects:[
@@ -6678,34 +6340,6 @@ async function(){
       ] ||
       null;
 
-    if(fcmToken){
-
-      await update(
-
-        ref(
-          db,
-          `pushTokens/${playerId}`
-        ),
-
-        {
-
-          currentRoom:
-            roomCode,
-
-          currentGame:
-            "game",
-
-          roundId,
-
-          updatedAt:
-            serverTimestamp()
-
-        }
-
-      );
-
-    }
-
     enterGameFromRoom();
 
   }
@@ -6717,14 +6351,11 @@ async function(){
     );
 
     alert(
-
       "Could not start the round.\n\n" +
-
       (
         error?.message ||
         "Firebase error."
       )
-
     );
 
   }
@@ -6742,7 +6373,9 @@ function renderSecret(){
       "secretCard"
     );
 
-  if(!mySecret){
+  if(
+    !mySecret
+  ){
 
     card.textContent =
       "Your secret is loading...";
@@ -6877,13 +6510,12 @@ function renderSecret(){
     );
 
   hideDetectiveTools();
-
   renderTasks();
 
 }
 
 /* =====================================================
-TASK UI
+TASKS
 ===================================================== */
 
 function renderTasks(){
@@ -6919,7 +6551,6 @@ function renderTasks(){
 
     mySecret.tasks
       .map(
-
         task=>{
 
           const unlockAt =
@@ -6928,14 +6559,12 @@ function renderTasks(){
             );
 
           const unlocked =
-            now >=
-            unlockAt;
+            now >= unlockAt;
 
           const done =
             completed[
               task.id
-            ] ===
-            true;
+            ] === true;
 
           const unlockText =
             task.unlockText ||
@@ -6945,7 +6574,9 @@ function renderTasks(){
               )
             );
 
-          if(!unlocked){
+          if(
+            !unlocked
+          ){
 
             return `
 
@@ -6982,10 +6613,19 @@ function renderTasks(){
                 <input
                   class="task-checkbox"
                   type="checkbox"
-                  ${done ? "checked" : ""}
-                  data-task-id="${escapeHtml(
-                    task.id
-                  )}"
+                  ${
+                    done
+                    ?
+                    "checked"
+                    :
+                    ""
+                  }
+                  onchange="
+                    toggleTask(
+                      '${task.id}',
+                      this.checked
+                    )
+                  "
                 >
 
                 <div class="task-text">
@@ -7004,7 +6644,6 @@ function renderTasks(){
                   </div>
 
                   <div class="task-status">
-
                     ${
                       done
                       ?
@@ -7012,7 +6651,6 @@ function renderTasks(){
                       :
                       "⬜ Not completed"
                     }
-
                   </div>
 
                 </div>
@@ -7024,33 +6662,8 @@ function renderTasks(){
           `;
 
         }
-
       )
       .join("");
-
-  container
-    .querySelectorAll(
-      "input[data-task-id]"
-    )
-    .forEach(
-
-      input=>{
-
-        input.addEventListener(
-          "change",
-          ()=>{
-
-            toggleTask(
-              input.dataset.taskId,
-              input.checked
-            );
-
-          }
-        );
-
-      }
-
-    );
 
 }
 
@@ -7078,20 +6691,16 @@ async function(
   const task =
     mySecret?.tasks?.find(
       item =>
-        item.id ===
-        taskId
+        item.id === taskId
     );
 
   if(
     !task ||
     sharedNow() <
-    Number(
-      task.unlockAt
-    )
+    Number(task.unlockAt)
   ){
 
     renderTasks();
-
     return;
 
   }
@@ -7128,7 +6737,7 @@ async function(
 };
 
 /* =====================================================
-PLAYER NOTES
+PLAYER NOTE
 ===================================================== */
 
 function updatePlayerNoteCounter(){
@@ -7189,17 +6798,15 @@ function updateMyNoteUI(){
         playerId
       ];
 
-  if(note){
+  if(
+    note
+  ){
 
     input.value =
-      note.text ||
-      "";
+      note.text || "";
 
-    input.disabled =
-      true;
-
-    button.disabled =
-      true;
+    input.disabled = true;
+    button.disabled = true;
 
     button.textContent =
       "✅ NOTE SENT";
@@ -7213,11 +6820,8 @@ function updateMyNoteUI(){
 
   }
 
-  input.disabled =
-    false;
-
-  button.disabled =
-    false;
+  input.disabled = false;
+  button.disabled = false;
 
   button.textContent =
     "📝 SEND NOTE TO DETECTIVE";
@@ -7251,7 +6855,9 @@ async function(){
   const text =
     input.value.trim();
 
-  if(!text){
+  if(
+    !text
+  ){
 
     alert(
       "Write a note first."
@@ -7283,10 +6889,11 @@ async function(){
         noteRef
       );
 
-    if(existing.exists()){
+    if(
+      existing.exists()
+    ){
 
       updateMyNoteUI();
-
       return;
 
     }
@@ -7311,12 +6918,9 @@ async function(){
     );
 
     roomData.notes =
-      roomData.notes ||
-      {};
+      roomData.notes || {};
 
-    roomData.notes[
-      playerId
-    ] =
+    roomData.notes[playerId] =
       note;
 
     updateMyNoteUI();
@@ -7411,34 +7015,35 @@ function renderLivePlayerNotes(){
       "liveNotesList"
     );
 
-  if(!container){
+  if(
+    !container
+  ){
 
     return;
 
   }
 
   const notes =
-    roomData?.notes ||
-    {};
+    roomData?.notes || {};
 
   const entries =
-    Object.values(
-      notes
-    )
-    .sort(
-      (a,b)=>
-        (b.timestamp || 0) -
-        (a.timestamp || 0)
-    );
+    Object.values(notes)
+      .sort(
+        (a,b)=>
+          (
+            b.timestamp || 0
+          ) -
+          (
+            a.timestamp || 0
+          )
+      );
 
-  if(!entries.length){
+  if(
+    !entries.length
+  ){
 
     container.innerHTML =
-      `
-        <div class="note-empty">
-          📭 No player notes yet.
-        </div>
-      `;
+      `<div class="note-empty">📭 No player notes yet.</div>`;
 
     return;
 
@@ -7511,20 +7116,19 @@ function renderDetectivePlayerButtons(){
       ?.players ||
     {};
 
-  if(!suspects.length){
+  if(
+    !suspects.length
+  ){
 
     container.innerHTML =
-      `
-        <div class="note-empty">
-          No suspects loaded.
-        </div>
-      `;
+      `<div class="note-empty">No suspects loaded.</div>`;
 
     return;
 
   }
 
   container.innerHTML =
+
     suspects
       .map(
         id=>{
@@ -7532,9 +7136,7 @@ function renderDetectivePlayerButtons(){
           const note =
             roomData
               ?.notes
-              ?.[
-                id
-              ];
+              ?.[id];
 
           const active =
             id ===
@@ -7545,11 +7147,19 @@ function renderDetectivePlayerButtons(){
             <button
               class="
                 detective-player-button
-                ${active ? "active" : ""}
+                ${
+                  active
+                  ?
+                  "active"
+                  :
+                  ""
+                }
               "
-              data-suspect-id="${escapeHtml(
-                id
-              )}"
+              onclick="
+                openPlayerDossier(
+                  '${id}'
+                )
+              "
             >
 
               👤
@@ -7558,7 +7168,13 @@ function renderDetectivePlayerButtons(){
                 "Unknown"
               )}
 
-              ${note ? " 📝" : ""}
+              ${
+                note
+                ?
+                " 📝"
+                :
+                ""
+              }
 
             </button>
 
@@ -7567,27 +7183,6 @@ function renderDetectivePlayerButtons(){
         }
       )
       .join("");
-
-  container
-    .querySelectorAll(
-      "[data-suspect-id]"
-    )
-    .forEach(
-      button=>{
-
-        button.addEventListener(
-          "click",
-          ()=>{
-
-            openPlayerDossier(
-              button.dataset.suspectId
-            );
-
-          }
-        );
-
-      }
-    );
 
 }
 
@@ -7622,9 +7217,7 @@ async function(
   const player =
     roomData
       ?.players
-      ?.[
-        selectedId
-      ];
+      ?.[selectedId];
 
   document
     .getElementById(
@@ -7649,32 +7242,28 @@ async function(
       );
 
     const data =
-      snap.val() ||
-      {};
+      snap.val() || {};
 
     document
       .getElementById(
         "dossierClaim"
       )
       .value =
-      data.claim ||
-      "";
+      data.claim || "";
 
     document
       .getElementById(
         "dossierImportant"
       )
       .value =
-      data.important ||
-      "";
+      data.important || "";
 
     document
       .getElementById(
         "dossierQuestions"
       )
       .value =
-      data.questions ||
-      "";
+      data.questions || "";
 
   }
   catch(error){
@@ -7705,11 +7294,11 @@ function refreshSelectedDossierNote(){
   const note =
     roomData
       ?.notes
-      ?.[
-        selectedDetectivePlayerId
-      ];
+      ?.[selectedDetectivePlayerId];
 
-  if(note){
+  if(
+    note
+  ){
 
     box.innerHTML = `
 
@@ -7930,15 +7519,16 @@ function renderCase(){
   const game =
     roomData?.game;
 
-  if(!game){
+  if(
+    !game
+  ){
 
     return;
 
   }
 
   const suspects =
-    game.suspects ||
-    [];
+    game.suspects || [];
 
   document
     .getElementById(
@@ -7957,24 +7547,22 @@ function renderCase(){
       </div>
 
       <p>
-
         <b>
           Map:
         </b>
 
         ${escapeHtml(
           MAPS[
-            game.mapType ===
+            game.mapType === "mall"
+            ?
             "mall"
-            ? "mall"
-            : "house"
+            :
+            "house"
           ].name
         )}
-
       </p>
 
       <p>
-
         <b>
           Fictional event time:
         </b>
@@ -7984,11 +7572,9 @@ function renderCase(){
             game.murderAt
           )
         )}
-
       </p>
 
       <p>
-
         <b>
           Location:
         </b>
@@ -8011,7 +7597,6 @@ function renderCase(){
               <div class="player">
 
                 👤
-
                 ${escapeHtml(
                   roomData
                     .players[id]
@@ -8030,20 +7615,22 @@ function renderCase(){
 
   renderTaskProgress();
 
-  const container =
-    document.getElementById(
+  document
+    .getElementById(
       "accusationButtons"
-    );
+    )
+    .innerHTML =
 
-  container.innerHTML =
     suspects
       .map(
         id=>`
 
           <button
-            data-accuse-id="${escapeHtml(
-              id
-            )}"
+            onclick="
+              accuse(
+                '${id}'
+              )
+            "
           >
 
             🔎 ACCUSE
@@ -8061,27 +7648,6 @@ function renderCase(){
       )
       .join("");
 
-  container
-    .querySelectorAll(
-      "[data-accuse-id]"
-    )
-    .forEach(
-      button=>{
-
-        button.addEventListener(
-          "click",
-          ()=>{
-
-            accuse(
-              button.dataset.accuseId
-            );
-
-          }
-        );
-
-      }
-    );
-
 }
 
 function renderTaskProgress(){
@@ -8097,14 +7663,15 @@ function renderTaskProgress(){
       "taskProgress"
     );
 
-  if(!container){
+  if(
+    !container
+  ){
 
     return;
 
   }
 
-  container.innerHTML =
-    "";
+  container.innerHTML = "";
 
   for(
     const id of suspects
@@ -8134,9 +7701,7 @@ function renderTaskProgress(){
       [];
 
     const total =
-      Array.isArray(
-        tasks
-      )
+      Array.isArray(tasks)
       ?
       tasks.length
       :
@@ -8165,9 +7730,7 @@ function renderTaskProgress(){
     div.innerHTML = `
 
       <b>
-
         👤
-
         ${escapeHtml(
           roomData
             ?.players
@@ -8175,7 +7738,6 @@ function renderTaskProgress(){
             ?.name ||
           "Unknown"
         )}
-
       </b>
 
       <div class="count-number">
@@ -8186,7 +7748,9 @@ function renderTaskProgress(){
 
         <div
           class="progress-bar"
-          style="width:${percent}%"
+          style="
+            width:${percent}%
+          "
         ></div>
 
       </div>
@@ -8248,9 +7812,7 @@ async function(
         accusedName:
           roomData
             ?.players
-            ?.[
-              accusedId
-            ]
+            ?.[accusedId]
             ?.name ||
           "Unknown",
 
@@ -8346,15 +7908,13 @@ async function runReveal(
 
   }
 
-  revealRunning =
-    true;
+  revealRunning = true;
 
   const game =
     roomData.game;
 
   const players =
-    roomData.players ||
-    {};
+    roomData.players || {};
 
   const accusedId =
     result.accusedId;
@@ -8381,46 +7941,28 @@ async function runReveal(
     );
 
   setReveal(
-
     "THE DETECTIVE HAS MADE A DECISION",
-
     "🔎",
-
     "Everyone stay quiet..."
-
   );
 
-  await sleep(
-    1800
-  );
+  await sleep(1800);
 
   setReveal(
-
     "THE ACCUSED PLAYER",
-
     accusedName,
-
     "The Detective has chosen..."
-
   );
 
-  await sleep(
-    1700
-  );
+  await sleep(1700);
 
   setReveal(
-
     "THE REVEAL",
-
     `${accusedName} WAS...`,
-
     "..."
-
   );
 
-  await sleep(
-    1000
-  );
+  await sleep(1000);
 
   setReveal(
 
@@ -8448,9 +7990,7 @@ async function runReveal(
 
   );
 
-  await sleep(
-    2500
-  );
+  await sleep(2500);
 
   const detectiveName =
     players[
@@ -8471,8 +8011,7 @@ async function runReveal(
     )
     .filter(
       id =>
-        id !==
-        game.murderer
+        id !== game.murderer
     )
     .map(
       id=>`
@@ -8480,14 +8019,11 @@ async function runReveal(
         <div class="reveal-role">
 
           <div class="reveal-role-name">
-
             👤
-
             ${escapeHtml(
               players[id]?.name ||
               "Unknown"
             )}
-
           </div>
 
           <div class="reveal-role-value">
@@ -8513,13 +8049,10 @@ async function runReveal(
       <div class="reveal-role">
 
         <div class="reveal-role-name">
-
           🔎
-
           ${escapeHtml(
             murdererName
           )}
-
         </div>
 
         <div class="reveal-role-value">
@@ -8531,13 +8064,10 @@ async function runReveal(
       <div class="reveal-role">
 
         <div class="reveal-role-name">
-
           🕵️
-
           ${escapeHtml(
             detectiveName
           )}
-
         </div>
 
         <div class="reveal-role-value">
@@ -8554,9 +8084,7 @@ async function runReveal(
 
   );
 
-  await sleep(
-    3500
-  );
+  await sleep(3500);
 
   setReveal(
 
@@ -8609,9 +8137,7 @@ async function runReveal(
 
   );
 
-  await sleep(
-    4000
-  );
+  await sleep(4000);
 
   overlay
     .classList
@@ -8621,8 +8147,7 @@ async function runReveal(
 
   await resetToLobby();
 
-  revealRunning =
-    false;
+  revealRunning = false;
 
 }
 
@@ -8686,14 +8211,9 @@ async function resetToLobby(){
       updates
     );
 
-    mySecret =
-      null;
-
-    currentRoundId =
-      null;
-
-    gameVisible =
-      false;
+    mySecret = null;
+    currentRoundId = null;
+    gameVisible = false;
 
     stopGameListeners();
 
@@ -8701,37 +8221,7 @@ async function resetToLobby(){
       globalInterval
     );
 
-    globalInterval =
-      null;
-
-    if(fcmToken){
-
-      await update(
-
-        ref(
-          db,
-          `pushTokens/${playerId}`
-        ),
-
-        {
-
-          currentRoom:
-            roomCode,
-
-          currentGame:
-            "lobby",
-
-          roundId:
-            null,
-
-          updatedAt:
-            serverTimestamp()
-
-        }
-
-      );
-
-    }
+    globalInterval = null;
 
   }
   catch(error){
@@ -9009,7 +8499,9 @@ function playCallSound(){
       window.AudioContext ||
       window.webkitAudioContext;
 
-    if(!AudioCtx){
+    if(
+      !AudioCtx
+    ){
 
       return;
 
@@ -9053,55 +8545,45 @@ function playCallSound(){
       ){
 
         const osc =
-          audioContext
-            .createOscillator();
+          audioContext.createOscillator();
 
         const gain =
-          audioContext
-            .createGain();
+          audioContext.createGain();
 
         osc.frequency.value =
           i === 0
-          ? 880
-          : 660;
+          ?
+          880
+          :
+          660;
 
         const t =
           base +
-          i *
-          .65;
+          i * .65;
 
         gain.gain.setValueAtTime(
           .0001,
           t
         );
 
-        gain.gain
-          .exponentialRampToValueAtTime(
-            .28,
-            t +
-            .03
-          );
-
-        gain.gain
-          .exponentialRampToValueAtTime(
-            .0001,
-            t +
-            .50
-          );
-
-        osc.connect(
-          gain
+        gain.gain.exponentialRampToValueAtTime(
+          .28,
+          t + .03
         );
 
+        gain.gain.exponentialRampToValueAtTime(
+          .0001,
+          t + .50
+        );
+
+        osc.connect(gain);
         gain.connect(
           audioContext.destination
         );
 
         osc.start(t);
-
         osc.stop(
-          t +
-          .55
+          t + .55
         );
 
       }
@@ -9125,8 +8607,7 @@ function vibrate(){
   try{
 
     if(
-      "vibrate" in
-      navigator
+      "vibrate" in navigator
     ){
 
       navigator.vibrate([
@@ -9145,195 +8626,44 @@ function vibrate(){
 }
 
 /* =====================================================
-TASK NOTIFICATIONS
+LOCAL CALL NOTIFICATION
 ===================================================== */
 
-function taskNotificationKey(
-  roundId,
-  taskId
+function systemNotification(
+  destination,
+  caller
 ){
-
-  return (
-    "houseTaskNotification_" +
-    String(roundId) +
-    "_" +
-    String(taskId)
-  );
-
-}
-
-function taskNotificationWasSent(
-  roundId,
-  taskId
-){
-
-  return (
-    localStorage.getItem(
-
-      taskNotificationKey(
-        roundId,
-        taskId
-      )
-
-    ) ===
-    "1"
-  );
-
-}
-
-function markTaskNotificationSent(
-  roundId,
-  taskId
-){
-
-  localStorage.setItem(
-
-    taskNotificationKey(
-      roundId,
-      taskId
-    ),
-
-    "1"
-
-  );
-
-}
-
-function startTaskNotificationWatcher(){
-
-  clearInterval(
-    taskNotificationInterval
-  );
 
   if(
-    !alertsEnabled ||
-    !("Notification" in window) ||
-    Notification.permission !==
-    "granted"
+    !alertsEnabled
   ){
 
     return;
 
   }
 
-  taskNotificationInterval =
-    setInterval(
+  showPersistentNotification(
 
-      checkTaskNotifications,
+    "📞 House Mystery Call",
 
-      1000
+    {
 
-    );
+      body:
+        `${caller} is calling everyone to ${destination}!`,
 
-  checkTaskNotifications();
+      tag:
+        "house-call-" +
+        Date.now(),
 
-}
+      requireInteraction:
+        true,
 
-async function checkTaskNotifications(){
-
-  if(
-    !alertsEnabled ||
-    !("Notification" in window) ||
-    Notification.permission !==
-    "granted"
-  ){
-
-    return;
-
-  }
-
-  if(
-    !roomData?.game ||
-    !Array.isArray(
-      mySecret?.tasks
-    )
-  ){
-
-    return;
-
-  }
-
-  const roundId =
-    String(
-
-      roomData.game.roundId ||
-      roomData.game.roundNumber ||
-      "1"
-
-    );
-
-  const now =
-    sharedNow();
-
-  for(
-    const task of mySecret.tasks
-  ){
-
-    const unlockAt =
-      Number(
-        task.unlockAt
-      );
-
-    if(
-      now <
-      unlockAt
-    ){
-
-      continue;
+      notificationType:
+        "call"
 
     }
 
-    if(
-      taskNotificationWasSent(
-        roundId,
-        task.id
-      )
-    ){
-
-      continue;
-
-    }
-
-    const shown =
-      await showPersistentNotification(
-
-        "🔔 Task Unlocked",
-
-        {
-
-          body:
-            task.description ||
-            "A new task is available.",
-
-          tag:
-            `house-task-${roundId}-${task.id}`,
-
-          requireInteraction:
-            true,
-
-          renotify:
-            true,
-
-          notificationType:
-            "task",
-
-          taskId:
-            task.id
-
-        }
-
-      );
-
-    if(shown){
-
-      markTaskNotificationSent(
-        roundId,
-        task.id
-      );
-
-    }
-
-  }
+  );
 
 }
 
@@ -9365,7 +8695,9 @@ async function reconnectCurrentRoom(){
 
       );
 
-    if(!snap.exists()){
+    if(
+      !snap.exists()
+    ){
 
       return;
 
@@ -9390,16 +8722,6 @@ async function reconnectCurrentRoom(){
 
     }
 
-    if(
-      alertsEnabled &&
-      Notification.permission ===
-      "granted"
-    ){
-
-      await registerPushNotifications();
-
-    }
-
   }
   catch(error){
 
@@ -9413,6 +8735,49 @@ async function reconnectCurrentRoom(){
 }
 
 /* =====================================================
+VISIBILITY
+===================================================== */
+
+document.addEventListener(
+  "visibilitychange",
+  async()=>{
+
+    if(
+      document.visibilityState ===
+      "visible"
+    ){
+
+      browserOnline =
+        navigator.onLine !== false;
+
+      updateConnectionState();
+
+      await reconnectCurrentRoom();
+
+      checkTaskNotifications();
+
+    }
+
+  }
+);
+
+window.addEventListener(
+  "focus",
+  async()=>{
+
+    browserOnline =
+      navigator.onLine !== false;
+
+    updateConnectionState();
+
+    await reconnectCurrentRoom();
+
+    checkTaskNotifications();
+
+  }
+);
+
+/* =====================================================
 LEAVE
 ===================================================== */
 
@@ -9421,26 +8786,14 @@ function leaveRoomToHome(
 ){
 
   stopRoomListeners();
-
   stopTimers();
 
-  roomCode =
-    "";
-
-  roomData =
-    null;
-
-  mySecret =
-    null;
-
-  currentRoundId =
-    null;
-
-  gameVisible =
-    false;
-
-  selectedDetectivePlayerId =
-    null;
+  roomCode = "";
+  roomData = null;
+  mySecret = null;
+  currentRoundId = null;
+  gameVisible = false;
+  selectedDetectivePlayerId = null;
 
   hideAllMainScreens();
 
@@ -9455,7 +8808,9 @@ function leaveRoomToHome(
 
   renderHomeMaps();
 
-  if(message){
+  if(
+    message
+  ){
 
     alert(
       message
@@ -9466,70 +8821,7 @@ function leaveRoomToHome(
 }
 
 /* =====================================================
-VISIBILITY
-===================================================== */
-
-document.addEventListener(
-
-  "visibilitychange",
-
-  async()=>{
-
-    if(
-      document.visibilityState ===
-      "visible"
-    ){
-
-      browserOnline =
-        navigator.onLine !==
-        false;
-
-      updateConnectionState();
-
-      await registerServiceWorker();
-
-      await reconnectCurrentRoom();
-
-      checkTaskNotifications();
-
-      if(
-        alertsEnabled &&
-        Notification.permission ===
-        "granted"
-      ){
-
-        await registerPushNotifications();
-
-      }
-
-    }
-
-  }
-
-);
-
-window.addEventListener(
-
-  "focus",
-
-  async()=>{
-
-    browserOnline =
-      navigator.onLine !==
-      false;
-
-    updateConnectionState();
-
-    await reconnectCurrentRoom();
-
-    checkTaskNotifications();
-
-  }
-
-);
-
-/* =====================================================
-URL ROOM
+URL
 ===================================================== */
 
 const params =
@@ -9538,26 +8830,17 @@ const params =
   );
 
 if(
-  params.get(
-    "room"
-  )
+  params.get("room")
 ){
 
-  const roomInput =
-    document.getElementById(
+  document
+    .getElementById(
       "roomInput"
+    )
+    .value =
+    normalizeRoomCode(
+      params.get("room")
     );
-
-  if(roomInput){
-
-    roomInput.value =
-      normalizeRoomCode(
-        params.get(
-          "room"
-        )
-      );
-
-  }
 
 }
 
@@ -9589,103 +8872,75 @@ STARTUP
 
 async function initialize(){
 
-  try{
+  startConnectionMonitoring();
 
-    startConnectionMonitoring();
+  startServerClock();
 
-    startServerClock();
+  await registerServiceWorker();
 
-    renderHomeMaps();
+  renderHomeMaps();
+  updateCreateMapPreview();
 
-    updateCreateMapPreview();
+  const savedName =
+    loadSavedName();
 
-    await registerServiceWorker();
+  if(
+    savedName
+  ){
 
-    await initializeMessaging();
+    myName =
+      savedName;
 
-    startForegroundMessaging();
+    showHome();
 
-    const savedName =
-      loadSavedName();
-
-    if(savedName){
-
-      myName =
-        savedName;
-
-      showHome();
-
-      await saveDeviceRecord();
-
-    }
-    else{
-
-      hideAllMainScreens();
-
-      document
-        .getElementById(
-          "nameSetup"
-        )
-        .classList
-        .remove(
-          "hidden"
-        );
-
-    }
-
-    if(
-      alertsEnabled &&
-      "Notification" in window &&
-      Notification.permission ===
-      "granted"
-    ){
-
-      updateNotificationUI(
-        false
-      );
-
-      const ready =
-        await registerPushNotifications();
-
-      if(ready){
-
-        startForegroundMessaging();
-
-        startTaskNotificationWatcher();
-
-      }
-
-    }
-    else{
-
-      alertsEnabled =
-        false;
-
-      localStorage.removeItem(
-        "houseMysteryAlerts"
-      );
-
-    }
+    await saveDeviceRecord();
 
   }
-  catch(error){
+  else{
 
-    console.error(
-      "INITIALIZATION ERROR",
-      error
-    );
+    hideAllMainScreens();
 
-    setNotificationDebug(
-
-      "INITIALIZATION ERROR\n\n" +
-
-      formatFirebaseError(
-        error
+    document
+      .getElementById(
+        "nameSetup"
       )
-
-    );
+      .classList
+      .remove(
+        "hidden"
+      );
 
   }
+
+  if(
+    alertsEnabled &&
+    "Notification" in window &&
+    Notification.permission ===
+    "granted"
+  ){
+
+    document
+      .getElementById(
+        "alertStatus"
+      )
+      .textContent =
+      "✅ Local call notifications are enabled.";
+
+    document
+      .getElementById(
+        "enableAlertsButton"
+      )
+      .textContent =
+      "✅ NOTIFICATIONS ENABLED";
+
+  }
+  else{
+
+    alertsEnabled =
+      false;
+
+  }
+
+  startTaskNotificationWatcher();
 
 }
 
