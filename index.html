@@ -2100,7 +2100,9 @@ async function sendDiscordTaskNotification(
     );
 
   if(sent){
+
     return true;
+
   }
 
   if(attempt < 2){
@@ -3238,40 +3240,10 @@ function(){
 };
 
 /* =====================================================
-NEW FIREBASE TASK QUEUE
+TASK QUEUE
 ===================================================== */
 
-/*
-  ROUND START:
-  The host creates every task.
-
-  Each task is copied into:
-  rooms/ROOM/taskQueue/QUEUE_ID
-
-  Example:
-
-  {
-    task:{...},
-    recipientId:"...",
-    recipientName:"Zezo",
-    unlockAt:123456789,
-    roundId:"1",
-    status:"pending"
-  }
-
-  Any connected client can process the queue.
-
-  IMPORTANT:
-  This removes the requirement that Zezo's own page
-  stays open.
-
-  However, at least one copy of the game must remain
-  connected somewhere for browser-only processing.
-*/
-
-function taskQueueRef(
-  queueId
-){
+function taskQueueRef(queueId){
 
   return ref(
     db,
@@ -3307,23 +3279,9 @@ async function createTaskNotificationQueue(
 
   const updates = {};
 
-  const oldQueue =
-    await get(
-      ref(
-        db,
-        `rooms/${room}/taskQueue`
-      )
-    );
-
-  if(
-    oldQueue.exists()
-  ){
-
-    updates[
-      `rooms/${room}/taskQueue`
-    ] = null;
-
-  }
+  updates[
+    `rooms/${room}/taskQueue`
+  ] = null;
 
   for(
     const playerIdForTask
@@ -3336,7 +3294,9 @@ async function createTaskNotificationQueue(
       privateData[playerIdForTask];
 
     const tasks =
-      Array.isArray(secret?.tasks)
+      Array.isArray(
+        secret?.tasks
+      )
       ?
       secret.tasks
       :
@@ -3372,14 +3332,18 @@ async function createTaskNotificationQueue(
         recipientName,
 
         unlockAt:
-          Number(task.unlockAt),
+          Number(
+            task.unlockAt
+          ),
 
         roundId:
           String(roundId),
 
-        roomCode:room,
+        roomCode:
+          room,
 
-        status:"pending",
+        status:
+          "pending",
 
         attempts:0,
 
@@ -3387,8 +3351,11 @@ async function createTaskNotificationQueue(
           sharedNow(),
 
         claimedBy:"",
+
         claimedAt:0,
+
         sentAt:0,
+
         lastError:""
 
       };
@@ -3397,16 +3364,10 @@ async function createTaskNotificationQueue(
 
   }
 
-  if(
-    Object.keys(updates).length
-  ){
-
-    await update(
-      ref(db),
-      updates
-    );
-
-  }
+  await update(
+    ref(db),
+    updates
+  );
 
 }
 
@@ -3415,8 +3376,7 @@ QUEUE CLAIM
 ===================================================== */
 
 async function claimQueueItem(
-  queueId,
-  currentItem
+  queueId
 ){
 
   const itemRef =
@@ -3429,9 +3389,7 @@ async function claimQueueItem(
       itemRef,
       current=>{
 
-        if(
-          !current
-        ){
+        if(!current){
 
           return;
 
@@ -3445,7 +3403,8 @@ async function claimQueueItem(
           sharedNow();
 
         if(
-          status === "sent"
+          status ===
+          "sent"
         ){
 
           return;
@@ -3453,7 +3412,8 @@ async function claimQueueItem(
         }
 
         if(
-          status === "sending"
+          status ===
+          "sending"
         ){
 
           const claimedAt =
@@ -3507,12 +3467,14 @@ async function claimQueueItem(
 
           ...current,
 
-          status:"sending",
+          status:
+            "sending",
 
           claimedBy:
             playerId,
 
-          claimedAt:now,
+          claimedAt:
+            now,
 
           attempts:
             Number(
@@ -3555,7 +3517,9 @@ async function processQueueItem(
     );
 
   if(
-    taskNotificationBusy.has(key)
+    taskNotificationBusy.has(
+      key
+    )
   ){
 
     return;
@@ -3568,16 +3532,19 @@ async function processQueueItem(
 
   try{
 
-    const currentRoom =
-      roomCode;
-
     const sent =
       await sendDiscordTaskNotification(
+
         item.task,
+
         item.recipientName,
+
         item.recipientId,
+
         item.roundId,
-        currentRoom
+
+        item.roomCode
+
       );
 
     const itemRef =
@@ -3591,7 +3558,8 @@ async function processQueueItem(
         itemRef,
         {
 
-          status:"sent",
+          status:
+            "sent",
 
           sentAt:
             sharedNow(),
@@ -3627,7 +3595,8 @@ async function processQueueItem(
         itemRef,
         {
 
-          status:"pending",
+          status:
+            "pending",
 
           claimedBy:"",
 
@@ -3663,7 +3632,8 @@ async function processQueueItem(
 
         {
 
-          status:"pending",
+          status:
+            "pending",
 
           claimedBy:"",
 
@@ -3739,9 +3709,7 @@ async function processDueTaskQueue(){
 
       );
 
-    if(
-      !snapshot.exists()
-    ){
+    if(!snapshot.exists()){
 
       return;
 
@@ -3760,9 +3728,7 @@ async function processDueTaskQueue(){
       .filter(
         ([,item])=>{
 
-          if(
-            !item
-          ){
+          if(!item){
 
             return false;
 
@@ -3830,8 +3796,7 @@ async function processDueTaskQueue(){
 
     for(
       const [
-        queueId,
-        item
+        queueId
       ]
       of entries
     ){
@@ -3848,13 +3813,10 @@ async function processDueTaskQueue(){
 
       const claimed =
         await claimQueueItem(
-          queueId,
-          item
+          queueId
         );
 
-      if(
-        !claimed
-      ){
+      if(!claimed){
 
         continue;
 
@@ -3886,7 +3848,8 @@ function startTaskQueueProcessor(){
     !roomCode ||
     !browserOnline ||
     !firebaseConnected ||
-    roomData?.status !== "game"
+    roomData?.status !==
+    "game"
   ){
 
     return;
@@ -5951,6 +5914,10 @@ const afterMurderTemplates = [
 
 ];
 
+/* =====================================================
+TASK GENERATION HELPERS
+===================================================== */
+
 function createTask(
   id,
   unlockAt,
@@ -5976,6 +5943,9 @@ function createTask(
 
 }
 
+/*
+  Returns the next minute boundary after a timestamp.
+*/
 function nextMinuteTimestamp(
   timestamp
 ){
@@ -5998,47 +5968,253 @@ function nextMinuteTimestamp(
 
 }
 
+/*
+  Creates unique minute-based task times.
+
+  Important:
+  - Returned values are already sorted.
+  - No two returned values have the same displayed HH:MM.
+  - We use a wide enough time range when necessary.
+*/
 function makeUnlockTimes(
   now,
   end,
   count
 ){
 
-  const first =
-    now + 60000;
-
-  const last =
+  const safeCount =
     Math.max(
-      first + 60000,
-      end - 60000
-    );
-
-  const output = [];
-
-  for(
-    let i = 0;
-    i < count;
-    i++
-  ){
-
-    const ratio =
-      (i + 1) /
-      (count + 1);
-
-    output.push(
-      nextMinuteTimestamp(
-        first +
-        (
-          last -
-          first
-        ) *
-        ratio
+      1,
+      Math.floor(
+        Number(count) || 1
       )
     );
 
+  const firstSlot =
+    nextMinuteTimestamp(
+      now
+    );
+
+  let lastSlot =
+    nextMinuteTimestamp(
+      end
+    ) - 60000;
+
+  if(
+    lastSlot <
+    firstSlot
+  ){
+
+    lastSlot =
+      firstSlot +
+      (
+        safeCount -
+        1
+      ) *
+      60000;
+
   }
 
-  return output;
+  const availableSlots =
+    Math.max(
+      1,
+      Math.floor(
+        (
+          lastSlot -
+          firstSlot
+        ) /
+        60000
+      ) + 1
+    );
+
+  /*
+    When the round window contains fewer minute slots
+    than needed, extend the schedule instead of creating
+    duplicate displayed times.
+  */
+  if(
+    availableSlots <
+    safeCount
+  ){
+
+    lastSlot =
+      firstSlot +
+      (
+        safeCount -
+        1
+      ) *
+      60000;
+
+  }
+
+  const maxIndex =
+    Math.max(
+      0,
+      Math.floor(
+        (
+          lastSlot -
+          firstSlot
+        ) /
+        60000
+      )
+    );
+
+  const selectedIndexes =
+    [];
+
+  if(
+    safeCount === 1
+  ){
+
+    selectedIndexes.push(
+      0
+    );
+
+  }
+  else{
+
+    for(
+      let i = 0;
+      i < safeCount;
+      i++
+    ){
+
+      const ratio =
+        i /
+        (
+          safeCount -
+          1
+        );
+
+      let index =
+        Math.round(
+          ratio *
+          maxIndex
+        );
+
+      /*
+        Guarantee strict increasing slots.
+      */
+      if(
+        selectedIndexes.length &&
+        index <=
+        selectedIndexes[
+          selectedIndexes.length - 1
+        ]
+      ){
+
+        index =
+          selectedIndexes[
+            selectedIndexes.length - 1
+          ] + 1;
+
+      }
+
+      selectedIndexes.push(
+        index
+      );
+
+    }
+
+  }
+
+  return selectedIndexes
+    .map(
+      index =>
+        firstSlot +
+        index *
+        60000
+    )
+    .sort(
+      (a,b)=>
+        a-b
+    );
+
+}
+
+/*
+  Picks a task description that hasn't already been used
+  for the same player this round.
+
+  This makes each match feel much less repetitive.
+*/
+function pickUniqueTaskDescription(
+  templates,
+  locations,
+  usedDescriptions
+){
+
+  const combinations = [];
+
+  for(
+    const template
+    of templates
+  ){
+
+    for(
+      const location
+      of locations
+    ){
+
+      combinations.push({
+
+        template,
+        location
+
+      });
+
+    }
+
+  }
+
+  const unused =
+    combinations.filter(
+      item=>{
+
+        const description =
+          item.template
+            .replace(
+              "{location}",
+              item.location
+            );
+
+        return !usedDescriptions.has(
+          description
+        );
+
+      }
+    );
+
+  const pool =
+    unused.length
+      ?
+      unused
+      :
+      combinations;
+
+  const picked =
+    random(
+      pool
+    );
+
+  if(!picked){
+
+    return "";
+
+  }
+
+  const description =
+    picked.template
+      .replace(
+        "{location}",
+        picked.location
+      );
+
+  usedDescriptions.add(
+    description
+  );
+
+  return description;
 
 }
 
@@ -6060,10 +6236,14 @@ function buildNormalTasks(
       mapType
     );
 
+  /*
+    3–4 normal tasks per player.
+    The amount itself can vary every round.
+  */
   const count =
     3 +
     Math.floor(
-      Math.random() * 3
+      Math.random() * 2
     );
 
   const times =
@@ -6073,75 +6253,99 @@ function buildNormalTasks(
       count
     );
 
-  const used = [];
+  const availableLocations =
+    locations.filter(
+      location =>
+        location !==
+        crimeLocation
+    );
 
-  return shuffle(
+  const usedDescriptions =
+    new Set();
 
-    times.map(
+  const tasks = [];
 
-      (
-        unlockAt,
-        index
-      )=>{
+  for(
+    let index = 0;
+    index < count;
+    index++
+  ){
 
-        let possible =
-          locations.filter(
-            location =>
-              location !==
-              crimeLocation &&
-              !used.includes(
-                location
-              )
-          );
+    const randomLocationPool =
+      shuffle(
+        availableLocations
+      );
 
-        if(!possible.length){
+    const templatePool =
+      Math.random() < 0.5
+        ?
+        activityTemplates
+        :
+        actionTemplates;
 
-          possible =
-            locations.filter(
-              location =>
-                location !==
-                crimeLocation
-            );
+    let description =
+      pickUniqueTaskDescription(
+        templatePool,
+        randomLocationPool.length
+          ?
+          randomLocationPool
+          :
+          locations,
+        usedDescriptions
+      );
 
-        }
+    /*
+      If all exact combinations are exhausted,
+      fall back safely.
+    */
+    if(!description){
 
-        const location =
-          random(
-            possible
-          );
+      const location =
+        random(
+          randomLocationPool.length
+            ?
+            randomLocationPool
+            :
+            locations
+        );
 
-        used.push(
+      description =
+        random(
+          templatePool
+        ).replace(
+          "{location}",
           location
         );
 
-        const pool =
-          Math.random() < .5
-          ?
-          activityTemplates
-          :
-          actionTemplates;
+    }
 
-        return createTask(
+    const task =
+      createTask(
 
-          `${roundSeed}_${playerIdForSeed}_${index}_${Math.random().toString(36).slice(2,7)}`,
+        `${roundSeed}_${playerIdForSeed}_N_${index}_${Math.random().toString(36).slice(2,8)}`,
 
-          unlockAt,
+        times[index],
 
-          random(
-            pool
-          )
-          .replace(
-            "{location}",
-            location
-          )
+        description
 
-        );
+      );
 
-      }
+    tasks.push(
+      task
+    );
 
-    )
+  }
 
+  /*
+    Always chronological.
+  */
+  tasks.sort(
+    (a,b)=>
+      Number(a.unlockAt) -
+      Number(b.unlockAt)
   );
+
+  return tasks;
 
 }
 
@@ -6164,7 +6368,12 @@ function buildMurdererTasks(
       mapType
     );
 
-  const count =
+  /*
+    2–4 normal murderer tasks,
+    plus the fictional event task,
+    plus the after-event task.
+  */
+  const normalCount =
     2 +
     Math.floor(
       Math.random() * 3
@@ -6173,10 +6382,11 @@ function buildMurdererTasks(
   const usableTaskEnd =
     Math.min(
       detectiveEnd,
-      murderAt - 20000
+      murderAt -
+      30000
     );
 
-  const times =
+  const normalTimes =
     makeUnlockTimes(
 
       now,
@@ -6186,75 +6396,87 @@ function buildMurdererTasks(
         usableTaskEnd
       ),
 
-      count
+      normalCount
 
     );
 
-  const used = [];
+  const usedDescriptions =
+    new Set();
 
-  const tasks =
-    times.map(
+  const tasks = [];
 
-      (
-        unlockAt,
-        index
-      )=>{
+  const safeLocations =
+    locations.filter(
+      location =>
+        location !==
+        crimeLocation
+    );
 
-        let possible =
-          locations.filter(
-            location =>
-              location !==
-              crimeLocation &&
-              !used.includes(
-                location
-              )
-          );
+  for(
+    let index = 0;
+    index < normalCount;
+    index++
+  ){
 
-        if(!possible.length){
+    const description =
+      pickUniqueTaskDescription(
 
-          possible =
-            locations.filter(
-              location =>
-                location !==
-                crimeLocation
-            );
+        activityTemplates,
 
-        }
+        shuffle(
+          safeLocations.length
+            ?
+            safeLocations
+            :
+            locations
+        ),
 
-        const location =
-          random(
-            possible
-          );
+        usedDescriptions
 
-        used.push(
-          location
-        );
+      );
 
-        return createTask(
+    const fallbackLocation =
+      random(
+        safeLocations.length
+          ?
+          safeLocations
+          :
+          locations
+      );
 
-          `${roundSeed}_${playerIdForSeed}_M_${index}_${Math.random().toString(36).slice(2,7)}`,
+    const finalDescription =
+      description ||
+      random(
+        activityTemplates
+      ).replace(
+        "{location}",
+        fallbackLocation
+      );
 
-          unlockAt,
+    tasks.push(
 
-          random(
-            activityTemplates
-          )
-          .replace(
-            "{location}",
-            location
-          )
+      createTask(
 
-        );
+        `${roundSeed}_${playerIdForSeed}_M_${index}_${Math.random().toString(36).slice(2,8)}`,
 
-      }
+        normalTimes[index],
+
+        finalDescription
+
+      )
 
     );
 
+  }
+
+  /*
+    Murder event task.
+  */
   tasks.push(
 
     createTask(
 
-      `${roundSeed}_${playerIdForSeed}_MURDER_${Math.random().toString(36).slice(2,7)}`,
+      `${roundSeed}_${playerIdForSeed}_MURDER_${Math.random().toString(36).slice(2,8)}`,
 
       murderAt,
 
@@ -6278,13 +6500,52 @@ function buildMurdererTasks(
 
   );
 
+  /*
+    After-event task.
+    Keep it at least one full minute later so the
+    displayed HH:MM is different from the murder task.
+  */
+  let afterAt =
+    nextMinuteTimestamp(
+      murderAt
+    );
+
+  /*
+    Protect against it becoming identical to another
+    task time.
+  */
+  const existingTimes =
+    new Set(
+      tasks.map(
+        task =>
+          Math.floor(
+            Number(task.unlockAt) /
+            60000
+          )
+      )
+    );
+
+  while(
+    existingTimes.has(
+      Math.floor(
+        afterAt /
+        60000
+      )
+    )
+  ){
+
+    afterAt +=
+      60000;
+
+  }
+
   tasks.push(
 
     createTask(
 
-      `${roundSeed}_${playerIdForSeed}_AFTER_${Math.random().toString(36).slice(2,7)}`,
+      `${roundSeed}_${playerIdForSeed}_AFTER_${Math.random().toString(36).slice(2,8)}`,
 
-      murderAt + 25000,
+      afterAt,
 
       random(
         afterMurderTemplates
@@ -6298,9 +6559,16 @@ function buildMurdererTasks(
 
   );
 
-  return shuffle(
-    tasks
+  /*
+    Final chronological ordering.
+  */
+  tasks.sort(
+    (a,b)=>
+      Number(a.unlockAt) -
+      Number(b.unlockAt)
   );
+
+  return tasks;
 
 }
 
@@ -6346,7 +6614,9 @@ async function(){
     roomData.players || {};
 
   const ids =
-    Object.keys(players);
+    Object.keys(
+      players
+    );
 
   const limit =
     Number(
@@ -6608,19 +6878,30 @@ async function(){
 
   try{
 
+    /*
+      Write the entire round first.
+      Every player gets the exact same stored task
+      schedule forever for this round.
+    */
     await update(
       ref(db),
       updates
     );
 
-    const queuePlayers =
-      players;
-
+    /*
+      Build Firebase notification queue from the
+      exact stored task data.
+    */
     await createTaskNotificationQueue(
+
       roomCode,
+
       roundId,
+
       privateData,
-      queuePlayers
+
+      players
+
     );
 
     roomData = {
@@ -6639,8 +6920,7 @@ async function(){
 
       completed:{},
 
-      taskQueue:
-        {}
+      taskQueue:{}
 
     };
 
@@ -6804,6 +7084,7 @@ function renderSecret(){
     .add("hidden");
 
   hideDetectiveTools();
+
   renderTasks();
 
 }
@@ -6834,12 +7115,30 @@ function renderTasks(){
     sharedNow();
 
   const completed =
-    roomData?.completed?.[
-      playerId
-    ] || {};
+    roomData
+      ?.completed
+      ?.[playerId] ||
+    {};
+
+  /*
+    IMPORTANT:
+    Always sort the actual task list before displaying.
+    This means:
+      10:25
+      10:28
+      10:29
+      10:31
+    rather than random order.
+  */
+  const orderedTasks =
+    [...mySecret.tasks].sort(
+      (a,b)=>
+        Number(a.unlockAt) -
+        Number(b.unlockAt)
+    );
 
   container.innerHTML =
-    mySecret.tasks
+    orderedTasks
       .map(
         task=>{
 
