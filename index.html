@@ -1981,7 +1981,8 @@ from
 import {
   getMessaging,
   getToken,
-  onMessage
+  onMessage,
+  deleteToken
 }
 from
 "https://www.gstatic.com/firebasejs/12.1.0/firebase-messaging.js";
@@ -2175,57 +2176,30 @@ MAPS
 const MAPS = {
 
   house:{
-
-    id:
-      "house",
-
-    name:
-      "🏠 House",
-
+    id:"house",
+    name:"🏠 House",
     locations:[
-
       "Main Door / Entrance",
-
       "Hallway",
-
       "Sofa / Living Room",
-
       "Kitchen",
-
       "Boys Room",
-
       "Girls Room",
-
       "Bathroom 1 — Outside Only",
-
       "Bathroom 2 — Outside Only"
-
     ]
-
   },
 
   mall:{
-
-    id:
-      "mall",
-
-    name:
-      "🏬 Mall",
-
+    id:"mall",
+    name:"🏬 Mall",
     locations:[
-
       "Open Area",
-
       "Aura Cafe",
-
       "Carlito Cafe",
-
       "Mollys Cafe",
-
       "Automatic Door Entrance"
-
     ]
-
   }
 
 };
@@ -2253,10 +2227,8 @@ function mapLocationList(
   return (
     MAPS[
       mapType === "mall"
-      ?
-      "mall"
-      :
-      "house"
+      ? "mall"
+      : "house"
     ]?.locations ||
     MAPS.house.locations
   );
@@ -2271,18 +2243,12 @@ function renderMapBadges(
   const map =
     MAPS[
       mapType === "mall"
-      ?
-      "mall"
-      :
-      "house"
+      ? "mall"
+      : "house"
     ];
 
-  if(
-    !map
-  ){
-
+  if(!map){
     return "";
-
   }
 
   return `
@@ -2290,9 +2256,7 @@ function renderMapBadges(
     <div class="${compact ? "" : "map-badge"}">
 
       <strong>
-        ${escapeHtml(
-          map.name
-        )}
+        ${escapeHtml(map.name)}
       </strong>
 
       ${
@@ -2303,20 +2267,13 @@ function renderMapBadges(
               ?
               `
                 <span class="badge">
-                  ${escapeHtml(
-                    location
-                  )}
+                  ${escapeHtml(location)}
                 </span>
               `
               :
               `
-                <div
-                  class="map-badge"
-                >
-                  📍
-                  ${escapeHtml(
-                    location
-                  )}
+                <div class="map-badge">
+                  📍 ${escapeHtml(location)}
                 </div>
               `
           )
@@ -2341,6 +2298,10 @@ function setConnectionState(
     document.getElementById(
       "connectionBar"
     );
+
+  if(!bar){
+    return;
+  }
 
   const red =
     document.getElementById(
@@ -2367,14 +2328,6 @@ function setConnectionState(
       "connectionStatusSub"
     );
 
-  if(
-    !bar
-  ){
-
-    return;
-
-  }
-
   bar.classList.remove(
     "red-state",
     "yellow-state",
@@ -2385,17 +2338,10 @@ function setConnectionState(
   yellow.classList.remove("active");
   green.classList.remove("active");
 
-  if(
-    state === "red"
-  ){
+  if(state === "red"){
 
-    bar.classList.add(
-      "red-state"
-    );
-
-    red.classList.add(
-      "active"
-    );
+    bar.classList.add("red-state");
+    red.classList.add("active");
 
     text.textContent =
       "NO INTERNET";
@@ -2404,17 +2350,10 @@ function setConnectionState(
       "Device offline";
 
   }
-  else if(
-    state === "green"
-  ){
+  else if(state === "green"){
 
-    bar.classList.add(
-      "green-state"
-    );
-
-    green.classList.add(
-      "active"
-    );
+    bar.classList.add("green-state");
+    green.classList.add("active");
 
     text.textContent =
       "CONNECTED";
@@ -2425,13 +2364,8 @@ function setConnectionState(
   }
   else{
 
-    bar.classList.add(
-      "yellow-state"
-    );
-
-    yellow.classList.add(
-      "active"
-    );
+    bar.classList.add("yellow-state");
+    yellow.classList.add("active");
 
     text.textContent =
       "CONNECTING";
@@ -2449,33 +2383,17 @@ function setConnectionState(
 
 function updateConnectionState(){
 
-  if(
-    !browserOnline
-  ){
-
-    setConnectionState(
-      "red"
-    );
-
+  if(!browserOnline){
+    setConnectionState("red");
     return;
-
   }
 
-  if(
-    firebaseConnected
-  ){
-
-    setConnectionState(
-      "green"
-    );
-
+  if(firebaseConnected){
+    setConnectionState("green");
     return;
-
   }
 
-  setConnectionState(
-    "yellow"
-  );
+  setConnectionState("yellow");
 
 }
 
@@ -2483,9 +2401,7 @@ function startConnectionMonitoring(){
 
   updateConnectionState();
 
-  if(
-    !firebaseConnectionUnsubscribe
-  ){
+  if(!firebaseConnectionUnsubscribe){
 
     firebaseConnectionUnsubscribe =
       onValue(
@@ -2522,12 +2438,8 @@ function startConnectionMonitoring(){
 
   }
 
-  if(
-    onlineListenerAdded
-  ){
-
+  if(onlineListenerAdded){
     return;
-
   }
 
   onlineListenerAdded = true;
@@ -2543,12 +2455,8 @@ function startConnectionMonitoring(){
 
       await reconnectCurrentRoom();
 
-      if(
-        alertsEnabled
-      ){
-
+      if(alertsEnabled){
         await registerPushNotifications();
-
       }
 
     }
@@ -2593,12 +2501,8 @@ function sharedDate(
 
 function startServerClock(){
 
-  if(
-    serverOffsetUnsubscribe
-  ){
-
+  if(serverOffsetUnsubscribe){
     serverOffsetUnsubscribe();
-
   }
 
   serverOffsetUnsubscribe =
@@ -2613,8 +2517,7 @@ function startServerClock(){
 
         serverTimeOffset =
           Number(
-            snapshot.val() ||
-            0
+            snapshot.val() || 0
           );
 
       }
@@ -2635,9 +2538,7 @@ function random(
     !Array.isArray(array) ||
     !array.length
   ){
-
     return "";
-
   }
 
   return array[
@@ -2655,14 +2556,11 @@ function shuffle(
 
   const result =
     Array.isArray(array)
-    ?
-    [...array]
-    :
-    [];
+    ? [...array]
+    : [];
 
   for(
-    let i =
-      result.length - 1;
+    let i = result.length - 1;
     i > 0;
     i--
   ){
@@ -2720,25 +2618,17 @@ function clockText(
 
   const period =
     h >= 12
-    ?
-    "PM"
-    :
-    "AM";
+    ? "PM"
+    : "AM";
 
   h =
     h % 12;
 
-  if(
-    h === 0
-  ){
-
+  if(h === 0){
     h = 12;
-
   }
 
-  return (
-    `${h}:${m}:${s} ${period}`
-  );
+  return `${h}:${m}:${s} ${period}`;
 
 }
 
@@ -2756,25 +2646,17 @@ function shortClock(
 
   const period =
     h >= 12
-    ?
-    "PM"
-    :
-    "AM";
+    ? "PM"
+    : "AM";
 
   h =
     h % 12;
 
-  if(
-    h === 0
-  ){
-
+  if(h === 0){
     h = 12;
-
   }
 
-  return (
-    `${h}:${m} ${period}`
-  );
+  return `${h}:${m} ${period}`;
 
 }
 
@@ -2786,24 +2668,21 @@ function formatDuration(
     Math.max(
       0,
       Math.ceil(
-        Number(ms) /
-        1000
+        Number(ms) / 1000
       )
     );
 
   return (
     pad(
       Math.floor(
-        seconds /
-        60
+        seconds / 60
       )
     )
     +
     ":"
     +
     pad(
-      seconds %
-      60
+      seconds % 60
     )
   );
 
@@ -2814,29 +2693,13 @@ function escapeHtml(
 ){
 
   return String(
-    value ??
-    ""
+    value ?? ""
   )
-    .replaceAll(
-      "&",
-      "&amp;"
-    )
-    .replaceAll(
-      "<",
-      "&lt;"
-    )
-    .replaceAll(
-      ">",
-      "&gt;"
-    )
-    .replaceAll(
-      '"',
-      "&quot;"
-    )
-    .replaceAll(
-      "'",
-      "&#039;"
-    );
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
 
 }
 
@@ -2874,13 +2737,9 @@ function roomExpiryFor(
   data
 ){
 
-  return (
-    data?.status === "game"
-  )
-  ?
-  GAME_EXPIRY
-  :
-  LOBBY_EXPIRY;
+  return data?.status === "game"
+    ? GAME_EXPIRY
+    : LOBBY_EXPIRY;
 
 }
 
@@ -2889,24 +2748,16 @@ function isRoomStale(
 ){
 
   const activity =
-    roomActivityTime(
-      data
-    );
+    roomActivityTime(data);
 
-  if(
-    !activity
-  ){
-
+  if(!activity){
     return true;
-
   }
 
   return (
     sharedNow() -
     activity >=
-    roomExpiryFor(
-      data
-    )
+    roomExpiryFor(data)
   );
 
 }
@@ -2917,71 +2768,43 @@ CLEANUP
 
 function stopGameListeners(){
 
-  if(
-    callsUnsubscribe
-  ){
-
+  if(callsUnsubscribe){
     callsUnsubscribe();
     callsUnsubscribe = null;
-
   }
 
-  if(
-    tasksUnsubscribe
-  ){
-
+  if(tasksUnsubscribe){
     tasksUnsubscribe();
     tasksUnsubscribe = null;
-
   }
 
-  if(
-    notesUnsubscribe
-  ){
-
+  if(notesUnsubscribe){
     notesUnsubscribe();
     notesUnsubscribe = null;
-
   }
 
-  if(
-    detectiveNotesUnsubscribe
-  ){
-
+  if(detectiveNotesUnsubscribe){
     detectiveNotesUnsubscribe();
     detectiveNotesUnsubscribe = null;
-
   }
 
-  if(
-    resultUnsubscribe
-  ){
-
+  if(resultUnsubscribe){
     resultUnsubscribe();
     resultUnsubscribe = null;
-
   }
 
 }
 
 function stopRoomListeners(){
 
-  if(
-    roomUnsubscribe
-  ){
-
+  if(roomUnsubscribe){
     roomUnsubscribe();
     roomUnsubscribe = null;
-
   }
 
-  if(
-    presenceUnsubscribe
-  ){
-
+  if(presenceUnsubscribe){
     presenceUnsubscribe();
     presenceUnsubscribe = null;
-
   }
 
   stopGameListeners();
@@ -2990,25 +2813,12 @@ function stopRoomListeners(){
 
 function stopTimers(){
 
-  clearInterval(
-    heartbeatInterval
-  );
+  clearInterval(heartbeatInterval);
+  clearInterval(roomExpiryInterval);
+  clearInterval(globalInterval);
+  clearInterval(taskNotificationInterval);
 
-  clearInterval(
-    roomExpiryInterval
-  );
-
-  clearInterval(
-    globalInterval
-  );
-
-  clearInterval(
-    taskNotificationInterval
-  );
-
-  clearTimeout(
-    callTimer
-  );
+  clearTimeout(callTimer);
 
   heartbeatInterval = null;
   roomExpiryInterval = null;
@@ -3027,9 +2837,7 @@ async function registerServiceWorker(){
   if(
     !("serviceWorker" in navigator)
   ){
-
     return null;
-
   }
 
   try{
@@ -3038,12 +2846,41 @@ async function registerServiceWorker(){
       await navigator.serviceWorker.register(
         "./sw.js",
         {
-          updateViaCache:
-            "none"
+          updateViaCache:"none"
         }
       );
 
     await navigator.serviceWorker.ready;
+
+    /*
+      Tell an already-installed worker to activate
+      the newest version immediately.
+    */
+
+    try{
+
+      if(
+        serviceWorkerRegistration.waiting
+      ){
+
+        serviceWorkerRegistration.waiting.postMessage({
+          type:"SKIP_WAITING"
+        });
+
+      }
+
+      if(
+        serviceWorkerRegistration.active
+      ){
+
+        serviceWorkerRegistration.active.postMessage({
+          type:"APP_READY"
+        });
+
+      }
+
+    }
+    catch{}
 
     return serviceWorkerRegistration;
 
@@ -3055,8 +2892,7 @@ async function registerServiceWorker(){
       error
     );
 
-    serviceWorkerRegistration =
-      null;
+    serviceWorkerRegistration = null;
 
     return null;
 
@@ -3065,52 +2901,39 @@ async function registerServiceWorker(){
 }
 
 /* =====================================================
-FCM
+FCM TOKEN
 ===================================================== */
 
 async function registerPushNotifications(){
 
-  if(
-    !messaging
-  ){
-
+  if(!messaging){
     return false;
-
-  }
-
-  if(
-    !serviceWorkerRegistration
-  ){
-
-    await registerServiceWorker();
-
-  }
-
-  if(
-    !serviceWorkerRegistration
-  ){
-
-    return false;
-
-  }
-
-  if(
-    !("Notification" in window)
-  ){
-
-    return false;
-
-  }
-
-  if(
-    Notification.permission !== "granted"
-  ){
-
-    return false;
-
   }
 
   try{
+
+    if(!serviceWorkerRegistration){
+
+      await registerServiceWorker();
+
+    }
+
+    if(!serviceWorkerRegistration){
+      return false;
+    }
+
+    if(
+      !("Notification" in window)
+    ){
+      return false;
+    }
+
+    if(
+      Notification.permission !==
+      "granted"
+    ){
+      return false;
+    }
 
     const token =
       await getToken(
@@ -3118,29 +2941,26 @@ async function registerPushNotifications(){
         messaging,
 
         {
-
           vapidKey:
             FIREBASE_VAPID_PUBLIC_KEY,
 
           serviceWorkerRegistration
-
         }
 
       );
 
-    if(
-      !token
-    ){
-
+    if(!token){
       return false;
-
     }
 
-    fcmToken =
-      token;
+    /*
+      Important:
+      Store the current token and all the context a
+      backend Cloud Function needs to know where to push.
+    */
 
-    fcmReady =
-      true;
+    fcmToken = token;
+    fcmReady = true;
 
     await set(
 
@@ -3150,9 +2970,7 @@ async function registerPushNotifications(){
       ),
 
       {
-
         token,
-
         playerId,
 
         name:
@@ -3170,12 +2988,14 @@ async function registerPushNotifications(){
         platform:
           "web",
 
+        permission:
+          Notification.permission,
+
         updatedAt:
           serverTimestamp(),
 
         userAgent:
           navigator.userAgent
-
       }
 
     );
@@ -3192,8 +3012,7 @@ async function registerPushNotifications(){
       error
     );
 
-    fcmReady =
-      false;
+    fcmReady = false;
 
     return false;
 
@@ -3201,30 +3020,35 @@ async function registerPushNotifications(){
 
 }
 
+/* =====================================================
+FOREGROUND FCM
+===================================================== */
+
 function startForegroundMessaging(){
 
   if(
     foregroundMessagingStarted ||
     !messaging
   ){
-
     return;
-
   }
 
   foregroundMessagingStarted = true;
 
   onMessage(
     messaging,
-    payload=>{
+    async payload=>{
+
+      console.log(
+        "FOREGROUND FCM:",
+        payload
+      );
 
       const notification =
-        payload?.notification ||
-        {};
+        payload?.notification || {};
 
       const data =
-        payload?.data ||
-        {};
+        payload?.data || {};
 
       const title =
         notification.title ||
@@ -3236,16 +3060,13 @@ function startForegroundMessaging(){
         data.body ||
         "New House Mystery alert.";
 
-      if(
-        Notification.permission !==
-        "granted"
-      ){
+      /*
+        When FCM data arrives in foreground,
+        explicitly create the system notification
+        through the service worker.
+      */
 
-        return;
-
-      }
-
-      showPersistentNotification(
+      await showPersistentNotification(
 
         title,
 
@@ -3255,19 +3076,30 @@ function startForegroundMessaging(){
 
           tag:
             data.tag ||
-            (
-              "house-fcm-" +
-              Date.now()
-            ),
+            `house-fcm-${Date.now()}`,
 
           requireInteraction:
-            data.requireInteraction === "true",
+            data.requireInteraction === "true" ||
+            data.requireInteraction === true,
 
           renotify:
-            data.renotify === "true",
+            data.renotify === "true" ||
+            data.renotify === true,
 
           notificationType:
             data.notificationType ||
+            null,
+
+          roomCode:
+            data.roomCode ||
+            roomCode,
+
+          roundId:
+            data.roundId ||
+            currentRoundId,
+
+          taskId:
+            data.taskId ||
             null
 
         }
@@ -3275,9 +3107,14 @@ function startForegroundMessaging(){
       );
 
     }
+
   );
 
 }
+
+/* =====================================================
+SYSTEM NOTIFICATION
+===================================================== */
 
 async function showPersistentNotification(
   title,
@@ -3299,12 +3136,8 @@ async function showPersistentNotification(
       serviceWorkerRegistration ||
       await navigator.serviceWorker.ready;
 
-    if(
-      !registration
-    ){
-
+    if(!registration){
       return false;
-
     }
 
     await registration.showNotification(
@@ -3314,8 +3147,7 @@ async function showPersistentNotification(
       {
 
         body:
-          options.body ||
-          "",
+          options.body || "",
 
         icon:
           "./icon-192.png",
@@ -3325,10 +3157,7 @@ async function showPersistentNotification(
 
         tag:
           options.tag ||
-          (
-            "house-mystery-" +
-            Date.now()
-          ),
+          `house-mystery-${Date.now()}`,
 
         renotify:
           options.renotify ??
@@ -3340,24 +3169,30 @@ async function showPersistentNotification(
 
         vibrate:
           options.vibrate ||
-          [
-            250,
-            120,
-            250
-          ],
+          [250,120,250],
 
         data:{
 
-          roomCode,
+          roomCode:
+            options.roomCode ||
+            roomCode ||
+            null,
 
           roundId:
-            currentRoundId,
+            options.roundId ||
+            currentRoundId ||
+            null,
+
+          taskId:
+            options.taskId ||
+            null,
 
           notificationType:
             options.notificationType ||
             null,
 
           url:
+            options.url ||
             location.href
 
         }
@@ -3372,7 +3207,7 @@ async function showPersistentNotification(
   catch(error){
 
     console.warn(
-      "LOCAL NOTIFICATION:",
+      "NOTIFICATION ERROR:",
       error
     );
 
@@ -3383,7 +3218,7 @@ async function showPersistentNotification(
 }
 
 /* =====================================================
-NOTIFICATIONS
+ENABLE ALERTS
 ===================================================== */
 
 window.enableAlerts =
@@ -3392,8 +3227,6 @@ async function(){
   try{
 
     await registerServiceWorker();
-
-    startForegroundMessaging();
 
     if(
       !("Notification" in window)
@@ -3432,45 +3265,54 @@ async function(){
         permission !==
         "granted"
       ){
-
         return;
-
       }
 
     }
 
-    alertsEnabled =
-      true;
+    alertsEnabled = true;
 
     localStorage.setItem(
       "tivoliMysteryAlerts",
       "1"
     );
 
+    startForegroundMessaging();
+
     const ready =
       await registerPushNotifications();
 
-    document
-      .getElementById(
+    const status =
+      document.getElementById(
         "alertStatus"
-      )
-      .textContent =
-      ready
-      ?
-      "✅ Push notifications ready."
-      :
-      "✅ Notifications enabled.";
+      );
 
-    document
-      .getElementById(
+    const button =
+      document.getElementById(
         "enableAlertsButton"
-      )
-      .textContent =
-      ready
-      ?
-      "✅ PUSH NOTIFICATIONS ENABLED"
-      :
-      "✅ NOTIFICATIONS ENABLED";
+      );
+
+    if(status){
+
+      status.textContent =
+        ready
+        ?
+        "✅ Push notifications ready."
+        :
+        "⚠️ Notifications enabled, but push registration failed.";
+
+    }
+
+    if(button){
+
+      button.textContent =
+        ready
+        ?
+        "✅ PUSH NOTIFICATIONS ENABLED"
+        :
+        "⚠️ RETRY PUSH SETUP";
+
+    }
 
     await showPersistentNotification(
 
@@ -3481,15 +3323,18 @@ async function(){
         body:
           ready
           ?
-          "Lock Screen push notifications are ready."
+          "Notification test successful."
           :
-          "Notifications are enabled.",
+          "Local notification enabled.",
 
         tag:
           "house-test",
 
         notificationType:
-          "test"
+          "test",
+
+        requireInteraction:
+          true
 
       }
 
@@ -3591,6 +3436,7 @@ function startTaskNotificationWatcher(){
 
   if(
     !alertsEnabled ||
+    !("Notification" in window) ||
     Notification.permission !==
     "granted"
   ){
@@ -3609,16 +3455,24 @@ function startTaskNotificationWatcher(){
 
 }
 
+/*
+  IMPORTANT:
+  This watcher only works while the webpage/app is
+  actually running.
+
+  Lock Screen/background tasks require the backend
+  FCM scheduler/Cloud Function.
+*/
+
 async function checkTaskNotifications(){
 
   if(
     !alertsEnabled ||
+    !("Notification" in window) ||
     Notification.permission !==
     "granted"
   ){
-
     return;
-
   }
 
   if(
@@ -3627,9 +3481,7 @@ async function checkTaskNotifications(){
       mySecret?.tasks
     )
   ){
-
     return;
-
   }
 
   const roundId =
@@ -3646,15 +3498,16 @@ async function checkTaskNotifications(){
     const task of mySecret.tasks
   ){
 
-    if(
-      now <
+    const unlockAt =
       Number(
         task.unlockAt
-      )
+      );
+
+    if(
+      now <
+      unlockAt
     ){
-
       continue;
-
     }
 
     if(
@@ -3663,20 +3516,15 @@ async function checkTaskNotifications(){
         task.id
       )
     ){
-
       continue;
-
     }
 
-    markTaskNotificationSent(
-      roundId,
-      task.id
-    );
+    /*
+      Try the local system notification first.
+      Only mark it as sent if it actually succeeds.
+    */
 
-    if(
-      !fcmReady
-    ){
-
+    const shown =
       await showPersistentNotification(
 
         "🔔 Task Unlocked",
@@ -3688,14 +3536,33 @@ async function checkTaskNotifications(){
             "A new task is available.",
 
           tag:
-            "house-task-" +
-            task.id,
+            `house-task-${roundId}-${task.id}`,
+
+          requireInteraction:
+            true,
+
+          renotify:
+            true,
 
           notificationType:
-            "task"
+            "task",
+
+          roomCode,
+
+          roundId,
+
+          taskId:
+            task.id
 
         }
 
+      );
+
+    if(shown){
+
+      markTaskNotificationSent(
+        roundId,
+        task.id
       );
 
     }
@@ -3710,12 +3577,8 @@ DEVICE
 
 async function saveDeviceRecord(){
 
-  if(
-    !myName
-  ){
-
+  if(!myName){
     return;
-
   }
 
   try{
@@ -3744,7 +3607,16 @@ async function saveDeviceRecord(){
           roomData?.status || null,
 
         pushReady:
-          fcmReady
+          fcmReady,
+
+        notificationPermission:
+          (
+            "Notification" in window
+            ?
+            Notification.permission
+            :
+            "unsupported"
+          )
 
       }
 
@@ -3768,12 +3640,8 @@ PRESENCE
 
 async function startPresence(){
 
-  if(
-    !roomCode
-  ){
-
+  if(!roomCode){
     return;
-
   }
 
   const presenceRef =
@@ -3788,8 +3656,7 @@ async function startPresence(){
       presenceRef
     ).set({
 
-      connected:
-        false,
+      connected:false,
 
       lastSeenAt:
         serverTimestamp()
@@ -3800,8 +3667,7 @@ async function startPresence(){
       presenceRef,
       {
 
-        connected:
-          true,
+        connected:true,
 
         lastSeenAt:
           serverTimestamp()
@@ -3828,12 +3694,8 @@ async function startPresence(){
 
       async()=>{
 
-        if(
-          !browserOnline
-        ){
-
+        if(!browserOnline){
           return;
-
         }
 
         try{
@@ -3844,8 +3706,7 @@ async function startPresence(){
 
             {
 
-              connected:
-                true,
+              connected:true,
 
               lastSeenAt:
                 serverTimestamp()
@@ -3870,12 +3731,8 @@ async function startPresence(){
 
     );
 
-  if(
-    presenceUnsubscribe
-  ){
-
+  if(presenceUnsubscribe){
     presenceUnsubscribe();
-
   }
 
   presenceUnsubscribe =
@@ -3888,13 +3745,10 @@ async function startPresence(){
 
       snapshot=>{
 
-        if(
-          roomData
-        ){
+        if(roomData){
 
           roomData.__presence =
-            snapshot.val() ||
-            {};
+            snapshot.val() || {};
 
           renderLobby();
 
@@ -3923,13 +3777,9 @@ function hideAllMainScreens(){
     id=>{
 
       document
-        .getElementById(
-          id
-        )
+        .getElementById(id)
         ?.classList
-        .add(
-          "hidden"
-        );
+        .add("hidden");
 
     }
   );
@@ -3948,26 +3798,17 @@ function updateCreateMapPreview(){
       "createMapPreview"
     );
 
-  if(
-    !select ||
-    !box
-  ){
-
+  if(!select || !box){
     return;
-
   }
 
   const type =
     select.value === "mall"
-    ?
-    "mall"
-    :
-    "house";
+    ? "mall"
+    : "house";
 
   box.innerHTML =
-    renderMapBadges(
-      type
-    );
+    renderMapBadges(type);
 
 }
 
@@ -3983,26 +3824,14 @@ function renderHomeMaps(){
       "mallPreview"
     );
 
-  if(
-    house
-  ){
-
+  if(house){
     house.innerHTML =
-      renderMapBadges(
-        "house"
-      );
-
+      renderMapBadges("house");
   }
 
-  if(
-    mall
-  ){
-
+  if(mall){
     mall.innerHTML =
-      renderMapBadges(
-        "mall"
-      );
-
+      renderMapBadges("mall");
   }
 
 }
@@ -4014,13 +3843,8 @@ function renderLobbyMap(){
       "lobbyMap"
     );
 
-  if(
-    !box ||
-    !roomData
-  ){
-
+  if(!box || !roomData){
     return;
-
   }
 
   box.innerHTML = `
@@ -4036,7 +3860,11 @@ function renderLobbyMap(){
       <br>
 
       This room uses the
-      ${getMapType() === "mall" ? "Mall" : "House"}
+      ${
+        getMapType() === "mall"
+        ? "Mall"
+        : "House"
+      }
       map.
 
     </div>
@@ -4052,13 +3880,8 @@ function renderGameMap(){
       "gameMap"
     );
 
-  if(
-    !box ||
-    !roomData
-  ){
-
+  if(!box || !roomData){
     return;
-
   }
 
   box.innerHTML =
@@ -4074,34 +3897,22 @@ function showHome(){
   hideAllMainScreens();
 
   document
-    .getElementById(
-      "home"
-    )
+    .getElementById("home")
     .classList
-    .remove(
-      "hidden"
-    );
+    .remove("hidden");
 
   document
-    .getElementById(
-      "userBar"
-    )
+    .getElementById("userBar")
     .classList
-    .remove(
-      "hidden"
-    );
+    .remove("hidden");
 
   document
-    .getElementById(
-      "userBarName"
-    )
+    .getElementById("userBarName")
     .textContent =
     myName;
 
   document
-    .getElementById(
-      "welcomeName"
-    )
+    .getElementById("welcomeName")
     .textContent =
     myName;
 
@@ -4130,9 +3941,7 @@ async function(){
   const value =
     input.value.trim();
 
-  if(
-    !value
-  ){
+  if(!value){
 
     alert(
       "Enter your name."
@@ -4159,12 +3968,8 @@ async function(){
 
   showHome();
 
-  if(
-    alertsEnabled
-  ){
-
+  if(alertsEnabled){
     await registerPushNotifications();
-
   }
 
 };
@@ -4178,23 +3983,15 @@ async function(){
       myName
     );
 
-  if(
-    value === null
-  ){
-
+  if(value === null){
     return;
-
   }
 
   const name =
     value.trim();
 
-  if(
-    !name
-  ){
-
+  if(!name){
     return;
-
   }
 
   myName =
@@ -4208,9 +4005,7 @@ async function(){
     myName
   );
 
-  if(
-    roomCode
-  ){
+  if(roomCode){
 
     try{
 
@@ -4242,9 +4037,7 @@ async function(){
 
   await saveDeviceRecord();
 
-  if(
-    fcmToken
-  ){
+  if(fcmToken){
 
     await update(
 
@@ -4284,14 +4077,12 @@ async function(){
 };
 
 /* =====================================================
-ROOM HELPERS
+ROOM
 ===================================================== */
 
 function saveLocalRoom(){
 
-  if(
-    roomCode
-  ){
+  if(roomCode){
 
     localStorage.setItem(
       "tivoliMysteryRoom",
@@ -4320,9 +4111,7 @@ function restoreSavedRoom(){
       "resumeBox"
     );
 
-  if(
-    !saved
-  ){
+  if(!saved){
 
     box.classList.add(
       "hidden"
@@ -4351,12 +4140,8 @@ async function(){
   const saved =
     getLocalRoom();
 
-  if(
-    !saved
-  ){
-
+  if(!saved){
     return;
-
   }
 
   document
@@ -4391,15 +4176,13 @@ function normalizeRoomCode(
 }
 
 /* =====================================================
-CREATE ROOM
+CREATE
 ===================================================== */
 
 window.createRoom =
 function(){
 
-  if(
-    !myName
-  ){
+  if(!myName){
 
     alert(
       "Enter your name first."
@@ -4416,9 +4199,7 @@ function(){
       "createScreen"
     )
     .classList
-    .remove(
-      "hidden"
-    );
+    .remove("hidden");
 
   updateCreateMapPreview();
 
@@ -4434,9 +4215,7 @@ function(){
 window.finishCreateRoom =
 async function(){
 
-  if(
-    !browserOnline
-  ){
+  if(!browserOnline){
 
     alert(
       "You are offline."
@@ -4474,14 +4253,10 @@ async function(){
         "mapType"
       )
       .value === "mall"
-      ?
-      "mall"
-      :
-      "house";
+      ? "mall"
+      : "house";
 
-  if(
-    code.length < 2
-  ){
+  if(code.length < 2){
 
     alert(
       "Enter a valid room code."
@@ -4491,8 +4266,7 @@ async function(){
 
   }
 
-  roomCode =
-    code;
+  roomCode = code;
 
   const roomRef =
     ref(
@@ -4505,24 +4279,19 @@ async function(){
 
   const newRoom = {
 
-    status:
-      "lobby",
+    status:"lobby",
 
     mapType,
 
-    host:
-      playerId,
+    host:playerId,
 
     playerLimit,
 
-    createdAt:
-      now,
+    createdAt:now,
 
-    lastActivityAt:
-      now,
+    lastActivityAt:now,
 
-    roundNumber:
-      0,
+    roundNumber:0,
 
     players:{
 
@@ -4530,11 +4299,9 @@ async function(){
 
         playerId,
 
-        name:
-          myName,
+        name:myName,
 
-        joinedAt:
-          now
+        joinedAt:now
 
       }
 
@@ -4551,33 +4318,20 @@ async function(){
 
         current=>{
 
-          if(
-            current === null
-          ){
-
+          if(current === null){
             return newRoom;
-
           }
 
-          if(
-            isRoomStale(
-              current
-            )
-          ){
-
+          if(isRoomStale(current)){
             return newRoom;
-
           }
 
           return;
-
         }
 
       );
 
-    if(
-      !result.committed
-    ){
+    if(!result.committed){
 
       alert(
         "That room already exists and is still active."
@@ -4601,9 +4355,7 @@ async function(){
   }
   catch(error){
 
-    console.error(
-      error
-    );
+    console.error(error);
 
     alert(
       "Could not create the room.\n\n" +
@@ -4618,15 +4370,13 @@ async function(){
 };
 
 /* =====================================================
-JOIN ROOM
+JOIN
 ===================================================== */
 
 window.joinRoom =
 async function(){
 
-  if(
-    !browserOnline
-  ){
+  if(!browserOnline){
 
     alert(
       "You are offline."
@@ -4647,9 +4397,7 @@ async function(){
 
     );
 
-  if(
-    code.length < 2
-  ){
+  if(code.length < 2){
 
     alert(
       "Enter a valid room code."
@@ -4659,8 +4407,7 @@ async function(){
 
   }
 
-  roomCode =
-    code;
+  roomCode = code;
 
   const roomRef =
     ref(
@@ -4675,9 +4422,7 @@ async function(){
         roomRef
       );
 
-    if(
-      !snapshot.exists()
-    ){
+    if(!snapshot.exists()){
 
       alert(
         "Room not found."
@@ -4690,14 +4435,11 @@ async function(){
     const data =
       snapshot.val();
 
-    if(
-      isRoomStale(
-        data
-      )
-    ){
+    if(isRoomStale(data)){
 
       if(
-        data.host === playerId
+        data.host ===
+        playerId
       ){
 
         await remove(
@@ -4715,9 +4457,7 @@ async function(){
     }
 
     const existingPlayer =
-      data.players?.[
-        playerId
-      ];
+      data.players?.[playerId];
 
     if(
       data.status === "game" &&
@@ -4752,9 +4492,7 @@ async function(){
 
     }
 
-    if(
-      !existingPlayer
-    ){
+    if(!existingPlayer){
 
       const now =
         sharedNow();
@@ -4765,18 +4503,15 @@ async function(){
 
         {
 
-          lastActivityAt:
-            now,
+          lastActivityAt:now,
 
           [`players/${playerId}`]:{
 
             playerId,
 
-            name:
-              myName,
+            name:myName,
 
-            joinedAt:
-              now
+            joinedAt:now
 
           }
 
@@ -4795,10 +4530,7 @@ async function(){
         ),
 
         {
-
-          name:
-            myName
-
+          name:myName
         }
 
       );
@@ -4807,9 +4539,7 @@ async function(){
 
     roomData =
       (
-        await get(
-          roomRef
-        )
+        await get(roomRef)
       ).val();
 
     saveLocalRoom();
@@ -4823,9 +4553,7 @@ async function(){
   }
   catch(error){
 
-    console.error(
-      error
-    );
+    console.error(error);
 
     alert(
       "Could not join the room.\n\n" +
@@ -4861,9 +4589,7 @@ async function startRoomSession(){
       "lobby"
     )
     .classList
-    .remove(
-      "hidden"
-    );
+    .remove("hidden");
 
   document
     .getElementById(
@@ -4880,9 +4606,7 @@ async function startRoomSession(){
 
   listenToRoom();
 
-  if(
-    alertsEnabled
-  ){
+  if(alertsEnabled){
 
     startTaskNotificationWatcher();
 
@@ -4896,12 +4620,8 @@ ROOM LISTENER
 
 function listenToRoom(){
 
-  if(
-    roomUnsubscribe
-  ){
-
+  if(roomUnsubscribe){
     roomUnsubscribe();
-
   }
 
   roomUnsubscribe =
@@ -4914,9 +4634,7 @@ function listenToRoom(){
 
       snapshot=>{
 
-        if(
-          !snapshot.exists()
-        ){
+        if(!snapshot.exists()){
 
           leaveRoomToHome(
             "This room no longer exists."
@@ -4932,7 +4650,8 @@ function listenToRoom(){
         renderLobby();
 
         if(
-          roomData.status === "game"
+          roomData.status ===
+          "game"
         ){
 
           enterGameFromRoom();
@@ -4965,26 +4684,21 @@ LOBBY
 
 function enterLobbyFromRoom(){
 
-  gameVisible =
-    false;
+  gameVisible = false;
 
   document
     .getElementById(
       "game"
     )
     .classList
-    .add(
-      "hidden"
-    );
+    .add("hidden");
 
   document
     .getElementById(
       "lobby"
     )
     .classList
-    .remove(
-      "hidden"
-    );
+    .remove("hidden");
 
   mySecret = null;
   currentRoundId = null;
@@ -5001,12 +4715,8 @@ function enterLobbyFromRoom(){
 
 function renderLobby(){
 
-  if(
-    !roomData
-  ){
-
+  if(!roomData){
     return;
-
   }
 
   const players =
@@ -5041,9 +4751,7 @@ function renderLobby(){
 
       <span class="badge">
         ${escapeHtml(
-          MAPS[
-            getMapType()
-          ].name
+          MAPS[getMapType()].name
         )}
       </span>
 
@@ -5142,9 +4850,7 @@ function renderLobby(){
     !isHost
   );
 
-  if(
-    isHost
-  ){
+  if(isHost){
 
     const full =
       ids.length === playerLimit;
@@ -5154,11 +4860,8 @@ function renderLobby(){
         "hostInfo"
       )
       .textContent =
-
       `${ids.length}/${playerLimit} players joined • ${
-        MAPS[
-          getMapType()
-        ].name
+        MAPS[getMapType()].name
       }`;
 
     const startButton =
@@ -5199,9 +4902,7 @@ function startRoomExpiryWatcher(){
           !roomCode ||
           !browserOnline
         ){
-
           return;
-
         }
 
         try{
@@ -5216,27 +4917,20 @@ function startRoomExpiryWatcher(){
 
             );
 
-          if(
-            !snap.exists()
-          ){
-
+          if(!snap.exists()){
             return;
-
           }
 
           const data =
             snap.val();
 
-          if(
-            !isRoomStale(data)
-          ){
-
+          if(!isRoomStale(data)){
             return;
-
           }
 
           if(
-            data.host === playerId
+            data.host ===
+            playerId
           ){
 
             await remove(
@@ -5279,12 +4973,8 @@ function enterGameFromRoom(){
   const game =
     roomData?.game;
 
-  if(
-    !game
-  ){
-
+  if(!game){
     return;
-
   }
 
   const roundId =
@@ -5299,15 +4989,13 @@ function enterGameFromRoom(){
   ){
 
     checkTaskNotifications();
+
     return;
 
   }
 
-  currentRoundId =
-    roundId;
-
-  gameVisible =
-    true;
+  currentRoundId = roundId;
+  gameVisible = true;
 
   hideAllMainScreens();
 
@@ -5316,9 +5004,7 @@ function enterGameFromRoom(){
       "game"
     )
     .classList
-    .remove(
-      "hidden"
-    );
+    .remove("hidden");
 
   document
     .getElementById(
@@ -5333,24 +5019,17 @@ function enterGameFromRoom(){
   mySecret =
     roomData
       ?.private
-      ?.[
-        playerId
-      ] ||
+      ?.[playerId] ||
     null;
 
   renderSecret();
-
   renderGameMap();
-
   renderCallButtons();
 
   startGameListeners();
-
   startGlobalClock();
 
-  if(
-    fcmToken
-  ){
+  if(fcmToken){
 
     update(
 
@@ -5375,18 +5054,12 @@ function enterGameFromRoom(){
       }
 
     )
-    .catch(
-      ()=>{}
-    );
+    .catch(()=>{});
 
   }
 
-  if(
-    alertsEnabled
-  ){
-
+  if(alertsEnabled){
     startTaskNotificationWatcher();
-
   }
 
 }
@@ -5402,12 +5075,8 @@ function renderCallButtons(){
       "callButtons"
     );
 
-  if(
-    !container
-  ){
-
+  if(!container){
     return;
-
   }
 
   const locations =
@@ -5423,14 +5092,10 @@ function renderCallButtons(){
           <button
             class="${
               index % 3 === 1
-              ?
-              "orange"
-              :
-              index % 3 === 2
-              ?
-              "secondary"
-              :
-              ""
+              ? "orange"
+              : index % 3 === 2
+              ? "secondary"
+              : ""
             }"
             onclick="
               makeCall(
@@ -5443,9 +5108,7 @@ function renderCallButtons(){
             "
           >
             📞 CALL
-            ${escapeHtml(
-              location
-            )}
+            ${escapeHtml(location)}
           </button>
 
         `
@@ -5462,12 +5125,8 @@ function startGameListeners(){
 
   stopGameListeners();
 
-  if(
-    !roomCode
-  ){
-
+  if(!roomCode){
     return;
-
   }
 
   callsUnsubscribe =
@@ -5480,49 +5139,24 @@ function startGameListeners(){
 
       snapshot=>{
 
-        if(
-          !snapshot.exists()
-        ){
-
+        if(!snapshot.exists()){
           return;
-
         }
 
         const calls =
           snapshot.val() || {};
 
         const entries =
-          Object.entries(
-            calls
-          )
-          .sort(
-            (
-              a,
-              b
-            ) =>
-              Number(
-                a[1]?.time ||
-                0
-              )
-              -
-              Number(
-                b[1]?.time ||
-                0
-              )
-          );
+          Object.entries(calls)
+            .sort(
+              (a,b)=>
+                Number(a[1]?.time || 0) -
+                Number(b[1]?.time || 0)
+            );
 
-        if(
-          !entries.length
-        ){
-
+        if(!entries.length){
           return;
-
         }
-
-        /*
-          We remember the newest call we have already
-          handled. This allows every NEW call to display.
-        */
 
         const newest =
           entries[
@@ -5540,26 +5174,12 @@ function startGameListeners(){
             lastSeenKey
           );
 
-        const newCalls =
-          entries.filter(
-            ([id]) =>
-              id !== lastSeen &&
-              Number(
-                calls[id]?.time ||
-                0
-              ) > Number(
-                calls[lastSeen]?.time ||
-                0
-              )
-          );
-
         /*
-          On first joining/reloading, don't replay an old call.
+          First page load:
+          do not replay an old call.
         */
 
-        if(
-          !lastSeen
-        ){
+        if(!lastSeen){
 
           localStorage.setItem(
             lastSeenKey,
@@ -5570,6 +5190,20 @@ function startGameListeners(){
 
         }
 
+        const lastSeenTime =
+          Number(
+            calls[lastSeen]?.time || 0
+          );
+
+        const newCalls =
+          entries.filter(
+            ([id,value])=>
+              id !== lastSeen &&
+              Number(
+                value?.time || 0
+              ) > lastSeenTime
+          );
+
         for(
           const [
             id,
@@ -5578,42 +5212,45 @@ function startGameListeners(){
           of newCalls
         ){
 
-          if(
-            !call?.id
-          ){
-
+          if(!call?.id){
             continue;
-
-          }
-
-          showCall(
-            call.destination,
-            call.caller
-          );
-
-          if(
-            alertsEnabled
-          ){
-
-            playCallSound();
-            vibrate();
-
           }
 
           /*
-            The local notification is only used while
-            the page is running. Lock Screen background
-            notifications come from FCM.
+            Don't show our own call as incoming.
           */
 
           if(
-            !fcmReady
+            call.callerId !==
+            playerId
           ){
 
-            systemNotification(
+            showCall(
               call.destination,
               call.caller
             );
+
+            if(alertsEnabled){
+
+              playCallSound();
+              vibrate();
+
+            }
+
+            /*
+              This is only the local fallback.
+              Background Lock Screen push is handled
+              by Firebase/FCM.
+            */
+
+            if(!fcmReady){
+
+              systemNotification(
+                call.destination,
+                call.caller
+              );
+
+            }
 
           }
 
@@ -5696,23 +5333,15 @@ function startGameListeners(){
 
       snapshot=>{
 
-        if(
-          !snapshot.exists()
-        ){
-
+        if(!snapshot.exists()){
           return;
-
         }
 
         const result =
           snapshot.val();
 
-        if(
-          !result?.accusedId
-        ){
-
+        if(!result?.accusedId){
           return;
-
         }
 
         const revealId =
@@ -5725,17 +5354,12 @@ function startGameListeners(){
           revealId ===
           lastRevealId
         ){
-
           return;
-
         }
 
-        lastRevealId =
-          revealId;
+        lastRevealId = revealId;
 
-        runReveal(
-          result
-        );
+        runReveal(result);
 
       }
 
@@ -5801,12 +5425,8 @@ function startGlobalClock(){
       const game =
         roomData?.game;
 
-      if(
-        !game
-      ){
-
+      if(!game){
         return;
-
       }
 
       const now =
@@ -5888,7 +5508,8 @@ function startGlobalClock(){
           );
 
         if(
-          now >= detectiveEnd
+          now >=
+          detectiveEnd
         ){
 
           showInvestigation();
@@ -5907,9 +5528,7 @@ function startGlobalClock(){
 
           investigationCard
             .classList
-            .remove(
-              "hidden"
-            );
+            .remove("hidden");
 
           document
             .getElementById(
@@ -5937,9 +5556,7 @@ function startGlobalClock(){
 
           investigationCard
             .classList
-            .add(
-              "hidden"
-            );
+            .add("hidden");
 
         }
 
@@ -6024,9 +5641,7 @@ function createTask(
 
     unlockText:
       shortClock(
-        sharedDate(
-          unlockAt
-        )
+        sharedDate(unlockAt)
       ),
 
     description
@@ -6040,14 +5655,9 @@ function nextMinuteTimestamp(
 ){
 
   const date =
-    sharedDate(
-      timestamp
-    );
+    sharedDate(timestamp);
 
-  date.setSeconds(
-    0,
-    0
-  );
+  date.setSeconds(0,0);
 
   date.setMinutes(
     date.getMinutes() + 1
@@ -6087,22 +5697,15 @@ function makeUnlockTimes(
   ){
 
     const ratio =
-      (
-        i + 1
-      ) /
-      (
-        count + 1
-      );
+      (i + 1) /
+      (count + 1);
 
     output.push(
 
       nextMinuteTimestamp(
 
         first +
-        (
-          last -
-          first
-        ) *
+        (last - first) *
         ratio
 
       )
@@ -6129,9 +5732,7 @@ function buildNormalTasks(
 ){
 
   const locations =
-    mapLocationList(
-      mapType
-    );
+    mapLocationList(mapType);
 
   const count =
     3 +
@@ -6152,10 +5753,7 @@ function buildNormalTasks(
 
     times.map(
 
-      (
-        unlockAt,
-        index
-      )=>{
+      (unlockAt,index)=>{
 
         let possible =
           locations.filter(
@@ -6164,9 +5762,7 @@ function buildNormalTasks(
               !used.includes(location)
           );
 
-        if(
-          !possible.length
-        ){
+        if(!possible.length){
 
           possible =
             locations.filter(
@@ -6227,9 +5823,7 @@ function buildMurdererTasks(
 ){
 
   const locations =
-    mapLocationList(
-      mapType
-    );
+    mapLocationList(mapType);
 
   const count =
     2 +
@@ -6258,10 +5852,7 @@ function buildMurdererTasks(
   const tasks =
     times.map(
 
-      (
-        unlockAt,
-        index
-      )=>{
+      (unlockAt,index)=>{
 
         let possible =
           locations.filter(
@@ -6270,9 +5861,7 @@ function buildMurdererTasks(
               !used.includes(location)
           );
 
-        if(
-          !possible.length
-        ){
+        if(!possible.length){
 
           possible =
             locations.filter(
@@ -6381,18 +5970,14 @@ async function(){
     roomData?.host !==
     playerId
   ){
-
     return;
-
   }
 
   if(
     roomData.status !==
     "lobby"
   ){
-
     return;
-
   }
 
   const players =
@@ -6406,9 +5991,7 @@ async function(){
       roomData.playerLimit
     );
 
-  if(
-    ids.length !== limit
-  ){
+  if(ids.length !== limit){
 
     alert(
       `Wait for everyone. ${ids.length}/${limit} joined.`
@@ -6454,15 +6037,11 @@ async function(){
 
   const mapType =
     roomData.mapType === "mall"
-    ?
-    "mall"
-    :
-    "house";
+    ? "mall"
+    : "house";
 
   const locations =
-    mapLocationList(
-      mapType
-    );
+    mapLocationList(mapType);
 
   const crimeLocation =
     random(locations);
@@ -6485,18 +6064,13 @@ async function(){
   const privateData = {};
 
   privateData[detective] = {
-
-    role:
-      "detective",
-
+    role:"detective",
     tasks:[]
-
   };
 
   privateData[murderer] = {
 
-    role:
-      "murderer",
+    role:"murderer",
 
     tasks:
       buildMurdererTasks(
@@ -6518,8 +6092,7 @@ async function(){
 
       privateData[id] = {
 
-        role:
-          "innocent",
+        role:"innocent",
 
         tasks:
           buildNormalTasks(
@@ -6541,20 +6114,14 @@ async function(){
   const game = {
 
     roundNumber,
-
     roundId,
-
     roundSeed,
-
     mapType,
 
-    startedAt:
-      now,
+    startedAt:now,
 
     murderAt,
-
     detectiveEnd,
-
     investigationEnd,
 
     crimeLocation,
@@ -6566,7 +6133,6 @@ async function(){
       "A fictional incident occurred during the mystery.",
 
     detective,
-
     murderer,
 
     suspects:[
@@ -6580,53 +6146,43 @@ async function(){
 
   updates[
     `rooms/${roomCode}/status`
-  ] =
-    "game";
+  ] = "game";
 
   updates[
     `rooms/${roomCode}/roundNumber`
-  ] =
-    roundNumber;
+  ] = roundNumber;
 
   updates[
     `rooms/${roomCode}/game`
-  ] =
-    game;
+  ] = game;
 
   updates[
     `rooms/${roomCode}/private`
-  ] =
-    privateData;
+  ] = privateData;
 
   updates[
     `rooms/${roomCode}/completed`
-  ] =
-    {};
+  ] = {};
 
   updates[
     `rooms/${roomCode}/notes`
-  ] =
-    null;
+  ] = null;
 
   updates[
     `rooms/${roomCode}/detectiveNotes`
-  ] =
-    null;
+  ] = null;
 
   updates[
     `rooms/${roomCode}/result`
-  ] =
-    null;
+  ] = null;
 
   updates[
     `rooms/${roomCode}/calls`
-  ] =
-    null;
+  ] = null;
 
   updates[
     `rooms/${roomCode}/lastActivityAt`
-  ] =
-    now;
+  ] = now;
 
   try{
 
@@ -6639,15 +6195,13 @@ async function(){
 
       ...roomData,
 
-      status:
-        "game",
+      status:"game",
 
       roundNumber,
 
       game,
 
-      private:
-        privateData,
+      private:privateData,
 
       completed:{}
 
@@ -6657,14 +6211,10 @@ async function(){
       roundId;
 
     mySecret =
-      privateData[
-        playerId
-      ] ||
+      privateData[playerId] ||
       null;
 
-    if(
-      fcmToken
-    ){
+    if(fcmToken){
 
       await update(
 
@@ -6725,9 +6275,7 @@ function renderSecret(){
       "secretCard"
     );
 
-  if(
-    !mySecret
-  ){
+  if(!mySecret){
 
     card.textContent =
       "Your secret is loading...";
@@ -6766,27 +6314,21 @@ function renderSecret(){
         "detectiveWaiting"
       )
       .classList
-      .remove(
-        "hidden"
-      );
+      .remove("hidden");
 
     document
       .getElementById(
         "normalWaiting"
       )
       .classList
-      .add(
-        "hidden"
-      );
+      .add("hidden");
 
     document
       .getElementById(
         "investigation"
       )
       .classList
-      .add(
-        "hidden"
-      );
+      .add("hidden");
 
     showDetectiveTools();
 
@@ -6802,10 +6344,8 @@ function renderSecret(){
 
     <div class="role ${
       murderer
-      ?
-      "murderer"
-      :
-      "innocent"
+      ? "murderer"
+      : "innocent"
     }">
 
       ${
@@ -6839,27 +6379,21 @@ function renderSecret(){
       "normalWaiting"
     )
     .classList
-    .remove(
-      "hidden"
-    );
+    .remove("hidden");
 
   document
     .getElementById(
       "detectiveWaiting"
     )
     .classList
-    .add(
-      "hidden"
-    );
+    .add("hidden");
 
   document
     .getElementById(
       "investigation"
     )
     .classList
-    .add(
-      "hidden"
-    );
+    .add("hidden");
 
   hideDetectiveTools();
 
@@ -6884,9 +6418,7 @@ function renderTasks(){
       mySecret?.tasks
     )
   ){
-
     return;
-
   }
 
   const now =
@@ -6895,9 +6427,7 @@ function renderTasks(){
   const completed =
     roomData
       ?.completed
-      ?.[
-        playerId
-      ] ||
+      ?.[playerId] ||
     {};
 
   container.innerHTML =
@@ -6927,9 +6457,7 @@ function renderTasks(){
               )
             );
 
-          if(
-            !unlocked
-          ){
+          if(!unlocked){
 
             return `
 
@@ -6966,13 +6494,7 @@ function renderTasks(){
                 <input
                   class="task-checkbox"
                   type="checkbox"
-                  ${
-                    done
-                    ?
-                    "checked"
-                    :
-                    ""
-                  }
+                  ${done ? "checked" : ""}
                   onchange="
                     toggleTask(
                       '${task.id}',
@@ -7105,10 +6627,7 @@ function updatePlayerNoteCounter(){
       "playerNoteCounter"
     );
 
-  if(
-    input &&
-    counter
-  ){
+  if(input && counter){
 
     counter.textContent =
       `${input.value.length} / ${MAX_PLAYER_NOTE_LENGTH}`;
@@ -7139,21 +6658,15 @@ function updateMyNoteUI(){
     !button ||
     !status
   ){
-
     return;
-
   }
 
   const note =
     roomData
       ?.notes
-      ?.[
-        playerId
-      ];
+      ?.[playerId];
 
-  if(
-    note
-  ){
+  if(note){
 
     input.value =
       note.text || "";
@@ -7208,9 +6721,7 @@ async function(){
   const text =
     input.value.trim();
 
-  if(
-    !text
-  ){
+  if(!text){
 
     alert(
       "Write a note first."
@@ -7224,9 +6735,7 @@ async function(){
     text.length >
     MAX_PLAYER_NOTE_LENGTH
   ){
-
     return;
-
   }
 
   try{
@@ -7242,11 +6751,10 @@ async function(){
         noteRef
       );
 
-    if(
-      existing.exists()
-    ){
+    if(existing.exists()){
 
       updateMyNoteUI();
+
       return;
 
     }
@@ -7313,18 +6821,14 @@ function showDetectiveTools(){
       "detectiveNotebook"
     )
     .classList
-    .remove(
-      "hidden"
-    );
+    .remove("hidden");
 
   document
     .getElementById(
       "detectiveLiveNotes"
     )
     .classList
-    .remove(
-      "hidden"
-    );
+    .remove("hidden");
 
   renderDetectivePlayerButtons();
 
@@ -7337,27 +6841,21 @@ function hideDetectiveTools(){
       "detectiveNotebook"
     )
     .classList
-    .add(
-      "hidden"
-    );
+    .add("hidden");
 
   document
     .getElementById(
       "detectiveLiveNotes"
     )
     .classList
-    .add(
-      "hidden"
-    );
+    .add("hidden");
 
   document
     .getElementById(
       "selectedDossier"
     )
     .classList
-    .add(
-      "hidden"
-    );
+    .add("hidden");
 
 }
 
@@ -7368,12 +6866,8 @@ function renderLivePlayerNotes(){
       "liveNotesList"
     );
 
-  if(
-    !container
-  ){
-
+  if(!container){
     return;
-
   }
 
   const notes =
@@ -7383,17 +6877,11 @@ function renderLivePlayerNotes(){
     Object.values(notes)
       .sort(
         (a,b)=>
-          (
-            b.timestamp || 0
-          ) -
-          (
-            a.timestamp || 0
-          )
+          (b.timestamp || 0) -
+          (a.timestamp || 0)
       );
 
-  if(
-    !entries.length
-  ){
+  if(!entries.length){
 
     container.innerHTML =
       `<div class="note-empty">📭 No player notes yet.</div>`;
@@ -7429,8 +6917,7 @@ function renderLivePlayerNotes(){
 
             <div class="note-text">
               ${escapeHtml(
-                note.text ||
-                ""
+                note.text || ""
               )}
             </div>
 
@@ -7448,9 +6935,7 @@ function renderDetectivePlayerButtons(){
     mySecret?.role !==
     "detective"
   ){
-
     return;
-
   }
 
   const container =
@@ -7469,9 +6954,7 @@ function renderDetectivePlayerButtons(){
       ?.players ||
     {};
 
-  if(
-    !suspects.length
-  ){
+  if(!suspects.length){
 
     container.innerHTML =
       `<div class="note-empty">No suspects loaded.</div>`;
@@ -7500,13 +6983,7 @@ function renderDetectivePlayerButtons(){
             <button
               class="
                 detective-player-button
-                ${
-                  active
-                  ?
-                  "active"
-                  :
-                  ""
-                }
+                ${active ? "active" : ""}
               "
               onclick="
                 openPlayerDossier(
@@ -7521,13 +6998,7 @@ function renderDetectivePlayerButtons(){
                 "Unknown"
               )}
 
-              ${
-                note
-                ?
-                " 📝"
-                :
-                ""
-              }
+              ${note ? " 📝" : ""}
 
             </button>
 
@@ -7548,9 +7019,7 @@ async function(
     mySecret?.role !==
     "detective"
   ){
-
     return;
-
   }
 
   selectedDetectivePlayerId =
@@ -7561,9 +7030,7 @@ async function(
       "selectedDossier"
     )
     .classList
-    .remove(
-      "hidden"
-    );
+    .remove("hidden");
 
   renderDetectivePlayerButtons();
 
@@ -7631,12 +7098,8 @@ async function(
 
 function refreshSelectedDossierNote(){
 
-  if(
-    !selectedDetectivePlayerId
-  ){
-
+  if(!selectedDetectivePlayerId){
     return;
-
   }
 
   const box =
@@ -7649,9 +7112,7 @@ function refreshSelectedDossierNote(){
       ?.notes
       ?.[selectedDetectivePlayerId];
 
-  if(
-    note
-  ){
+  if(note){
 
     box.innerHTML = `
 
@@ -7704,9 +7165,7 @@ async function(){
     "detective" ||
     !selectedDetectivePlayerId
   ){
-
     return;
-
   }
 
   try{
@@ -7773,9 +7232,7 @@ async function(){
     mySecret?.role !==
     "detective"
   ){
-
     return;
-
   }
 
   try{
@@ -7831,9 +7288,7 @@ function showInvestigation(){
     mySecret?.role !==
     "detective"
   ){
-
     return;
-
   }
 
   document
@@ -7841,27 +7296,21 @@ function showInvestigation(){
       "detectiveWaiting"
     )
     .classList
-    .add(
-      "hidden"
-    );
+    .add("hidden");
 
   document
     .getElementById(
       "normalWaiting"
     )
     .classList
-    .add(
-      "hidden"
-    );
+    .add("hidden");
 
   document
     .getElementById(
       "investigation"
     )
     .classList
-    .remove(
-      "hidden"
-    );
+    .remove("hidden");
 
   renderCase();
 
@@ -7872,12 +7321,8 @@ function renderCase(){
   const game =
     roomData?.game;
 
-  if(
-    !game
-  ){
-
+  if(!game){
     return;
-
   }
 
   const suspects =
@@ -7900,6 +7345,7 @@ function renderCase(){
       </div>
 
       <p>
+
         <b>
           Map:
         </b>
@@ -7907,15 +7353,15 @@ function renderCase(){
         ${escapeHtml(
           MAPS[
             game.mapType === "mall"
-            ?
-            "mall"
-            :
-            "house"
+            ? "mall"
+            : "house"
           ].name
         )}
+
       </p>
 
       <p>
+
         <b>
           Fictional event time:
         </b>
@@ -7925,9 +7371,11 @@ function renderCase(){
             game.murderAt
           )
         )}
+
       </p>
 
       <p>
+
         <b>
           Location:
         </b>
@@ -7980,14 +7428,11 @@ function renderCase(){
 
           <button
             onclick="
-              accuse(
-                '${id}'
-              )
+              accuse('${id}')
             "
           >
 
             🔎 ACCUSE
-
             ${escapeHtml(
               roomData
                 .players[id]
@@ -8016,12 +7461,8 @@ function renderTaskProgress(){
       "taskProgress"
     );
 
-  if(
-    !container
-  ){
-
+  if(!container){
     return;
-
   }
 
   container.innerHTML = "";
@@ -8065,9 +7506,7 @@ function renderTaskProgress(){
       ?
       Math.min(
         100,
-        count /
-        total *
-        100
+        count / total * 100
       )
       :
       0;
@@ -8101,9 +7540,7 @@ function renderTaskProgress(){
 
         <div
           class="progress-bar"
-          style="
-            width:${percent}%
-          "
+          style="width:${percent}%"
         ></div>
 
       </div>
@@ -8127,26 +7564,20 @@ async function(
     mySecret?.role !==
     "detective"
   ){
-
     return;
-
   }
 
   if(
     roomData?.game?.detective !==
     playerId
   ){
-
     return;
-
   }
 
   if(
     roomData?.result?.accusedId
   ){
-
     return;
-
   }
 
   try{
@@ -8256,9 +7687,7 @@ async function runReveal(
     revealRunning ||
     !roomData?.game
   ){
-
     return;
-
   }
 
   revealRunning = true;
@@ -8289,9 +7718,7 @@ async function runReveal(
 
   overlay
     .classList
-    .remove(
-      "hidden"
-    );
+    .remove("hidden");
 
   setReveal(
     "THE DETECTIVE HAS MADE A DECISION",
@@ -8372,11 +7799,13 @@ async function runReveal(
         <div class="reveal-role">
 
           <div class="reveal-role-name">
+
             👤
             ${escapeHtml(
               players[id]?.name ||
               "Unknown"
             )}
+
           </div>
 
           <div class="reveal-role-value">
@@ -8402,10 +7831,12 @@ async function runReveal(
       <div class="reveal-role">
 
         <div class="reveal-role-name">
+
           🔎
           ${escapeHtml(
             murdererName
           )}
+
         </div>
 
         <div class="reveal-role-value">
@@ -8417,10 +7848,12 @@ async function runReveal(
       <div class="reveal-role">
 
         <div class="reveal-role-name">
+
           🕵️
           ${escapeHtml(
             detectiveName
           )}
+
         </div>
 
         <div class="reveal-role-value">
@@ -8462,10 +7895,8 @@ async function runReveal(
           reveal-winner
           ${
             wasMurderer
-            ?
-            "detective-win"
-            :
-            "murderer-win"
+            ? "detective-win"
+            : "murderer-win"
           }
         "
       >
@@ -8494,9 +7925,7 @@ async function runReveal(
 
   overlay
     .classList
-    .add(
-      "hidden"
-    );
+    .add("hidden");
 
   await resetToLobby();
 
@@ -8515,9 +7944,7 @@ async function resetToLobby(){
     !browserOnline ||
     !firebaseConnected
   ){
-
     return;
-
   }
 
   const now =
@@ -8576,9 +8003,7 @@ async function resetToLobby(){
 
     globalInterval = null;
 
-    if(
-      fcmToken
-    ){
+    if(fcmToken){
 
       await update(
 
@@ -8595,8 +8020,7 @@ async function resetToLobby(){
           currentGame:
             "lobby",
 
-          roundId:
-            null,
+          roundId:null,
 
           updatedAt:
             serverTimestamp()
@@ -8643,9 +8067,7 @@ async function(){
       "Reset the game and return everyone to the lobby?"
     )
   ){
-
     return;
-
   }
 
   await resetToLobby();
@@ -8679,9 +8101,7 @@ async function(
     roomData?.status !==
     "game"
   ){
-
     return;
-
   }
 
   try{
@@ -8695,14 +8115,11 @@ async function(
 
     const call = {
 
-      id:
-        callId,
+      id:callId,
 
-      caller:
-        myName,
+      caller:myName,
 
-      callerId:
-        playerId,
+      callerId:playerId,
 
       destination,
 
@@ -8713,12 +8130,6 @@ async function(
         sharedNow()
 
     };
-
-    /*
-      IMPORTANT:
-      Each call gets its own Firebase node.
-      This means every new call is a CREATE event.
-    */
 
     await set(
 
@@ -8752,9 +8163,7 @@ function showCall(
   caller
 ){
 
-  clearTimeout(
-    callTimer
-  );
+  clearTimeout(callTimer);
 
   const overlay =
     document.getElementById(
@@ -8791,9 +8200,7 @@ function showCall(
 
   overlay
     .classList
-    .remove(
-      "hidden"
-    );
+    .remove("hidden");
 
   const bar =
     document.getElementById(
@@ -8819,8 +8226,7 @@ function showCall(
           (
             CALL_DURATION -
             elapsed
-          ) /
-          1000
+          ) / 1000
         )
       );
 
@@ -8829,9 +8235,7 @@ function showCall(
         "callCount"
       )
       .textContent =
-      String(
-        remaining
-      );
+      String(remaining);
 
     bar.style.transform =
       `scaleX(${
@@ -8865,9 +8269,7 @@ function showCall(
 
         overlay
           .classList
-          .add(
-            "hidden"
-          );
+          .add("hidden");
 
       },
 
@@ -8889,12 +8291,8 @@ function playCallSound(){
       window.AudioContext ||
       window.webkitAudioContext;
 
-    if(
-      !AudioCtx
-    ){
-
+    if(!AudioCtx){
       return;
-
     }
 
     audioContext =
@@ -8908,9 +8306,7 @@ function playCallSound(){
 
       audioContext
         .resume()
-        .catch(
-          ()=>{}
-        );
+        .catch(()=>{});
 
     }
 
@@ -8925,8 +8321,7 @@ function playCallSound(){
 
       const base =
         start +
-        group *
-        3.1;
+        group * 3.1;
 
       for(
         let i = 0;
@@ -8942,10 +8337,8 @@ function playCallSound(){
 
         osc.frequency.value =
           i === 0
-          ?
-          880
-          :
-          660;
+          ? 880
+          : 660;
 
         const t =
           base +
@@ -9024,12 +8417,8 @@ function systemNotification(
   caller
 ){
 
-  if(
-    !alertsEnabled
-  ){
-
+  if(!alertsEnabled){
     return;
-
   }
 
   showPersistentNotification(
@@ -9045,14 +8434,16 @@ function systemNotification(
         "house-call-" +
         Date.now(),
 
-      requireInteraction:
-        true,
+      requireInteraction:true,
 
-      renotify:
-        true,
+      renotify:true,
 
-      notificationType:
-        "call"
+      notificationType:"call",
+
+      roomCode,
+
+      roundId:
+        currentRoundId
 
     }
 
@@ -9071,9 +8462,7 @@ async function reconnectCurrentRoom(){
     !myName ||
     !browserOnline
   ){
-
     return;
-
   }
 
   try{
@@ -9088,12 +8477,8 @@ async function reconnectCurrentRoom(){
 
       );
 
-    if(
-      !snap.exists()
-    ){
-
+    if(!snap.exists()){
       return;
-
     }
 
     roomData =
@@ -9115,9 +8500,7 @@ async function reconnectCurrentRoom(){
 
     }
 
-    if(
-      alertsEnabled
-    ){
+    if(alertsEnabled){
 
       await registerPushNotifications();
 
@@ -9153,13 +8536,13 @@ document.addEventListener(
 
       updateConnectionState();
 
+      await registerServiceWorker();
+
       await reconnectCurrentRoom();
 
       checkTaskNotifications();
 
-      if(
-        alertsEnabled
-      ){
+      if(alertsEnabled){
 
         await registerPushNotifications();
 
@@ -9178,6 +8561,8 @@ window.addEventListener(
       navigator.onLine !== false;
 
     updateConnectionState();
+
+    await registerServiceWorker();
 
     await reconnectCurrentRoom();
 
@@ -9211,20 +8596,12 @@ function leaveRoomToHome(
       "home"
     )
     .classList
-    .remove(
-      "hidden"
-    );
+    .remove("hidden");
 
   renderHomeMaps();
 
-  if(
-    message
-  ){
-
-    alert(
-      message
-    );
-
+  if(message){
+    alert(message);
   }
 
 }
@@ -9295,9 +8672,7 @@ async function initialize(){
   const savedName =
     loadSavedName();
 
-  if(
-    savedName
-  ){
+  if(savedName){
 
     myName =
       savedName;
@@ -9316,9 +8691,7 @@ async function initialize(){
         "nameSetup"
       )
       .classList
-      .remove(
-        "hidden"
-      );
+      .remove("hidden");
 
   }
 
@@ -9348,7 +8721,7 @@ async function initialize(){
       ?
       "✅ Notifications and push are ready."
       :
-      "✅ Notifications enabled.";
+      "⚠️ Notifications enabled but push needs setup.";
 
     document
       .getElementById(
@@ -9359,15 +8732,17 @@ async function initialize(){
       ?
       "✅ PUSH NOTIFICATIONS ENABLED"
       :
-      "✅ NOTIFICATIONS ENABLED";
+      "⚠️ RETRY PUSH SETUP";
 
     startTaskNotificationWatcher();
 
   }
-  else{
+  else if(
+    !("Notification" in window) ||
+    Notification.permission !== "granted"
+  ){
 
-    alertsEnabled =
-      false;
+    alertsEnabled = false;
 
   }
 
