@@ -188,11 +188,7 @@ button.dark{
 
 .install-box{
   background:#172038;
-
-  border:
-    1px solid
-    rgba(113,140,255,.25);
-
+  border:1px solid rgba(113,140,255,.25);
   padding:15px;
   border-radius:16px;
   margin-top:15px;
@@ -455,8 +451,6 @@ button.dark{
   background:#252c40;
 }
 
-/* CONNECTION */
-
 .connection-bar{
   position:sticky;
   top:0;
@@ -543,8 +537,6 @@ button.dark{
   color:#8bf1ad;
 }
 
-/* DEBUG */
-
 .debug-box{
   margin-top:12px;
   padding:12px;
@@ -558,8 +550,6 @@ button.dark{
   white-space:pre-wrap;
 }
 
-/* CALL */
-
 .call-overlay{
   position:fixed;
   inset:0;
@@ -567,7 +557,6 @@ button.dark{
   display:flex;
   align-items:center;
   justify-content:center;
-
   background:
     radial-gradient(
       circle at center,
@@ -575,12 +564,10 @@ button.dark{
       #111a2a 43%,
       #020307 100%
     );
-
   padding:
     calc(20px + env(safe-area-inset-top))
     20px
     calc(20px + env(safe-area-inset-bottom));
-
   overflow:hidden;
 }
 
@@ -648,8 +635,6 @@ button.dark{
   50%{transform:scale(1.13);}
 }
 
-/* ALERT */
-
 .alert-modal{
   position:fixed;
   inset:0;
@@ -682,8 +667,6 @@ button.dark{
   font-size:13px;
   box-shadow:0 8px 25px rgba(0,0,0,.35);
 }
-
-/* NOTES */
 
 .notes-box{
   background:#202638;
@@ -795,13 +778,10 @@ button.dark{
   margin-bottom:5px;
 }
 
-/* REVEAL */
-
 .reveal-overlay{
   position:fixed;
   inset:0;
   z-index:200000;
-
   background:
     radial-gradient(
       circle at center,
@@ -809,7 +789,6 @@ button.dark{
       #0c101b 44%,
       #020307 100%
     );
-
   display:flex;
   align-items:center;
   justify-content:center;
@@ -979,6 +958,7 @@ button.dark{
 <body>
 
 <div id="connectionBar" class="connection-bar yellow-state">
+
   <div class="connection-inner">
 
     <div class="connection-lights">
@@ -1015,6 +995,7 @@ button.dark{
     </div>
 
   </div>
+
 </div>
 
 <div id="callOverlay" class="call-overlay hidden">
@@ -1049,10 +1030,12 @@ button.dark{
     </div>
 
     <div class="call-progress">
+
       <div
         id="callProgressBar"
         class="call-progress-bar"
       ></div>
+
     </div>
 
   </div>
@@ -1554,11 +1537,7 @@ button.dark{
 
       <div
         id="detectiveArrivalTime"
-        style="
-          font-size:28px;
-          font-weight:900;
-          margin-top:8px
-        "
+        style="font-size:28px;font-weight:900;margin-top:8px"
       >
         --
       </div>
@@ -1723,11 +1702,9 @@ button.dark{
     </h2>
 
     <div id="liveNotesList">
-
       <div class="note-empty">
         No player notes yet.
       </div>
-
     </div>
 
   </div>
@@ -1826,8 +1803,13 @@ FIREBASE
 
 const firebaseConfig = {
 
+  /*
+    THIS IS THE CORRECT KEY FROM THE FIREBASE CONFIG
+    YOU SENT.
+  */
+
   apiKey:
-    "AIzaSyCug0S0qHKstGAr5vdzm-DaLZAIDugo",
+    "AIzaSyCug0S0qHKstXGZArd5vEBzm-DaLZAIDugo",
 
   authDomain:
     "money-e560a.firebaseapp.com",
@@ -1852,6 +1834,18 @@ const firebaseConfig = {
 
 };
 
+/*
+  IMPORTANT:
+  This must be the Web Push public VAPID key shown in:
+  Firebase Console
+  → Project settings
+  → Cloud Messaging
+  → Web Push certificates
+*/
+
+const FIREBASE_VAPID_PUBLIC_KEY =
+  "BL7rsvWz4BsL0CnbBLrrLUoWtNO4r5TMLygYl8A_YT1qVCfVr8ZjBW7OLjbBswac1fHs74-Aw6Wl1gxG6ipyf78";
+
 const app =
   initializeApp(
     firebaseConfig
@@ -1866,21 +1860,17 @@ const db =
 FCM
 ===================================================== */
 
-const FIREBASE_VAPID_PUBLIC_KEY =
-  "BL7rsvWz4BsL0CnbBLrrLUoWtNO4r5TMLygYl8A_YT1qVCfVr8ZjBW7OLjbBswac1fHs74-Aw6Wl1gxG6ipyf78";
-
 let messaging = null;
 let fcmToken = "";
 let fcmReady = false;
 let foregroundMessagingStarted = false;
+let messagingSupported = false;
 
 /* =====================================================
-DEBUG UI
+DEBUG
 ===================================================== */
 
-function setNotificationDebug(
-  text
-){
+function setNotificationDebug(text){
 
   const box =
     document.getElementById(
@@ -1892,11 +1882,48 @@ function setNotificationDebug(
   }
 
   box.textContent =
-    String(text || "");
+    String(
+      text || ""
+    );
 
   box.classList.remove(
     "hidden"
   );
+
+}
+
+function formatFirebaseError(error){
+
+  if(!error){
+    return "Unknown error";
+  }
+
+  const output = [];
+
+  if(error.name){
+    output.push(
+      "name: " +
+      error.name
+    );
+  }
+
+  if(error.code){
+    output.push(
+      "code: " +
+      error.code
+    );
+  }
+
+  if(error.message){
+    output.push(
+      "message: " +
+      error.message
+    );
+  }
+
+  return output.length
+    ? output.join("\n")
+    : String(error);
 
 }
 
@@ -1906,7 +1933,7 @@ PLAYER ID
 
 let playerId =
   localStorage.getItem(
-    "tivoliMysteryPlayerId"
+    "houseMysteryPlayerId"
   );
 
 if(!playerId){
@@ -1920,7 +1947,7 @@ if(!playerId){
       .slice(2,10);
 
   localStorage.setItem(
-    "tivoliMysteryPlayerId",
+    "houseMysteryPlayerId",
     playerId
   );
 
@@ -1973,7 +2000,7 @@ let browserOnline =
 
 let alertsEnabled =
   localStorage.getItem(
-    "tivoliMysteryAlerts"
+    "houseMysteryAlerts"
   ) === "1";
 
 /* =====================================================
@@ -2057,15 +2084,13 @@ function getMap(){
 
 }
 
-function mapLocationList(
-  mapType
-){
+function mapLocationList(mapType){
 
   return (
     MAPS[
       mapType === "mall"
-      ? "mall"
-      : "house"
+        ? "mall"
+        : "house"
     ]?.locations ||
     MAPS.house.locations
   );
@@ -2080,8 +2105,8 @@ function renderMapBadges(
   const map =
     MAPS[
       mapType === "mall"
-      ? "mall"
-      : "house"
+        ? "mall"
+        : "house"
     ];
 
   if(!map){
@@ -2093,7 +2118,9 @@ function renderMapBadges(
     <div class="${compact ? "" : "map-badge"}">
 
       <strong>
-        ${escapeHtml(map.name)}
+        ${escapeHtml(
+          map.name
+        )}
       </strong>
 
       ${
@@ -2104,13 +2131,18 @@ function renderMapBadges(
               ?
               `
                 <span class="badge">
-                  ${escapeHtml(location)}
+                  ${escapeHtml(
+                    location
+                  )}
                 </span>
               `
               :
               `
                 <div class="map-badge">
-                  📍 ${escapeHtml(location)}
+                  📍
+                  ${escapeHtml(
+                    location
+                  )}
                 </div>
               `
           )
@@ -2131,10 +2163,10 @@ async function initializeMessaging(){
 
   try{
 
-    const supported =
+    messagingSupported =
       await isSupported();
 
-    if(!supported){
+    if(!messagingSupported){
 
       messaging = null;
 
@@ -2147,7 +2179,9 @@ async function initializeMessaging(){
     }
 
     messaging =
-      getMessaging(app);
+      getMessaging(
+        app
+      );
 
     return true;
 
@@ -2155,6 +2189,7 @@ async function initializeMessaging(){
   catch(error){
 
     messaging = null;
+    messagingSupported = false;
 
     setNotificationDebug(
       "FCM initialization failed:\n\n" +
@@ -2178,24 +2213,34 @@ async function registerServiceWorker(){
   ){
 
     setNotificationDebug(
-      "This browser does not support service workers."
+      "Service workers are not supported."
     );
 
     return null;
 
   }
 
-  /*
-    IMPORTANT:
-    This must point to a real service-worker file
-    beside index.html.
-  */
+  if(
+    location.protocol !== "https:" &&
+    location.hostname !== "localhost" &&
+    location.hostname !== "127.0.0.1"
+  ){
+
+    setNotificationDebug(
+      "FCM requires HTTPS.\n\n" +
+      "Current page:\n" +
+      location.href
+    );
+
+    return null;
+
+  }
 
   try{
 
     serviceWorkerRegistration =
       await navigator.serviceWorker.register(
-        "./sw.js",
+        "./firebase-messaging-sw.js",
         {
           scope:"./",
           updateViaCache:"none"
@@ -2205,33 +2250,18 @@ async function registerServiceWorker(){
     await navigator.serviceWorker.ready;
 
     /*
-      Force the newest waiting worker to activate.
+      Make sure a waiting worker activates.
     */
 
-    try{
+    if(
+      serviceWorkerRegistration.waiting
+    ){
 
-      if(
-        serviceWorkerRegistration.waiting
-      ){
-
-        serviceWorkerRegistration.waiting.postMessage({
-          type:"SKIP_WAITING"
-        });
-
-      }
-
-      if(
-        serviceWorkerRegistration.active
-      ){
-
-        serviceWorkerRegistration.active.postMessage({
-          type:"APP_READY"
-        });
-
-      }
+      serviceWorkerRegistration.waiting.postMessage({
+        type:"SKIP_WAITING"
+      });
 
     }
-    catch{}
 
     return serviceWorkerRegistration;
 
@@ -2243,7 +2273,8 @@ async function registerServiceWorker(){
     setNotificationDebug(
       "Service worker registration failed:\n\n" +
       formatFirebaseError(error) +
-      "\n\nMake sure sw.js exists beside index.html and the site is HTTPS."
+      "\n\n" +
+      "Make sure firebase-messaging-sw.js is beside index.html."
     );
 
     return null;
@@ -2253,54 +2284,678 @@ async function registerServiceWorker(){
 }
 
 /* =====================================================
-ERROR FORMAT
+FCM REGISTRATION
 ===================================================== */
 
-function formatFirebaseError(
-  error
-){
+async function registerPushNotifications(){
 
-  if(!error){
-    return "Unknown error";
-  }
+  setNotificationDebug(
+    "Starting push registration..."
+  );
 
-  const parts = [];
+  if(
+    !("Notification" in window)
+  ){
 
-  if(error.name){
-    parts.push(
-      "name: " +
-      error.name
+    setNotificationDebug(
+      "This browser does not provide the Notification API."
     );
+
+    return false;
+
   }
 
-  if(error.code){
-    parts.push(
-      "code: " +
-      error.code
+  if(
+    Notification.permission !== "granted"
+  ){
+
+    setNotificationDebug(
+      "Notification permission is not granted.\n\n" +
+      "Current state: " +
+      Notification.permission
     );
+
+    return false;
+
   }
 
-  if(error.message){
-    parts.push(
-      "message: " +
-      error.message
+  if(
+    !messagingSupported ||
+    !messaging
+  ){
+
+    const initialized =
+      await initializeMessaging();
+
+    if(!initialized){
+      return false;
+    }
+
+  }
+
+  if(
+    !serviceWorkerRegistration
+  ){
+
+    await registerServiceWorker();
+
+  }
+
+  if(
+    !serviceWorkerRegistration
+  ){
+
+    return false;
+
+  }
+
+  try{
+
+    /*
+      Firebase's getToken() accepts the explicit
+      ServiceWorkerRegistration and VAPID key.
+    */
+
+    const token =
+      await getToken(
+
+        messaging,
+
+        {
+          vapidKey:
+            FIREBASE_VAPID_PUBLIC_KEY,
+
+          serviceWorkerRegistration:
+            serviceWorkerRegistration
+
+        }
+
+      );
+
+    if(!token){
+
+      fcmToken = "";
+      fcmReady = false;
+
+      setNotificationDebug(
+        "Firebase did not return an FCM registration token."
+      );
+
+      return false;
+
+    }
+
+    fcmToken =
+      token;
+
+    fcmReady =
+      true;
+
+    await set(
+
+      ref(
+        db,
+        `pushTokens/${playerId}`
+      ),
+
+      {
+
+        token,
+
+        playerId,
+
+        name:
+          myName || null,
+
+        currentRoom:
+          roomCode || null,
+
+        currentGame:
+          roomData?.status || null,
+
+        roundId:
+          currentRoundId || null,
+
+        platform:
+          "web",
+
+        permission:
+          Notification.permission,
+
+        updatedAt:
+          serverTimestamp(),
+
+        userAgent:
+          navigator.userAgent
+
+      }
+
     );
+
+    await saveDeviceRecord();
+
+    setNotificationDebug(
+      "✅ PUSH READY\n\n" +
+      "Firebase registration succeeded."
+    );
+
+    updateNotificationUI(
+      true
+    );
+
+    return true;
+
   }
+  catch(error){
 
-  if(!parts.length){
+    fcmToken = "";
+    fcmReady = false;
 
-    try{
-      return JSON.stringify(
+    const text =
+      formatFirebaseError(
         error
       );
-    }
-    catch{
-      return String(error);
-    }
+
+    setNotificationDebug(
+      "FCM TOKEN ERROR\n\n" +
+      text +
+      "\n\n" +
+      "Check:\n" +
+      "1. Firebase API key matches this exact Firebase app.\n" +
+      "2. VAPID key belongs to this project.\n" +
+      "3. firebase-messaging-sw.js exists at the site root.\n" +
+      "4. The site is HTTPS.\n" +
+      "5. FCM Registration API is enabled."
+    );
+
+    updateNotificationUI(
+      false
+    );
+
+    console.error(
+      "FCM TOKEN ERROR",
+      error
+    );
+
+    return false;
 
   }
 
-  return parts.join("\n");
+}
+
+function updateNotificationUI(
+  ready
+){
+
+  const status =
+    document.getElementById(
+      "alertStatus"
+    );
+
+  const button =
+    document.getElementById(
+      "enableAlertsButton"
+    );
+
+  if(
+    !status ||
+    !button
+  ){
+    return;
+  }
+
+  if(ready){
+
+    status.textContent =
+      "✅ Push notifications ready.";
+
+    button.textContent =
+      "✅ PUSH NOTIFICATIONS ENABLED";
+
+  }
+  else{
+
+    status.textContent =
+      "⚠️ Push setup needs fixing.";
+
+    button.textContent =
+      "⚠️ RETRY PUSH SETUP";
+
+  }
+
+}
+
+/* =====================================================
+FOREGROUND FCM
+===================================================== */
+
+function startForegroundMessaging(){
+
+  if(
+    foregroundMessagingStarted ||
+    !messaging
+  ){
+    return;
+  }
+
+  foregroundMessagingStarted = true;
+
+  onMessage(
+    messaging,
+    async payload=>{
+
+      console.log(
+        "FOREGROUND FCM:",
+        payload
+      );
+
+      const notification =
+        payload?.notification ||
+        {};
+
+      const data =
+        payload?.data ||
+        {};
+
+      const title =
+        notification.title ||
+        data.title ||
+        "🔔 House Mystery";
+
+      const body =
+        notification.body ||
+        data.body ||
+        "New House Mystery alert.";
+
+      await showPersistentNotification(
+
+        title,
+
+        {
+
+          body,
+
+          tag:
+            data.tag ||
+            (
+              "house-fcm-" +
+              Date.now()
+            ),
+
+          requireInteraction:
+            data.requireInteraction ===
+            "true" ||
+            data.requireInteraction ===
+            true,
+
+          renotify:
+            data.renotify ===
+            "true" ||
+            data.renotify ===
+            true,
+
+          notificationType:
+            data.notificationType ||
+            null
+
+        }
+
+      );
+
+    }
+
+  );
+
+}
+
+/* =====================================================
+LOCAL SYSTEM NOTIFICATION
+===================================================== */
+
+async function showPersistentNotification(
+  title,
+  options = {}
+){
+
+  if(
+    !("Notification" in window) ||
+    Notification.permission !== "granted"
+  ){
+
+    return false;
+
+  }
+
+  try{
+
+    const registration =
+      serviceWorkerRegistration ||
+      await navigator.serviceWorker.ready;
+
+    if(!registration){
+      return false;
+    }
+
+    await registration.showNotification(
+
+      title,
+
+      {
+
+        body:
+          options.body ||
+          "",
+
+        icon:
+          "./icon-192.png",
+
+        badge:
+          "./icon-192.png",
+
+        tag:
+          options.tag ||
+          (
+            "house-mystery-" +
+            Date.now()
+          ),
+
+        renotify:
+          options.renotify ??
+          true,
+
+        requireInteraction:
+          options.requireInteraction ??
+          false,
+
+        vibrate:
+          options.vibrate ||
+          [250,120,250],
+
+        data:{
+
+          roomCode:
+            options.roomCode ||
+            roomCode ||
+            null,
+
+          roundId:
+            options.roundId ||
+            currentRoundId ||
+            null,
+
+          taskId:
+            options.taskId ||
+            null,
+
+          notificationType:
+            options.notificationType ||
+            null,
+
+          url:
+            options.url ||
+            location.href
+
+        }
+
+      }
+
+    );
+
+    return true;
+
+  }
+  catch(error){
+
+    console.warn(
+      "NOTIFICATION ERROR",
+      error
+    );
+
+    return false;
+
+  }
+
+}
+
+/* =====================================================
+ENABLE ALERTS
+===================================================== */
+
+window.enableAlerts =
+async function(){
+
+  try{
+
+    if(
+      !("Notification" in window)
+    ){
+
+      alert(
+        "Notifications are not supported here."
+      );
+
+      return;
+
+    }
+
+    if(
+      Notification.permission ===
+      "denied"
+    ){
+
+      alert(
+        "Notifications are blocked. Enable them in iPhone Settings."
+      );
+
+      return;
+
+    }
+
+    /*
+      Ask permission first.
+    */
+
+    if(
+      Notification.permission !==
+      "granted"
+    ){
+
+      const permission =
+        await Notification.requestPermission();
+
+      if(
+        permission !==
+        "granted"
+      ){
+
+        setNotificationDebug(
+          "Notification permission was not granted."
+        );
+
+        return;
+
+      }
+
+    }
+
+    /*
+      Register the Firebase messaging worker.
+    */
+
+    const sw =
+      await registerServiceWorker();
+
+    if(!sw){
+
+      updateNotificationUI(
+        false
+      );
+
+      return;
+
+    }
+
+    /*
+      Initialize messaging.
+    */
+
+    const readyMessaging =
+      await initializeMessaging();
+
+    if(!readyMessaging){
+
+      updateNotificationUI(
+        false
+      );
+
+      return;
+
+    }
+
+    startForegroundMessaging();
+
+    alertsEnabled =
+      true;
+
+    localStorage.setItem(
+      "houseMysteryAlerts",
+      "1"
+    );
+
+    const ready =
+      await registerPushNotifications();
+
+    if(ready){
+
+      await showPersistentNotification(
+
+        "🔔 House Mystery",
+
+        {
+
+          body:
+            "Push registration successful.",
+
+          tag:
+            "house-test",
+
+          requireInteraction:
+            true,
+
+          notificationType:
+            "test"
+
+        }
+
+      );
+
+    }
+
+    startTaskNotificationWatcher();
+
+  }
+  catch(error){
+
+    console.error(
+      "NOTIFICATION SETUP",
+      error
+    );
+
+    setNotificationDebug(
+      "NOTIFICATION SETUP ERROR\n\n" +
+      formatFirebaseError(error)
+    );
+
+  }
+
+};
+
+window.closeAlertModal =
+function(){
+
+  document
+    .getElementById(
+      "alertModal"
+    )
+    .classList
+    .add(
+      "hidden"
+    );
+
+};
+
+/* =====================================================
+PLAYER ID
+===================================================== */
+
+function loadSavedName(){
+
+  return localStorage.getItem(
+    "houseMysteryName"
+  );
+
+}
+
+/* =====================================================
+DEVICE
+===================================================== */
+
+async function saveDeviceRecord(){
+
+  if(!myName){
+    return;
+  }
+
+  try{
+
+    await update(
+
+      ref(
+        db,
+        `devices/${playerId}`
+      ),
+
+      {
+
+        playerId,
+
+        name:
+          myName,
+
+        lastSeenAt:
+          serverTimestamp(),
+
+        currentRoom:
+          roomCode || null,
+
+        currentGame:
+          roomData?.status || null,
+
+        pushReady:
+          fcmReady,
+
+        notificationPermission:
+          (
+            "Notification" in window
+            ?
+            Notification.permission
+            :
+            "unsupported"
+          )
+
+      }
+
+    );
+
+  }
+  catch(error){
+
+    console.warn(
+      "DEVICE:",
+      error
+    );
+
+  }
 
 }
 
@@ -2358,8 +3013,13 @@ function setConnectionState(
 
   if(state === "red"){
 
-    bar.classList.add("red-state");
-    red.classList.add("active");
+    bar.classList.add(
+      "red-state"
+    );
+
+    red.classList.add(
+      "active"
+    );
 
     text.textContent =
       "NO INTERNET";
@@ -2370,8 +3030,13 @@ function setConnectionState(
   }
   else if(state === "green"){
 
-    bar.classList.add("green-state");
-    green.classList.add("active");
+    bar.classList.add(
+      "green-state"
+    );
+
+    green.classList.add(
+      "active"
+    );
 
     text.textContent =
       "CONNECTED";
@@ -2382,8 +3047,13 @@ function setConnectionState(
   }
   else{
 
-    bar.classList.add("yellow-state");
-    yellow.classList.add("active");
+    bar.classList.add(
+      "yellow-state"
+    );
+
+    yellow.classList.add(
+      "active"
+    );
 
     text.textContent =
       "CONNECTING";
@@ -2402,16 +3072,28 @@ function setConnectionState(
 function updateConnectionState(){
 
   if(!browserOnline){
-    setConnectionState("red");
+
+    setConnectionState(
+      "red"
+    );
+
     return;
+
   }
 
   if(firebaseConnected){
-    setConnectionState("green");
+
+    setConnectionState(
+      "green"
+    );
+
     return;
+
   }
 
-  setConnectionState("yellow");
+  setConnectionState(
+    "yellow"
+  );
 
 }
 
@@ -2419,7 +3101,9 @@ function startConnectionMonitoring(){
 
   updateConnectionState();
 
-  if(!firebaseConnectionUnsubscribe){
+  if(
+    !firebaseConnectionUnsubscribe
+  ){
 
     firebaseConnectionUnsubscribe =
       onValue(
@@ -2440,15 +3124,14 @@ function startConnectionMonitoring(){
 
         error=>{
 
-          console.warn(
-            "FIREBASE CONNECTION:",
-            error
-          );
-
           firebaseConnected =
             false;
 
           updateConnectionState();
+
+          console.warn(
+            error
+          );
 
         }
 
@@ -2456,25 +3139,37 @@ function startConnectionMonitoring(){
 
   }
 
-  if(onlineListenerAdded){
+  if(
+    onlineListenerAdded
+  ){
     return;
   }
 
-  onlineListenerAdded = true;
+  onlineListenerAdded =
+    true;
 
   window.addEventListener(
     "online",
     async()=>{
 
-      browserOnline = true;
-      firebaseConnected = false;
+      browserOnline =
+        true;
+
+      firebaseConnected =
+        false;
 
       updateConnectionState();
 
       await reconnectCurrentRoom();
 
-      if(alertsEnabled){
+      if(
+        alertsEnabled &&
+        "Notification" in window &&
+        Notification.permission === "granted"
+      ){
+
         await registerPushNotifications();
+
       }
 
     }
@@ -2484,8 +3179,11 @@ function startConnectionMonitoring(){
     "offline",
     ()=>{
 
-      browserOnline = false;
-      firebaseConnected = false;
+      browserOnline =
+        false;
+
+      firebaseConnected =
+        false;
 
       updateConnectionState();
 
@@ -2519,8 +3217,12 @@ function sharedDate(
 
 function startServerClock(){
 
-  if(serverOffsetUnsubscribe){
+  if(
+    serverOffsetUnsubscribe
+  ){
+
     serverOffsetUnsubscribe();
+
   }
 
   serverOffsetUnsubscribe =
@@ -2535,7 +3237,8 @@ function startServerClock(){
 
         serverTimeOffset =
           Number(
-            snapshot.val() || 0
+            snapshot.val() ||
+            0
           );
 
       }
@@ -2556,7 +3259,9 @@ function random(
     !Array.isArray(array) ||
     !array.length
   ){
+
     return "";
+
   }
 
   return array[
@@ -2578,7 +3283,8 @@ function shuffle(
     : [];
 
   for(
-    let i = result.length - 1;
+    let i =
+      result.length - 1;
     i > 0;
     i--
   ){
@@ -2686,21 +3392,24 @@ function formatDuration(
     Math.max(
       0,
       Math.ceil(
-        Number(ms) / 1000
+        Number(ms) /
+        1000
       )
     );
 
   return (
     pad(
       Math.floor(
-        seconds / 60
+        seconds /
+        60
       )
     )
     +
     ":"
     +
     pad(
-      seconds % 60
+      seconds %
+      60
     )
   );
 
@@ -2713,11 +3422,26 @@ function escapeHtml(
   return String(
     value ?? ""
   )
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
+    .replaceAll(
+      "&",
+      "&amp;"
+    )
+    .replaceAll(
+      "<",
+      "&lt;"
+    )
+    .replaceAll(
+      ">",
+      "&gt;"
+    )
+    .replaceAll(
+      '"',
+      "&quot;"
+    )
+    .replaceAll(
+      "'",
+      "&#039;"
+    );
 
 }
 
@@ -2736,754 +3460,144 @@ function sleep(
 }
 
 /* =====================================================
-NOTIFICATION REGISTRATION
+ROOM EXPIRY
 ===================================================== */
 
-async function registerPushNotifications(){
-
-  setNotificationDebug(
-    "Starting push registration..."
-  );
-
-  if(
-    !("Notification" in window)
-  ){
-
-    setNotificationDebug(
-      "Notification API is unavailable."
-    );
-
-    return false;
-
-  }
-
-  if(
-    Notification.permission !==
-    "granted"
-  ){
-
-    setNotificationDebug(
-      "Notification permission is not granted.\n\nCurrent state: " +
-      Notification.permission
-    );
-
-    return false;
-
-  }
-
-  if(!messaging){
-
-    await initializeMessaging();
-
-  }
-
-  if(!messaging){
-
-    return false;
-
-  }
-
-  if(!serviceWorkerRegistration){
-
-    await registerServiceWorker();
-
-  }
-
-  if(!serviceWorkerRegistration){
-
-    return false;
-
-  }
-
-  try{
-
-    /*
-      Explicit registration is important.
-      Firebase documents that getToken() can receive
-      the ServiceWorkerRegistration directly.
-    */
-
-    const token =
-      await getToken(
-
-        messaging,
-
-        {
-          vapidKey:
-            FIREBASE_VAPID_PUBLIC_KEY,
-
-          serviceWorkerRegistration
-        }
-
-      );
-
-    if(!token){
-
-      setNotificationDebug(
-        "Firebase returned no registration token."
-      );
-
-      fcmReady = false;
-
-      return false;
-
-    }
-
-    fcmToken =
-      token;
-
-    fcmReady =
-      true;
-
-    await set(
-
-      ref(
-        db,
-        `pushTokens/${playerId}`
-      ),
-
-      {
-
-        token,
-
-        playerId,
-
-        name:
-          myName || null,
-
-        currentRoom:
-          roomCode || null,
-
-        currentGame:
-          roomData?.status || null,
-
-        roundId:
-          currentRoundId || null,
-
-        platform:
-          "web",
-
-        permission:
-          Notification.permission,
-
-        updatedAt:
-          serverTimestamp(),
-
-        userAgent:
-          navigator.userAgent
-
-      }
-
-    );
-
-    await saveDeviceRecord();
-
-    setNotificationDebug(
-      "✅ FCM registration successful.\n\n" +
-      "Token saved to Firebase."
-    );
-
-    return true;
-
-  }
-  catch(error){
-
-    fcmReady = false;
-
-    setNotificationDebug(
-      "FCM TOKEN ERROR\n\n" +
-      formatFirebaseError(error) +
-      "\n\n" +
-      "Common causes:\n" +
-      "• VAPID key does not belong to this Firebase project\n" +
-      "• sw.js is missing/invalid\n" +
-      "• site is not HTTPS\n" +
-      "• browser/PWA does not support Web Push\n" +
-      "• Firebase Messaging Web Push setup is incomplete"
-    );
-
-    console.error(
-      "FCM TOKEN ERROR",
-      error
-    );
-
-    return false;
-
-  }
-
-}
-
-/* =====================================================
-FOREGROUND MESSAGING
-===================================================== */
-
-function startForegroundMessaging(){
-
-  if(
-    foregroundMessagingStarted ||
-    !messaging
-  ){
-    return;
-  }
-
-  foregroundMessagingStarted =
-    true;
-
-  onMessage(
-    messaging,
-    async payload=>{
-
-      console.log(
-        "FOREGROUND FCM:",
-        payload
-      );
-
-      const notification =
-        payload?.notification || {};
-
-      const data =
-        payload?.data || {};
-
-      const title =
-        notification.title ||
-        data.title ||
-        "🔔 House Mystery";
-
-      const body =
-        notification.body ||
-        data.body ||
-        "New House Mystery alert.";
-
-      await showPersistentNotification(
-
-        title,
-
-        {
-
-          body,
-
-          tag:
-            data.tag ||
-            `house-fcm-${Date.now()}`,
-
-          requireInteraction:
-            data.requireInteraction === "true" ||
-            data.requireInteraction === true,
-
-          renotify:
-            data.renotify === "true" ||
-            data.renotify === true,
-
-          notificationType:
-            data.notificationType ||
-            null
-
-        }
-
-      );
-
-    }
-
+function roomActivityTime(
+  data
+){
+
+  return Number(
+    data?.lastActivityAt ||
+    data?.createdAt ||
+    0
   );
 
 }
 
-/* =====================================================
-SYSTEM NOTIFICATION
-===================================================== */
-
-async function showPersistentNotification(
-  title,
-  options = {}
+function roomExpiryFor(
+  data
 ){
 
-  if(
-    !("Notification" in window) ||
-    Notification.permission !==
-    "granted"
-  ){
-    return false;
-  }
-
-  try{
-
-    const registration =
-      serviceWorkerRegistration ||
-      await navigator.serviceWorker.ready;
-
-    if(!registration){
-      return false;
-    }
-
-    await registration.showNotification(
-
-      title,
-
-      {
-
-        body:
-          options.body || "",
-
-        icon:
-          "./icon-192.png",
-
-        badge:
-          "./icon-192.png",
-
-        tag:
-          options.tag ||
-          `house-mystery-${Date.now()}`,
-
-        renotify:
-          options.renotify ??
-          true,
-
-        requireInteraction:
-          options.requireInteraction ??
-          false,
-
-        vibrate:
-          options.vibrate ||
-          [250,120,250],
-
-        data:{
-
-          roomCode:
-            roomCode || null,
-
-          roundId:
-            currentRoundId || null,
-
-          taskId:
-            options.taskId || null,
-
-          notificationType:
-            options.notificationType || null,
-
-          url:
-            location.href
-
-        }
-
-      }
-
-    );
-
-    return true;
-
-  }
-  catch(error){
-
-    console.warn(
-      "NOTIFICATION ERROR",
-      error
-    );
-
-    return false;
-
-  }
+  return data?.status === "game"
+    ? GAME_EXPIRY
+    : LOBBY_EXPIRY;
 
 }
 
-/* =====================================================
-ENABLE ALERTS
-===================================================== */
-
-window.enableAlerts =
-async function(){
-
-  try{
-
-    setNotificationDebug(
-      "Preparing notification system..."
-    );
-
-    if(
-      !("Notification" in window)
-    ){
-
-      alert(
-        "This browser does not support notifications."
-      );
-
-      return;
-
-    }
-
-    if(
-      Notification.permission ===
-      "denied"
-    ){
-
-      alert(
-        "Notifications are blocked. Enable notifications for House Mystery in iPhone Settings."
-      );
-
-      return;
-
-    }
-
-    if(
-      Notification.permission !==
-      "granted"
-    ){
-
-      const permission =
-        await Notification.requestPermission();
-
-      if(
-        permission !==
-        "granted"
-      ){
-
-        setNotificationDebug(
-          "Notification permission was not granted."
-        );
-
-        return;
-
-      }
-
-    }
-
-    await registerServiceWorker();
-
-    await initializeMessaging();
-
-    startForegroundMessaging();
-
-    alertsEnabled =
-      true;
-
-    localStorage.setItem(
-      "tivoliMysteryAlerts",
-      "1"
-    );
-
-    const ready =
-      await registerPushNotifications();
-
-    const status =
-      document.getElementById(
-        "alertStatus"
-      );
-
-    const button =
-      document.getElementById(
-        "enableAlertsButton"
-      );
-
-    if(ready){
-
-      status.textContent =
-        "✅ Push notifications ready.";
-
-      button.textContent =
-        "✅ PUSH NOTIFICATIONS ENABLED";
-
-      /*
-        Test notification.
-      */
-
-      await showPersistentNotification(
-        "🔔 House Mystery",
-        {
-          body:
-            "Push registration successful.",
-          tag:
-            "house-test",
-          notificationType:
-            "test",
-          requireInteraction:
-            true
-        }
-      );
-
-    }
-    else{
-
-      status.textContent =
-        "⚠️ Push registration failed.";
-
-      button.textContent =
-        "⚠️ RETRY PUSH SETUP";
-
-    }
-
-    startTaskNotificationWatcher();
-
-  }
-  catch(error){
-
-    console.error(
-      "NOTIFICATION SETUP",
-      error
-    );
-
-    setNotificationDebug(
-      "NOTIFICATION SETUP ERROR\n\n" +
-      formatFirebaseError(error)
-    );
-
-    alert(
-      "Could not enable notifications.\n\n" +
-      (
-        error?.message ||
-        "Please try again."
-      )
-    );
-
-  }
-
-};
-
-window.closeAlertModal =
-function(){
-
-  document
-    .getElementById(
-      "alertModal"
-    )
-    .classList
-    .add("hidden");
-
-};
-
-/* =====================================================
-TASK NOTIFICATIONS
-===================================================== */
-
-function taskNotificationKey(
-  roundId,
-  taskId
+function isRoomStale(
+  data
 ){
+
+  const activity =
+    roomActivityTime(
+      data
+    );
+
+  if(!activity){
+    return true;
+  }
 
   return (
-    "houseTaskNotification_" +
-    String(roundId) +
-    "_" +
-    String(taskId)
+    sharedNow() -
+    activity
+  ) >=
+  roomExpiryFor(
+    data
   );
 
 }
 
-function taskNotificationWasSent(
-  roundId,
-  taskId
-){
+/* =====================================================
+CLEANUP
+===================================================== */
 
-  return (
-    localStorage.getItem(
-      taskNotificationKey(
-        roundId,
-        taskId
-      )
-    ) === "1"
-  );
+function stopGameListeners(){
+
+  if(callsUnsubscribe){
+
+    callsUnsubscribe();
+    callsUnsubscribe = null;
+
+  }
+
+  if(tasksUnsubscribe){
+
+    tasksUnsubscribe();
+    tasksUnsubscribe = null;
+
+  }
+
+  if(notesUnsubscribe){
+
+    notesUnsubscribe();
+    notesUnsubscribe = null;
+
+  }
+
+  if(detectiveNotesUnsubscribe){
+
+    detectiveNotesUnsubscribe();
+    detectiveNotesUnsubscribe = null;
+
+  }
+
+  if(resultUnsubscribe){
+
+    resultUnsubscribe();
+    resultUnsubscribe = null;
+
+  }
 
 }
 
-function markTaskNotificationSent(
-  roundId,
-  taskId
-){
+function stopRoomListeners(){
 
-  localStorage.setItem(
+  if(roomUnsubscribe){
 
-    taskNotificationKey(
-      roundId,
-      taskId
-    ),
+    roomUnsubscribe();
+    roomUnsubscribe = null;
 
-    "1"
+  }
 
-  );
+  if(presenceUnsubscribe){
+
+    presenceUnsubscribe();
+    presenceUnsubscribe = null;
+
+  }
+
+  stopGameListeners();
 
 }
 
-function startTaskNotificationWatcher(){
+function stopTimers(){
+
+  clearInterval(
+    heartbeatInterval
+  );
+
+  clearInterval(
+    roomExpiryInterval
+  );
+
+  clearInterval(
+    globalInterval
+  );
 
   clearInterval(
     taskNotificationInterval
   );
 
-  if(
-    !alertsEnabled ||
-    !("Notification" in window) ||
-    Notification.permission !==
-    "granted"
-  ){
-    return;
-  }
+  clearTimeout(
+    callTimer
+  );
 
-  taskNotificationInterval =
-    setInterval(
-      checkTaskNotifications,
-      1000
-    );
-
-  checkTaskNotifications();
-
-}
-
-async function checkTaskNotifications(){
-
-  if(
-    !alertsEnabled ||
-    !("Notification" in window) ||
-    Notification.permission !==
-    "granted"
-  ){
-    return;
-  }
-
-  if(
-    !roomData?.game ||
-    !Array.isArray(
-      mySecret?.tasks
-    )
-  ){
-    return;
-  }
-
-  const roundId =
-    String(
-      roomData.game.roundId ||
-      roomData.game.roundNumber ||
-      "1"
-    );
-
-  const now =
-    sharedNow();
-
-  for(
-    const task of mySecret.tasks
-  ){
-
-    const unlockAt =
-      Number(
-        task.unlockAt
-      );
-
-    if(
-      now <
-      unlockAt
-    ){
-      continue;
-    }
-
-    if(
-      taskNotificationWasSent(
-        roundId,
-        task.id
-      )
-    ){
-      continue;
-    }
-
-    const shown =
-      await showPersistentNotification(
-
-        "🔔 Task Unlocked",
-
-        {
-
-          body:
-            task.description ||
-            "A new task is available.",
-
-          tag:
-            `house-task-${roundId}-${task.id}`,
-
-          requireInteraction:
-            true,
-
-          renotify:
-            true,
-
-          notificationType:
-            "task",
-
-          taskId:
-            task.id
-
-        }
-
-      );
-
-    if(shown){
-
-      markTaskNotificationSent(
-        roundId,
-        task.id
-      );
-
-    }
-
-  }
-
-}
-
-/* =====================================================
-DEVICE
-===================================================== */
-
-async function saveDeviceRecord(){
-
-  if(!myName){
-    return;
-  }
-
-  try{
-
-    await update(
-
-      ref(
-        db,
-        `devices/${playerId}`
-      ),
-
-      {
-
-        playerId,
-
-        name:
-          myName,
-
-        lastSeenAt:
-          serverTimestamp(),
-
-        currentRoom:
-          roomCode || null,
-
-        currentGame:
-          roomData?.status || null,
-
-        pushReady:
-          fcmReady,
-
-        notificationPermission:
-          (
-            "Notification" in window
-            ?
-            Notification.permission
-            :
-            "unsupported"
-          )
-
-      }
-
-    );
-
-  }
-  catch(error){
-
-    console.warn(
-      "DEVICE:",
-      error
-    );
-
-  }
+  heartbeatInterval = null;
+  roomExpiryInterval = null;
+  globalInterval = null;
+  taskNotificationInterval = null;
+  callTimer = null;
 
 }
 
@@ -3507,7 +3621,8 @@ async function startPresence(){
 
     await onDisconnect(
       presenceRef
-    ).set({
+    )
+    .set({
 
       connected:false,
 
@@ -3544,44 +3659,36 @@ async function startPresence(){
 
   heartbeatInterval =
     setInterval(
-
       async()=>{
 
-        if(!browserOnline){
+        if(
+          !browserOnline
+        ){
           return;
         }
 
         try{
 
           await update(
-
             presenceRef,
-
             {
-
               connected:true,
-
               lastSeenAt:
                 serverTimestamp()
-
             }
-
           );
 
         }
         catch(error){
 
           console.warn(
-            "PRESENCE HEARTBEAT:",
             error
           );
 
         }
 
       },
-
       30000
-
     );
 
   if(presenceUnsubscribe){
@@ -3601,7 +3708,8 @@ async function startPresence(){
         if(roomData){
 
           roomData.__presence =
-            snapshot.val() || {};
+            snapshot.val() ||
+            {};
 
           renderLobby();
 
@@ -3632,7 +3740,9 @@ function hideAllMainScreens(){
       document
         .getElementById(id)
         ?.classList
-        .add("hidden");
+        .add(
+          "hidden"
+        );
 
     }
   );
@@ -3651,17 +3761,19 @@ function updateCreateMapPreview(){
       "createMapPreview"
     );
 
-  if(!select || !box){
+  if(
+    !select ||
+    !box
+  ){
     return;
   }
 
-  const type =
-    select.value === "mall"
-    ? "mall"
-    : "house";
-
   box.innerHTML =
-    renderMapBadges(type);
+    renderMapBadges(
+      select.value === "mall"
+      ? "mall"
+      : "house"
+    );
 
 }
 
@@ -3678,13 +3790,21 @@ function renderHomeMaps(){
     );
 
   if(house){
+
     house.innerHTML =
-      renderMapBadges("house");
+      renderMapBadges(
+        "house"
+      );
+
   }
 
   if(mall){
+
     mall.innerHTML =
-      renderMapBadges("mall");
+      renderMapBadges(
+        "mall"
+      );
+
   }
 
 }
@@ -3696,7 +3816,10 @@ function renderLobbyMap(){
       "lobbyMap"
     );
 
-  if(!box || !roomData){
+  if(
+    !box ||
+    !roomData
+  ){
     return;
   }
 
@@ -3733,7 +3856,10 @@ function renderGameMap(){
       "gameMap"
     );
 
-  if(!box || !roomData){
+  if(
+    !box ||
+    !roomData
+  ){
     return;
   }
 
@@ -3750,36 +3876,40 @@ function showHome(){
   hideAllMainScreens();
 
   document
-    .getElementById("home")
+    .getElementById(
+      "home"
+    )
     .classList
-    .remove("hidden");
+    .remove(
+      "hidden"
+    );
 
   document
-    .getElementById("userBar")
+    .getElementById(
+      "userBar"
+    )
     .classList
-    .remove("hidden");
+    .remove(
+      "hidden"
+    );
 
   document
-    .getElementById("userBarName")
+    .getElementById(
+      "userBarName"
+    )
     .textContent =
     myName;
 
   document
-    .getElementById("welcomeName")
+    .getElementById(
+      "welcomeName"
+    )
     .textContent =
     myName;
 
   renderHomeMaps();
 
   restoreSavedRoom();
-
-}
-
-function loadSavedName(){
-
-  return localStorage.getItem(
-    "tivoliMysteryName"
-  );
 
 }
 
@@ -3813,7 +3943,7 @@ async function(){
     );
 
   localStorage.setItem(
-    "tivoliMysteryName",
+    "houseMysteryName",
     myName
   );
 
@@ -3821,8 +3951,12 @@ async function(){
 
   showHome();
 
-  if(alertsEnabled){
+  if(
+    alertsEnabled
+  ){
+
     await registerPushNotifications();
+
   }
 
 };
@@ -3854,7 +3988,7 @@ async function(){
     );
 
   localStorage.setItem(
-    "tivoliMysteryName",
+    "houseMysteryName",
     myName
   );
 
@@ -3880,7 +4014,6 @@ async function(){
     catch(error){
 
       console.warn(
-        "NAME UPDATE:",
         error
       );
 
@@ -3900,13 +4033,10 @@ async function(){
       ),
 
       {
-
         name:
           myName,
-
         updatedAt:
           serverTimestamp()
-
       }
 
     );
@@ -3938,7 +4068,7 @@ function saveLocalRoom(){
   if(roomCode){
 
     localStorage.setItem(
-      "tivoliMysteryRoom",
+      "houseMysteryRoom",
       roomCode
     );
 
@@ -3949,7 +4079,7 @@ function saveLocalRoom(){
 function getLocalRoom(){
 
   return localStorage.getItem(
-    "tivoliMysteryRoom"
+    "houseMysteryRoom"
   );
 
 }
@@ -4029,7 +4159,7 @@ function normalizeRoomCode(
 }
 
 /* =====================================================
-CREATE ROOM
+CREATE
 ===================================================== */
 
 window.createRoom =
@@ -4052,7 +4182,9 @@ function(){
       "createScreen"
     )
     .classList
-    .remove("hidden");
+    .remove(
+      "hidden"
+    );
 
   updateCreateMapPreview();
 
@@ -4080,13 +4212,11 @@ async function(){
 
   const code =
     normalizeRoomCode(
-
       document
         .getElementById(
           "roomInput"
         )
         .value
-
     );
 
   const playerLimit =
@@ -4117,7 +4247,8 @@ async function(){
 
   }
 
-  roomCode = code;
+  roomCode =
+    code;
 
   const roomRef =
     ref(
@@ -4200,7 +4331,14 @@ async function(){
 
     await saveDeviceRecord();
 
-    await registerPushNotifications();
+    if(
+      alertsEnabled &&
+      Notification.permission === "granted"
+    ){
+
+      await registerPushNotifications();
+
+    }
 
     await startRoomSession();
 
@@ -4224,7 +4362,7 @@ async function(){
 };
 
 /* =====================================================
-JOIN ROOM
+JOIN
 ===================================================== */
 
 window.joinRoom =
@@ -4242,13 +4380,11 @@ async function(){
 
   const code =
     normalizeRoomCode(
-
       document
         .getElementById(
           "roomInput"
         )
         .value
-
     );
 
   if(code.length < 2){
@@ -4261,7 +4397,8 @@ async function(){
 
   }
 
-  roomCode = code;
+  roomCode =
+    code;
 
   const roomRef =
     ref(
@@ -4311,7 +4448,9 @@ async function(){
     }
 
     const existingPlayer =
-      data.players?.[playerId];
+      data.players?.[
+        playerId
+      ];
 
     if(
       data.status === "game" &&
@@ -4335,7 +4474,9 @@ async function(){
       data.status === "lobby" &&
       !existingPlayer &&
       playerCount >=
-      Number(data.playerLimit)
+      Number(
+        data.playerLimit
+      )
     ){
 
       alert(
@@ -4402,7 +4543,14 @@ async function(){
 
     await saveDeviceRecord();
 
-    await registerPushNotifications();
+    if(
+      alertsEnabled &&
+      Notification.permission === "granted"
+    ){
+
+      await registerPushNotifications();
+
+    }
 
     await startRoomSession();
 
@@ -4447,7 +4595,9 @@ async function startRoomSession(){
       "lobby"
     )
     .classList
-    .remove("hidden");
+    .remove(
+      "hidden"
+    );
 
   document
     .getElementById(
@@ -4464,7 +4614,9 @@ async function startRoomSession(){
 
   listenToRoom();
 
-  if(alertsEnabled){
+  if(
+    alertsEnabled
+  ){
 
     startTaskNotificationWatcher();
 
@@ -4542,21 +4694,26 @@ LOBBY
 
 function enterLobbyFromRoom(){
 
-  gameVisible = false;
+  gameVisible =
+    false;
 
   document
     .getElementById(
       "game"
     )
     .classList
-    .add("hidden");
+    .add(
+      "hidden"
+    );
 
   document
     .getElementById(
       "lobby"
     )
     .classList
-    .remove("hidden");
+    .remove(
+      "hidden"
+    );
 
   mySecret = null;
   currentRoundId = null;
@@ -4567,7 +4724,8 @@ function enterLobbyFromRoom(){
     globalInterval
   );
 
-  globalInterval = null;
+  globalInterval =
+    null;
 
 }
 
@@ -4578,10 +4736,13 @@ function renderLobby(){
   }
 
   const players =
-    roomData.players || {};
+    roomData.players ||
+    {};
 
   const ids =
-    Object.keys(players);
+    Object.keys(
+      players
+    );
 
   const playerLimit =
     Number(
@@ -4633,7 +4794,8 @@ function renderLobby(){
     `;
 
   const presence =
-    roomData.__presence || {};
+    roomData.__presence ||
+    {};
 
   document
     .getElementById(
@@ -4646,11 +4808,11 @@ function renderLobby(){
         id=>{
 
           const player =
-            players[id] || {};
+            players[id] ||
+            {};
 
           const connected =
-            presence[id]?.connected ===
-            true;
+            presence[id]?.connected === true;
 
           return `
 
@@ -4699,7 +4861,8 @@ function renderLobby(){
       .join("");
 
   const isHost =
-    roomData.host === playerId;
+    roomData.host ===
+    playerId;
 
   const hostPanel =
     document.getElementById(
@@ -4714,7 +4877,8 @@ function renderLobby(){
   if(isHost){
 
     const full =
-      ids.length === playerLimit;
+      ids.length ===
+      playerLimit;
 
     document
       .getElementById(
@@ -4747,7 +4911,7 @@ function renderLobby(){
 }
 
 /* =====================================================
-EXPIRY
+ROOM EXPIRY
 ===================================================== */
 
 function startRoomExpiryWatcher(){
@@ -4758,7 +4922,6 @@ function startRoomExpiryWatcher(){
 
   roomExpiryInterval =
     setInterval(
-
       async()=>{
 
         if(
@@ -4772,12 +4935,10 @@ function startRoomExpiryWatcher(){
 
           const snap =
             await get(
-
               ref(
                 db,
                 `rooms/${roomCode}`
               )
-
             );
 
           if(!snap.exists()){
@@ -4787,7 +4948,11 @@ function startRoomExpiryWatcher(){
           const data =
             snap.val();
 
-          if(!isRoomStale(data)){
+          if(
+            !isRoomStale(
+              data
+            )
+          ){
             return;
           }
 
@@ -4820,9 +4985,7 @@ function startRoomExpiryWatcher(){
         }
 
       },
-
       60000
-
     );
 
 }
@@ -4847,8 +5010,7 @@ function enterGameFromRoom(){
     );
 
   if(
-    currentRoundId ===
-    roundId &&
+    currentRoundId === roundId &&
     gameVisible
   ){
 
@@ -4858,8 +5020,11 @@ function enterGameFromRoom(){
 
   }
 
-  currentRoundId = roundId;
-  gameVisible = true;
+  currentRoundId =
+    roundId;
+
+  gameVisible =
+    true;
 
   hideAllMainScreens();
 
@@ -4868,7 +5033,9 @@ function enterGameFromRoom(){
       "game"
     )
     .classList
-    .remove("hidden");
+    .remove(
+      "hidden"
+    );
 
   document
     .getElementById(
@@ -4877,7 +5044,8 @@ function enterGameFromRoom(){
     .classList
     .toggle(
       "hidden",
-      roomData.host !== playerId
+      roomData.host !==
+      playerId
     );
 
   mySecret =
@@ -4919,15 +5087,18 @@ function enterGameFromRoom(){
 
       }
 
-    )
-    .catch(
+    ).catch(
       ()=>{}
     );
 
   }
 
-  if(alertsEnabled){
+  if(
+    alertsEnabled
+  ){
+
     startTaskNotificationWatcher();
+
   }
 
 }
@@ -4955,7 +5126,10 @@ function renderCallButtons(){
   container.innerHTML =
     locations
       .map(
-        (location,index)=>`
+        (
+          location,
+          index
+        )=>`
 
           <button
             class="${
@@ -4965,23 +5139,40 @@ function renderCallButtons(){
               ? "secondary"
               : ""
             }"
-            onclick="
-              makeCall(
-                '${escapeHtml(location)
-                  .replaceAll(
-                    "'",
-                    "\\'"
-                  )}'
-              )
-            "
+            data-location="${escapeHtml(
+              location
+            )}"
           >
             📞 CALL
-            ${escapeHtml(location)}
+            ${escapeHtml(
+              location
+            )}
           </button>
 
         `
       )
       .join("");
+
+  container
+    .querySelectorAll(
+      "button[data-location]"
+    )
+    .forEach(
+      button=>{
+
+        button.addEventListener(
+          "click",
+          ()=>{
+
+            makeCall(
+              button.dataset.location
+            );
+
+          }
+        );
+
+      }
+    );
 
 }
 
@@ -5012,7 +5203,8 @@ function startGameListeners(){
         }
 
         const calls =
-          snapshot.val() || {};
+          snapshot.val() ||
+          {};
 
         const entries =
           Object.entries(
@@ -5070,7 +5262,9 @@ function startGameListeners(){
 
         const newCalls =
           entries.filter(
-            ([id,value])=>
+            (
+              [id,value]
+            )=>
               id !== lastSeen &&
               Number(
                 value?.time ||
@@ -5101,19 +5295,12 @@ function startGameListeners(){
               call.caller
             );
 
-            if(alertsEnabled){
+            if(
+              alertsEnabled
+            ){
 
               playCallSound();
               vibrate();
-
-            }
-
-            if(!fcmReady){
-
-              systemNotification(
-                call.destination,
-                call.caller
-              );
 
             }
 
@@ -5129,12 +5316,10 @@ function startGameListeners(){
       },
 
       error=>{
-
         console.warn(
           "CALL LISTENER:",
           error
         );
-
       }
 
     );
@@ -5149,8 +5334,13 @@ function startGameListeners(){
 
       snapshot=>{
 
+        if(!roomData){
+          return;
+        }
+
         roomData.completed =
-          snapshot.val() || {};
+          snapshot.val() ||
+          {};
 
         renderTasks();
 
@@ -5168,8 +5358,13 @@ function startGameListeners(){
 
       snapshot=>{
 
+        if(!roomData){
+          return;
+        }
+
         roomData.notes =
-          snapshot.val() || {};
+          snapshot.val() ||
+          {};
 
         updateMyNoteUI();
 
@@ -5198,14 +5393,18 @@ function startGameListeners(){
 
       snapshot=>{
 
-        if(!snapshot.exists()){
+        if(
+          !snapshot.exists()
+        ){
           return;
         }
 
         const result =
           snapshot.val();
 
-        if(!result?.accusedId){
+        if(
+          !result?.accusedId
+        ){
           return;
         }
 
@@ -5249,7 +5448,8 @@ function startGameListeners(){
         snapshot=>{
 
           const data =
-            snapshot.val() || {};
+            snapshot.val() ||
+            {};
 
           const input =
             document.getElementById(
@@ -5312,7 +5512,8 @@ function startGlobalClock(){
         );
 
       const beforeDetective =
-        now < detectiveEnd;
+        now <
+        detectiveEnd;
 
       document
         .getElementById(
@@ -5321,7 +5522,9 @@ function startGlobalClock(){
         .textContent =
         "Shared time: " +
         clockText(
-          sharedDate(now)
+          sharedDate(
+            now
+          )
         );
 
       document
@@ -5343,7 +5546,8 @@ function startGlobalClock(){
         beforeDetective
         ?
         formatDuration(
-          detectiveEnd - now
+          detectiveEnd -
+          now
         )
         :
         "00:00";
@@ -5372,7 +5576,8 @@ function startGlobalClock(){
           formatDuration(
             Math.max(
               0,
-              detectiveEnd - now
+              detectiveEnd -
+              now
             )
           );
 
@@ -5397,7 +5602,9 @@ function startGlobalClock(){
 
           investigationCard
             .classList
-            .remove("hidden");
+            .remove(
+              "hidden"
+            );
 
           document
             .getElementById(
@@ -5417,7 +5624,8 @@ function startGlobalClock(){
             )
             .textContent =
             formatDuration(
-              investigationEnd - now
+              investigationEnd -
+              now
             );
 
         }
@@ -5425,7 +5633,9 @@ function startGlobalClock(){
 
           investigationCard
             .classList
-            .add("hidden");
+            .add(
+              "hidden"
+            );
 
         }
 
@@ -5447,7 +5657,7 @@ function startGlobalClock(){
 }
 
 /* =====================================================
-TASK TEMPLATES
+TASKS
 ===================================================== */
 
 const activityTemplates = [
@@ -5536,7 +5746,8 @@ function nextMinuteTimestamp(
   );
 
   date.setMinutes(
-    date.getMinutes() + 1
+    date.getMinutes() +
+    1
   );
 
   return date.getTime();
@@ -5551,17 +5762,14 @@ function makeUnlockTimes(
 
   const first =
     now +
-    60 *
-    1000;
+    60000;
 
   const last =
     Math.max(
       first +
-      60 *
-      1000,
+      60000,
       end -
-      60 *
-      1000
+      60000
     );
 
   const output = [];
@@ -5573,15 +5781,22 @@ function makeUnlockTimes(
   ){
 
     const ratio =
-      (i + 1) /
-      (count + 1);
+      (
+        i + 1
+      ) /
+      (
+        count + 1
+      );
 
     output.push(
 
       nextMinuteTimestamp(
 
         first +
-        (last - first) *
+        (
+          last -
+          first
+        ) *
         ratio
 
       )
@@ -5593,10 +5808,6 @@ function makeUnlockTimes(
   return output;
 
 }
-
-/* =====================================================
-NORMAL TASKS
-===================================================== */
 
 function buildNormalTasks(
   playerIdForSeed,
@@ -5615,7 +5826,8 @@ function buildNormalTasks(
   const count =
     3 +
     Math.floor(
-      Math.random() * 3
+      Math.random() *
+      3
     );
 
   const times =
@@ -5630,7 +5842,6 @@ function buildNormalTasks(
   return shuffle(
 
     times.map(
-
       (
         unlockAt,
         index
@@ -5638,9 +5849,8 @@ function buildNormalTasks(
 
         let possible =
           locations.filter(
-            location =>
-              location !==
-                crimeLocation &&
+            location=>
+              location !== crimeLocation &&
               !used.includes(
                 location
               )
@@ -5652,7 +5862,7 @@ function buildNormalTasks(
 
           possible =
             locations.filter(
-              location =>
+              location=>
                 location !==
                 crimeLocation
             );
@@ -5683,25 +5893,22 @@ function buildNormalTasks(
 
           unlockAt,
 
-          random(pool)
-            .replace(
-              "{location}",
-              location
-            )
+          random(
+            pool
+          )
+          .replace(
+            "{location}",
+            location
+          )
 
         );
 
       }
-
     )
 
   );
 
 }
-
-/* =====================================================
-MURDERER TASKS
-===================================================== */
 
 function buildMurdererTasks(
   playerIdForSeed,
@@ -5721,20 +5928,23 @@ function buildMurdererTasks(
   const count =
     2 +
     Math.floor(
-      Math.random() * 3
+      Math.random() *
+      3
     );
 
   const usableTaskEnd =
     Math.min(
       detectiveEnd,
-      murderAt - 20000
+      murderAt -
+      20000
     );
 
   const times =
     makeUnlockTimes(
       now,
       Math.max(
-        now + 60000,
+        now +
+        60000,
         usableTaskEnd
       ),
       count
@@ -5744,7 +5954,6 @@ function buildMurdererTasks(
 
   const tasks =
     times.map(
-
       (
         unlockAt,
         index
@@ -5752,9 +5961,9 @@ function buildMurdererTasks(
 
         let possible =
           locations.filter(
-            location =>
+            location=>
               location !==
-                crimeLocation &&
+              crimeLocation &&
               !used.includes(
                 location
               )
@@ -5766,7 +5975,7 @@ function buildMurdererTasks(
 
           possible =
             locations.filter(
-              location =>
+              location=>
                 location !==
                 crimeLocation
             );
@@ -5793,15 +6002,14 @@ function buildMurdererTasks(
           random(
             activityTemplates
           )
-            .replace(
-              "{location}",
-              location
-            )
+          .replace(
+            "{location}",
+            location
+          )
 
         );
 
       }
-
     );
 
   tasks.push(
@@ -5817,18 +6025,18 @@ function buildMurdererTasks(
       random(
         murderTemplates
       )
-        .replace(
-          "{location}",
-          crimeLocation
-        )
-        .replace(
-          "{time}",
-          shortClock(
-            sharedDate(
-              murderAt
-            )
+      .replace(
+        "{location}",
+        crimeLocation
+      )
+      .replace(
+        "{time}",
+        shortClock(
+          sharedDate(
+            murderAt
           )
         )
+      )
 
     )
 
@@ -5842,15 +6050,16 @@ function buildMurdererTasks(
         .toString(36)
         .slice(2,7)}`,
 
-      murderAt + 25000,
+      murderAt +
+      25000,
 
       random(
         afterMurderTemplates
       )
-        .replace(
-          "{location}",
-          crimeLocation
-        )
+      .replace(
+        "{location}",
+        crimeLocation
+      )
 
     )
 
@@ -5897,17 +6106,23 @@ async function(){
   }
 
   const players =
-    roomData.players || {};
+    roomData.players ||
+    {};
 
   const ids =
-    Object.keys(players);
+    Object.keys(
+      players
+    );
 
   const limit =
     Number(
       roomData.playerLimit
     );
 
-  if(ids.length !== limit){
+  if(
+    ids.length !==
+    limit
+  ){
 
     alert(
       `Wait for everyone. ${ids.length}/${limit} joined.`
@@ -5918,7 +6133,9 @@ async function(){
   }
 
   const shuffledPlayers =
-    shuffle(ids);
+    shuffle(
+      ids
+    );
 
   const detective =
     shuffledPlayers[0];
@@ -5927,7 +6144,9 @@ async function(){
     shuffledPlayers[1];
 
   const innocents =
-    shuffledPlayers.slice(2);
+    shuffledPlayers.slice(
+      2
+    );
 
   const now =
     sharedNow();
@@ -5965,13 +6184,16 @@ async function(){
     );
 
   const crimeLocation =
-    random(locations);
+    random(
+      locations
+    );
 
   const roundNumber =
     Number(
       roomData.roundNumber ||
       0
-    ) + 1;
+    ) +
+    1;
 
   const roundId =
     String(
@@ -5991,7 +6213,8 @@ async function(){
     detective
   ] = {
 
-    role:"detective",
+    role:
+      "detective",
 
     tasks:[]
 
@@ -6001,7 +6224,8 @@ async function(){
     murderer
   ] = {
 
-    role:"murderer",
+    role:
+      "murderer",
 
     tasks:
       buildMurdererTasks(
@@ -6025,7 +6249,8 @@ async function(){
         id
       ] = {
 
-        role:"innocent",
+        role:
+          "innocent",
 
         tasks:
           buildNormalTasks(
@@ -6049,6 +6274,7 @@ async function(){
     roundNumber,
     roundId,
     roundSeed,
+
     mapType,
 
     startedAt:
@@ -6139,7 +6365,8 @@ async function(){
 
       ...roomData,
 
-      status:"game",
+      status:
+        "game",
 
       roundNumber,
 
@@ -6363,7 +6590,7 @@ function renderSecret(){
 }
 
 /* =====================================================
-TASKS
+TASK UI
 ===================================================== */
 
 function renderTasks(){
@@ -6447,10 +6674,7 @@ function renderTasks(){
           return `
 
             <div
-              class="
-                task
-                ${done ? "done" : ""}
-              "
+              class="task ${done ? "done" : ""}"
             >
 
               <div class="task-row">
@@ -6459,12 +6683,9 @@ function renderTasks(){
                   class="task-checkbox"
                   type="checkbox"
                   ${done ? "checked" : ""}
-                  onchange="
-                    toggleTask(
-                      '${task.id}',
-                      this.checked
-                    )
-                  "
+                  data-task-id="${escapeHtml(
+                    task.id
+                  )}"
                 >
 
                 <div class="task-text">
@@ -6483,7 +6704,6 @@ function renderTasks(){
                   </div>
 
                   <div class="task-status">
-
                     ${
                       done
                       ?
@@ -6491,7 +6711,6 @@ function renderTasks(){
                       :
                       "⬜ Not completed"
                     }
-
                   </div>
 
                 </div>
@@ -6505,6 +6724,28 @@ function renderTasks(){
         }
       )
       .join("");
+
+  container
+    .querySelectorAll(
+      "input[data-task-id]"
+    )
+    .forEach(
+      input=>{
+
+        input.addEventListener(
+          "change",
+          ()=>{
+
+            toggleTask(
+              input.dataset.taskId,
+              input.checked
+            );
+
+          }
+        );
+
+      }
+    );
 
 }
 
@@ -6532,7 +6773,8 @@ async function(
   const task =
     mySecret?.tasks?.find(
       item =>
-        item.id === taskId
+        item.id ===
+        taskId
     );
 
   if(
@@ -6581,7 +6823,7 @@ async function(
 };
 
 /* =====================================================
-PLAYER NOTE
+PLAYER NOTES
 ===================================================== */
 
 function updatePlayerNoteCounter(){
@@ -6646,8 +6888,11 @@ function updateMyNoteUI(){
       note.text ||
       "";
 
-    input.disabled = true;
-    button.disabled = true;
+    input.disabled =
+      true;
+
+    button.disabled =
+      true;
 
     button.textContent =
       "✅ NOTE SENT";
@@ -6661,8 +6906,11 @@ function updateMyNoteUI(){
 
   }
 
-  input.disabled = false;
-  button.disabled = false;
+  input.disabled =
+    false;
+
+  button.disabled =
+    false;
 
   button.textContent =
     "📝 SEND NOTE TO DETECTIVE";
@@ -6757,7 +7005,9 @@ async function(){
       roomData.notes ||
       {};
 
-    roomData.notes[playerId] =
+    roomData.notes[
+      playerId
+    ] =
       note;
 
     updateMyNoteUI();
@@ -6863,12 +7113,11 @@ function renderLivePlayerNotes(){
   const entries =
     Object.values(
       notes
-    )
-      .sort(
-        (a,b)=>
-          (b.timestamp || 0) -
-          (a.timestamp || 0)
-      );
+    ).sort(
+      (a,b)=>
+        (b.timestamp || 0) -
+        (a.timestamp || 0)
+    );
 
   if(!entries.length){
 
@@ -6962,7 +7211,6 @@ function renderDetectivePlayerButtons(){
   }
 
   container.innerHTML =
-
     suspects
       .map(
         id=>{
@@ -6970,7 +7218,9 @@ function renderDetectivePlayerButtons(){
           const note =
             roomData
               ?.notes
-              ?.[id];
+              ?.[
+                id
+              ];
 
           const active =
             id ===
@@ -6983,11 +7233,9 @@ function renderDetectivePlayerButtons(){
                 detective-player-button
                 ${active ? "active" : ""}
               "
-              onclick="
-                openPlayerDossier(
-                  '${id}'
-                )
-              "
+              data-suspect-id="${escapeHtml(
+                id
+              )}"
             >
 
               👤
@@ -7005,6 +7253,27 @@ function renderDetectivePlayerButtons(){
         }
       )
       .join("");
+
+  container
+    .querySelectorAll(
+      "[data-suspect-id]"
+    )
+    .forEach(
+      button=>{
+
+        button.addEventListener(
+          "click",
+          ()=>{
+
+            openPlayerDossier(
+              button.dataset.suspectId
+            );
+
+          }
+        );
+
+      }
+    );
 
 }
 
@@ -7037,7 +7306,9 @@ async function(
   const player =
     roomData
       ?.players
-      ?.[selectedId];
+      ?.[
+        selectedId
+      ];
 
   document
     .getElementById(
@@ -7053,12 +7324,10 @@ async function(
 
     const snap =
       await get(
-
         ref(
           db,
           `rooms/${roomCode}/detectiveNotes/players/${selectedId}`
         )
-
       );
 
     const data =
@@ -7102,7 +7371,9 @@ async function(
 
 function refreshSelectedDossierNote(){
 
-  if(!selectedDetectivePlayerId){
+  if(
+    !selectedDetectivePlayerId
+  ){
     return;
   }
 
@@ -7348,37 +7619,24 @@ function renderCase(){
     .innerHTML = `
 
       <div class="success">
-
         ⏰ Detective timer finished.
-
         <br><br>
-
         Investigation started.
-
       </div>
 
       <p>
-        <b>
-          Map:
-        </b>
-
+        <b>Map:</b>
         ${escapeHtml(
           MAPS[
-            game.mapType ===
-            "mall"
-            ?
-            "mall"
-            :
-            "house"
+            game.mapType === "mall"
+              ? "mall"
+              : "house"
           ].name
         )}
       </p>
 
       <p>
-        <b>
-          Fictional event time:
-        </b>
-
+        <b>Fictional event time:</b>
         ${shortClock(
           sharedDate(
             game.murderAt
@@ -7387,10 +7645,7 @@ function renderCase(){
       </p>
 
       <p>
-        <b>
-          Location:
-        </b>
-
+        <b>Location:</b>
         ${escapeHtml(
           game.crimeLocation
         )}
@@ -7426,22 +7681,20 @@ function renderCase(){
 
   renderTaskProgress();
 
-  document
-    .getElementById(
+  const container =
+    document.getElementById(
       "accusationButtons"
-    )
-    .innerHTML =
+    );
 
+  container.innerHTML =
     suspects
       .map(
         id=>`
 
           <button
-            onclick="
-              accuse(
-                '${id}'
-              )
-            "
+            data-accuse-id="${escapeHtml(
+              id
+            )}"
           >
 
             🔎 ACCUSE
@@ -7457,6 +7710,27 @@ function renderCase(){
         `
       )
       .join("");
+
+  container
+    .querySelectorAll(
+      "[data-accuse-id]"
+    )
+    .forEach(
+      button=>{
+
+        button.addEventListener(
+          "click",
+          ()=>{
+
+            accuse(
+              button.dataset.accuseId
+            );
+
+          }
+        );
+
+      }
+    );
 
 }
 
@@ -7477,7 +7751,8 @@ function renderTaskProgress(){
     return;
   }
 
-  container.innerHTML = "";
+  container.innerHTML =
+    "";
 
   for(
     const id of suspects
@@ -7507,7 +7782,9 @@ function renderTaskProgress(){
       [];
 
     const total =
-      Array.isArray(tasks)
+      Array.isArray(
+        tasks
+      )
       ?
       tasks.length
       :
@@ -7610,7 +7887,9 @@ async function(
         accusedName:
           roomData
             ?.players
-            ?.[accusedId]
+            ?.[
+              accusedId
+            ]
             ?.name ||
           "Unknown",
 
@@ -7704,7 +7983,8 @@ async function runReveal(
     return;
   }
 
-  revealRunning = true;
+  revealRunning =
+    true;
 
   const game =
     roomData.game;
@@ -7772,24 +8052,24 @@ async function runReveal(
     "ROLE REVEALED",
 
     wasMurderer
-    ?
-    "🔎 THE MYSTERY PLAYER"
-    :
-    "👤 INNOCENT",
+      ?
+      "🔎 THE MYSTERY PLAYER"
+      :
+      "👤 INNOCENT",
 
     wasMurderer
-    ?
-    `${accusedName} was the mystery player.`
-    :
-    `${accusedName} was innocent.`,
+      ?
+      `${accusedName} was the mystery player.`
+      :
+      `${accusedName} was innocent.`,
 
     "",
 
     wasMurderer
-    ?
-    "reveal-shake"
-    :
-    "reveal-pop"
+      ?
+      "reveal-shake"
+      :
+      "reveal-pop"
 
   );
 
@@ -7816,7 +8096,8 @@ async function runReveal(
     )
     .filter(
       id =>
-        id !== game.murderer
+        id !==
+        game.murderer
     )
     .map(
       id=>`
@@ -7856,12 +8137,10 @@ async function runReveal(
       <div class="reveal-role">
 
         <div class="reveal-role-name">
-
           🔎
           ${escapeHtml(
             murdererName
           )}
-
         </div>
 
         <div class="reveal-role-value">
@@ -7873,12 +8152,10 @@ async function runReveal(
       <div class="reveal-role">
 
         <div class="reveal-role-name">
-
           🕵️
           ${escapeHtml(
             detectiveName
           )}
-
         </div>
 
         <div class="reveal-role-value">
@@ -7904,16 +8181,16 @@ async function runReveal(
     "GAME OVER",
 
     wasMurderer
-    ?
-    "🎉 DETECTIVE WINS!"
-    :
-    "🔎 MYSTERY PLAYER WINS!",
+      ?
+      "🎉 DETECTIVE WINS!"
+      :
+      "🔎 MYSTERY PLAYER WINS!",
 
     wasMurderer
-    ?
-    "Correct accusation."
-    :
-    "The Detective accused an innocent.",
+      ?
+      "Correct accusation."
+      :
+      "The Detective accused an innocent.",
 
     `
 
@@ -7922,20 +8199,20 @@ async function runReveal(
           reveal-winner
           ${
             wasMurderer
-            ?
-            "detective-win"
-            :
-            "murderer-win"
+              ?
+              "detective-win"
+              :
+              "murderer-win"
           }
         "
       >
 
         ${
           wasMurderer
-          ?
-          "🔎 GREAT DETECTIVE WORK"
-          :
-          "😎 GREAT MYSTERY PLAY"
+            ?
+            "🔎 GREAT DETECTIVE WORK"
+            :
+            "😎 GREAT MYSTERY PLAY"
         }
 
       </div>
@@ -7943,10 +8220,10 @@ async function runReveal(
     `,
 
     wasMurderer
-    ?
-    "reveal-pop"
-    :
-    "reveal-shake"
+      ?
+      "reveal-pop"
+      :
+      "reveal-shake"
 
   );
 
@@ -7962,7 +8239,8 @@ async function runReveal(
 
   await resetToLobby();
 
-  revealRunning = false;
+  revealRunning =
+    false;
 
 }
 
@@ -8053,7 +8331,8 @@ async function resetToLobby(){
           currentGame:
             "lobby",
 
-          roundId:null,
+          roundId:
+            null,
 
           updatedAt:
             serverTimestamp()
@@ -8148,11 +8427,14 @@ async function(
 
     const call = {
 
-      id:callId,
+      id:
+        callId,
 
-      caller:myName,
+      caller:
+        myName,
 
-      callerId:playerId,
+      callerId:
+        playerId,
 
       destination,
 
@@ -8304,7 +8586,6 @@ function showCall(
 
   callTimer =
     setTimeout(
-
       ()=>{
 
         overlay
@@ -8314,9 +8595,7 @@ function showCall(
           );
 
       },
-
       CALL_DURATION
-
     );
 
 }
@@ -8374,10 +8653,12 @@ function playCallSound(){
       ){
 
         const osc =
-          audioContext.createOscillator();
+          audioContext
+            .createOscillator();
 
         const gain =
-          audioContext.createGain();
+          audioContext
+            .createGain();
 
         osc.frequency.value =
           i === 0
@@ -8393,22 +8674,30 @@ function playCallSound(){
           t
         );
 
-        gain.gain.exponentialRampToValueAtTime(
-          .28,
-          t + .03
+        gain.gain
+          .exponentialRampToValueAtTime(
+            .28,
+            t + .03
+          );
+
+        gain.gain
+          .exponentialRampToValueAtTime(
+            .0001,
+            t + .50
+          );
+
+        osc.connect(
+          gain
         );
 
-        gain.gain.exponentialRampToValueAtTime(
-          .0001,
-          t + .50
-        );
-
-        osc.connect(gain);
         gain.connect(
           audioContext.destination
         );
 
-        osc.start(t);
+        osc.start(
+          t
+        );
+
         osc.stop(
           t + .55
         );
@@ -8453,40 +8742,183 @@ function vibrate(){
 }
 
 /* =====================================================
-LOCAL CALL NOTIFICATION
+TASK NOTIFICATIONS
 ===================================================== */
 
-function systemNotification(
-  destination,
-  caller
+function taskNotificationKey(
+  roundId,
+  taskId
 ){
 
-  if(!alertsEnabled){
+  return (
+    "houseTaskNotification_" +
+    String(roundId) +
+    "_" +
+    String(taskId)
+  );
+
+}
+
+function taskNotificationWasSent(
+  roundId,
+  taskId
+){
+
+  return (
+    localStorage.getItem(
+      taskNotificationKey(
+        roundId,
+        taskId
+      )
+    ) === "1"
+  );
+
+}
+
+function markTaskNotificationSent(
+  roundId,
+  taskId
+){
+
+  localStorage.setItem(
+
+    taskNotificationKey(
+      roundId,
+      taskId
+    ),
+
+    "1"
+
+  );
+
+}
+
+function startTaskNotificationWatcher(){
+
+  clearInterval(
+    taskNotificationInterval
+  );
+
+  if(
+    !alertsEnabled ||
+    !("Notification" in window) ||
+    Notification.permission !==
+    "granted"
+  ){
+
     return;
+
   }
 
-  showPersistentNotification(
+  taskNotificationInterval =
+    setInterval(
+      checkTaskNotifications,
+      1000
+    );
 
-    "📞 House Mystery Call",
+  checkTaskNotifications();
 
-    {
+}
 
-      body:
-        `${caller} is calling everyone to ${destination}!`,
+async function checkTaskNotifications(){
 
-      tag:
-        "house-call-" +
-        Date.now(),
+  if(
+    !alertsEnabled ||
+    !("Notification" in window) ||
+    Notification.permission !==
+    "granted"
+  ){
 
-      requireInteraction:true,
+    return;
 
-      renotify:true,
+  }
 
-      notificationType:"call"
+  if(
+    !roomData?.game ||
+    !Array.isArray(
+      mySecret?.tasks
+    )
+  ){
+
+    return;
+
+  }
+
+  const roundId =
+    String(
+      roomData.game.roundId ||
+      roomData.game.roundNumber ||
+      "1"
+    );
+
+  const now =
+    sharedNow();
+
+  for(
+    const task of mySecret.tasks
+  ){
+
+    const unlockAt =
+      Number(
+        task.unlockAt
+      );
+
+    if(
+      now <
+      unlockAt
+    ){
+      continue;
+    }
+
+    if(
+      taskNotificationWasSent(
+        roundId,
+        task.id
+      )
+    ){
+      continue;
+    }
+
+    const shown =
+      await showPersistentNotification(
+
+        "🔔 Task Unlocked",
+
+        {
+
+          body:
+            task.description ||
+            "A new task is available.",
+
+          tag:
+            `house-task-${roundId}-${task.id}`,
+
+          requireInteraction:
+            true,
+
+          renotify:
+            true,
+
+          notificationType:
+            "task",
+
+          taskId:
+            task.id
+
+        }
+
+      );
+
+    if(shown){
+
+      markTaskNotificationSent(
+        roundId,
+        task.id
+      );
 
     }
 
-  );
+  }
 
 }
 
@@ -8501,7 +8933,9 @@ async function reconnectCurrentRoom(){
     !myName ||
     !browserOnline
   ){
+
     return;
+
   }
 
   try{
@@ -8539,7 +8973,11 @@ async function reconnectCurrentRoom(){
 
     }
 
-    if(alertsEnabled){
+    if(
+      alertsEnabled &&
+      Notification.permission ===
+      "granted"
+    ){
 
       await registerPushNotifications();
 
@@ -8556,59 +8994,6 @@ async function reconnectCurrentRoom(){
   }
 
 }
-
-/* =====================================================
-VISIBILITY
-===================================================== */
-
-document.addEventListener(
-  "visibilitychange",
-  async()=>{
-
-    if(
-      document.visibilityState ===
-      "visible"
-    ){
-
-      browserOnline =
-        navigator.onLine !== false;
-
-      updateConnectionState();
-
-      await registerServiceWorker();
-
-      await reconnectCurrentRoom();
-
-      checkTaskNotifications();
-
-      if(alertsEnabled){
-
-        await registerPushNotifications();
-
-      }
-
-    }
-
-  }
-);
-
-window.addEventListener(
-  "focus",
-  async()=>{
-
-    browserOnline =
-      navigator.onLine !== false;
-
-    updateConnectionState();
-
-    await registerServiceWorker();
-
-    await reconnectCurrentRoom();
-
-    checkTaskNotifications();
-
-  }
-);
 
 /* =====================================================
 LEAVE
@@ -8652,7 +9037,62 @@ function leaveRoomToHome(
 }
 
 /* =====================================================
-URL
+VISIBILITY
+===================================================== */
+
+document.addEventListener(
+  "visibilitychange",
+  async()=>{
+
+    if(
+      document.visibilityState ===
+      "visible"
+    ){
+
+      browserOnline =
+        navigator.onLine !== false;
+
+      updateConnectionState();
+
+      await registerServiceWorker();
+
+      await reconnectCurrentRoom();
+
+      checkTaskNotifications();
+
+      if(
+        alertsEnabled &&
+        Notification.permission ===
+        "granted"
+      ){
+
+        await registerPushNotifications();
+
+      }
+
+    }
+
+  }
+);
+
+window.addEventListener(
+  "focus",
+  async()=>{
+
+    browserOnline =
+      navigator.onLine !== false;
+
+    updateConnectionState();
+
+    await reconnectCurrentRoom();
+
+    checkTaskNotifications();
+
+  }
+);
+
+/* =====================================================
+URL ROOM
 ===================================================== */
 
 const params =
@@ -8661,17 +9101,26 @@ const params =
   );
 
 if(
-  params.get("room")
+  params.get(
+    "room"
+  )
 ){
 
-  document
-    .getElementById(
+  const roomInput =
+    document.getElementById(
       "roomInput"
-    )
-    .value =
-    normalizeRoomCode(
-      params.get("room")
     );
+
+  if(roomInput){
+
+    roomInput.value =
+      normalizeRoomCode(
+        params.get(
+          "room"
+        )
+      );
+
+  }
 
 }
 
@@ -8703,98 +9152,107 @@ STARTUP
 
 async function initialize(){
 
-  startConnectionMonitoring();
+  try{
 
-  startServerClock();
+    startConnectionMonitoring();
 
-  renderHomeMaps();
+    startServerClock();
 
-  updateCreateMapPreview();
+    renderHomeMaps();
+    updateCreateMapPreview();
 
-  /*
-    Service worker MUST be ready before FCM getToken().
-  */
+    /*
+      Service worker first.
+    */
 
-  await registerServiceWorker();
+    await registerServiceWorker();
 
-  await initializeMessaging();
+    /*
+      Messaging second.
+    */
 
-  startForegroundMessaging();
+    await initializeMessaging();
 
-  const savedName =
-    loadSavedName();
+    startForegroundMessaging();
 
-  if(savedName){
+    const savedName =
+      loadSavedName();
 
-    myName =
-      savedName;
+    if(savedName){
 
-    showHome();
+      myName =
+        savedName;
 
-    await saveDeviceRecord();
+      showHome();
 
-  }
-  else{
+      await saveDeviceRecord();
 
-    hideAllMainScreens();
+    }
+    else{
 
-    document
-      .getElementById(
-        "nameSetup"
-      )
-      .classList
-      .remove(
-        "hidden"
+      hideAllMainScreens();
+
+      document
+        .getElementById(
+          "nameSetup"
+        )
+        .classList
+        .remove(
+          "hidden"
+        );
+
+    }
+
+    /*
+      Restore notification state.
+    */
+
+    if(
+      alertsEnabled &&
+      "Notification" in window &&
+      Notification.permission ===
+      "granted"
+    ){
+
+      updateNotificationUI(
+        false
       );
 
-  }
+      const ready =
+        await registerPushNotifications();
 
-  if(
-    alertsEnabled &&
-    "Notification" in window &&
-    Notification.permission ===
-    "granted"
-  ){
+      if(ready){
 
-    document
-      .getElementById(
-        "alertStatus"
-      )
-      .textContent =
-      "🔄 Checking notification setup...";
+        startForegroundMessaging();
 
-    const ready =
-      await registerPushNotifications();
+        startTaskNotificationWatcher();
 
-    document
-      .getElementById(
-        "alertStatus"
-      )
-      .textContent =
-      ready
-      ?
-      "✅ Notifications and push are ready."
-      :
-      "⚠️ Push setup failed — see the error below.";
+      }
 
-    document
-      .getElementById(
-        "enableAlertsButton"
-      )
-      .textContent =
-      ready
-      ?
-      "✅ PUSH NOTIFICATIONS ENABLED"
-      :
-      "⚠️ RETRY PUSH SETUP";
+    }
+    else{
 
-    startTaskNotificationWatcher();
+      alertsEnabled =
+        false;
+
+      localStorage.removeItem(
+        "houseMysteryAlerts"
+      );
+
+    }
 
   }
-  else{
+  catch(error){
 
-    alertsEnabled =
-      false;
+    console.error(
+      "INITIALIZATION ERROR",
+      error
+    );
+
+    setNotificationDebug(
+      "INITIALIZATION ERROR\n\n" +
+      formatFirebaseError(error)
+    );
 
   }
 
