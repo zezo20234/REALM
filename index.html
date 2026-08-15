@@ -4580,6 +4580,20 @@ async function(){
 
     roundNumber:0,
 
+    /*
+      NEW:
+      Stores who was detective last and
+      how many detective rounds in a row
+      they have had.
+    */
+    detectiveHistory:{
+
+      lastDetectiveId:"",
+
+      detectiveStreak:0
+
+    },
+
     players:{
       [playerId]:{
 
@@ -5943,9 +5957,6 @@ function createTask(
 
 }
 
-/*
-  Returns the next minute boundary after a timestamp.
-*/
 function nextMinuteTimestamp(
   timestamp
 ){
@@ -5968,14 +5979,6 @@ function nextMinuteTimestamp(
 
 }
 
-/*
-  Creates unique minute-based task times.
-
-  Important:
-  - Returned values are already sorted.
-  - No two returned values have the same displayed HH:MM.
-  - We use a wide enough time range when necessary.
-*/
 function makeUnlockTimes(
   now,
   end,
@@ -6027,11 +6030,6 @@ function makeUnlockTimes(
       ) + 1
     );
 
-  /*
-    When the round window contains fewer minute slots
-    than needed, extend the schedule instead of creating
-    duplicate displayed times.
-  */
   if(
     availableSlots <
     safeCount
@@ -6092,9 +6090,6 @@ function makeUnlockTimes(
           maxIndex
         );
 
-      /*
-        Guarantee strict increasing slots.
-      */
       if(
         selectedIndexes.length &&
         index <=
@@ -6132,12 +6127,6 @@ function makeUnlockTimes(
 
 }
 
-/*
-  Picks a task description that hasn't already been used
-  for the same player this round.
-
-  This makes each match feel much less repetitive.
-*/
 function pickUniqueTaskDescription(
   templates,
   locations,
@@ -6236,10 +6225,6 @@ function buildNormalTasks(
       mapType
     );
 
-  /*
-    3–4 normal tasks per player.
-    The amount itself can vary every round.
-  */
   const count =
     3 +
     Math.floor(
@@ -6294,10 +6279,6 @@ function buildNormalTasks(
         usedDescriptions
       );
 
-    /*
-      If all exact combinations are exhausted,
-      fall back safely.
-    */
     if(!description){
 
       const location =
@@ -6336,9 +6317,6 @@ function buildNormalTasks(
 
   }
 
-  /*
-    Always chronological.
-  */
   tasks.sort(
     (a,b)=>
       Number(a.unlockAt) -
@@ -6368,11 +6346,6 @@ function buildMurdererTasks(
       mapType
     );
 
-  /*
-    2–4 normal murderer tasks,
-    plus the fictional event task,
-    plus the after-event task.
-  */
   const normalCount =
     2 +
     Math.floor(
@@ -6469,9 +6442,6 @@ function buildMurdererTasks(
 
   }
 
-  /*
-    Murder event task.
-  */
   tasks.push(
 
     createTask(
@@ -6500,20 +6470,11 @@ function buildMurdererTasks(
 
   );
 
-  /*
-    After-event task.
-    Keep it at least one full minute later so the
-    displayed HH:MM is different from the murder task.
-  */
   let afterAt =
     nextMinuteTimestamp(
       murderAt
     );
 
-  /*
-    Protect against it becoming identical to another
-    task time.
-  */
   const existingTimes =
     new Set(
       tasks.map(
@@ -6559,9 +6520,6 @@ function buildMurdererTasks(
 
   );
 
-  /*
-    Final chronological ordering.
-  */
   tasks.sort(
     (a,b)=>
       Number(a.unlockAt) -
@@ -6569,6 +6527,136 @@ function buildMurdererTasks(
   );
 
   return tasks;
+
+}
+
+/* =====================================================
+DETECTIVE SELECTION
+===================================================== */
+
+/*
+  Detective rules:
+
+  1. First round:
+     Completely random.
+
+  2. If the previous Detective only had one
+     consecutive Detective round:
+     50% chance to stay Detective.
+
+  3. If the previous Detective had two
+     consecutive Detective rounds:
+     They are BLOCKED from Detective in the
+     next round.
+
+  Example:
+
+    Round 1 → Zezo
+    Round 2 → Zezo (50% chance)
+    Round 3 → NOT Zezo
+    Round 4 → New Detective gets a 50% chance
+               to repeat.
+*/
+function chooseDetective(
+  playerIds,
+  previousDetectiveId,
+  previousDetectiveStreak
+){
+
+  const ids =
+    Array.isArray(playerIds)
+      ?
+      [...playerIds]
+      :
+      [];
+
+  if(!ids.length){
+
+    return "";
+
+  }
+
+  const hasPrevious =
+    previousDetectiveId &&
+    ids.includes(
+      previousDetectiveId
+    );
+
+  /*
+    First round / old rooms without history.
+  */
+  if(!hasPrevious){
+
+    return random(
+      ids
+    );
+
+  }
+
+  /*
+    Third consecutive Detective round:
+    previous Detective is forbidden.
+  */
+  if(
+    Number(
+      previousDetectiveStreak
+    ) >= 2
+  ){
+
+    const eligible =
+      ids.filter(
+        id =>
+          id !==
+          previousDetectiveId
+      );
+
+    return (
+      random(
+        eligible.length
+          ?
+          eligible
+          :
+          ids
+      )
+    );
+
+  }
+
+  /*
+    Previous Detective gets exactly 50%
+    chance to stay Detective.
+  */
+  if(
+    Math.random() <
+    0.5
+  ){
+
+    return previousDetectiveId;
+
+  }
+
+  /*
+    The other 50% picks someone else.
+    IMPORTANT: the previous Detective is
+    excluded here so it is actually a 50/50
+    repeat chance.
+  */
+  const eligible =
+    ids.filter(
+      id =>
+        id !==
+        previousDetectiveId
+    );
+
+  return (
+    random(
+      eligible.length
+        ?
+        eligible
+        :
+        ids
+    )
+  );
 
 }
 
@@ -6614,9 +6702,7 @@ async function(){
     roomData.players || {};
 
   const ids =
-    Object.keys(
-      players
-    );
+    Object.keys(players);
 
   const limit =
     Number(
@@ -6636,20 +6722,81 @@ async function(){
 
   }
 
-  const shuffledPlayers =
-    shuffle(
-      ids
+  /*
+    =====================================================
+    NEW DETECTIVE SYSTEM
+    =====================================================
+
+    Read the previous Detective and their
+    consecutive Detective streak.
+
+    This data survives the round reset because
+    resetToLobby() does NOT delete detectiveHistory.
+  */
+  const detectiveHistory =
+    roomData.detectiveHistory || {};
+
+  const previousDetectiveId =
+    detectiveHistory.lastDetectiveId ||
+    "";
+
+  const previousDetectiveStreak =
+    Number(
+      detectiveHistory.detectiveStreak ||
+      0
     );
 
+  /*
+    Choose Detective using:
+
+    - First round = random
+    - Previous Detective = 50% repeat
+    - Two consecutive Detective rounds =
+      guaranteed different Detective
+  */
   const detective =
-    shuffledPlayers[0];
+    chooseDetective(
+      ids,
+      previousDetectiveId,
+      previousDetectiveStreak
+    );
+
+  /*
+    Work out the new streak.
+
+    Same Detective again:
+      streak 1 -> 2
+      streak 2 -> would never happen because
+                 the third round is blocked
+
+    Different Detective:
+      streak resets to 1
+  */
+  const newDetectiveStreak =
+    detective ===
+    previousDetectiveId
+      ?
+      previousDetectiveStreak + 1
+      :
+      1;
+
+  const murdererPool =
+    ids.filter(
+      id =>
+        id !==
+        detective
+    );
 
   const murderer =
-    shuffledPlayers[1];
+    random(
+      murdererPool
+    );
 
   const innocents =
-    shuffledPlayers.slice(
-      2
+    ids.filter(
+      id =>
+        id !== detective &&
+        id !== murderer
     );
 
   const now =
@@ -6809,6 +6956,13 @@ async function(){
 
     murderer,
 
+    /*
+      Useful for displaying/debugging the
+      detective streak in Firebase.
+    */
+    detectiveStreak:
+      newDetectiveStreak,
+
     suspects:[
 
       murderer,
@@ -6871,6 +7025,21 @@ async function(){
   ] =
     null;
 
+  /*
+    SAVE DETECTIVE HISTORY
+  */
+  updates[
+    `rooms/${roomCode}/detectiveHistory`
+  ] = {
+
+    lastDetectiveId:
+      detective,
+
+    detectiveStreak:
+      newDetectiveStreak
+
+  };
+
   updates[
     `rooms/${roomCode}/lastActivityAt`
   ] =
@@ -6879,9 +7048,7 @@ async function(){
   try{
 
     /*
-      Write the entire round first.
-      Every player gets the exact same stored task
-      schedule forever for this round.
+      Write the complete round.
     */
     await update(
       ref(db),
@@ -6889,8 +7056,7 @@ async function(){
     );
 
     /*
-      Build Firebase notification queue from the
-      exact stored task data.
+      Build Firebase notification queue.
     */
     await createTaskNotificationQueue(
 
@@ -6920,7 +7086,17 @@ async function(){
 
       completed:{},
 
-      taskQueue:{}
+      taskQueue:{},
+
+      detectiveHistory:{
+
+        lastDetectiveId:
+          detective,
+
+        detectiveStreak:
+          newDetectiveStreak
+
+      }
 
     };
 
@@ -7120,16 +7296,6 @@ function renderTasks(){
       ?.[playerId] ||
     {};
 
-  /*
-    IMPORTANT:
-    Always sort the actual task list before displaying.
-    This means:
-      10:25
-      10:28
-      10:29
-      10:31
-    rather than random order.
-  */
   const orderedTasks =
     [...mySecret.tasks].sort(
       (a,b)=>
@@ -8769,6 +8935,15 @@ async function resetToLobby(){
       now
 
   };
+
+  /*
+    IMPORTANT:
+    detectiveHistory is NOT cleared.
+
+    This is what makes the next round remember
+    who was Detective and how many consecutive
+    Detective rounds they already had.
+  */
 
   try{
 
