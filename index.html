@@ -442,6 +442,71 @@ button.dark{
   background:#252c40;
 }
 
+/* DETECTIVE RANK */
+
+.rank-card{
+  background:
+    linear-gradient(
+      135deg,
+      rgba(38,57,110,.95),
+      rgba(25,37,70,.95)
+    );
+
+  border:1px solid rgba(143,163,255,.25);
+  border-radius:20px;
+  padding:18px;
+  margin-top:15px;
+}
+
+.rank-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+}
+
+.rank-icon{
+  font-size:34px;
+}
+
+.rank-name{
+  font-size:21px;
+  font-weight:900;
+}
+
+.rank-points{
+  color:#b5c3ef;
+  font-size:13px;
+  margin-top:3px;
+}
+
+.rank-next{
+  text-align:right;
+  color:#aab7d5;
+  font-size:12px;
+}
+
+.rank-progress{
+  height:10px;
+  background:#0b1020;
+  border-radius:999px;
+  overflow:hidden;
+  margin-top:14px;
+}
+
+.rank-progress-bar{
+  height:100%;
+  width:0%;
+  background:#8fa3ff;
+  transition:width .3s;
+}
+
+.rank-message{
+  margin-top:12px;
+  font-size:13px;
+  color:#c0cbdf;
+}
+
 /* CONNECTION */
 
 .connection-bar{
@@ -934,6 +999,10 @@ button.dark{
     min-width:auto;
   }
 
+  .rank-top{
+    align-items:flex-start;
+  }
+
 }
 
 </style>
@@ -1192,6 +1261,13 @@ button.dark{
       Welcome,
       <b id="welcomeName"></b>.
     </p>
+
+    <div
+      id="detectiveRankHome"
+      class="rank-card"
+    >
+      Loading Detective rank...
+    </div>
 
     <div class="install-box">
 
@@ -2258,6 +2334,606 @@ let alertsEnabled =
   localStorage.getItem(
     "tivoliMysteryAlerts"
   ) === "1";
+
+/* =====================================================
+DETECTIVE RANK SYSTEM
+===================================================== */
+
+const DETECTIVE_CORRECT_POINTS =
+  50;
+
+const DETECTIVE_WRONG_POINTS =
+  -25;
+
+const DETECTIVE_RANKS = [
+
+  {
+    name:"Rookie",
+    minPoints:0,
+    icon:"🕵️"
+  },
+
+  {
+    name:"Investigator",
+    minPoints:100,
+    icon:"🔎"
+  },
+
+  {
+    name:"Detective",
+    minPoints:200,
+    icon:"🕵️‍♂️"
+  },
+
+  {
+    name:"Master Detective",
+    minPoints:300,
+    icon:"🏆"
+  }
+
+];
+
+function getDetectiveRank(
+  points
+){
+
+  const safePoints =
+    Math.max(
+      0,
+      Number(
+        points || 0
+      )
+    );
+
+  let currentRank =
+    DETECTIVE_RANKS[0];
+
+  for(
+    const rank
+    of DETECTIVE_RANKS
+  ){
+
+    if(
+      safePoints >=
+      rank.minPoints
+    ){
+
+      currentRank =
+        rank;
+
+    }
+
+  }
+
+  const rankIndex =
+    DETECTIVE_RANKS.indexOf(
+      currentRank
+    );
+
+  const nextRank =
+    DETECTIVE_RANKS[
+      rankIndex + 1
+    ] ||
+    null;
+
+  return {
+
+    name:
+      currentRank.name,
+
+    icon:
+      currentRank.icon,
+
+    points:
+      safePoints,
+
+    minPoints:
+      currentRank.minPoints,
+
+    nextRank,
+
+    pointsToNext:
+      nextRank
+      ?
+      Math.max(
+        0,
+        nextRank.minPoints -
+        safePoints
+      )
+      :
+      0
+
+  };
+
+}
+
+function renderDetectiveRankCard(
+  profile,
+  compact = false
+){
+
+  const points =
+    Math.max(
+      0,
+      Number(
+        profile?.points ||
+        0
+      )
+    );
+
+  const rank =
+    getDetectiveRank(
+      points
+    );
+
+  let progressPercent =
+    100;
+
+  if(rank.nextRank){
+
+    const range =
+      rank.nextRank.minPoints -
+      rank.minPoints;
+
+    const gained =
+      points -
+      rank.minPoints;
+
+    progressPercent =
+      Math.max(
+        0,
+        Math.min(
+          100,
+          gained /
+          range *
+          100
+        )
+      );
+
+  }
+
+  return `
+
+    <div class="rank-card">
+
+      <div class="rank-top">
+
+        <div
+          style="
+            display:flex;
+            align-items:center;
+            gap:11px;
+            min-width:0;
+          "
+        >
+
+          <div class="rank-icon">
+            ${rank.icon}
+          </div>
+
+          <div>
+
+            <div class="rank-name">
+              ${escapeHtml(
+                rank.name
+              )}
+            </div>
+
+            <div class="rank-points">
+              ${points}
+              Detective points
+            </div>
+
+          </div>
+
+        </div>
+
+        ${
+          rank.nextRank
+          ?
+          `
+            <div class="rank-next">
+              ${rank.pointsToNext}
+              to
+              <b>
+                ${escapeHtml(
+                  rank.nextRank.name
+                )}
+              </b>
+            </div>
+          `
+          :
+          `
+            <div
+              class="rank-next"
+              style="
+                color:#ffd66d;
+                font-weight:900;
+              "
+            >
+              MAX RANK
+            </div>
+          `
+        }
+
+      </div>
+
+      ${
+        rank.nextRank
+        ?
+        `
+          <div class="rank-progress">
+
+            <div
+              class="rank-progress-bar"
+              style="
+                width:${progressPercent}%;
+              "
+            ></div>
+
+          </div>
+
+          <div class="rank-message">
+
+            ${
+              compact
+              ?
+              `Next: ${escapeHtml(
+                rank.nextRank.name
+              )}`
+              :
+              `
+                ✅ Correct accusation:
+                +${DETECTIVE_CORRECT_POINTS}
+                &nbsp;&nbsp;|&nbsp;&nbsp;
+                ❌ Wrong accusation:
+                ${DETECTIVE_WRONG_POINTS}
+              `
+            }
+
+          </div>
+        `
+        :
+        `
+          <div class="rank-message">
+
+            🏆 You reached Master Detective.
+
+          </div>
+        `
+      }
+
+    </div>
+
+  `;
+
+}
+
+async function ensureDetectiveProfile(){
+
+  if(!playerId){
+
+    return null;
+
+  }
+
+  const profileRef =
+    ref(
+      db,
+      `detectiveProfiles/${playerId}`
+    );
+
+  try{
+
+    const snapshot =
+      await get(
+        profileRef
+      );
+
+    if(
+      snapshot.exists()
+    ){
+
+      return snapshot.val();
+
+    }
+
+    const profile = {
+
+      playerId,
+
+      points:0,
+
+      lastAwardedRoundId:"",
+
+      lastResultType:"",
+
+      createdAt:
+        sharedNow(),
+
+      updatedAt:
+        sharedNow()
+
+    };
+
+    await set(
+      profileRef,
+      profile
+    );
+
+    return profile;
+
+  }
+  catch(error){
+
+    console.warn(
+      "DETECTIVE PROFILE:",
+      error
+    );
+
+    return null;
+
+  }
+
+}
+
+async function getDetectiveProfile(){
+
+  if(!playerId){
+
+    return {
+
+      playerId:"",
+
+      points:0,
+
+      lastAwardedRoundId:"",
+
+      lastResultType:""
+
+    };
+
+  }
+
+  try{
+
+    const snapshot =
+      await get(
+
+        ref(
+          db,
+          `detectiveProfiles/${playerId}`
+        )
+
+      );
+
+    if(
+      !snapshot.exists()
+    ){
+
+      return (
+        await ensureDetectiveProfile()
+      ) || {
+
+        playerId,
+
+        points:0,
+
+        lastAwardedRoundId:"",
+
+        lastResultType:""
+
+      };
+
+    }
+
+    return (
+      snapshot.val()
+    );
+
+  }
+  catch(error){
+
+    console.warn(
+      "GET DETECTIVE PROFILE:",
+      error
+    );
+
+    return {
+
+      playerId,
+
+      points:0,
+
+      lastAwardedRoundId:"",
+
+      lastResultType:""
+
+    };
+
+  }
+
+}
+
+/*
+  Awards the result exactly once per round.
+
+  Correct:
+    +50
+
+  Wrong:
+    -25
+
+  Points are never allowed below zero.
+
+  A transaction prevents duplicate awards from
+  multiple reveal listeners / refreshes.
+*/
+async function applyDetectiveResultPoints(
+  roundId,
+  correct
+){
+
+  if(
+    !roundId ||
+    !playerId
+  ){
+
+    return null;
+
+  }
+
+  const profileRef =
+    ref(
+      db,
+      `detectiveProfiles/${playerId}`
+    );
+
+  try{
+
+    const transactionResult =
+      await runTransaction(
+
+        profileRef,
+
+        current=>{
+
+          const profile =
+            current || {
+
+              playerId,
+
+              points:0,
+
+              lastAwardedRoundId:"",
+
+              lastResultType:"",
+
+              createdAt:
+                sharedNow(),
+
+              updatedAt:
+                sharedNow()
+
+            };
+
+          /*
+            This exact round has already
+            changed the player's points.
+          */
+          if(
+            String(
+              profile.lastAwardedRoundId ||
+              ""
+            ) ===
+            String(roundId)
+          ){
+
+            return profile;
+
+          }
+
+          const oldPoints =
+            Math.max(
+              0,
+              Number(
+                profile.points ||
+                0
+              )
+            );
+
+          const change =
+            correct
+            ?
+            DETECTIVE_CORRECT_POINTS
+            :
+            DETECTIVE_WRONG_POINTS;
+
+          const newPoints =
+            Math.max(
+              0,
+              oldPoints +
+              change
+            );
+
+          return {
+
+            ...profile,
+
+            playerId,
+
+            points:
+              newPoints,
+
+            lastAwardedRoundId:
+              String(
+                roundId
+              ),
+
+            lastResultType:
+              correct
+              ?
+              "correct"
+              :
+              "wrong",
+
+            updatedAt:
+              sharedNow()
+
+          };
+
+        }
+
+      );
+
+    if(
+      !transactionResult.committed
+    ){
+
+      return null;
+
+    }
+
+    return transactionResult
+      .snapshot
+      .val();
+
+  }
+  catch(error){
+
+    console.error(
+      "DETECTIVE RESULT POINTS:",
+      error
+    );
+
+    return null;
+
+  }
+
+}
+
+async function refreshHomeDetectiveRank(){
+
+  const box =
+    document.getElementById(
+      "detectiveRankHome"
+    );
+
+  if(!box){
+
+    return;
+
+  }
+
+  const profile =
+    await getDetectiveProfile();
+
+  box.innerHTML =
+    renderDetectiveRankCard(
+      profile
+    );
+
+}
 
 /* =====================================================
 TIMING
@@ -4231,6 +4907,8 @@ function showHome(){
   renderHomeMaps();
   restoreSavedRoom();
 
+  refreshHomeDetectiveRank();
+
 }
 
 function loadSavedName(){
@@ -4274,6 +4952,7 @@ async function(){
     myName
   );
 
+  await ensureDetectiveProfile();
   await saveDeviceRecord();
 
   showHome();
@@ -4359,6 +5038,9 @@ async function(){
     )
     .textContent =
     myName;
+
+  await ensureDetectiveProfile();
+  refreshHomeDetectiveRank();
 
 };
 
@@ -4580,12 +5262,6 @@ async function(){
 
     roundNumber:0,
 
-    /*
-      NEW:
-      Stores who was detective last and
-      how many detective rounds in a row
-      they have had.
-    */
     detectiveHistory:{
 
       lastDetectiveId:"",
@@ -4857,6 +5533,7 @@ async function(){
 
     saveLocalRoom();
 
+    await ensureDetectiveProfile();
     await saveDeviceRecord();
     await startRoomSession();
 
@@ -6537,25 +7214,20 @@ DETECTIVE SELECTION
 /*
   Detective rules:
 
-  1. First round:
-     Completely random.
+  Round 1:
+    Completely random.
 
-  2. If the previous Detective only had one
-     consecutive Detective round:
-     50% chance to stay Detective.
+  Round 2:
+    If the previous Detective was Detective
+    only once, there is a 50% chance they stay
+    Detective.
 
-  3. If the previous Detective had two
-     consecutive Detective rounds:
-     They are BLOCKED from Detective in the
-     next round.
+  Round 3:
+    If the same Detective was Detective in
+    Round 1 and Round 2, they are BLOCKED.
 
-  Example:
-
-    Round 1 → Zezo
-    Round 2 → Zezo (50% chance)
-    Round 3 → NOT Zezo
-    Round 4 → New Detective gets a 50% chance
-               to repeat.
+  So the maximum consecutive Detective streak
+  is 2 rounds.
 */
 function chooseDetective(
   playerIds,
@@ -6583,7 +7255,7 @@ function chooseDetective(
     );
 
   /*
-    First round / old rooms without history.
+    First round.
   */
   if(!hasPrevious){
 
@@ -6594,8 +7266,10 @@ function chooseDetective(
   }
 
   /*
-    Third consecutive Detective round:
-    previous Detective is forbidden.
+    Previous Detective has already had
+    two consecutive rounds.
+
+    They cannot be Detective again.
   */
   if(
     Number(
@@ -6610,21 +7284,18 @@ function chooseDetective(
           previousDetectiveId
       );
 
-    return (
-      random(
-        eligible.length
-          ?
-          eligible
-          :
-          ids
-      )
+    return random(
+      eligible.length
+        ?
+        eligible
+        :
+        ids
     );
 
   }
 
   /*
-    Previous Detective gets exactly 50%
-    chance to stay Detective.
+    Exactly 50% chance to repeat.
   */
   if(
     Math.random() <
@@ -6636,10 +7307,7 @@ function chooseDetective(
   }
 
   /*
-    The other 50% picks someone else.
-    IMPORTANT: the previous Detective is
-    excluded here so it is actually a 50/50
-    repeat chance.
+    Other 50% = someone else.
   */
   const eligible =
     ids.filter(
@@ -6648,14 +7316,12 @@ function chooseDetective(
         previousDetectiveId
     );
 
-  return (
-    random(
-      eligible.length
-        ?
-        eligible
-        :
-        ids
-    )
+  return random(
+    eligible.length
+      ?
+      eligible
+      :
+      ids
   );
 
 }
@@ -6723,18 +7389,11 @@ async function(){
   }
 
   /*
-    =====================================================
-    NEW DETECTIVE SYSTEM
-    =====================================================
-
-    Read the previous Detective and their
-    consecutive Detective streak.
-
-    This data survives the round reset because
-    resetToLobby() does NOT delete detectiveHistory.
+    READ DETECTIVE HISTORY
   */
   const detectiveHistory =
-    roomData.detectiveHistory || {};
+    roomData.detectiveHistory ||
+    {};
 
   const previousDetectiveId =
     detectiveHistory.lastDetectiveId ||
@@ -6747,12 +7406,7 @@ async function(){
     );
 
   /*
-    Choose Detective using:
-
-    - First round = random
-    - Previous Detective = 50% repeat
-    - Two consecutive Detective rounds =
-      guaranteed different Detective
+    SELECT DETECTIVE
   */
   const detective =
     chooseDetective(
@@ -6762,15 +7416,7 @@ async function(){
     );
 
   /*
-    Work out the new streak.
-
-    Same Detective again:
-      streak 1 -> 2
-      streak 2 -> would never happen because
-                 the third round is blocked
-
-    Different Detective:
-      streak resets to 1
+    Calculate consecutive streak.
   */
   const newDetectiveStreak =
     detective ===
@@ -6780,6 +7426,10 @@ async function(){
       :
       1;
 
+  /*
+    Pick murderer from everyone except
+    Detective.
+  */
   const murdererPool =
     ids.filter(
       id =>
@@ -6956,10 +7606,6 @@ async function(){
 
     murderer,
 
-    /*
-      Useful for displaying/debugging the
-      detective streak in Firebase.
-    */
     detectiveStreak:
       newDetectiveStreak,
 
@@ -7026,7 +7672,7 @@ async function(){
     null;
 
   /*
-    SAVE DETECTIVE HISTORY
+    PERSIST DETECTIVE HISTORY.
   */
   updates[
     `rooms/${roomCode}/detectiveHistory`
@@ -7047,17 +7693,11 @@ async function(){
 
   try{
 
-    /*
-      Write the complete round.
-    */
     await update(
       ref(db),
       updates
     );
 
-    /*
-      Build Firebase notification queue.
-    */
     await createTaskNotificationQueue(
 
       roomCode,
@@ -7134,6 +7774,66 @@ async function(){
 SECRET
 ===================================================== */
 
+async function renderDetectiveSecretCard(){
+
+  const card =
+    document.getElementById(
+      "secretCard"
+    );
+
+  const profile =
+    await getDetectiveProfile();
+
+  const rank =
+    getDetectiveRank(
+      profile?.points || 0
+    );
+
+  card.innerHTML = `
+
+    <div class="role detective">
+      🕵️ YOU ARE THE DETECTIVE
+    </div>
+
+    ${renderDetectiveRankCard(
+      profile
+    )}
+
+    <div class="big">
+      Leave the playing area now.
+    </div>
+
+    <div class="warning">
+      Return when the countdown reaches 00:00.
+    </div>
+
+  `;
+
+  document
+    .getElementById(
+      "detectiveWaiting"
+    )
+    .classList
+    .remove("hidden");
+
+  document
+    .getElementById(
+      "normalWaiting"
+    )
+    .classList
+    .add("hidden");
+
+  document
+    .getElementById(
+      "investigation"
+    )
+    .classList
+    .add("hidden");
+
+  showDetectiveTools();
+
+}
+
 function renderSecret(){
 
   const card =
@@ -7155,44 +7855,7 @@ function renderSecret(){
     "detective"
   ){
 
-    card.innerHTML = `
-
-      <div class="role detective">
-        🕵️ YOU ARE THE DETECTIVE
-      </div>
-
-      <div class="big">
-        Leave the playing area now.
-      </div>
-
-      <div class="warning">
-        Return when the countdown reaches 00:00.
-      </div>
-
-    `;
-
-    document
-      .getElementById(
-        "detectiveWaiting"
-      )
-      .classList
-      .remove("hidden");
-
-    document
-      .getElementById(
-        "normalWaiting"
-      )
-      .classList
-      .add("hidden");
-
-    document
-      .getElementById(
-        "investigation"
-      )
-      .classList
-      .add("hidden");
-
-    showDetectiveTools();
+    renderDetectiveSecretCard();
 
     return;
 
@@ -8491,6 +9154,10 @@ function renderTaskProgress(){
 
 }
 
+/* =====================================================
+ACCUSE
+===================================================== */
+
 window.accuse =
 async function(
   accusedId
@@ -8514,14 +9181,25 @@ async function(
 
   }
 
+  if(
+    !roomData?.game
+  ){
+
+    return;
+
+  }
+
   try{
+
+    const resultRef =
+      ref(
+        db,
+        `rooms/${roomCode}/result`
+      );
 
     const existing =
       await get(
-        ref(
-          db,
-          `rooms/${roomCode}/result`
-        )
+        resultRef
       );
 
     if(existing.exists()){
@@ -8530,12 +9208,25 @@ async function(
 
     }
 
+    const game =
+      roomData.game;
+
+    const correct =
+      accusedId ===
+      game.murderer;
+
+    const roundId =
+      String(
+        game.roundId ||
+        game.roundNumber
+      );
+
+    /*
+      Create the result.
+    */
     await set(
 
-      ref(
-        db,
-        `rooms/${roomCode}/result`
-      ),
+      resultRef,
 
       {
 
@@ -8549,16 +9240,78 @@ async function(
           "Unknown",
 
         votedAt:
-          sharedNow()
+          sharedNow(),
+
+        correct,
+
+        roundId
 
       }
 
     );
 
+    /*
+      IMPORTANT:
+
+      Only the Detective awards their own
+      rank points.
+
+      Correct = +50
+      Wrong   = -25
+      Minimum = 0
+    */
+    const updatedProfile =
+      await applyDetectiveResultPoints(
+        roundId,
+        correct
+      );
+
+    if(
+      updatedProfile
+    ){
+
+      const rank =
+        getDetectiveRank(
+          updatedProfile.points
+        );
+
+      const change =
+        correct
+        ?
+        DETECTIVE_CORRECT_POINTS
+        :
+        DETECTIVE_WRONG_POINTS;
+
+      setTimeout(
+        ()=>{
+
+          alert(
+
+            correct
+            ?
+            `✅ CORRECT ACCUSATION!\n\n` +
+            `+${DETECTIVE_CORRECT_POINTS} Detective points\n\n` +
+            `🏆 ${rank.icon} ${rank.name}\n` +
+            `${rank.points} total points`
+            :
+            `❌ WRONG ACCUSATION!\n\n` +
+            `${DETECTIVE_WRONG_POINTS} Detective points\n\n` +
+            `🏆 ${rank.icon} ${rank.name}\n` +
+            `${rank.points} total points`
+
+          );
+
+        },
+        400
+      );
+
+    }
+
   }
   catch(error){
 
     console.error(
+      "ACCUSE:",
       error
     );
 
@@ -8660,6 +9413,38 @@ async function runReveal(
   const wasMurderer =
     accusedId ===
     game.murderer;
+
+  const roundId =
+    String(
+      result.roundId ||
+      game.roundId ||
+      game.roundNumber
+    );
+
+  /*
+    Get the Detective's current points.
+
+    The profile was already updated by the
+    Detective client when the accusation was
+    made. For safety, fetch it again here.
+  */
+  let detectiveProfile =
+    null;
+
+  if(
+    game.detective ===
+    playerId
+  ){
+
+    detectiveProfile =
+      await getDetectiveProfile();
+
+  }
+
+  const detectiveRank =
+    getDetectiveRank(
+      detectiveProfile?.points || 0
+    );
 
   const overlay =
     document.getElementById(
@@ -8817,6 +9602,33 @@ async function runReveal(
 
   await sleep(3500);
 
+  /*
+    Refresh points here in case the result
+    transaction completed after the reveal
+    started.
+  */
+  if(
+    game.detective ===
+    playerId
+  ){
+
+    detectiveProfile =
+      await getDetectiveProfile();
+
+  }
+
+  const finalRank =
+    getDetectiveRank(
+      detectiveProfile?.points || 0
+    );
+
+  const finalChange =
+    wasMurderer
+    ?
+    DETECTIVE_CORRECT_POINTS
+    :
+    DETECTIVE_WRONG_POINTS;
+
   setReveal(
 
     "GAME OVER",
@@ -8857,6 +9669,92 @@ async function runReveal(
         }
 
       </div>
+
+      ${
+        game.detective === playerId
+        ?
+        `
+          <div
+            class="info"
+            style="
+              margin-top:15px;
+              text-align:center;
+            "
+          >
+
+            <div
+              style="
+                font-size:23px;
+                font-weight:900;
+              "
+            >
+
+              ${
+                finalChange >= 0
+                ?
+                `✅ +${finalChange}`
+                :
+                `❌ ${finalChange}`
+              }
+
+              Detective points
+
+            </div>
+
+            <div
+              style="
+                font-size:21px;
+                font-weight:900;
+                margin-top:8px;
+              "
+            >
+
+              ${finalRank.icon}
+              ${escapeHtml(
+                finalRank.name
+              )}
+
+            </div>
+
+            <div class="small">
+              ${finalRank.points}
+              total points
+            </div>
+
+            ${
+              finalRank.nextRank
+              ?
+              `
+                <div
+                  class="small"
+                  style="margin-top:5px"
+                >
+                  ${finalRank.pointsToNext}
+                  points to
+                  ${escapeHtml(
+                    finalRank.nextRank.name
+                  )}
+                </div>
+              `
+              :
+              `
+                <div
+                  class="small"
+                  style="
+                    margin-top:5px;
+                    color:#ffd76b;
+                  "
+                >
+                  🏆 MAX RANK
+                </div>
+              `
+            }
+
+          </div>
+        `
+        :
+        ""
+      }
 
     `,
 
@@ -8937,12 +9835,13 @@ async function resetToLobby(){
   };
 
   /*
-    IMPORTANT:
-    detectiveHistory is NOT cleared.
+    detectiveHistory intentionally stays.
 
-    This is what makes the next round remember
-    who was Detective and how many consecutive
-    Detective rounds they already had.
+    detectiveProfiles also stays.
+
+    Therefore:
+      - Detective streak survives round reset.
+      - Detective rank survives round reset.
   */
 
   try{
@@ -8963,6 +9862,8 @@ async function resetToLobby(){
     );
 
     globalInterval = null;
+
+    refreshHomeDetectiveRank();
 
   }
   catch(error){
@@ -9487,6 +10388,8 @@ document.addEventListener(
 
       }
 
+      refreshHomeDetectiveRank();
+
     }
 
   }
@@ -9511,6 +10414,8 @@ window.addEventListener(
       startTaskQueueProcessor();
 
     }
+
+    refreshHomeDetectiveRank();
 
   }
 );
@@ -9543,6 +10448,8 @@ function leaveRoomToHome(
     .remove("hidden");
 
   renderHomeMaps();
+
+  refreshHomeDetectiveRank();
 
   if(message){
 
@@ -9622,6 +10529,8 @@ async function initialize(){
 
     myName =
       savedName;
+
+    await ensureDetectiveProfile();
 
     showHome();
 
