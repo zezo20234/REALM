@@ -214,6 +214,17 @@ button.dark{
   margin-top:4px;
 }
 
+.player-rank{
+  color:#b8c5ef;
+  font-size:12px;
+  font-weight:800;
+  margin-top:4px;
+}
+
+.player-rank-icon{
+  margin-right:4px;
+}
+
 .name-display{
   font-size:17px;
   font-weight:900;
@@ -1912,7 +1923,7 @@ FIREBASE
 const firebaseConfig = {
 
   apiKey:
-    "AIzaSyCug0S0qHKstGAr5vdzm-DaLZAIDugo",
+    "YOUR_FIREBASE_API_KEY",
 
   authDomain:
     "money-e560a.firebaseapp.com",
@@ -1948,22 +1959,22 @@ const db =
   );
 
 /* =====================================================
-DISCORD WEBHOOKS
+DISCORD
 ===================================================== */
 
 const DISCORD_WEBHOOKS = {
 
   zezo:
-    "https://discord.com/api/webhooks/1537486319339700297/3NB4HLJnT76EQk-Xjj0vNehz6vwukISHTJ4qNy27euX_4YVsLY9_1T_GNZFiQJk5gRyP",
+    "YOUR_ZEZO_WEBHOOK",
 
   asser:
-    "https://discord.com/api/webhooks/1537486379599003713/g8rn9bM7XF87JMn8SJLiW5VnX1ign1ddrcMEhagpf1QkOA-7cefM0cEoZZaRpCoPdji_",
+    "YOUR_ASSER_WEBHOOK",
 
   lilly:
-    "https://discord.com/api/webhooks/1537486651914453052/9uCiBaIzXz0EmbIPlraXhTMMqWybQDlB_sg1XsaFnJFty2kV32GyivWLve-NDtVCRdlC",
+    "YOUR_LILLY_WEBHOOK",
 
   lara:
-    "https://discord.com/api/webhooks/1537486745195782244/U8-s5cP66RRw3Y5KQMDmXvG95cobHBhgBFdLf8HC9u5expfNSahE0Nxrt6TcU9U6W_wT"
+    "YOUR_LARA_WEBHOOK"
 
 };
 
@@ -1977,10 +1988,6 @@ function getDiscordWebhookForName(name){
   return DISCORD_WEBHOOKS[key] || "";
 
 }
-
-/* =====================================================
-DISCORD
-===================================================== */
 
 function discordEscape(value){
 
@@ -2136,11 +2143,6 @@ async function sendDiscordTaskNotification(
     !webhook ||
     !task
   ){
-
-    console.warn(
-      "No Discord webhook for recipient:",
-      recipientName
-    );
 
     return false;
 
@@ -2298,7 +2300,6 @@ let tasksUnsubscribe = null;
 let notesUnsubscribe = null;
 let detectiveNotesUnsubscribe = null;
 let resultUnsubscribe = null;
-let taskQueueUnsubscribe = null;
 
 let serverOffsetUnsubscribe = null;
 let firebaseConnectionUnsubscribe = null;
@@ -2373,9 +2374,7 @@ const DETECTIVE_RANKS = [
 
 ];
 
-function getDetectiveRank(
-  points
-){
+function getDetectiveRank(points){
 
   const safePoints =
     Math.max(
@@ -2427,9 +2426,6 @@ function getDetectiveRank(
     points:
       safePoints,
 
-    minPoints:
-      currentRank.minPoints,
-
     nextRank,
 
     pointsToNext:
@@ -2473,11 +2469,24 @@ function renderDetectiveRankCard(
 
     const range =
       rank.nextRank.minPoints -
-      rank.minPoints;
+      (
+        DETECTIVE_RANKS.find(
+          r =>
+            r.name ===
+            rank.name
+        )?.minPoints || 0
+      );
+
+    const currentMin =
+      DETECTIVE_RANKS.find(
+        r =>
+          r.name ===
+          rank.name
+      )?.minPoints || 0;
 
     const gained =
       points -
-      rank.minPoints;
+      currentMin;
 
     progressPercent =
       Math.max(
@@ -2503,7 +2512,6 @@ function renderDetectiveRankCard(
             display:flex;
             align-items:center;
             gap:11px;
-            min-width:0;
           "
         >
 
@@ -2566,9 +2574,7 @@ function renderDetectiveRankCard(
 
             <div
               class="rank-progress-bar"
-              style="
-                width:${progressPercent}%;
-              "
+              style="width:${progressPercent}%"
             ></div>
 
           </div>
@@ -2596,9 +2602,7 @@ function renderDetectiveRankCard(
         :
         `
           <div class="rank-message">
-
             🏆 You reached Master Detective.
-
           </div>
         `
       }
@@ -2608,6 +2612,219 @@ function renderDetectiveRankCard(
   `;
 
 }
+
+/* =====================================================
+NEW:
+GET PLAYER RANK
+===================================================== */
+
+async function getPlayerDetectiveRank(
+  playerIdForRank
+){
+
+  if(!playerIdForRank){
+
+    return {
+
+      name:"Rookie",
+      icon:"🕵️",
+      points:0
+
+    };
+
+  }
+
+  try{
+
+    const snapshot =
+      await get(
+
+        ref(
+          db,
+          `detectiveProfiles/${playerIdForRank}`
+        )
+
+      );
+
+    const profile =
+      snapshot.exists()
+      ?
+      snapshot.val()
+      :
+      {
+        points:0
+      };
+
+    return getDetectiveRank(
+      profile.points || 0
+    );
+
+  }
+  catch(error){
+
+    console.warn(
+      "PLAYER RANK:",
+      error
+    );
+
+    return {
+
+      name:"Rookie",
+      icon:"🕵️",
+      points:0
+
+    };
+
+  }
+
+}
+
+/* =====================================================
+NEW:
+RENDER ALL PLAYER RANKS IN LOBBY
+===================================================== */
+
+async function renderLobbyPlayerRanks(
+  players
+){
+
+  const container =
+    document.getElementById(
+      "playersList"
+    );
+
+  if(!container){
+
+    return;
+
+  }
+
+  const ids =
+    Object.keys(
+      players || {}
+    );
+
+  const rankResults =
+    await Promise.all(
+
+      ids.map(
+        async id=>({
+
+          id,
+
+          rank:
+            await getPlayerDetectiveRank(
+              id
+            )
+
+        })
+      )
+
+    );
+
+  const rankMap =
+    {};
+
+  rankResults.forEach(
+    item=>{
+
+      rankMap[
+        item.id
+      ] =
+      item.rank;
+
+    }
+  );
+
+  const presence =
+    roomData?.__presence || {};
+
+  container.innerHTML =
+    ids
+      .map(
+        id=>{
+
+          const player =
+            players[id] || {};
+
+          const rank =
+            rankMap[id] ||
+            {
+              name:"Rookie",
+              icon:"🕵️",
+              points:0
+            };
+
+          const connected =
+            presence[id]?.connected === true;
+
+          return `
+
+            <div class="player">
+
+              <div class="name-display">
+
+                👤
+                ${escapeHtml(
+                  player.name ||
+                  "Unknown"
+                )}
+
+                ${
+                  id === roomData.host
+                  ?
+                  `
+                    <span class="host">
+                      👑 HOST
+                    </span>
+                  `
+                  :
+                  ""
+                }
+
+              </div>
+
+              <div class="player-rank">
+
+                <span class="player-rank-icon">
+                  ${rank.icon}
+                </span>
+
+                ${escapeHtml(
+                  rank.name
+                )}
+
+                •
+                ${rank.points}
+                pts
+
+              </div>
+
+              <div class="player-status">
+
+                ${
+                  connected
+                  ?
+                  "🟢 Connected"
+                  :
+                  "🟡 Connecting / offline"
+                }
+
+              </div>
+
+            </div>
+
+          `;
+
+        }
+      )
+      .join("");
+
+}
+
+/* =====================================================
+PROFILE
+===================================================== */
 
 async function ensureDetectiveProfile(){
 
@@ -2727,9 +2944,7 @@ async function getDetectiveProfile(){
 
     }
 
-    return (
-      snapshot.val()
-    );
+    return snapshot.val();
 
   }
   catch(error){
@@ -2755,20 +2970,6 @@ async function getDetectiveProfile(){
 
 }
 
-/*
-  Awards the result exactly once per round.
-
-  Correct:
-    +50
-
-  Wrong:
-    -25
-
-  Points are never allowed below zero.
-
-  A transaction prevents duplicate awards from
-  multiple reveal listeners / refreshes.
-*/
 async function applyDetectiveResultPoints(
   roundId,
   correct
@@ -2817,16 +3018,14 @@ async function applyDetectiveResultPoints(
 
             };
 
-          /*
-            This exact round has already
-            changed the player's points.
-          */
           if(
             String(
               profile.lastAwardedRoundId ||
               ""
             ) ===
-            String(roundId)
+            String(
+              roundId
+            )
           ){
 
             return profile;
@@ -3229,16 +3428,6 @@ function startConnectionMonitoring(){
 
           updateConnectionState();
 
-          if(
-            firebaseConnected &&
-            roomCode &&
-            roomData?.status === "game"
-          ){
-
-            startTaskQueueProcessor();
-
-          }
-
         },
 
         ()=>{
@@ -3583,13 +3772,6 @@ function clearTaskTimers(){
 
 function stopTaskQueueProcessor(){
 
-  if(taskQueueUnsubscribe){
-
-    taskQueueUnsubscribe();
-    taskQueueUnsubscribe = null;
-
-  }
-
   clearInterval(
     taskQueuePollInterval
   );
@@ -3664,8 +3846,6 @@ function stopTimers(){
     callTimer
   );
 
-  clearTaskTimers();
-
   heartbeatInterval = null;
   roomExpiryInterval = null;
   globalInterval = null;
@@ -3676,7 +3856,7 @@ function stopTimers(){
 }
 
 /* =====================================================
-SERVICE WORKER / LOCAL NOTIFICATIONS
+NOTIFICATIONS
 ===================================================== */
 
 async function registerServiceWorker(){
@@ -3763,8 +3943,7 @@ async function showPersistentNotification(
           "house-mystery-" +
           Date.now(),
 
-        renotify:
-          true,
+        renotify:true,
 
         requireInteraction:
           options.requireInteraction ??
@@ -3889,14 +4068,6 @@ async function(){
       error
     );
 
-    alert(
-      "Could not enable notifications.\n\n" +
-      (
-        error?.message ||
-        "Please try again."
-      )
-    );
-
   }
 
 };
@@ -3914,633 +4085,6 @@ function(){
     );
 
 };
-
-/* =====================================================
-TASK QUEUE
-===================================================== */
-
-function taskQueueRef(queueId){
-
-  return ref(
-    db,
-    `rooms/${roomCode}/taskQueue/${queueId}`
-  );
-
-}
-
-function queueTaskKey(
-  roundId,
-  recipientId,
-  taskId
-){
-
-  return (
-    `${String(roundId)}__${String(recipientId)}__${String(taskId)}`
-      .replaceAll("/","_")
-      .replaceAll(".","_")
-      .replaceAll("#","_")
-      .replaceAll("$","_")
-      .replaceAll("[","_")
-      .replaceAll("]","_")
-  );
-
-}
-
-async function createTaskNotificationQueue(
-  room,
-  roundId,
-  privateData,
-  players
-){
-
-  const updates = {};
-
-  updates[
-    `rooms/${room}/taskQueue`
-  ] = null;
-
-  for(
-    const playerIdForTask
-    of Object.keys(
-      privateData || {}
-    )
-  ){
-
-    const secret =
-      privateData[playerIdForTask];
-
-    const tasks =
-      Array.isArray(
-        secret?.tasks
-      )
-      ?
-      secret.tasks
-      :
-      [];
-
-    const recipientName =
-      players?.[playerIdForTask]?.name ||
-      "Unknown";
-
-    for(
-      const task
-      of tasks
-    ){
-
-      const queueId =
-        queueTaskKey(
-          roundId,
-          playerIdForTask,
-          task.id
-        );
-
-      updates[
-        `rooms/${room}/taskQueue/${queueId}`
-      ] = {
-
-        queueId,
-
-        task,
-
-        recipientId:
-          playerIdForTask,
-
-        recipientName,
-
-        unlockAt:
-          Number(
-            task.unlockAt
-          ),
-
-        roundId:
-          String(roundId),
-
-        roomCode:
-          room,
-
-        status:
-          "pending",
-
-        attempts:0,
-
-        createdAt:
-          sharedNow(),
-
-        claimedBy:"",
-
-        claimedAt:0,
-
-        sentAt:0,
-
-        lastError:""
-
-      };
-
-    }
-
-  }
-
-  await update(
-    ref(db),
-    updates
-  );
-
-}
-
-/* =====================================================
-QUEUE CLAIM
-===================================================== */
-
-async function claimQueueItem(
-  queueId
-){
-
-  const itemRef =
-    taskQueueRef(
-      queueId
-    );
-
-  const result =
-    await runTransaction(
-      itemRef,
-      current=>{
-
-        if(!current){
-
-          return;
-
-        }
-
-        const status =
-          current.status ||
-          "pending";
-
-        const now =
-          sharedNow();
-
-        if(
-          status ===
-          "sent"
-        ){
-
-          return;
-
-        }
-
-        if(
-          status ===
-          "sending"
-        ){
-
-          const claimedAt =
-            Number(
-              current.claimedAt || 0
-            );
-
-          if(
-            now -
-            claimedAt <
-            TASK_CLAIM_TIMEOUT
-          ){
-
-            return;
-
-          }
-
-        }
-
-        const unlockAt =
-          Number(
-            current.unlockAt
-          );
-
-        const nextTryAt =
-          Number(
-            current.nextTryAt ||
-            0
-          );
-
-        if(
-          now <
-          unlockAt
-        ){
-
-          return;
-
-        }
-
-        if(
-          nextTryAt &&
-          now <
-          nextTryAt
-        ){
-
-          return;
-
-        }
-
-        return {
-
-          ...current,
-
-          status:
-            "sending",
-
-          claimedBy:
-            playerId,
-
-          claimedAt:
-            now,
-
-          attempts:
-            Number(
-              current.attempts || 0
-            ) + 1
-
-        };
-
-      }
-    );
-
-  return result.committed
-    ?
-    result.snapshot.val()
-    :
-    null;
-
-}
-
-/* =====================================================
-QUEUE SEND
-===================================================== */
-
-async function processQueueItem(
-  item
-){
-
-  if(
-    !item ||
-    !roomCode
-  ){
-
-    return;
-
-  }
-
-  const key =
-    String(
-      item.queueId
-    );
-
-  if(
-    taskNotificationBusy.has(
-      key
-    )
-  ){
-
-    return;
-
-  }
-
-  taskNotificationBusy.add(
-    key
-  );
-
-  try{
-
-    const sent =
-      await sendDiscordTaskNotification(
-
-        item.task,
-
-        item.recipientName,
-
-        item.recipientId,
-
-        item.roundId,
-
-        item.roomCode
-
-      );
-
-    const itemRef =
-      taskQueueRef(
-        item.queueId
-      );
-
-    if(sent){
-
-      await update(
-        itemRef,
-        {
-
-          status:
-            "sent",
-
-          sentAt:
-            sharedNow(),
-
-          claimedBy:
-            playerId
-
-        }
-      );
-
-    }
-    else{
-
-      const attempts =
-        Number(
-          item.attempts || 1
-        );
-
-      const retryDelay =
-        Math.min(
-          60000,
-          5000 *
-          Math.pow(
-            2,
-            Math.max(
-              0,
-              attempts - 1
-            )
-          )
-        );
-
-      await update(
-        itemRef,
-        {
-
-          status:
-            "pending",
-
-          claimedBy:"",
-
-          claimedAt:0,
-
-          nextTryAt:
-            sharedNow() +
-            retryDelay,
-
-          lastError:
-            "Discord submission failed"
-
-        }
-      );
-
-    }
-
-  }
-  catch(error){
-
-    console.error(
-      "QUEUE SEND:",
-      error
-    );
-
-    try{
-
-      await update(
-
-        taskQueueRef(
-          item.queueId
-        ),
-
-        {
-
-          status:
-            "pending",
-
-          claimedBy:"",
-
-          claimedAt:0,
-
-          nextTryAt:
-            sharedNow() +
-            5000,
-
-          lastError:
-            error?.message ||
-            "Unknown queue error"
-
-        }
-
-      );
-
-    }
-    catch(updateError){
-
-      console.error(
-        "QUEUE RESET:",
-        updateError
-      );
-
-    }
-
-  }
-  finally{
-
-    taskNotificationBusy.delete(
-      key
-    );
-
-  }
-
-}
-
-/* =====================================================
-QUEUE PROCESSOR
-===================================================== */
-
-async function processDueTaskQueue(){
-
-  if(
-    !roomCode ||
-    !browserOnline ||
-    !firebaseConnected
-  ){
-
-    return;
-
-  }
-
-  if(
-    roomData?.status !==
-    "game"
-  ){
-
-    return;
-
-  }
-
-  try{
-
-    const snapshot =
-      await get(
-
-        ref(
-          db,
-          `rooms/${roomCode}/taskQueue`
-        )
-
-      );
-
-    if(!snapshot.exists()){
-
-      return;
-
-    }
-
-    const queue =
-      snapshot.val() || {};
-
-    const now =
-      sharedNow();
-
-    const entries =
-      Object.entries(
-        queue
-      )
-      .filter(
-        ([,item])=>{
-
-          if(!item){
-
-            return false;
-
-          }
-
-          if(
-            item.status ===
-            "sent"
-          ){
-
-            return false;
-
-          }
-
-          if(
-            Number(
-              item.unlockAt
-            ) >
-            now
-          ){
-
-            return false;
-
-          }
-
-          if(
-            Number(
-              item.nextTryAt ||
-              0
-            ) >
-            now
-          ){
-
-            return false;
-
-          }
-
-          if(
-            item.status ===
-            "sending" &&
-            now -
-            Number(
-              item.claimedAt || 0
-            ) <
-            TASK_CLAIM_TIMEOUT
-          ){
-
-            return false;
-
-          }
-
-          return true;
-
-        }
-      )
-      .sort(
-        (a,b)=>
-          Number(
-            a[1]?.unlockAt || 0
-          ) -
-          Number(
-            b[1]?.unlockAt || 0
-          )
-      );
-
-    for(
-      const [
-        queueId
-      ]
-      of entries
-    ){
-
-      if(
-        taskNotificationBusy.has(
-          queueId
-        )
-      ){
-
-        continue;
-
-      }
-
-      const claimed =
-        await claimQueueItem(
-          queueId
-        );
-
-      if(!claimed){
-
-        continue;
-
-      }
-
-      await processQueueItem(
-        claimed
-      );
-
-    }
-
-  }
-  catch(error){
-
-    console.warn(
-      "TASK QUEUE:",
-      error
-    );
-
-  }
-
-}
-
-function startTaskQueueProcessor(){
-
-  stopTaskQueueProcessor();
-
-  if(
-    !roomCode ||
-    !browserOnline ||
-    !firebaseConnected ||
-    roomData?.status !==
-    "game"
-  ){
-
-    return;
-
-  }
-
-  processDueTaskQueue();
-
-  taskQueuePollInterval =
-    setInterval(
-      processDueTaskQueue,
-      TASK_QUEUE_POLL
-    );
-
-}
 
 /* =====================================================
 DEVICE
@@ -4906,7 +4450,6 @@ function showHome(){
 
   renderHomeMaps();
   restoreSavedRoom();
-
   refreshHomeDetectiveRank();
 
 }
@@ -5759,70 +5302,18 @@ function renderLobby(){
 
     `;
 
-  const presence =
-    roomData.__presence || {};
+  /*
+    IMPORTANT:
 
-  document
-    .getElementById(
-      "playersList"
-    )
-    .innerHTML =
+    Ranks are fetched from:
+      detectiveProfiles/{playerId}
 
-    ids
-      .map(
-        id=>{
-
-          const player =
-            players[id] || {};
-
-          const connected =
-            presence[id]?.connected === true;
-
-          return `
-
-            <div class="player">
-
-              <div class="name-display">
-
-                👤
-                ${escapeHtml(
-                  player.name ||
-                  "Unknown"
-                )}
-
-                ${
-                  id === roomData.host
-                  ?
-                  `
-                    <span class="host">
-                      👑 HOST
-                    </span>
-                  `
-                  :
-                  ""
-                }
-
-              </div>
-
-              <div class="player-status">
-
-                ${
-                  connected
-                  ?
-                  "🟢 Connected"
-                  :
-                  "🟡 Connecting / offline"
-                }
-
-              </div>
-
-            </div>
-
-          `;
-
-        }
-      )
-      .join("");
+    This means every person in the lobby
+    sees everybody else's rank.
+  */
+  renderLobbyPlayerRanks(
+    players
+  );
 
   const isHost =
     roomData.host ===
@@ -5980,8 +5471,6 @@ function enterGameFromRoom(){
     gameVisible
   ){
 
-    startTaskQueueProcessor();
-
     return;
 
   }
@@ -6021,8 +5510,6 @@ function enterGameFromRoom(){
   renderCallButtons();
   startGameListeners();
   startGlobalClock();
-
-  startTaskQueueProcessor();
 
 }
 
@@ -6214,18 +5701,6 @@ function startGameListeners(){
             call.destination,
             call.caller
           );
-
-          if(alertsEnabled){
-
-            playCallSound();
-            vibrate();
-
-            systemNotification(
-              call.destination,
-              call.caller
-            );
-
-          }
 
           localStorage.setItem(
             lastSeenKey,
@@ -6606,7 +6081,7 @@ const afterMurderTemplates = [
 ];
 
 /* =====================================================
-TASK GENERATION HELPERS
+TASK HELPERS
 ===================================================== */
 
 function createTask(
@@ -6695,33 +6170,6 @@ function makeUnlockTimes(
 
   }
 
-  const availableSlots =
-    Math.max(
-      1,
-      Math.floor(
-        (
-          lastSlot -
-          firstSlot
-        ) /
-        60000
-      ) + 1
-    );
-
-  if(
-    availableSlots <
-    safeCount
-  ){
-
-    lastSlot =
-      firstSlot +
-      (
-        safeCount -
-        1
-      ) *
-      60000;
-
-  }
-
   const maxIndex =
     Math.max(
       0,
@@ -6734,8 +6182,7 @@ function makeUnlockTimes(
       )
     );
 
-  const selectedIndexes =
-    [];
+  const selectedIndexes = [];
 
   if(
     safeCount === 1
@@ -6796,10 +6243,6 @@ function makeUnlockTimes(
         firstSlot +
         index *
         60000
-    )
-    .sort(
-      (a,b)=>
-        a-b
     );
 
 }
@@ -6883,10 +6326,6 @@ function pickUniqueTaskDescription(
   return description;
 
 }
-
-/* =====================================================
-NORMAL TASKS
-===================================================== */
 
 function buildNormalTasks(
   playerIdForSeed,
@@ -6977,7 +6416,8 @@ function buildNormalTasks(
 
     }
 
-    const task =
+    tasks.push(
+
       createTask(
 
         `${roundSeed}_${playerIdForSeed}_N_${index}_${Math.random().toString(36).slice(2,8)}`,
@@ -6986,27 +6426,19 @@ function buildNormalTasks(
 
         description
 
-      );
+      )
 
-    tasks.push(
-      task
     );
 
   }
 
-  tasks.sort(
+  return tasks.sort(
     (a,b)=>
       Number(a.unlockAt) -
       Number(b.unlockAt)
   );
 
-  return tasks;
-
 }
-
-/* =====================================================
-MURDERER TASKS
-===================================================== */
 
 function buildMurdererTasks(
   playerIdForSeed,
@@ -7038,16 +6470,12 @@ function buildMurdererTasks(
 
   const normalTimes =
     makeUnlockTimes(
-
       now,
-
       Math.max(
         now + 60000,
         usableTaskEnd
       ),
-
       normalCount
-
     );
 
   const usedDescriptions =
@@ -7070,9 +6498,7 @@ function buildMurdererTasks(
 
     const description =
       pickUniqueTaskDescription(
-
         activityTemplates,
-
         shuffle(
           safeLocations.length
             ?
@@ -7080,9 +6506,7 @@ function buildMurdererTasks(
             :
             locations
         ),
-
         usedDescriptions
-
       );
 
     const fallbackLocation =
@@ -7094,15 +6518,6 @@ function buildMurdererTasks(
           locations
       );
 
-    const finalDescription =
-      description ||
-      random(
-        activityTemplates
-      ).replace(
-        "{location}",
-        fallbackLocation
-      );
-
     tasks.push(
 
       createTask(
@@ -7111,7 +6526,13 @@ function buildMurdererTasks(
 
         normalTimes[index],
 
-        finalDescription
+        description ||
+        random(
+          activityTemplates
+        ).replace(
+          "{location}",
+          fallbackLocation
+        )
 
       )
 
@@ -7197,13 +6618,11 @@ function buildMurdererTasks(
 
   );
 
-  tasks.sort(
+  return tasks.sort(
     (a,b)=>
       Number(a.unlockAt) -
       Number(b.unlockAt)
   );
-
-  return tasks;
 
 }
 
@@ -7211,24 +6630,6 @@ function buildMurdererTasks(
 DETECTIVE SELECTION
 ===================================================== */
 
-/*
-  Detective rules:
-
-  Round 1:
-    Completely random.
-
-  Round 2:
-    If the previous Detective was Detective
-    only once, there is a 50% chance they stay
-    Detective.
-
-  Round 3:
-    If the same Detective was Detective in
-    Round 1 and Round 2, they are BLOCKED.
-
-  So the maximum consecutive Detective streak
-  is 2 rounds.
-*/
 function chooseDetective(
   playerIds,
   previousDetectiveId,
@@ -7254,9 +6655,6 @@ function chooseDetective(
       previousDetectiveId
     );
 
-  /*
-    First round.
-  */
   if(!hasPrevious){
 
     return random(
@@ -7265,12 +6663,6 @@ function chooseDetective(
 
   }
 
-  /*
-    Previous Detective has already had
-    two consecutive rounds.
-
-    They cannot be Detective again.
-  */
   if(
     Number(
       previousDetectiveStreak
@@ -7294,9 +6686,6 @@ function chooseDetective(
 
   }
 
-  /*
-    Exactly 50% chance to repeat.
-  */
   if(
     Math.random() <
     0.5
@@ -7306,9 +6695,6 @@ function chooseDetective(
 
   }
 
-  /*
-    Other 50% = someone else.
-  */
   const eligible =
     ids.filter(
       id =>
@@ -7388,9 +6774,6 @@ async function(){
 
   }
 
-  /*
-    READ DETECTIVE HISTORY
-  */
   const detectiveHistory =
     roomData.detectiveHistory ||
     {};
@@ -7405,9 +6788,6 @@ async function(){
       0
     );
 
-  /*
-    SELECT DETECTIVE
-  */
   const detective =
     chooseDetective(
       ids,
@@ -7415,9 +6795,6 @@ async function(){
       previousDetectiveStreak
     );
 
-  /*
-    Calculate consecutive streak.
-  */
   const newDetectiveStreak =
     detective ===
     previousDetectiveId
@@ -7426,10 +6803,6 @@ async function(){
       :
       1;
 
-  /*
-    Pick murderer from everyone except
-    Detective.
-  */
   const murdererPool =
     ids.filter(
       id =>
@@ -7526,21 +6899,13 @@ async function(){
 
     tasks:
       buildMurdererTasks(
-
         murderer,
-
         now,
-
         detectiveEnd,
-
         murderAt,
-
         crimeLocation,
-
         roundSeed,
-
         mapType
-
       )
 
   };
@@ -7555,19 +6920,12 @@ async function(){
 
         tasks:
           buildNormalTasks(
-
             id,
-
             now,
-
             detectiveEnd,
-
             crimeLocation,
-
             roundSeed,
-
             mapType
-
           )
 
       };
@@ -7610,11 +6968,8 @@ async function(){
       newDetectiveStreak,
 
     suspects:[
-
       murderer,
-
       ...innocents
-
     ]
 
   };
@@ -7667,14 +7022,6 @@ async function(){
     null;
 
   updates[
-    `rooms/${roomCode}/taskQueue`
-  ] =
-    null;
-
-  /*
-    PERSIST DETECTIVE HISTORY.
-  */
-  updates[
     `rooms/${roomCode}/detectiveHistory`
   ] = {
 
@@ -7698,18 +7045,6 @@ async function(){
       updates
     );
 
-    await createTaskNotificationQueue(
-
-      roomCode,
-
-      roundId,
-
-      privateData,
-
-      players
-
-    );
-
     roomData = {
 
       ...roomData,
@@ -7725,8 +7060,6 @@ async function(){
         privateData,
 
       completed:{},
-
-      taskQueue:{},
 
       detectiveHistory:{
 
@@ -7783,11 +7116,6 @@ async function renderDetectiveSecretCard(){
 
   const profile =
     await getDetectiveProfile();
-
-  const rank =
-    getDetectiveRank(
-      profile?.points || 0
-    );
 
   card.innerHTML = `
 
@@ -8102,20 +7430,6 @@ async function(
   checked
 ){
 
-  if(
-    !browserOnline ||
-    !firebaseConnected
-  ){
-
-    alert(
-      "You are not connected."
-    );
-
-    renderTasks();
-    return;
-
-  }
-
   const task =
     mySecret?.tasks?.find(
       item =>
@@ -8290,15 +7604,6 @@ async function(){
 
   }
 
-  if(
-    text.length >
-    MAX_PLAYER_NOTE_LENGTH
-  ){
-
-    return;
-
-  }
-
   try{
 
     const noteRef =
@@ -8371,7 +7676,7 @@ async function(){
 };
 
 /* =====================================================
-DETECTIVE
+DETECTIVE TOOLS
 ===================================================== */
 
 function showDetectiveTools(){
@@ -8977,13 +8282,17 @@ function renderCase(){
 
               <div class="player">
 
-                👤
-                ${escapeHtml(
-                  roomData
-                    .players[id]
-                    ?.name ||
-                  "Unknown"
-                )}
+                <div class="name-display">
+
+                  👤
+                  ${escapeHtml(
+                    roomData
+                      .players[id]
+                      ?.name ||
+                    "Unknown"
+                  )}
+
+                </div>
 
               </div>
 
@@ -9181,21 +8490,13 @@ async function(
 
   }
 
-  if(
-    !roomData?.game
-  ){
-
-    return;
-
-  }
+  const resultRef =
+    ref(
+      db,
+      `rooms/${roomCode}/result`
+    );
 
   try{
-
-    const resultRef =
-      ref(
-        db,
-        `rooms/${roomCode}/result`
-      );
 
     const existing =
       await get(
@@ -9221,9 +8522,6 @@ async function(
         game.roundNumber
       );
 
-    /*
-      Create the result.
-    */
     await set(
 
       resultRef,
@@ -9250,60 +8548,15 @@ async function(
 
     );
 
-    /*
-      IMPORTANT:
-
-      Only the Detective awards their own
-      rank points.
-
-      Correct = +50
-      Wrong   = -25
-      Minimum = 0
-    */
     const updatedProfile =
       await applyDetectiveResultPoints(
         roundId,
         correct
       );
 
-    if(
-      updatedProfile
-    ){
+    if(updatedProfile){
 
-      const rank =
-        getDetectiveRank(
-          updatedProfile.points
-        );
-
-      const change =
-        correct
-        ?
-        DETECTIVE_CORRECT_POINTS
-        :
-        DETECTIVE_WRONG_POINTS;
-
-      setTimeout(
-        ()=>{
-
-          alert(
-
-            correct
-            ?
-            `✅ CORRECT ACCUSATION!\n\n` +
-            `+${DETECTIVE_CORRECT_POINTS} Detective points\n\n` +
-            `🏆 ${rank.icon} ${rank.name}\n` +
-            `${rank.points} total points`
-            :
-            `❌ WRONG ACCUSATION!\n\n` +
-            `${DETECTIVE_WRONG_POINTS} Detective points\n\n` +
-            `🏆 ${rank.icon} ${rank.name}\n` +
-            `${rank.points} total points`
-
-          );
-
-        },
-        400
-      );
+      refreshHomeDetectiveRank();
 
     }
 
@@ -9414,37 +8667,17 @@ async function runReveal(
     accusedId ===
     game.murderer;
 
-  const roundId =
-    String(
-      result.roundId ||
-      game.roundId ||
-      game.roundNumber
-    );
+  const detectiveName =
+    players[
+      game.detective
+    ]?.name ||
+    "Unknown";
 
-  /*
-    Get the Detective's current points.
-
-    The profile was already updated by the
-    Detective client when the accusation was
-    made. For safety, fetch it again here.
-  */
-  let detectiveProfile =
-    null;
-
-  if(
-    game.detective ===
-    playerId
-  ){
-
-    detectiveProfile =
-      await getDetectiveProfile();
-
-  }
-
-  const detectiveRank =
-    getDetectiveRank(
-      detectiveProfile?.points || 0
-    );
+  const murdererName =
+    players[
+      game.murderer
+    ]?.name ||
+    "Unknown";
 
   const overlay =
     document.getElementById(
@@ -9496,7 +8729,6 @@ async function runReveal(
       `${accusedName} was innocent.`,
 
     "",
-
     wasMurderer
       ?
       "reveal-shake"
@@ -9506,18 +8738,6 @@ async function runReveal(
   );
 
   await sleep(2500);
-
-  const detectiveName =
-    players[
-      game.detective
-    ]?.name ||
-    "Unknown";
-
-  const murdererName =
-    players[
-      game.murderer
-    ]?.name ||
-    "Unknown";
 
   const innocentRows =
     (
@@ -9602,169 +8822,183 @@ async function runReveal(
 
   await sleep(3500);
 
-  /*
-    Refresh points here in case the result
-    transaction completed after the reveal
-    started.
-  */
   if(
     game.detective ===
     playerId
   ){
 
-    detectiveProfile =
+    const profile =
       await getDetectiveProfile();
 
-  }
+    const rank =
+      getDetectiveRank(
+        profile?.points || 0
+      );
 
-  const finalRank =
-    getDetectiveRank(
-      detectiveProfile?.points || 0
-    );
+    const pointsChange =
+      wasMurderer
+        ?
+        DETECTIVE_CORRECT_POINTS
+        :
+        DETECTIVE_WRONG_POINTS;
 
-  const finalChange =
-    wasMurderer
-    ?
-    DETECTIVE_CORRECT_POINTS
-    :
-    DETECTIVE_WRONG_POINTS;
+    setReveal(
 
-  setReveal(
+      "GAME OVER",
 
-    "GAME OVER",
+      wasMurderer
+        ?
+        "🎉 DETECTIVE WINS!"
+        :
+        "🔎 MYSTERY PLAYER WINS!",
 
-    wasMurderer
-      ?
-      "🎉 DETECTIVE WINS!"
-      :
-      "🔎 MYSTERY PLAYER WINS!",
+      wasMurderer
+        ?
+        "Correct accusation."
+        :
+        "The Detective accused an innocent.",
 
-    wasMurderer
-      ?
-      "Correct accusation."
-      :
-      "The Detective accused an innocent.",
+      `
 
-    `
+        <div
+          class="
+            reveal-winner
+            ${
+              wasMurderer
+                ?
+                "detective-win"
+                :
+                "murderer-win"
+            }
+          "
+        >
 
-      <div
-        class="
-          reveal-winner
           ${
             wasMurderer
               ?
-              "detective-win"
+              "🔎 GREAT DETECTIVE WORK"
               :
-              "murderer-win"
+              "😎 GREAT MYSTERY PLAY"
           }
-        "
-      >
 
-        ${
-          wasMurderer
-            ?
-            "🔎 GREAT DETECTIVE WORK"
-            :
-            "😎 GREAT MYSTERY PLAY"
-        }
+        </div>
 
-      </div>
+        <div
+          class="info"
+          style="
+            margin-top:15px;
+            text-align:center;
+          "
+        >
 
-      ${
-        game.detective === playerId
-        ?
-        `
           <div
-            class="info"
             style="
-              margin-top:15px;
-              text-align:center;
+              font-size:23px;
+              font-weight:900;
             "
           >
 
-            <div
-              style="
-                font-size:23px;
-                font-weight:900;
-              "
-            >
-
-              ${
-                finalChange >= 0
-                ?
-                `✅ +${finalChange}`
-                :
-                `❌ ${finalChange}`
-              }
-
-              Detective points
-
-            </div>
-
-            <div
-              style="
-                font-size:21px;
-                font-weight:900;
-                margin-top:8px;
-              "
-            >
-
-              ${finalRank.icon}
-              ${escapeHtml(
-                finalRank.name
-              )}
-
-            </div>
-
-            <div class="small">
-              ${finalRank.points}
-              total points
-            </div>
-
             ${
-              finalRank.nextRank
+              pointsChange >= 0
               ?
-              `
-                <div
-                  class="small"
-                  style="margin-top:5px"
-                >
-                  ${finalRank.pointsToNext}
-                  points to
-                  ${escapeHtml(
-                    finalRank.nextRank.name
-                  )}
-                </div>
-              `
+              `✅ +${pointsChange}`
               :
-              `
-                <div
-                  class="small"
-                  style="
-                    margin-top:5px;
-                    color:#ffd76b;
-                  "
-                >
-                  🏆 MAX RANK
-                </div>
-              `
+              `❌ ${pointsChange}`
             }
 
+            Detective points
+
           </div>
-        `
+
+          <div
+            style="
+              font-size:21px;
+              font-weight:900;
+              margin-top:8px;
+            "
+          >
+
+            ${rank.icon}
+            ${escapeHtml(
+              rank.name
+            )}
+
+          </div>
+
+          <div class="small">
+
+            ${rank.points}
+            total points
+
+          </div>
+
+        </div>
+
+      `,
+
+      wasMurderer
+        ?
+        "reveal-pop"
         :
-        ""
-      }
+        "reveal-shake"
 
-    `,
+    );
 
-    wasMurderer
-      ?
-      "reveal-pop"
-      :
-      "reveal-shake"
+  }
+  else{
 
-  );
+    setReveal(
+
+      "GAME OVER",
+
+      wasMurderer
+        ?
+        "🎉 DETECTIVE WINS!"
+        :
+        "🔎 MYSTERY PLAYER WINS!",
+
+      wasMurderer
+        ?
+        "Correct accusation."
+        :
+        "The Detective accused an innocent.",
+
+      `
+
+        <div
+          class="
+            reveal-winner
+            ${
+              wasMurderer
+                ?
+                "detective-win"
+                :
+                "murderer-win"
+            }
+          "
+        >
+
+          ${
+            wasMurderer
+              ?
+              "🔎 GREAT DETECTIVE WORK"
+              :
+              "😎 GREAT MYSTERY PLAY"
+          }
+
+        </div>
+
+      `,
+
+      wasMurderer
+        ?
+        "reveal-pop"
+        :
+        "reveal-shake"
+
+    );
+
+  }
 
   await sleep(4000);
 
@@ -9823,9 +9057,6 @@ async function resetToLobby(){
     [`rooms/${roomCode}/calls`]:
       null,
 
-    [`rooms/${roomCode}/taskQueue`]:
-      null,
-
     [`rooms/${roomCode}/createdAt`]:
       now,
 
@@ -9833,16 +9064,6 @@ async function resetToLobby(){
       now
 
   };
-
-  /*
-    detectiveHistory intentionally stays.
-
-    detectiveProfiles also stays.
-
-    Therefore:
-      - Detective streak survives round reset.
-      - Detective rank survives round reset.
-  */
 
   try{
 
@@ -9991,10 +9212,6 @@ async function(
       error
     );
 
-    alert(
-      "Could not send the call."
-    );
-
   }
 
 };
@@ -10120,181 +9337,6 @@ function showCall(
 }
 
 /* =====================================================
-SOUND
-===================================================== */
-
-function playCallSound(){
-
-  try{
-
-    const AudioCtx =
-      window.AudioContext ||
-      window.webkitAudioContext;
-
-    if(!AudioCtx){
-
-      return;
-
-    }
-
-    audioContext =
-      audioContext ||
-      new AudioCtx();
-
-    if(
-      audioContext.state ===
-      "suspended"
-    ){
-
-      audioContext
-        .resume()
-        .catch(
-          ()=>{}
-        );
-
-    }
-
-    const start =
-      audioContext.currentTime;
-
-    for(
-      let group = 0;
-      group < 3;
-      group++
-    ){
-
-      const base =
-        start +
-        group * 3.1;
-
-      for(
-        let i = 0;
-        i < 2;
-        i++
-      ){
-
-        const osc =
-          audioContext
-            .createOscillator();
-
-        const gain =
-          audioContext
-            .createGain();
-
-        osc.frequency.value =
-          i === 0
-          ?
-          880
-          :
-          660;
-
-        const t =
-          base +
-          i * .65;
-
-        gain.gain.setValueAtTime(
-          .0001,
-          t
-        );
-
-        gain.gain.exponentialRampToValueAtTime(
-          .28,
-          t + .03
-        );
-
-        gain.gain.exponentialRampToValueAtTime(
-          .0001,
-          t + .50
-        );
-
-        osc.connect(gain);
-        gain.connect(
-          audioContext.destination
-        );
-
-        osc.start(t);
-        osc.stop(t + .55);
-
-      }
-
-    }
-
-  }
-  catch(error){
-
-    console.warn(
-      "CALL SOUND:",
-      error
-    );
-
-  }
-
-}
-
-function vibrate(){
-
-  try{
-
-    if(
-      "vibrate" in navigator
-    ){
-
-      navigator.vibrate([
-        300,
-        120,
-        300,
-        120,
-        500
-      ]);
-
-    }
-
-  }
-  catch{}
-
-}
-
-/* =====================================================
-CALL NOTIFICATION
-===================================================== */
-
-function systemNotification(
-  destination,
-  caller
-){
-
-  if(!alertsEnabled){
-
-    return;
-
-  }
-
-  showPersistentNotification(
-
-    "📞 House Mystery Call",
-
-    {
-
-      body:
-        `${caller} is calling everyone to ${destination}!`,
-
-      tag:
-        "house-call-" +
-        Date.now(),
-
-      requireInteraction:
-        true,
-
-      notificationType:
-        "call"
-
-    }
-
-  );
-
-}
-
-/* =====================================================
 RECONNECT
 ===================================================== */
 
@@ -10379,15 +9421,6 @@ document.addEventListener(
 
       await reconnectCurrentRoom();
 
-      if(
-        roomData?.status ===
-        "game"
-      ){
-
-        startTaskQueueProcessor();
-
-      }
-
       refreshHomeDetectiveRank();
 
     }
@@ -10405,15 +9438,6 @@ window.addEventListener(
     updateConnectionState();
 
     await reconnectCurrentRoom();
-
-    if(
-      roomData?.status ===
-      "game"
-    ){
-
-      startTaskQueueProcessor();
-
-    }
 
     refreshHomeDetectiveRank();
 
