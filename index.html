@@ -214,11 +214,11 @@ async function camPrompt() {
 function postPopup(p) {
   let el = $('#popup');
   if (!el) { el = document.createElement('div'); el.id = 'popup'; document.body.appendChild(el); }
-  el.innerHTML = `<div class="pav">${esc((p.name || '?')[0].toUpperCase())}</div><div style="min-width:0"><small>📸 New post</small><b>New post by ${esc(p.name || 'someone')}</b><span class="mut">${esc(p.text || (p.img ? '📷 Photo' : p.video ? '🎬 Video' : ''))}</span></div>`;
+  el.innerHTML = `<div class="pav">${esc((p.name || '?')[0].toUpperCase())}</div><div style="min-width:0"><small>${p.video ? '🎬 New video' : '📸 New post'}</small><b>${p.video ? 'New video' : 'New post'} by ${esc(p.name || 'someone')}</b><span class="mut">${esc(p.text || (p.img ? '📷 Photo' : p.video ? '🎬 Video' : ''))}</span></div>`;
   el.onclick = () => { el.classList.remove('show'); if (M.id) meShow('insta'); };
   requestAnimationFrame(() => el.classList.add('show'));
-  clearTimeout(popTimer); popTimer = setTimeout(() => el.classList.remove('show'), 5000);
-  if (navigator.vibrate) navigator.vibrate(120);
+  clearTimeout(popTimer); popTimer = setTimeout(() => el.classList.remove('show'), p.video ? 9000 : 5000);
+  if (p.video) beep(); else if (navigator.vibrate) navigator.vibrate(120);
 }
 function qrStop() { clearInterval(M.qrTimer); M.qrTimer = null; if (M.qrTok) { remove(ref(db, 'qr/' + M.qrTok)).catch(() => { }); M.qrTok = null; } }
 function cleanup() { clearTimeout(popTimer); $('#popup')?.remove(); qrStop(); while (subs.length) subs.pop()(); stopMeter(); scanHandler = null; clearInterval(billTick); }
