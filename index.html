@@ -167,6 +167,32 @@ function ask(title, fields, okLabel = 'OK') {
 const subs = [];
 const listen = (r, cb) => { subs.push(onValue(r, cb)); };
 let billTick = null, popTimer = null;
+/* ---------- camera permission ---------- */
+function camMsg(e) {
+  if (!navigator.mediaDevices?.getUserMedia) return 'Camera needs a secure (https) page';
+  if (e && (e.name === 'NotAllowedError' || e.name === 'SecurityError')) return 'Camera is blocked — allow it in your phone Settings → TapPay / browser → Camera';
+  if (e && e.name === 'NotFoundError') return 'No camera found on this device';
+  return 'Camera not available';
+}
+// asks the browser for camera access (shows the system pop-up)
+async function askCamera() {
+  try {
+    const st = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+    st.getTracks().forEach(t => t.stop()); localStorage.tp_cam = '1'; return { ok: true };
+  } catch (e) { return { ok: false, msg: camMsg(e) }; }
+}
+// on opening the app: ask once per launch until camera is allowed
+async function camPrompt() {
+  if (sessionStorage.tp_camAsked) return;
+  try { const q = await navigator.permissions?.query({ name: 'camera' }); if (q && q.state === 'granted') { localStorage.tp_cam = '1'; return; } } catch (e) { }
+  sessionStorage.tp_camAsked = '1';
+  const d = $('#dlg');
+  d.innerHTML = `<h3>📷 Allow camera</h3><p class="mut">TapPay needs your camera to scan QR codes when you pay. Tap Allow, then choose "Allow" on the pop-up.</p><div class="row"><button class="btn" id="camOk" type="button">Allow camera</button><button class="btn ghost" id="camNo" type="button">Not now</button></div>`;
+  d.onclose = null;
+  $('#camNo').onclick = () => d.close();
+  $('#camOk').onclick = async () => { const r = await askCamera(); d.close(); toast(r.ok ? 'Camera allowed ✅' : r.msg, r.ok ? 'ok' : 'bad'); };
+  d.showModal();
+}
 // banner sliding in from the top: "New post by <user>"
 function postPopup(p) {
   let el = $('#popup');
@@ -220,7 +246,7 @@ function qrScan(title, hint) {
     if (!(await loadLib('jsQR'))) { toast('QR scanner could not load — your network may block the CDN', 'bad'); return res(null); }
     let stream;
     try { stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }); }
-    catch (e) { toast('Camera not available (needs https and permission)', 'bad'); return res(null); }
+    catch (e) { toast(camMsg(e), 'bad'); return res(null); }
     const d = $('#dlg'); let timer, done = false;
     d.innerHTML = `<h3>${esc(title)}</h3><video id="qrVid" playsinline muted style="width:100%;border-radius:12px;background:#000"></video><p class="mut" style="font-size:13px">${esc(hint || '')}</p><div class="row"><button class="btn ghost" id="qrCancel" type="button">Cancel</button></div>`;
     const v = $('#qrVid'); v.srcObject = stream; v.play().catch(() => { });
@@ -673,7 +699,7 @@ const ACT = {
     if (!(await loadLib('jsQR'))) return toast('QR scanner could not load — your network may block the CDN', 'bad');
     let stream;
     try { stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }); }
-    catch (e) { return toast('Camera not available (needs https and permission)', 'bad'); }
+    catch (e) { return toast(camMsg(e), 'bad'); }
     const d = $('#dlg'); let timer;
     d.innerHTML = `<h3>Scan customer QR</h3><video id="qrVid" playsinline muted style="width:100%;border-radius:12px;background:#000"></video><p class="mut" style="font-size:13px">Ask the customer to open Send → My QR in their app.</p><div class="row"><button class="btn ghost" id="qrCancel" type="button">Cancel</button></div>`;
     const v = $('#qrVid'); v.srcObject = stream; v.play();
@@ -904,7 +930,7 @@ function meStart() {
     const a = s.val();
     if (!a) { toast('Session ended — please log in', 'bad'); return ACT.mlogout(); }
     M.acc = { id: M.id, ...a };
-    if (!shell) { shell = true; meShell(); drawClock(); }
+    if (!shell) { shell = true; meShell(); drawClock(); camPrompt(); }
     $('#mBal') && ($('#mBal').textContent = money(a.balance));
     meRefresh();
   });
