@@ -80,6 +80,9 @@ dialog .row{flex-direction:row-reverse}
 #toast div.bad{border-color:var(--bad)}#toast div.ok{border-color:var(--ok)}
 .big-ok{text-align:center;padding:24px}.big-ok .tick{font-size:56px}
 .seg{display:flex;gap:8px;margin-bottom:14px}.seg .btn{flex:1}
+.vid{width:100%;max-height:360px;border:0;border-radius:12px;margin-top:8px;background:#000;aspect-ratio:16/9}
+.cmts{margin-top:10px;padding:10px;background:#0e1226;border-radius:12px}
+.cmt{display:flex;justify-content:space-between;gap:8px;align-items:flex-start;padding:5px 0;font-size:14px;word-break:break-word}
 .pulse{animation:p 1.2s infinite}@keyframes p{50%{opacity:.4}}
 </style>
 </head>
@@ -107,6 +110,7 @@ const db = getDatabase(fb);
 /* ---------- settings ---------- */
 const CUR = 'SAR';
 const LINE_PRICE = 20;
+const FREE_MB = 10; // every user starts with this, even without a line
 const PACKS = [
   { id: 'mini', name: 'Mini', mb: 300,  price: 10 },
   { id: 'plus', name: 'Plus', mb: 1000, price: 25 },
@@ -143,6 +147,30 @@ const subs = [];
 const listen = (r, cb) => { subs.push(onValue(r, cb)); };
 let billTick = null;
 function cleanup() { while (subs.length) subs.pop()(); stopMeter(); scanHandler = null; clearInterval(billTick); }
+
+/* ---------- shared world clock: 1 full day = 5 real minutes, same for everyone ---------- */
+const DAY_MS = 5 * 60 * 1000;
+let clockStart = null, srvOffset = 0;
+onValue(ref(db, '.info/serverTimeOffset'), s => { srvOffset = s.val() || 0; });
+onValue(ref(db, 'clock/start'), s => {
+  if (s.val() == null) runTransaction(ref(db, 'clock/start'), c => c == null ? Date.now() + srvOffset : undefined).catch(() => { clockStart = Date.UTC(2026, 0, 1); });
+  else clockStart = s.val();
+  drawClock();
+}, () => { clockStart = Date.UTC(2026, 0, 1); drawClock(); });
+function gameTime() {
+  if (clockStart == null) return null;
+  const e = Math.max(0, Date.now() + srvOffset - clockStart);
+  const day = Math.floor(e / DAY_MS) + 1;
+  const mins = Math.floor((e % DAY_MS) / DAY_MS * 1440);
+  return { day, h: Math.floor(mins / 60), m: mins % 60 };
+}
+function clockText() {
+  const t = gameTime(); if (!t) return '🕒 …';
+  const icon = t.h < 6 || t.h >= 20 ? '🌙' : '☀️';
+  return `${icon} Day ${t.day} · ${String(t.h).padStart(2, '0')}:${String(t.m).padStart(2, '0')}`;
+}
+function drawClock() { document.querySelectorAll('.gclock').forEach(el => el.textContent = clockText()); }
+setInterval(drawClock, 1000);
 
 /* ---------- money core ---------- */
 async function debit(id, amt, desc, type, extra = {}) {
@@ -193,7 +221,7 @@ async function createAccount({ name, uid, balance = 0 }) {
   if (!un.committed) return { ok: false, msg: 'Username already taken' };
   const cc = await runTransaction(ref(db, 'cards/' + uid), c => c ? undefined : id);
   if (!cc.committed) { await remove(ref(db, 'usernames/' + u)); return { ok: false, msg: 'This card is already registered' }; }
-  await set(ref(db, 'accounts/' + id), { name, uid, balance: r2(balance), created: Date.now() });
+  await set(ref(db, 'accounts/' + id), { name, uid, balance: r2(balance), freeMB: FREE_MB, created: Date.now() });
   if (balance > 0) await push(ref(db, 'tx/' + id), { type: 'topup', amount: r2(balance), desc: 'Opening balance', balanceAfter: r2(balance), ts: serverTimestamp() });
   return { ok: true, id };
 }
@@ -303,6 +331,9 @@ document.addEventListener('click', e => {
   const b = e.target.closest('[data-act]');
   if (b && ACT[b.dataset.act]) ACT[b.dataset.act](b.dataset, b);
 });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.target.id?.startsWith('cIn_')) { e.preventDefault(); ACT.mcomment({ id: e.target.id.slice(4) }); }
+});
 document.addEventListener('input', e => {
   if (e.target.id === 'aq') V.accounts.draw();
   if (e.target.id === 'tq') V.tx.draw();
@@ -316,7 +347,7 @@ function route() {
   landing();
 }
 function landing() {
-  root.innerHTML = `<div class="landing"><h1 style="font-size:34px">💳 TapPay</h1><p class="mut">Card payments with your RFID RC522 reader.</p>
+  root.innerHTML = `<div class="landing"><p style="margin:0 0 14px"><button class="btn ghost sm" data-act="refresh" title="Refresh to get the latest update">🔄 Refresh</button></p><h1 style="font-size:34px">💳 TapPay</h1><p class="mut">Card payments with your RFID RC522 reader.</p>
   <a href="#admin"><div class="choice"><div class="ico">🖥️</div><h2>Cashier / Admin</h2><p class="mut">Laptop: create accounts, charge payments, bills, reader.</p></div></a>
   <a href="#me"><div class="choice"><div class="ico">📱</div><h2>My account</h2><p class="mut">Mobile: balance, bills, phone line, packages, Instazyad.</p></div></a></div>`;
 }
@@ -333,14 +364,14 @@ function adminGate() { sessionStorage.tp_admin = '1'; adminApp(); }
 const TABS = [['dash', '📊 Dashboard'], ['pos', '💳 Charge'], ['new', '➕ New account'], ['accounts', '👥 Accounts'], ['bills', '🧾 Bills'], ['tx', '📜 Transactions'], ['reader', '📡 Reader']];
 function adminApp() {
   cleanup();
-  root.innerHTML = `<div class="top"><div class="brand">💳 TapPay · Cashier</div><div class="row"><span class="pill bad" id="serBadge"></span><button class="btn ghost sm" id="serBtn" data-act="serPair">Pair reader</button><span class="mut" id="rdr" style="font-size:12px"></span><button class="btn ghost sm" data-act="alogout">Logout</button></div></div>
+  root.innerHTML = `<div class="top"><div class="row" style="flex-wrap:nowrap"><button class="btn ghost sm" data-act="refresh" title="Refresh to get the latest update">🔄 Refresh</button><div class="brand">💳 TapPay · Cashier</div></div><div class="row"><span class="pill gclock" title="1 day = 5 minutes"></span><span class="pill bad" id="serBadge"></span><button class="btn ghost sm" id="serBtn" data-act="serPair">Pair reader</button><span class="mut" id="rdr" style="font-size:12px"></span><button class="btn ghost sm" data-act="alogout">Logout</button></div></div>
   <div class="shell"><div class="side">${TABS.map(([k, n]) => `<button data-act="tab" data-k="${k}" id="t_${k}">${n}</button>`).join('')}</div><div class="main" id="view"></div></div>`;
   listen(ref(db, 'accounts'), s => { D.acc = s.val() || {}; drawCur(); });
   listen(ref(db, 'bills'), s => { D.bills = s.val() || {}; drawCur(); });
   listen(ref(db, 'tx'), s => { D.tx = s.val() || {}; drawCur(); });
   get(ref(db, 'scans/latest')).then(s => showReader(s.val()));
   serStatus(SER.status); serAuto();
-  showTab(curTab);
+  showTab(curTab); drawClock();
   let paidSeen = null;
   billTick = setInterval(() => {
     const paid = new Set(Object.entries(D.bills).flatMap(([a, o]) => Object.entries(o || {}).filter(([, b]) => b.status === 'paid').map(([id]) => a + '/' + id)));
@@ -360,7 +391,7 @@ function showTab(k) {
 const V = {};
 /* --- dashboard --- */
 V.dash = {
-  html: () => `<h2>Dashboard</h2><div class="stats" id="stats"></div><div class="card"><h3>Latest transactions</h3><div class="tbl" id="dTx"></div></div>`,
+  html: () => `<div class="row between"><h2>Dashboard</h2><div class="row"><span class="pill gclock"></span><button class="btn ghost sm" data-act="clockReset">🔄 Restart clock (Day 1)</button></div></div><div class="stats" id="stats"></div><div class="card"><h3>Latest transactions</h3><div class="tbl" id="dTx"></div></div>`,
   draw() {
     const accs = Object.values(D.acc), tx = allTx();
     const today = new Date().toDateString();
@@ -436,7 +467,7 @@ V.accounts = {
     const q = ($('#aq')?.value || '').toLowerCase();
     const rows = Object.entries(D.acc).filter(([id, a]) => !q || (id + (a.name || '') + (a.uid || '')).toLowerCase().includes(q));
     $('#aList').innerHTML = rows.length ? `<table><thead><tr><th>Username</th><th>Card</th><th>Balance</th><th>Line</th><th>Data</th><th></th></tr></thead><tbody>${rows.map(([id, a]) =>
-      `<tr><td><b>${esc(a.name)}</b></td><td>${esc(a.uid)}</td><td><b>${money(a.balance)}</b></td><td>${esc(a.line?.number || '—')}</td><td>${a.line ? (a.line.dataMB || 0) + ' MB' : '—'}</td>
+      `<tr><td><b>${esc(a.name)}</b></td><td>${esc(a.uid)}</td><td><b>${money(a.balance)}</b></td><td>${esc(a.line?.number || '—')}</td><td>${(a.freeMB || 0) + (a.line?.dataMB || 0)} MB${a.freeMB ? ` <span class="mut">(${a.freeMB} free)</span>` : ''}</td>
       <td><div class="row"><button class="btn sm" data-act="topup" data-id="${id}">Top up</button><button class="btn sm bad" data-act="delacc" data-id="${id}">Delete</button></div></td></tr>`).join('')}</tbody></table>` : '<p class="mut">No accounts.</p>';
   }
 };
@@ -484,7 +515,9 @@ V.reader = {
 /* --- admin actions --- */
 const ACT = {
   alogout() { SER.reader?.cancel(); sessionStorage.removeItem('tp_admin'); location.hash = ''; route(); },
+  refresh() { location.reload(); },
   tab(d) { showTab(d.k); },
+  async clockReset() { if (confirm('Restart the world clock at Day 1 for everyone?')) { await set(ref(db, 'clock/start'), Date.now() + srvOffset); toast('Clock restarted'); } },
   /* POS */
   posStart() {
     posReadForm(); pos.acc = null; pos.verified = false; $('#pPanel').innerHTML = '';
@@ -613,21 +646,47 @@ const ACT = {
     $('#sAmt').value = ''; toast('Sent ✅');
   },
   async mpost() {
-    const text = $('#pText').value.trim(); if (!text && !M.img) return toast('Write something first', 'bad');
-    await push(ref(db, 'posts'), { acc: M.id, name: M.acc.name, text, img: M.img || null, ts: serverTimestamp() });
-    $('#pText').value = ''; M.img = null; $('#pPrev').innerHTML = '';
+    const text = $('#pText').value.trim(); if (!text && !M.img && !M.vid) return toast('Write something first', 'bad');
+    const pr = push(ref(db, 'posts'));
+    const vid = M.vid;
+    if (vid?.kind === 'file') await set(ref(db, 'postVideos/' + pr.key), vid.data);
+    await set(pr, { acc: M.id, name: M.acc.name, text, img: M.img || null, video: vid ? (vid.kind === 'url' ? { kind: 'url', url: vid.url } : { kind: 'file' }) : null, ts: serverTimestamp() });
+    $('#pText').value = ''; M.img = null; M.vid = null; $('#pPrev').innerHTML = '';
   },
   async mlike(d) {
     const p = M.posts[d.id]; if (!p) return;
     await set(ref(db, `posts/${d.id}/likes/${M.id}`), p.likes?.[M.id] ? null : true);
+    ME.insta.feed(true);
   },
-  async mdelpost(d) { if (confirm('Delete your post?')) await remove(ref(db, 'posts/' + d.id)); }
+  async mdelpost(d) { if (confirm('Delete your post?')) { await remove(ref(db, 'posts/' + d.id)); remove(ref(db, 'postVideos/' + d.id)).catch(() => { }); delete M.vids[d.id]; ME.insta.feed(true); } },
+  async mvlink() {
+    const o = await ask('Add a video link', [{ label: 'YouTube or direct .mp4 link', name: 'u', type: 'url', attrs: 'placeholder="https://…"' }], 'Add');
+    if (!o) return; const u = (o.u || '').trim();
+    if (!/^https?:\/\//i.test(u)) return toast('Enter a link starting with http(s)://', 'bad');
+    M.vid = { kind: 'url', url: u };
+    $('#pPrev').innerHTML = `<p class="mut" id="vPrev" style="margin:8px 0 0">🎬 ${esc(u)}</p>`;
+  },
+  async mplayvid(d) {
+    const sn = await get(ref(db, 'postVideos/' + d.id));
+    if (!sn.exists()) return toast('Video not found', 'bad');
+    M.vids[d.id] = sn.val(); ME.insta.feed(true);
+  },
+  mctoggle(d) { M.openC[d.id] = !M.openC[d.id]; ME.insta.feed(true); },
+  async mcomment(d) {
+    const inp = document.getElementById('cIn_' + d.id); const text = (inp?.value || '').trim();
+    if (!text) return;
+    inp.value = '';
+    await push(ref(db, `posts/${d.id}/comments`), { acc: M.id, name: M.acc.name, text: text.slice(0, 300), ts: serverTimestamp() });
+    ME.insta.feed(true);
+    document.getElementById('cIn_' + d.id)?.focus();
+  },
+  async mdelc(d) { await remove(ref(db, `posts/${d.id}/comments/${d.c}`)); ME.insta.feed(true); }
 };
 
 /* =====================================================
    MOBILE (user portal)
    ===================================================== */
-const M = { id: null, acc: null, bills: {}, tx: {}, posts: {}, nums: null, img: null, iState: '' };
+const M = { id: null, acc: null, bills: {}, tx: {}, posts: {}, nums: null, img: null, vid: null, vids: {}, openC: {}, iState: '' };
 const ME_TABS = [['home', '🏠', 'Home'], ['bills', '🧾', 'Bills'], ['insta', '📸', 'Instazyad'], ['phone', '📱', 'Phone'], ['send', '💸', 'Send'], ['hist', '🕘', 'History']];
 let meCur = 'home';
 const genNums = () => Array.from({ length: 3 }, () => '010' + String(Math.floor(Math.random() * 1e8)).padStart(8, '0'));
@@ -637,14 +696,15 @@ function meStart() {
   let saved = null; try { saved = JSON.parse(localStorage.tp_me || 'null'); } catch (e) { }
   if (!saved) return meLogin();
   M.id = saved.id; M.acc = null;
-  root.innerHTML = `<div class="me"><div class="meTop"><b style="font-size:18px">💳 TapPay</b><button class="btn ghost sm" data-act="mlogout">Logout</button></div><div id="mv"><p class="mut">Loading…</p></div></div>`;
+  runTransaction(ref(db, `accounts/${M.id}/freeMB`), c => c == null ? FREE_MB : undefined).catch(() => { });
+  root.innerHTML = `<div class="me"><div class="meTop"><div class="row" style="flex-wrap:nowrap;gap:8px"><button class="btn ghost sm" data-act="refresh" title="Refresh to get the latest update">🔄 Refresh</button><b style="font-size:18px">💳 TapPay</b></div><span class="pill gclock" title="1 day = 5 minutes"></span><button class="btn ghost sm" data-act="mlogout">Logout</button></div><div id="mv"><p class="mut">Loading…</p></div></div>`;
   let shell = false;
   const meRefresh = () => keep(() => { const t = ME[meCur]; if (t && t.refresh) t.refresh(); });
   listen(ref(db, 'accounts/' + M.id), s => {
     const a = s.val();
     if (!a) { toast('Session ended — please log in', 'bad'); return ACT.mlogout(); }
     M.acc = { id: M.id, ...a };
-    if (!shell) { shell = true; meShell(); }
+    if (!shell) { shell = true; meShell(); drawClock(); }
     $('#mBal') && ($('#mBal').textContent = money(a.balance));
     meRefresh();
   });
@@ -661,7 +721,7 @@ function meStart() {
   }, 1000);
 }
 function meLogin(mode = 'in') {
-  root.innerHTML = `<div class="me" style="padding-top:40px"><h1>💳 TapPay</h1>
+  root.innerHTML = `<div class="me" style="padding-top:20px"><p style="margin:0 0 14px"><button class="btn ghost sm" data-act="refresh" title="Refresh to get the latest update">🔄 Refresh</button></p><h1>💳 TapPay</h1>
   <div class="seg"><button class="btn ${mode === 'in' ? '' : 'ghost'}" data-act="lmode" data-m="in">Log in</button><button class="btn ${mode === 'up' ? '' : 'ghost'}" data-act="lmode" data-m="up">Create account</button></div>
   <div class="card">${mode === 'in' ? `
     <div class="big-ok"><div class="tick">📡</div><h3>Tap your card</h3><p class="mut">Tap your card on the reader to log in.</p><p id="lStat" class="mut"><span class="pulse">Waiting for your card…</span></p><button class="btn ghost" data-act="mtap">Try again</button></div>` : `
@@ -687,7 +747,7 @@ ME.home = {
     const l = M.acc.line;
     const unpaid = Object.values(M.bills).filter(b => b.status !== 'paid' && billVisible(b));
     $('#hBody').innerHTML = `<div class="card"><div class="item"><span class="mut">📱 Line</span><b>${l ? esc(l.number) : 'Not active'}</b></div>
-    <div class="item"><span class="mut">📶 Data left</span><b>${l ? (l.dataMB || 0) + ' MB' : '—'}</b></div>
+    <div class="item"><span class="mut">📶 Data left</span><b>${(M.acc.freeMB || 0) + (l?.dataMB || 0)} MB${M.acc.freeMB ? ` <span class="mut" style="font-weight:400">(${M.acc.freeMB} free)</span>` : ''}</b></div>
     <div class="item"><span class="mut">🧾 Unpaid bills</span><b>${unpaid.length}${unpaid.length ? ' · ' + money(unpaid.reduce((s, b) => s + b.amount, 0)) : ''}</b></div></div>`;
   }
 };
@@ -704,9 +764,9 @@ ME.phone = {
     const l = M.acc.line;
     if (!l) {
       if (!M.nums) M.nums = genNums();
-      $('#phBody').innerHTML = `<div class="card"><h3>Get a phone line · ${money(LINE_PRICE)}</h3><p class="mut">Pick your number:</p>${M.nums.map(n => `<div class="item"><b>${n}</b><button class="btn sm" data-act="mbuyline" data-num="${n}">Buy</button></div>`).join('')}<p><button class="btn ghost sm" data-act="mnums">🔄 Other numbers</button></p></div>`;
+      $('#phBody').innerHTML = `<div class="card"><div class="item"><span class="mut">🎁 Free data</span><b>${M.acc.freeMB || 0} MB</b></div></div><div class="card"><h3>Get a phone line · ${money(LINE_PRICE)}</h3><p class="mut">Pick your number:</p>${M.nums.map(n => `<div class="item"><b>${n}</b><button class="btn sm" data-act="mbuyline" data-num="${n}">Buy</button></div>`).join('')}<p><button class="btn ghost sm" data-act="mnums">🔄 Other numbers</button></p></div>`;
     } else {
-      $('#phBody').innerHTML = `<div class="card"><div class="item"><span class="mut">Your number</span><b>${esc(l.number)}</b></div><div class="item"><span class="mut">Data left</span><b>${l.dataMB || 0} MB</b></div></div>
+      $('#phBody').innerHTML = `<div class="card"><div class="item"><span class="mut">Your number</span><b>${esc(l.number)}</b></div><div class="item"><span class="mut">Line data</span><b>${l.dataMB || 0} MB</b></div><div class="item"><span class="mut">🎁 Free data</span><b>${M.acc.freeMB || 0} MB</b></div></div>
       <h3>Buy a package</h3>${PACKS.map(p => `<div class="pk"><div><b>${p.name}</b><br><span class="mut">${p.mb} MB · ${Math.floor(p.mb / 60)} min on Instazyad</span></div><button class="btn sm" data-act="mbuypack" data-id="${p.id}">${money(p.price)}</button></div>`).join('')}`;
     }
   }
@@ -724,7 +784,7 @@ ME.hist = {
 
 /* --- Instazyad: 1 MB of data per second while open --- */
 const meter = { timer: null, pending: 0, inflight: 0 };
-const dataLeft = () => Math.max(0, (M.acc?.line?.dataMB || 0) - meter.pending - meter.inflight);
+const dataLeft = () => Math.max(0, (M.acc?.freeMB || 0) + (M.acc?.line?.dataMB || 0) - meter.pending - meter.inflight);
 function startMeter() {
   stopMeter();
   meter.timer = setInterval(() => {
@@ -738,7 +798,16 @@ function stopMeter() { if (meter.timer) { clearInterval(meter.timer); meter.time
 async function flushMeter() {
   const n = meter.pending; if (!n || !M.id) return;
   meter.pending = 0; meter.inflight += n;
-  try { await runTransaction(ref(db, `accounts/${M.id}/line/dataMB`), c => Math.max(0, (c || 0) - n)); }
+  try {
+    await runTransaction(ref(db, 'accounts/' + M.id), a => {
+      if (!a) return a;
+      const f = Math.min(a.freeMB || 0, n);
+      a.freeMB = (a.freeMB || 0) - f;
+      const rest = n - f;
+      if (rest && a.line) a.line.dataMB = Math.max(0, (a.line.dataMB || 0) - rest);
+      return a;
+    });
+  }
   finally { meter.inflight -= n; }
 }
 function updateMeterUI() {
@@ -754,30 +823,53 @@ ME.insta = {
   refresh() {
     if (!$('#iHead')) return;
     const l = M.acc.line, left = dataLeft();
-    const st = !l ? 'noline' : left <= 0 ? 'nodata' : 'ok';
-    $('#iHead').innerHTML = `<div class="row between"><b>📸 Instazyad</b><span class="mut">📶 <b id="dataLeft" style="color:var(--text)">${left} MB</b></span></div><div class="meter"><i id="dataBar" style="width:${Math.min(100, left / 10)}%"></i></div><p class="mut" style="margin:8px 0 0;font-size:12px">Using 1 MB per second while this page is open.</p>`;
+    const st = left > 0 ? 'ok' : l ? 'nodata' : 'noline';
+    $('#iHead').innerHTML = `<div class="row between"><b>📸 Instazyad</b><span class="mut">📶 <b id="dataLeft" style="color:var(--text)">${left} MB</b></span></div><div class="meter"><i id="dataBar" style="width:${Math.min(100, left / 10)}%"></i></div><p class="mut" style="margin:8px 0 0;font-size:12px">Using 1 MB per second while this page is open.${M.acc.freeMB ? ` 🎁 ${M.acc.freeMB} MB free data is used first.` : ''}</p>`;
     if (st === M.iState) return;
     M.iState = st;
     if (st === 'ok') {
       $('#iBody').innerHTML = `<div class="card"><textarea id="pText" rows="2" placeholder="What's on your mind?"></textarea>
-      <div id="pPrev"></div><div class="row between" style="margin-top:10px"><label class="btn ghost sm" style="margin:0;cursor:pointer">🖼️ Photo<input type="file" id="pFile" accept="image/*" hidden></label><button class="btn" data-act="mpost">Post</button></div></div><div class="card" id="feed"></div>`;
-      $('#pFile').onchange = pickImg; ME.insta.feed();
+      <div id="pPrev"></div><div class="row between" style="margin-top:10px"><div class="row"><label class="btn ghost sm" style="margin:0;cursor:pointer">🖼️ Photo<input type="file" id="pFile" accept="image/*" hidden></label><label class="btn ghost sm" style="margin:0;cursor:pointer">🎬 Video<input type="file" id="vFile" accept="video/*" hidden></label><button class="btn ghost sm" data-act="mvlink">🔗 Video link</button></div><button class="btn" data-act="mpost">Post</button></div></div><div class="card" id="feed"></div>`;
+      $('#pFile').onchange = pickImg; $('#vFile').onchange = pickVid; ME.insta.feed(true);
     } else {
       stopMeter();
-      $('#iBody').innerHTML = `<div class="card big-ok"><div class="tick">${st === 'noline' ? '📵' : '🪫'}</div><h3>${st === 'noline' ? 'You need a phone line first' : "You're out of data"}</h3><p class="mut">${st === 'noline' ? 'Buy a line, then a package, to use Instazyad.' : 'Buy a package to keep scrolling.'}</p><button class="btn" data-act="mtab" data-k="phone">Go to Phone</button></div>`;
+      $('#iBody').innerHTML = `<div class="card big-ok"><div class="tick">${st === 'noline' ? '📵' : '🪫'}</div><h3>${st === 'noline' ? 'Your free data is finished' : "You're out of data"}</h3><p class="mut">${st === 'noline' ? 'Buy a line, then a package, to keep using Instazyad.' : 'Buy a package to keep scrolling.'}</p><button class="btn" data-act="mtab" data-k="phone">Go to Phone</button></div>`;
     }
   },
-  feed() {
+  feed(force) {
     const el = $('#feed'); if (!el) return;
+    if (!force && [...el.querySelectorAll('video')].some(v => !v.paused)) return; // don't interrupt a playing video
     const list = Object.entries(M.posts).sort((a, b) => (b[1].ts || 0) - (a[1].ts || 0));
-    el.innerHTML = list.length ? list.map(([id, p]) => {
-      const likes = Object.keys(p.likes || {}).length, mine = p.likes?.[M.id];
-      return `<div class="post"><div class="row" style="flex-wrap:nowrap"><div class="av">${esc((p.name || '?')[0].toUpperCase())}</div><div><b>${esc(p.name)}</b><br><span class="mut" style="font-size:12px">${when(p.ts)}</span></div></div>
-      ${p.text ? `<p style="margin:10px 0 0;white-space:pre-wrap">${esc(p.text)}</p>` : ''}${p.img ? `<img src="${esc(p.img)}" alt="">` : ''}
-      <div class="row" style="margin-top:10px"><button class="btn ghost sm" data-act="mlike" data-id="${id}">${mine ? '❤️' : '🤍'} ${likes}</button>${p.acc === M.id ? `<button class="btn ghost sm" data-act="mdelpost" data-id="${id}">🗑️</button>` : ''}</div></div>`;
-    }).join('') : '<p class="mut">No posts yet — be the first!</p>';
+    keep(() => {
+      el.innerHTML = list.length ? list.map(([id, p]) => {
+        const likes = Object.keys(p.likes || {}).length, mine = p.likes?.[M.id];
+        const cm = Object.entries(p.comments || {}).sort((a, b) => (a[1].ts || 0) - (b[1].ts || 0));
+        return `<div class="post"><div class="row" style="flex-wrap:nowrap"><div class="av">${esc((p.name || '?')[0].toUpperCase())}</div><div><b>${esc(p.name)}</b><br><span class="mut" style="font-size:12px">${when(p.ts)}</span></div></div>
+        ${p.text ? `<p style="margin:10px 0 0;white-space:pre-wrap">${esc(p.text)}</p>` : ''}${p.img ? `<img src="${esc(p.img)}" alt="">` : ''}${vidHtml(id, p)}
+        <div class="row" style="margin-top:10px"><button class="btn ghost sm" data-act="mlike" data-id="${id}">${mine ? '❤️' : '🤍'} ${likes}</button><button class="btn ghost sm" data-act="mctoggle" data-id="${id}">💬 ${cm.length}</button>${p.acc === M.id ? `<button class="btn ghost sm" data-act="mdelpost" data-id="${id}">🗑️</button>` : ''}</div>
+        ${M.openC[id] ? `<div class="cmts">${cm.length ? cm.map(([cid, c]) => `<div class="cmt"><span><b>${esc(c.name)}</b> ${esc(c.text)}</span>${c.acc === M.id ? `<button class="btn ghost sm" data-act="mdelc" data-id="${id}" data-c="${cid}">✕</button>` : ''}</div>`).join('') : '<p class="mut" style="margin:0 0 8px">No comments yet.</p>'}
+          <div class="row" style="flex-wrap:nowrap;margin-top:6px"><input id="cIn_${id}" placeholder="Write a comment…" maxlength="300"><button class="btn sm" data-act="mcomment" data-id="${id}">Send</button></div></div>` : ''}</div>`;
+      }).join('') : '<p class="mut">No posts yet — be the first!</p>';
+    });
   }
 };
+function vidHtml(id, p) {
+  const v = p.video; if (!v) return '';
+  if (v.kind === 'url') {
+    const m = String(v.url).match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/|embed\/))([\w-]{11})/);
+    if (m) return `<iframe class="vid" src="https://www.youtube.com/embed/${m[1]}" allowfullscreen loading="lazy"></iframe>`;
+    return `<video class="vid" controls playsinline preload="metadata" src="${esc(v.url)}"></video>`;
+  }
+  if (M.vids[id]) return `<video class="vid" controls playsinline src="${M.vids[id]}"></video>`;
+  return `<div style="margin-top:8px"><button class="btn ghost" data-act="mplayvid" data-id="${id}">▶ Play video</button></div>`;
+}
+function pickVid(e) {
+  const f = e.target.files[0]; if (!f) return;
+  if (f.size > 4 * 1024 * 1024) { e.target.value = ''; return toast('Video too big (max 4 MB). Use 🔗 Video link for bigger ones.', 'bad'); }
+  const r = new FileReader();
+  r.onload = () => { M.vid = { kind: 'file', data: r.result }; $('#pPrev').insertAdjacentHTML('beforeend', `<div id="vPrev"><video controls playsinline src="${r.result}" style="max-height:160px;border-radius:10px;margin-top:8px"></video></div>`); };
+  r.readAsDataURL(f);
+}
 function pickImg(e) {
   const f = e.target.files[0]; if (!f) return;
   const img = new Image();
