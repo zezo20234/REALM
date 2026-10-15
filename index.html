@@ -167,6 +167,23 @@ function ask(title, fields, okLabel = 'OK') {
 const subs = [];
 const listen = (r, cb) => { subs.push(onValue(r, cb)); };
 let billTick = null, popTimer = null;
+/* ---------- loud scan beep ---------- */
+let actx = null;
+const primeAudio = () => { try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === 'suspended') actx.resume(); } catch (e) { } };
+['pointerdown', 'touchstart', 'click', 'keydown'].forEach(ev => document.addEventListener(ev, primeAudio, { passive: true }));
+function beep() {
+  try {
+    primeAudio(); if (!actx) return;
+    const t0 = actx.currentTime, comp = actx.createDynamicsCompressor(); comp.connect(actx.destination);
+    [[1400, 0], [1900, 0.16]].forEach(([f, dt]) => {
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.type = 'square'; o.frequency.value = f;
+      g.gain.setValueAtTime(0.0001, t0 + dt); g.gain.exponentialRampToValueAtTime(1, t0 + dt + 0.01); g.gain.setValueAtTime(1, t0 + dt + 0.12); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dt + 0.15);
+      o.connect(g); g.connect(comp); o.start(t0 + dt); o.stop(t0 + dt + 0.16);
+    });
+  } catch (e) { }
+  if (navigator.vibrate) navigator.vibrate(200);
+}
 /* ---------- camera permission ---------- */
 function camMsg(e) {
   if (!navigator.mediaDevices?.getUserMedia) return 'Camera needs a secure (https) page';
@@ -263,7 +280,7 @@ function qrScan(title, hint) {
       if (!v.videoWidth) return;
       cv.width = v.videoWidth; cv.height = v.videoHeight; cx.drawImage(v, 0, 0);
       const r = jsQR(cx.getImageData(0, 0, cv.width, cv.height).data, cv.width, cv.height);
-      if (r && r.data) finish(r.data);
+      if (r && r.data) { beep(); finish(r.data); }
     }, 250);
     d.showModal();
   });
@@ -714,7 +731,7 @@ const ACT = {
       const r = jsQR(cx.getImageData(0, 0, cv.width, cv.height).data, cv.width, cv.height);
       const m = r && /^TPPAY:([A-Za-z0-9_]{3,16})/.exec(r.data.trim());
       if (!m) return;
-      busy = true; d.close();
+      busy = true; beep(); d.close();
       const id = await accIdByName(m[1]);
       if (!id) return toast('Account not found', 'bad');
       posIdentify(id);
