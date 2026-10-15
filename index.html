@@ -180,7 +180,7 @@ async function accIdByName(n) {
   if (!/^[a-z0-9_]{1,16}$/.test(n)) return null;
   const s = await get(ref(db, 'usernames/' + n)); return s.exists() ? s.val() : null;
 }
-// one place that creates accounts (cashier or the user on mobile): username + PIN + card UID
+// one place that creates accounts (cashier or the user on mobile): username + card UID (no PIN)
 async function createAccount({ name, uid, balance = 0 }) {
   name = String(name || '').trim();
   if (!/^[A-Za-z0-9_]{3,16}$/.test(name)) return { ok: false, msg: 'Username: 3–16 letters, numbers or _' };
@@ -238,12 +238,6 @@ function keep(fn) {
     }
   }
 }
-// Enter key submits the PIN / login forms
-document.addEventListener('keydown', e => {
-  if (e.key !== 'Enter') return;
-  const m = {}[e.target.id];
-  if (m) { e.preventDefault(); ACT[m]({}, e.target); }
-});
 function showReader(v) {
   const el = $('#rdr'); if (!el || !v) return;
   el.innerHTML = `Last tap: <b>${esc(v.uid)}</b> · ${esc(v.device || '?')} · ${when(v.ts)}`;
@@ -347,6 +341,13 @@ function adminApp() {
   get(ref(db, 'scans/latest')).then(s => showReader(s.val()));
   serStatus(SER.status); serAuto();
   showTab(curTab);
+  let paidSeen = null;
+  billTick = setInterval(() => {
+    const paid = new Set(Object.entries(D.bills).flatMap(([a, o]) => Object.entries(o || {}).filter(([, b]) => b.status === 'paid').map(([id]) => a + '/' + id)));
+    if (paidSeen) paid.forEach(k => { if (!paidSeen.has(k)) toast('💰 A user just paid a bill'); });
+    paidSeen = paid;
+    if (curTab === 'bills' || curTab === 'dash') drawCur();
+  }, 1000);
 }
 function drawCur() { keep(() => V[curTab]?.draw?.()); }
 function showTab(k) {
@@ -383,8 +384,7 @@ V.pos = {
   <div class="card"><div class="grid2"><label>Amount (${CUR})<input id="pAmt" type="number" step="0.01" min="0" value="${pos.amount || ''}"></label>
   <label>Description<input id="pDesc" placeholder="e.g. Snacks" value="${esc(pos.desc)}"></label></div>
   <label>Pay to (who receives the money)<select id="pTo"></select></label>
-  <div class="row"><button class="btn" data-act="posStart">Start — wait for card tap</button>
-  <input id="pCode" placeholder="or username" style="max-width:170px"><button class="btn ghost" data-act="posManual">Use username</button></div>
+  <div class="row"><button class="btn" data-act="posStart">Start — wait for card tap</button></div>
   <p id="pStatus" class="mut"></p></div><div id="pPanel"></div>`,
   init() { V.pos.fill(); if (pos.acc) V.pos.panel(); },
   fill() {
@@ -401,8 +401,8 @@ V.pos = {
     const live = D.acc[a.id]; if (live) a.balance = live.balance;
     const unpaid = Object.entries(D.bills[a.id] || {}).filter(([, b]) => b.status !== 'paid' && billVisible(b));
     $('#pPanel').innerHTML = `<div class="card"><div class="row between"><div><h3 style="margin:0">${esc(a.name)}</h3><span class="mut">Card ${esc(a.uid)}</span></div><div style="text-align:right"><span class="mut">Balance</span><br><b style="font-size:22px">${money(a.balance)}</b></div></div><hr style="border:0;border-top:1px solid var(--line);margin:14px 0">
-    ${true ? `${pos.amount > 0 ? `<button class="btn ok big" data-act="posPay">Pay ${money(pos.amount)}${pos.desc ? ' — ' + esc(pos.desc) : ''}</button>` : ''}
-      ${unpaid.length ? `<h3 style="margin-top:16px">Unpaid bills</h3>${unpaid.map(([id, b]) => `<div class="item"><div>${esc(b.title)}<br><span class="mut">${b.due ? 'Due ' + esc(b.due) : ''}</span></div><div class="row"><b>${money(b.amount)}</b><button class="btn sm" data-act="posBill" data-id="${id}">Pay</button></div></div>`).join('')}` : '<p class="mut">No unpaid bills.</p>'}`}
+    ${pos.amount > 0 ? `<button class="btn ok big" data-act="posPay">Pay ${money(pos.amount)}${pos.desc ? ' — ' + esc(pos.desc) : ''}</button>` : ''}
+    ${unpaid.length ? `<h3 style="margin-top:16px">Unpaid bills</h3>${unpaid.map(([id, b]) => `<div class="item"><div>${esc(b.title)}<br><span class="mut">${b.due ? 'Due ' + esc(b.due) : ''}</span></div><div class="row"><b>${money(b.amount)}</b><button class="btn sm" data-act="posBill" data-id="${id}">Pay</button></div></div>`).join('')}` : '<p class="mut">No unpaid bills.</p>'}
     <p><button class="btn ghost sm" data-act="posReset">Cancel / next customer</button></p></div>`;
   }
 };
@@ -446,7 +446,7 @@ V.bills = {
   html: () => `<h2>Bills</h2><div class="card"><h3>Add a bill to an account</h3>
   <div class="grid2"><label>Account<select id="bAcc"></select></label><label>Title<input id="bTitle" placeholder="e.g. Electricity"></label>
   <label>Amount (${CUR})<input id="bAmt" type="number" step="0.01" min="0"></label><label>Due date<input id="bDue" type="date"></label>
-  <label>Show to user after (minutes, 0 = now)<input id="bDelay" type="number" min="0" step="1" value="0"></label></div>
+  <label>Show to user after (0 = right now)<div class="row" style="flex-wrap:nowrap;margin-top:5px"><input id="bDelay" type="number" min="0" step="1" value="0" style="margin:0"><select id="bUnit" style="margin:0;width:auto"><option value="1">seconds</option><option value="60" selected>minutes</option><option value="3600">hours</option></select></div></label></div>
   <button class="btn" data-act="addBill">Add bill</button></div><div class="card"><h3>All bills</h3><div class="tbl" id="bList"></div></div>`,
   init() { V.bills.fill(); },
   fill() {
@@ -491,7 +491,6 @@ const ACT = {
     $('#pStatus').innerHTML = '<span class="pulse">📡 Waiting for the customer to tap their card…</span>';
     scanHandler = async uid => { const id = await accIdByUid(uid); if (!id) return toast('Card not registered', 'bad'); await posIdentify(id); };
   },
-  async posManual() { posReadForm(); const c = $('#pCode').value.trim(); if (!c) return; const id = await accIdByName(c); if (!id) return toast('Username not found', 'bad'); posIdentify(id); },
   async posPay() {
     posReadForm();
     const to = pos.to && D.acc[pos.to] ? pos.to : '';
@@ -530,11 +529,6 @@ const ACT = {
     if (!o) return; const r = await credit(d.id, o.a, 'Top up (cashier)', 'topup');
     r.ok ? toast('Balance updated') : toast(r.msg, 'bad');
   },
-  async resetpin(d) {
-    const o = await ask('New PIN for ' + accName(d.id), [{ label: '4 digits', name: 'p', type: 'password', attrs: 'maxlength="4" inputmode="numeric"' }], 'Save');
-    if (!o) return; if (!/^\d{4}$/.test(o.p)) return toast('PIN must be 4 digits', 'bad');
-    await set(ref(db, `accounts/${d.id}/pin`), o.p); toast('PIN changed');
-  },
   async delacc(d) {
     const a = D.acc[d.id]; if (!a || !confirm(`Delete ${a.name} and all their data?`)) return;
     await update(ref(db), { ['accounts/' + d.id]: null, ['cards/' + a.uid]: null, ['usernames/' + String(a.name || '').toLowerCase()]: null, ['bills/' + d.id]: null, ['tx/' + d.id]: null, ...(a.line ? { ['lines/' + a.line.number]: null } : {}) });
@@ -542,10 +536,10 @@ const ACT = {
   },
   /* bills */
   async addBill() {
-    const acc = $('#bAcc').value, title = $('#bTitle').value.trim(), amount = Number($('#bAmt').value), due = $('#bDue').value, delay = Math.max(0, Number($('#bDelay').value) || 0);
+    const acc = $('#bAcc').value, title = $('#bTitle').value.trim(), amount = Number($('#bAmt').value), due = $('#bDue').value, delay = Math.max(0, Number($('#bDelay').value) || 0) * (Number($('#bUnit').value) || 60);
     if (!acc || !title || !(amount > 0)) return toast('Fill account, title and amount', 'bad');
-    await push(ref(db, 'bills/' + acc), { title, amount: r2(amount), due, status: 'unpaid', created: Date.now(), showAt: Date.now() + delay * 60000 });
-    $('#bTitle').value = ''; $('#bAmt').value = ''; toast(delay ? 'Bill scheduled — shows in ' + delay + ' min' : 'Bill added');
+    await push(ref(db, 'bills/' + acc), { title, amount: r2(amount), due, status: 'unpaid', created: Date.now(), showAt: Date.now() + delay * 1000 });
+    $('#bTitle').value = ''; $('#bAmt').value = ''; toast(delay ? 'Bill scheduled — user sees it in ' + (delay >= 3600 ? r2(delay / 3600) + ' h' : delay >= 60 ? r2(delay / 60) + ' min' : delay + ' s') : 'Bill sent to user now');
   },
   async delBill(d) { if (confirm('Delete this bill?')) await remove(ref(db, `bills/${d.acc}/${d.id}`)); },
   csv() {
@@ -660,11 +654,11 @@ function meStart() {
   // bills appear live (also scheduled ones when their time comes)
   let seen = null;
   billTick = setInterval(() => {
-    const n = Object.values(M.bills).filter(b => b.status !== 'paid' && billVisible(b)).length;
-    if (seen !== null && n > seen) toast('🧾 New bill');
-    if (seen !== n) meRefresh();
-    seen = n;
-  }, 3000);
+    const ids = new Set(Object.entries(M.bills).filter(([, b]) => b.status !== 'paid' && billVisible(b)).map(([id]) => id));
+    if (seen) { let fresh = false; ids.forEach(i => { if (!seen.has(i)) fresh = true; }); if (fresh) toast('🧾 New bill'); }
+    if (!seen || seen.size !== ids.size || [...ids].some(i => !seen.has(i))) meRefresh();
+    seen = ids;
+  }, 1000);
 }
 function meLogin(mode = 'in') {
   root.innerHTML = `<div class="me" style="padding-top:40px"><h1>💳 TapPay</h1>
