@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0e1120">
 <title>TapPay</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
 <style>
 :root{--bg:#0e1120;--card:#171b30;--card2:#1e2340;--line:#2a3157;--text:#eef0ff;--mut:#8e95b8;--acc:#6c7bff;--ok:#2ecc8f;--bad:#ff5d73;--warn:#ffb84d}
 *{box-sizing:border-box}
@@ -75,6 +77,11 @@ th{color:var(--mut);font-weight:500;font-size:12px;text-transform:uppercase;lett
 dialog{background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:16px;padding:20px;width:min(380px,92vw)}
 dialog::backdrop{background:#000a}
 dialog .row{flex-direction:row-reverse}
+#popup{position:fixed;left:50%;top:calc(10px + env(safe-area-inset-top,0px));transform:translate(-50%,-140%);z-index:60;width:min(440px,94vw);background:var(--card2);border:1px solid var(--acc);border-radius:16px;padding:12px 14px;display:flex;gap:12px;align-items:center;cursor:pointer;box-shadow:0 8px 30px #000a;transition:transform .35s ease}
+#popup.show{transform:translate(-50%,0)}
+#popup .pav{width:38px;height:38px;border-radius:50%;background:var(--acc);display:grid;place-items:center;font-weight:700;flex:none}
+#popup small{display:block;color:var(--mut)}
+#popup b,#popup span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #toast{position:fixed;left:50%;bottom:80px;transform:translateX(-50%);z-index:50;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
 #toast div{background:#0b0e1c;border:1px solid var(--line);padding:10px 16px;border-radius:12px}
 #toast div.bad{border-color:var(--bad)}#toast div.ok{border-color:var(--ok)}
@@ -145,11 +152,31 @@ function ask(title, fields, okLabel = 'OK') {
 }
 const subs = [];
 const listen = (r, cb) => { subs.push(onValue(r, cb)); };
-let billTick = null;
-function cleanup() { while (subs.length) subs.pop()(); stopMeter(); scanHandler = null; clearInterval(billTick); }
+let billTick = null, popTimer = null;
+// banner sliding in from the top: "New post by <user>"
+function postPopup(p) {
+  let el = $('#popup');
+  if (!el) { el = document.createElement('div'); el.id = 'popup'; document.body.appendChild(el); }
+  el.innerHTML = `<div class="pav">${esc((p.name || '?')[0].toUpperCase())}</div><div style="min-width:0"><small>📸 New post</small><b>New post by ${esc(p.name || 'someone')}</b><span class="mut">${esc(p.text || (p.img ? '📷 Photo' : p.video ? '🎬 Video' : ''))}</span></div>`;
+  el.onclick = () => { el.classList.remove('show'); if (M.id) meShow('insta'); };
+  requestAnimationFrame(() => el.classList.add('show'));
+  clearTimeout(popTimer); popTimer = setTimeout(() => el.classList.remove('show'), 5000);
+  if (navigator.vibrate) navigator.vibrate(120);
+}
+function qrStop() { clearInterval(M.qrTimer); M.qrTimer = null; if (M.qrTok) { remove(ref(db, 'qr/' + M.qrTok)).catch(() => { }); M.qrTok = null; } }
+function cleanup() { clearTimeout(popTimer); $('#popup')?.remove(); qrStop(); while (subs.length) subs.pop()(); stopMeter(); scanHandler = null; clearInterval(billTick); }
 
 /* ---------- shared world clock: 1 full day = 5 real minutes, same for everyone ---------- */
 const DAY_MS = 5 * 60 * 1000;
+// real timestamp of the next time the game clock shows `mins` (minutes since 00:00), after `after`
+function nextGameTime(after, mins) {
+  const base = clockStart == null ? Date.UTC(2026, 0, 1) : clockStart;
+  const e = after + srvOffset - base, off = mins / 1440 * DAY_MS;
+  let d = Math.floor(e / DAY_MS);
+  if (d * DAY_MS + off <= e) d++;
+  return base - srvOffset + d * DAY_MS + off;
+}
+const hhmm = m => String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
 let clockStart = null, srvOffset = 0;
 onValue(ref(db, '.info/serverTimeOffset'), s => { srvOffset = s.val() || 0; });
 onValue(ref(db, 'clock/start'), s => {
@@ -171,6 +198,69 @@ function clockText() {
 }
 function drawClock() { document.querySelectorAll('.gclock').forEach(el => el.textContent = clockText()); }
 setInterval(drawClock, 1000);
+
+/* ---------- QR helpers ---------- */
+// opens the camera in the dialog, resolves with the first QR text it reads (or null if cancelled)
+function qrScan(title, hint) {
+  return new Promise(async res => {
+    if (!window.jsQR) { toast('QR scanner failed to load (check internet)', 'bad'); return res(null); }
+    let stream;
+    try { stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }); }
+    catch (e) { toast('Camera not available (needs https and permission)', 'bad'); return res(null); }
+    const d = $('#dlg'); let timer, done = false;
+    d.innerHTML = `<h3>${esc(title)}</h3><video id="qrVid" playsinline muted style="width:100%;border-radius:12px;background:#000"></video><p class="mut" style="font-size:13px">${esc(hint || '')}</p><div class="row"><button class="btn ghost" id="qrCancel" type="button">Cancel</button></div>`;
+    const v = $('#qrVid'); v.srcObject = stream; v.play().catch(() => { });
+    const finish = val => {
+      if (done) return; done = true; clearInterval(timer);
+      stream.getTracks().forEach(t => t.stop());
+      d.onclose = null; if (d.open) d.close();
+      setTimeout(() => res(val), 80); // let the dialog's close event pass before the caller opens another dialog
+    };
+    d.onclose = () => finish(null);
+    $('#qrCancel').onclick = () => finish(null);
+    const cv = document.createElement('canvas'), cx = cv.getContext('2d', { willReadFrequently: true });
+    timer = setInterval(() => {
+      if (!v.videoWidth) return;
+      cv.width = v.videoWidth; cv.height = v.videoHeight; cx.drawImage(v, 0, 0);
+      const r = jsQR(cx.getImageData(0, 0, cv.width, cv.height).data, cv.width, cv.height);
+      if (r && r.data) finish(r.data);
+    }, 250);
+    d.showModal();
+  });
+}
+// the QR other people scan to send money to `name` (a store can add a fixed price)
+function showRecvQR(name) {
+  if (!window.qrcode) return toast('QR library failed to load (check internet)', 'bad');
+  const d = $('#dlg'); d.onclose = null;
+  d.innerHTML = `<h3>Receive money · ${esc(name)}</h3><div id="rqBox" style="background:#fff;padding:12px;border-radius:14px;max-width:260px;margin:0 auto 12px"></div><label>Amount (optional — fixed price for a store)<input id="rqAmt" type="number" step="0.01" min="0" placeholder="any amount"></label><p class="mut" style="font-size:13px">Scan with TapPay → Send → Scan QR to pay ${esc(name)}.</p><div class="row"><button class="btn ghost" id="rqClose" type="button">Close</button></div>`;
+  const draw = () => { const a = Number($('#rqAmt').value); const q = qrcode(0, 'M'); q.addData('TPPAY:' + name + (a > 0 ? ':' + r2(a) : '')); q.make(); $('#rqBox').innerHTML = q.createSvgTag({ scalable: true, margin: 0 }); };
+  $('#rqAmt').oninput = draw; $('#rqClose').onclick = () => d.close(); draw(); d.showModal();
+}
+
+/* ---------- change card ---------- */
+// moves the account to a new card: new card must be unused, old card stops working
+async function changeCard(id, newUid) {
+  newUid = cleanUid(newUid); if (!newUid) return { ok: false, msg: 'Invalid card' };
+  const a = await getAcc(id); if (!a) return { ok: false, msg: 'Account not found' };
+  if (a.uid === newUid) return { ok: false, msg: 'That is already your card' };
+  const cc = await runTransaction(ref(db, 'cards/' + newUid), c => c ? undefined : id);
+  if (!cc.committed) return { ok: false, msg: 'That card is already registered' };
+  await update(ref(db), { ['accounts/' + id + '/uid']: newUid, ['cards/' + a.uid]: null });
+  return { ok: true };
+}
+// dialog that waits for the new card to be tapped on the reader
+function changeCardDialog(id, who) {
+  const d = $('#dlg');
+  d.innerHTML = `<h3>Change card${who ? ' · ' + esc(who) : ''}</h3><p><span class="pulse">📡 Tap the NEW card on the reader…</span></p><p class="mut" style="font-size:13px">The old card will stop working as soon as the new one is tapped.</p><div class="row"><button class="btn ghost" id="ccCancel" type="button">Cancel</button></div>`;
+  d.onclose = () => { scanHandler = null; };
+  $('#ccCancel').onclick = () => d.close();
+  scanHandler = async uid => {
+    const r = await changeCard(id, uid);
+    if (!r.ok) return toast(r.msg, 'bad');
+    scanHandler = null; d.close(); toast('Card changed ✅');
+  };
+  d.showModal();
+}
 
 /* ---------- money core ---------- */
 async function debit(id, amt, desc, type, extra = {}) {
@@ -355,7 +445,7 @@ function landing() {
 /* =====================================================
    ADMIN
    ===================================================== */
-const D = { acc: {}, bills: {}, tx: {} };
+const D = { acc: {}, bills: {}, tx: {}, sched: {} };
 const allTx = () => Object.entries(D.tx).flatMap(([acc, o]) => Object.entries(o || {}).map(([id, t]) => ({ id, acc, ...t }))).sort((a, b) => (b.ts || 0) - (a.ts || 0));
 const accName = id => D.acc[id]?.name || id;
 let curTab = 'dash';
@@ -369,6 +459,7 @@ function adminApp() {
   listen(ref(db, 'accounts'), s => { D.acc = s.val() || {}; drawCur(); });
   listen(ref(db, 'bills'), s => { D.bills = s.val() || {}; drawCur(); });
   listen(ref(db, 'tx'), s => { D.tx = s.val() || {}; drawCur(); });
+  listen(ref(db, 'schedules'), s => { D.sched = s.val() || {}; drawCur(); });
   get(ref(db, 'scans/latest')).then(s => showReader(s.val()));
   serStatus(SER.status); serAuto();
   showTab(curTab); drawClock();
@@ -377,8 +468,33 @@ function adminApp() {
     const paid = new Set(Object.entries(D.bills).flatMap(([a, o]) => Object.entries(o || {}).filter(([, b]) => b.status === 'paid').map(([id]) => a + '/' + id)));
     if (paidSeen) paid.forEach(k => { if (!paidSeen.has(k)) toast('💰 A user just paid a bill'); });
     paidSeen = paid;
+    runSchedules();
     if (curTab === 'bills' || curTab === 'dash') drawCur();
   }, 1000);
+}
+let schedBusy = false;
+// issues every automatic bill that is due. Only one cashier page wins each round (transaction on `next`).
+async function runSchedules() {
+  if (schedBusy) return; schedBusy = true;
+  try {
+    for (const [id, x] of Object.entries(D.sched)) {
+      if (!x.active || !(x.next <= Date.now())) continue;
+      const r = await runTransaction(ref(db, `schedules/${id}/next`), c => {
+        if (c == null || c > Date.now()) return;
+        const n = c + x.every; if (n > Date.now()) return n; return x.at != null ? nextGameTime(Date.now(), x.at) : Date.now() + x.every;
+      });
+      if (!r.committed) continue;
+      const targets = x.acc === 'all' ? Object.keys(D.acc) : D.acc[x.acc] ? [x.acc] : [];
+      for (const acc of targets) {
+        const nb = push(ref(db, 'bills/' + acc));
+        await set(nb, { title: x.title, amount: x.amount, due: '', status: 'unpaid', created: Date.now(), showAt: Date.now(), sched: id });
+        if (x.auto) {
+          const p = await debit(acc, x.amount, 'Bill: ' + x.title, 'bill');
+          if (p.ok) await update(nb, { status: 'paid', paidAt: Date.now() });
+        }
+      }
+    }
+  } catch (e) { console.error(e); } finally { schedBusy = false; }
 }
 function drawCur() { keep(() => V[curTab]?.draw?.()); }
 function showTab(k) {
@@ -415,9 +531,9 @@ V.pos = {
   <div class="card"><div class="grid2"><label>Amount (${CUR})<input id="pAmt" type="number" step="0.01" min="0" value="${pos.amount || ''}"></label>
   <label>Description<input id="pDesc" placeholder="e.g. Snacks" value="${esc(pos.desc)}"></label></div>
   <label>Pay to (who receives the money)<select id="pTo"></select></label>
-  <div class="row"><button class="btn" data-act="posStart">Start — wait for card tap</button></div>
+  <div class="row"><button class="btn" data-act="posStart">💳 Wait for card tap</button><button class="btn ghost" data-act="posQR">📷 No card? Scan QR</button></div>
   <p id="pStatus" class="mut"></p></div><div id="pPanel"></div>`,
-  init() { V.pos.fill(); if (pos.acc) V.pos.panel(); },
+  init() { V.pos.fill(); if (pos.acc) V.pos.panel(); else ACT.posArm(); },
   fill() {
     const sel = $('#pTo'); if (!sel) return;
     const cur = sel.value || pos.to || '';
@@ -440,6 +556,7 @@ V.pos = {
 async function posIdentify(id) {
   const a = await getAcc(id);
   if (!a) return toast('Account not found', 'bad');
+  if ($('#pAmt')) posReadForm();
   pos.acc = a; pos.verified = true; scanHandler = null;
   const st = $('#pStatus'); if (st) st.textContent = '';
   V.pos.panel();
@@ -468,7 +585,7 @@ V.accounts = {
     const rows = Object.entries(D.acc).filter(([id, a]) => !q || (id + (a.name || '') + (a.uid || '')).toLowerCase().includes(q));
     $('#aList').innerHTML = rows.length ? `<table><thead><tr><th>Username</th><th>Card</th><th>Balance</th><th>Line</th><th>Data</th><th></th></tr></thead><tbody>${rows.map(([id, a]) =>
       `<tr><td><b>${esc(a.name)}</b></td><td>${esc(a.uid)}</td><td><b>${money(a.balance)}</b></td><td>${esc(a.line?.number || '—')}</td><td>${(a.freeMB || 0) + (a.line?.dataMB || 0)} MB${a.freeMB ? ` <span class="mut">(${a.freeMB} free)</span>` : ''}</td>
-      <td><div class="row"><button class="btn sm" data-act="topup" data-id="${id}">Top up</button><button class="btn sm bad" data-act="delacc" data-id="${id}">Delete</button></div></td></tr>`).join('')}</tbody></table>` : '<p class="mut">No accounts.</p>';
+      <td><div class="row"><button class="btn sm" data-act="topup" data-id="${id}">Top up</button><button class="btn sm ghost" data-act="accQR" data-id="${id}">QR</button><button class="btn sm ghost" data-act="chcard" data-id="${id}">Change card</button><button class="btn sm bad" data-act="delacc" data-id="${id}">Delete</button></div></td></tr>`).join('')}</tbody></table>` : '<p class="mut">No accounts.</p>';
   }
 };
 
@@ -478,14 +595,27 @@ V.bills = {
   <div class="grid2"><label>Account<select id="bAcc"></select></label><label>Title<input id="bTitle" placeholder="e.g. Electricity"></label>
   <label>Amount (${CUR})<input id="bAmt" type="number" step="0.01" min="0"></label><label>Due date<input id="bDue" type="date"></label>
   <label>Show to user after (0 = right now)<div class="row" style="flex-wrap:nowrap;margin-top:5px"><input id="bDelay" type="number" min="0" step="1" value="0" style="margin:0"><select id="bUnit" style="margin:0;width:auto"><option value="1">seconds</option><option value="60" selected>minutes</option><option value="3600">hours</option></select></div></label></div>
-  <button class="btn" data-act="addBill">Add bill</button></div><div class="card"><h3>All bills</h3><div class="tbl" id="bList"></div></div>`,
+  <button class="btn" data-act="addBill">Add bill</button></div>
+  <div class="card"><h3>🔁 Automatic bills</h3><p class="mut">Issues the bill again and again by itself. Pick the in-game time it arrives (e.g. 08:00 every 2 game days). Keep this cashier page open — it runs the schedule.</p>
+  <div class="grid2"><label>Account<select id="sAcc"></select></label><label>Title<input id="sTitle" placeholder="e.g. Rent"></label>
+  <label>Amount (${CUR})<input id="sAmt" type="number" step="0.01" min="0"></label>
+  <label>Bill arrives at game time<input id="sAt" type="time" value="08:00"></label>
+  <label>Repeat every<div class="row" style="flex-wrap:nowrap;margin-top:5px"><input id="sEvery" type="number" min="1" step="1" value="1" style="margin:0"><select id="sUnit" style="margin:0;width:auto"><option value="300000" selected>game days (5 min)</option><option value="60000" data-free="1">minutes (any time)</option><option value="3600000" data-free="1">hours (any time)</option><option value="86400000" data-free="1">real days (any time)</option></select></div></label></div>
+  <label class="chk"><input type="checkbox" id="sAuto"> Auto-pay from the user's balance when issued (stays unpaid if not enough money)</label>
+  <button class="btn" data-act="addSched">Start automatic bill</button><div class="tbl" id="sList" style="margin-top:14px"></div></div>
+  <div class="card"><h3>All bills</h3><div class="tbl" id="bList"></div></div>`,
   init() { V.bills.fill(); },
   fill() {
     const sel = $('#bAcc'); if (!sel) return; const cur = sel.value;
     sel.innerHTML = Object.entries(D.acc).map(([id, a]) => `<option value="${id}">${esc(a.name)} (${id})</option>`).join(''); if (cur) sel.value = cur;
+    const s2 = $('#sAcc'); if (s2) { const c2 = s2.value; s2.innerHTML = '<option value="all">Everyone</option>' + sel.innerHTML; if (c2) s2.value = c2; }
   },
   draw() {
     V.bills.fill();
+    const sr = Object.entries(D.sched);
+    if ($('#sList')) $('#sList').innerHTML = sr.length ? `<table><thead><tr><th>Account</th><th>Title</th><th>Amount</th><th>Every</th><th>Next bill</th><th></th></tr></thead><tbody>${sr.map(([id, x]) =>
+      `<tr><td>${x.acc === 'all' ? 'Everyone' : esc(accName(x.acc))}</td><td>${esc(x.title)}${x.auto ? ' <span class="pill">auto-pay</span>' : ''}</td><td>${money(x.amount)}</td><td>${x.n} ${esc(x.unit)}${x.at != null ? ' @ ' + hhmm(x.at) : ''}</td><td>${x.active ? esc(when(x.next)) : '<span class="pill bad">paused</span>'}</td>
+      <td><div class="row"><button class="btn sm ghost" data-act="schedToggle" data-id="${id}">${x.active ? 'Pause' : 'Resume'}</button><button class="btn sm bad" data-act="schedDel" data-id="${id}">Delete</button></div></td></tr>`).join('')}</tbody></table>` : '<p class="mut">No automatic bills yet.</p>';
     const rows = Object.entries(D.bills).flatMap(([acc, o]) => Object.entries(o || {}).map(([id, b]) => ({ id, acc, ...b }))).sort((a, b) => (b.created || 0) - (a.created || 0));
     $('#bList').innerHTML = rows.length ? `<table><thead><tr><th>Account</th><th>Title</th><th>Amount</th><th>Due</th><th>Status</th><th></th></tr></thead><tbody>${rows.map(b =>
       `<tr><td>${esc(accName(b.acc))}</td><td>${esc(b.title)}</td><td>${money(b.amount)}</td><td>${esc(b.due || '')}</td><td>${b.status === 'paid' ? '<span class="pill ok">paid</span>' : !billVisible(b) ? '<span class="pill">scheduled · ' + esc(when(b.showAt)) + '</span>' : '<span class="pill bad">unpaid</span>'}</td>
@@ -519,10 +649,37 @@ const ACT = {
   tab(d) { showTab(d.k); },
   async clockReset() { if (confirm('Restart the world clock at Day 1 for everyone?')) { await set(ref(db, 'clock/start'), Date.now() + srvOffset); toast('Clock restarted'); } },
   /* POS */
-  posStart() {
-    posReadForm(); pos.acc = null; pos.verified = false; $('#pPanel').innerHTML = '';
+  posStart() { pos.acc = null; pos.verified = false; $('#pPanel').innerHTML = ''; ACT.posArm(); },
+  // card tap is always listening on this screen — the customer can just tap
+  posArm() {
     $('#pStatus').innerHTML = '<span class="pulse">📡 Waiting for the customer to tap their card…</span>';
     scanHandler = async uid => { const id = await accIdByUid(uid); if (!id) return toast('Card not registered', 'bad'); await posIdentify(id); };
+  },
+  async posQR() {
+    if (!window.jsQR) return toast('QR scanner failed to load (check internet)', 'bad');
+    let stream;
+    try { stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }); }
+    catch (e) { return toast('Camera not available (needs https and permission)', 'bad'); }
+    const d = $('#dlg'); let timer;
+    d.innerHTML = `<h3>Scan customer QR</h3><video id="qrVid" playsinline muted style="width:100%;border-radius:12px;background:#000"></video><p class="mut" style="font-size:13px">Ask the customer to open Send → My QR in their app.</p><div class="row"><button class="btn ghost" id="qrCancel" type="button">Cancel</button></div>`;
+    const v = $('#qrVid'); v.srcObject = stream; v.play();
+    const stop = () => { clearInterval(timer); stream.getTracks().forEach(t => t.stop()); };
+    d.onclose = stop;
+    $('#qrCancel').onclick = () => d.close();
+    const cv = document.createElement('canvas'), cx = cv.getContext('2d', { willReadFrequently: true });
+    let busy = false;
+    timer = setInterval(async () => {
+      if (busy || !v.videoWidth) return;
+      cv.width = v.videoWidth; cv.height = v.videoHeight; cx.drawImage(v, 0, 0);
+      const r = jsQR(cx.getImageData(0, 0, cv.width, cv.height).data, cv.width, cv.height);
+      const m = r && /^TPPAY:([A-Za-z0-9_]{3,16})/.exec(r.data.trim());
+      if (!m) return;
+      busy = true; d.close();
+      const id = await accIdByName(m[1]);
+      if (!id) return toast('Account not found', 'bad');
+      posIdentify(id);
+    }, 250);
+    d.showModal();
   },
   async posPay() {
     posReadForm();
@@ -562,6 +719,8 @@ const ACT = {
     if (!o) return; const r = await credit(d.id, o.a, 'Top up (cashier)', 'topup');
     r.ok ? toast('Balance updated') : toast(r.msg, 'bad');
   },
+  chcard(d) { const a = D.acc[d.id]; if (a) changeCardDialog(d.id, a.name); },
+  accQR(d) { const a = D.acc[d.id]; if (a) showRecvQR(a.name); },
   async delacc(d) {
     const a = D.acc[d.id]; if (!a || !confirm(`Delete ${a.name} and all their data?`)) return;
     await update(ref(db), { ['accounts/' + d.id]: null, ['cards/' + a.uid]: null, ['usernames/' + String(a.name || '').toLowerCase()]: null, ['bills/' + d.id]: null, ['tx/' + d.id]: null, ...(a.line ? { ['lines/' + a.line.number]: null } : {}) });
@@ -574,6 +733,17 @@ const ACT = {
     await push(ref(db, 'bills/' + acc), { title, amount: r2(amount), due, status: 'unpaid', created: Date.now(), showAt: Date.now() + delay * 1000 });
     $('#bTitle').value = ''; $('#bAmt').value = ''; toast(delay ? 'Bill scheduled — user sees it in ' + (delay >= 3600 ? r2(delay / 3600) + ' h' : delay >= 60 ? r2(delay / 60) + ' min' : delay + ' s') : 'Bill sent to user now');
   },
+  async addSched() {
+    const acc = $('#sAcc').value, title = $('#sTitle').value.trim(), amount = Number($('#sAmt').value), n = Math.max(1, Math.floor(Number($('#sEvery').value) || 1));
+    const u = $('#sUnit'), every = n * Number(u.value), unit = u.selectedOptions[0].text.replace(/ \(.*\)/, '');
+    if (!acc || !title || !(amount > 0)) return toast('Fill account, title and amount', 'bad');
+    const gameDays = u.value === '300000', tv = $('#sAt').value, at = gameDays && /^\d\d:\d\d$/.test(tv) ? Number(tv.slice(0, 2)) * 60 + Number(tv.slice(3)) : null;
+    const next = at != null ? nextGameTime(Date.now(), at) : Date.now();
+    await push(ref(db, 'schedules'), { acc, title, amount: r2(amount), every, n, unit, auto: $('#sAuto').checked, active: true, next, created: Date.now(), ...(at != null ? { at } : {}) });
+    $('#sTitle').value = ''; $('#sAmt').value = ''; toast(at != null ? 'Automatic bill started — first bill at game time ' + hhmm(at) : 'Automatic bill started — first bill is issued now');
+  },
+  async schedToggle(d) { const x = D.sched[d.id]; if (!x) return; await update(ref(db, 'schedules/' + d.id), x.active ? { active: false } : { active: true, next: x.at != null ? nextGameTime(Date.now(), x.at) : Date.now() + x.every }); },
+  async schedDel(d) { if (confirm('Delete this automatic bill?')) await remove(ref(db, 'schedules/' + d.id)); },
   async delBill(d) { if (confirm('Delete this bill?')) await remove(ref(db, `bills/${d.acc}/${d.id}`)); },
   csv() {
     const rows = [['time', 'account', 'type', 'description', 'amount', 'balance']].concat(allTx().map(t => [new Date(t.ts || 0).toISOString(), accName(t.acc), t.type, t.desc, t.amount, t.balanceAfter]));
@@ -608,6 +778,7 @@ const ACT = {
       localStorage.tp_me = JSON.stringify({ id: r.id }); meStart();
     };
   },
+  mchcard() { if (confirm('Change your card? Your old card will stop working.')) changeCardDialog(M.id, M.acc.name); },
   async mpay(d) {
     const b = M.bills[d.id]; if (!b || b.status === 'paid') return;
     const r = await debit(M.id, b.amount, 'Bill: ' + b.title, 'bill');
@@ -645,6 +816,21 @@ const ACT = {
     await credit(to, amt, 'From ' + M.acc.name, 'transfer-in');
     $('#sAmt').value = ''; toast('Sent ✅');
   },
+  async msendQR() {
+    const raw = await qrScan('Scan a QR to pay', "Point at a store's or a friend's TapPay QR.");
+    if (!raw) return;
+    const m = /^TPPAY:([A-Za-z0-9_]{3,16})(?::(\d+(?:\.\d{1,2})?))?$/.exec(raw.trim());
+    if (!m) return toast('Not a TapPay payment QR', 'bad');
+    const to = await accIdByName(m[1]); if (!to) return toast('Account not found', 'bad');
+    if (to === M.id) return toast("That's your own QR", 'bad');
+    const t = await getAcc(to); const fixed = m[2] ? Number(m[2]) : 0;
+    const o = await ask('Pay ' + t.name, [{ label: 'Amount (' + CUR + ')', name: 'a', type: 'number', value: fixed || '', attrs: 'step="0.01" min="0" ' + (fixed ? 'readonly' : 'autofocus') }], 'Pay');
+    if (!o) return; const amt = Number(o.a);
+    const r = await debit(M.id, amt, 'Paid ' + t.name + ' (QR)', 'transfer-out'); if (!r.ok) return toast(r.msg, 'bad');
+    await credit(to, amt, 'From ' + M.acc.name + ' (QR)', 'transfer-in');
+    toast('Paid ' + money(amt) + ' to ' + t.name + ' ✅');
+  },
+  mrecvQR() { showRecvQR(M.acc.name); },
   async mpost() {
     const text = $('#pText').value.trim(); if (!text && !M.img && !M.vid) return toast('Write something first', 'bad');
     const pr = push(ref(db, 'posts'));
@@ -710,7 +896,17 @@ function meStart() {
   });
   listen(ref(db, 'bills/' + M.id), s => { M.bills = s.val() || {}; meRefresh(); });
   listen(ref(db, 'tx/' + M.id), s => { M.tx = s.val() || {}; meRefresh(); });
-  listen(query(ref(db, 'posts'), limitToLast(50)), s => { M.posts = s.val() || {}; if (meCur === 'insta') ME.insta.feed(); });
+  M.seenPosts = null;
+  listen(query(ref(db, 'posts'), limitToLast(50)), s => {
+    M.posts = s.val() || {};
+    const ids = Object.keys(M.posts);
+    if (M.seenPosts) {
+      const fresh = ids.filter(i => !M.seenPosts.has(i) && M.posts[i].acc !== M.id).sort((a, b) => (M.posts[a].ts || 0) - (M.posts[b].ts || 0));
+      if (fresh.length) postPopup(M.posts[fresh[fresh.length - 1]]);
+    }
+    M.seenPosts = new Set(ids);
+    if (meCur === 'insta') ME.insta.feed();
+  });
   // bills appear live (also scheduled ones when their time comes)
   let seen = null;
   billTick = setInterval(() => {
@@ -736,7 +932,7 @@ function meShell() {
   meShow(meCur);
 }
 function meShow(k) {
-  stopMeter(); meCur = k;
+  stopMeter(); qrStop(); meCur = k;
   document.querySelectorAll('.nav button').forEach(b => b.classList.toggle('on', b.id === 'n_' + k));
   $('#mv').innerHTML = ME[k].html(); ME[k].init?.(); ME[k].refresh?.();
 }
@@ -748,6 +944,7 @@ ME.home = {
     const unpaid = Object.values(M.bills).filter(b => b.status !== 'paid' && billVisible(b));
     $('#hBody').innerHTML = `<div class="card"><div class="item"><span class="mut">📱 Line</span><b>${l ? esc(l.number) : 'Not active'}</b></div>
     <div class="item"><span class="mut">📶 Data left</span><b>${(M.acc.freeMB || 0) + (l?.dataMB || 0)} MB${M.acc.freeMB ? ` <span class="mut" style="font-weight:400">(${M.acc.freeMB} free)</span>` : ''}</b></div>
+    <div class="item"><span class="mut">💳 Card</span><div class="row"><b>•••• ${esc(String(M.acc.uid || '').slice(-4))}</b><button class="btn sm ghost" data-act="mchcard">Change card</button></div></div>
     <div class="item"><span class="mut">🧾 Unpaid bills</span><b>${unpaid.length}${unpaid.length ? ' · ' + money(unpaid.reduce((s, b) => s + b.amount, 0)) : ''}</b></div></div>`;
   }
 };
@@ -772,7 +969,14 @@ ME.phone = {
   }
 };
 ME.send = {
-  html: () => `<h2>Send money</h2><div class="card"><label>To username<input id="sTo" autocapitalize="none" maxlength="16"></label><label>Amount (${CUR})<input id="sAmt" type="number" step="0.01" min="0"></label><button class="btn big" data-act="msend">Send</button></div>`
+  html: () => `<h2>Send money</h2><div class="card"><button class="btn big" data-act="msendQR">📷 Scan QR to pay</button><p class="mut" style="font-size:13px;margin:10px 0 0">Money can only be sent by scanning the receiver's QR code.</p></div>
+  <div class="card big-ok"><h3>My QR</h3><div id="myQr" style="background:#fff;padding:12px;border-radius:14px;max-width:260px;margin:0 auto;min-height:100px"></div><p class="mut" style="text-align:center;margin:10px 0 0">@${esc(M.acc.name)} · this QR never changes. Others scan it to send you money.</p></div>`,
+  init() {
+    const box = $('#myQr'); if (!box) return;
+    if (!window.qrcode) { box.innerHTML = '<p style="color:#000">QR library failed to load — check your internet.</p>'; return; }
+    const q = qrcode(0, 'M'); q.addData('TPPAY:' + M.acc.name); q.make();
+    box.innerHTML = q.createSvgTag({ scalable: true, margin: 0 });
+  }
 };
 ME.hist = {
   html: () => `<h2>History</h2><div class="card" id="hiBody"></div>`,
