@@ -571,6 +571,8 @@ function serStatus(st) {
   const b = $('#serBadge');
   if (b) { b.className = 'pill ' + (st === 'on' ? 'ok' : 'bad'); b.textContent = st === 'on' ? '🔌 Reader connected' : st === 'busy' ? '🔌 Connecting…' : '🔌 Reader not paired'; }
   const btn = $('#serBtn'); if (btn) btn.textContent = st === 'on' ? 'Disconnect' : 'Pair reader';
+  const bn = $('#serBanner'); if (bn) bn.style.display = st === 'on' ? 'none' : 'flex';
+  const bt = $('#serBannerTxt'); if (bt) bt.textContent = st === 'busy' ? 'Connecting to the reader…' : 'Card reader is not connected — plug in the Arduino and click Connect.';
   const r2el = $('#serInfo'); if (r2el) r2el.textContent = st === 'on' ? 'Connected — taps on the reader are sent to the system.' : 'Not connected. Plug in the Arduino Uno and press Pair reader (first time only).';
 }
 async function serOpen(port) {
@@ -657,7 +659,8 @@ function adminGate() { sessionStorage.tp_admin = '1'; adminApp(); }
 const TABS = [['dash', '📊 Dashboard'], ['pos', '💳 Charge'], ['new', '➕ New account'], ['accounts', '👥 Accounts'], ['bills', '🧾 Bills'], ['tx', '📜 Transactions'], ['lottery', '🎟️ Lottery'], ['reader', '📡 Reader']];
 function adminApp() {
   cleanup();
-  root.innerHTML = `<div class="top"><div class="row" style="flex-wrap:nowrap"><button class="btn ghost sm" data-act="refresh" title="Refresh to get the latest update">🔄 Refresh</button><div class="brand">💳 TapPay · Cashier</div></div><div class="row"><span class="pill gclock" title="1 day = 5 minutes"></span><span class="pill bad" id="serBadge"></span><button class="btn ghost sm" id="serBtn" data-act="serPair">Pair reader</button><span class="mut" id="rdr" style="font-size:12px"></span><button class="btn ghost sm" data-act="alogout">Logout</button></div></div>
+  root.innerHTML = `<div class="top"><div class="row" style="flex-wrap:nowrap"><button class="btn ghost sm" data-act="refresh" title="Refresh to get the latest update">🔄 Refresh</button><div class="brand">💳 TapPay · Cashier</div></div><div class="row"><span class="pill gclock" title="1 day = 5 minutes"></span><span class="pill bad" id="serBadge" data-act="serPair" style="cursor:pointer" title="Click to connect / disconnect the reader"></span><button class="btn ghost sm" id="serBtn" data-act="serPair">Pair reader</button><span class="mut" id="rdr" style="font-size:12px"></span><button class="btn ghost sm" data-act="alogout">Logout</button></div></div>
+  <div id="serBanner" style="display:none;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;padding:10px 14px;background:#3a1f2b;border-bottom:1px solid var(--bad)"><b id="serBannerTxt"></b><button class="btn sm" data-act="serPair">🔌 Connect reader</button></div>
   <div class="shell"><div class="side">${TABS.map(([k, n]) => `<button data-act="tab" data-k="${k}" id="t_${k}">${n}</button>`).join('')}</div><div class="main" id="view"></div></div>`;
   listen(ref(db, 'accounts'), s => { D.acc = s.val() || {}; drawCur(); });
   listen(ref(db, 'bills'), s => { D.bills = s.val() || {}; drawCur(); });
@@ -675,10 +678,11 @@ function adminApp() {
     if (paidSeen) paid.forEach(k => { if (!paidSeen.has(k)) toast('💰 A user just paid a bill'); });
     paidSeen = paid;
     runSchedules();
+    if (SER.status === 'off' && ++serRetry % 4 === 0) serAuto();   // keeps trying to reconnect by itself
     if (curTab === 'bills' || curTab === 'dash') drawCur();
   }, 1000);
 }
-let schedBusy = false;
+let schedBusy = false, serRetry = 0;
 // issues every automatic bill that is due. Only one cashier page wins each round (transaction on `next`).
 async function runSchedules() {
   if (schedBusy || pausedAt != null) return; schedBusy = true;
