@@ -263,7 +263,7 @@ function postPopup(p) {
   if (p.video) beep(); else if (navigator.vibrate) navigator.vibrate(120);
 }
 function qrStop() { clearInterval(M.qrTimer); M.qrTimer = null; if (M.qrTok) { remove(ref(db, 'qr/' + M.qrTok)).catch(() => { }); M.qrTok = null; } }
-function cleanup() { localReq = null; $('#payAnim')?.remove(); shopFlashing = false; shopHandler = null; $('#shopOv')?.remove(); shopCur = null; clearTimeout(popTimer); $('#popup')?.remove(); qrStop(); while (subs.length) subs.pop()(); stopMeter(); scanHandler = null; clearInterval(billTick); }
+function cleanup() { localReq = null; $('#payAnim')?.remove(); shopFlashing = false; shopHandler = null; $('#shopOv')?.remove(); shopCur = null; clearTimeout(popTimer); $('#popup')?.remove(); qrStop(); while (subs.length) subs.pop()(); stopMeter(); scanHandler = null; clearInterval(billTick); clearInterval(window.__bt); }
 
 /* ---------- shared world clock: 1 full day = 5 real minutes, same for everyone ---------- */
 // one full cycle = 10 real minutes: daytime 06:00–22:00 lasts 7 min, night 22:00–06:00 lasts 3 min
@@ -783,6 +783,7 @@ function adminApp() {
   get(ref(db, 'scans/latest')).then(s => showReader(s.val()));
   serStatus(SER.status); serAuto();
   showTab(curTab); drawClock();
+  clearInterval(window.__bt); window.__bt = setInterval(beep, 60000);   // computer: one beep every minute
   let paidSeen = null;
   billTick = setInterval(() => {
     const paid = new Set(Object.entries(D.bills).flatMap(([a, o]) => Object.entries(o || {}).filter(([, b]) => b.status === 'paid').map(([id]) => a + '/' + id)));
