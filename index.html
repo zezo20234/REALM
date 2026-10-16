@@ -24,7 +24,7 @@ loadLib('qrcode'); loadLib('jsQR');
 <style>
 :root{--bg:#0e1120;--card:#171b30;--card2:#1e2340;--line:#2a3157;--text:#eef0ff;--mut:#8e95b8;--acc:#6c7bff;--ok:#2ecc8f;--bad:#ff5d73;--warn:#ffb84d}
 *{box-sizing:border-box}
-html,body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+html,body{margin:0;background:var(--bg);transition:background-color 4s;color:var(--text);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
 body{min-height:100vh}
 h1,h2,h3{margin:0 0 12px}
 .mut{color:var(--mut)}
@@ -253,11 +253,14 @@ function qrStop() { clearInterval(M.qrTimer); M.qrTimer = null; if (M.qrTok) { r
 function cleanup() { localReq = null; $('#payAnim')?.remove(); shopFlashing = false; shopHandler = null; $('#shopOv')?.remove(); shopCur = null; clearTimeout(popTimer); $('#popup')?.remove(); qrStop(); while (subs.length) subs.pop()(); stopMeter(); scanHandler = null; clearInterval(billTick); }
 
 /* ---------- shared world clock: 1 full day = 5 real minutes, same for everyone ---------- */
-const DAY_MS = 5 * 60 * 1000;
+// one full cycle = 10 real minutes: daytime 06:00–22:00 lasts 7 min, night 22:00–06:00 lasts 3 min
+const DAYPART_MS = 7 * 60 * 1000, NIGHTPART_MS = 3 * 60 * 1000, DAY_MS = DAYPART_MS + NIGHTPART_MS;
+const minToOff = mins => { const mm = (mins - 360 + 1440) % 1440; return mm < 960 ? mm / 960 * DAYPART_MS : DAYPART_MS + (mm - 960) / 480 * NIGHTPART_MS; };
+const offToMin = x => x < DAYPART_MS ? 360 + x / DAYPART_MS * 960 : 1320 + (x - DAYPART_MS) / NIGHTPART_MS * 480;
 // real timestamp of the next time the game clock shows `mins` (minutes since 00:00), after `after`
 function nextGameTime(after, mins) {
   const base = clockStart == null ? Date.UTC(2026, 0, 1) : clockStart;
-  const e = (pausedAt != null ? pausedAt + (after - Date.now()) : after + srvOffset) - base, off = mins / 1440 * DAY_MS;
+  const e = (pausedAt != null ? pausedAt + (after - Date.now()) : after + srvOffset) - base, off = minToOff(mins);
   let d = Math.floor(e / DAY_MS);
   if (d * DAY_MS + off <= e) d++;
   return base - srvOffset + d * DAY_MS + off;
@@ -280,16 +283,48 @@ function gameTime() {
   if (clockStart == null) return null;
   const e = Math.max(0, nowSrv() - clockStart);
   const day = Math.floor(e / DAY_MS) + 1;
-  const mins = Math.floor((e % DAY_MS) / DAY_MS * 1440);
+  const mins = Math.floor(offToMin(e % DAY_MS)) % 1440;
   return { day, h: Math.floor(mins / 60), m: mins % 60 };
 }
 function clockText() {
   const t = gameTime(); if (!t) return '🕒 …';
-  const icon = t.h < 6 || t.h >= 20 ? '🌙' : '☀️';
+  const icon = PHASE[phaseOf(t.h)].icon;
   return `${pausedAt != null ? '⏸' : icon} Day ${t.day} · ${String(t.h).padStart(2, '0')}:${String(t.m).padStart(2, '0')}${pausedAt != null ? ' · paused' : ''}`;
 }
-function drawClock() { document.querySelectorAll('.gclock').forEach(el => el.textContent = clockText()); }
+const PHASE = { day: { icon: '☀️', bg: '#2f6db5', msg: '☀️ It is day time' }, dawn: { icon: '🌅', bg: '#6a4c93', msg: '🌅 The sun is rising' }, dusk: { icon: '🌇', bg: '#7a3e6b', msg: '🌇 Evening — night is coming' }, night: { icon: '🌙', bg: '#0e1120', msg: '🌙 Night has fallen' } };
+const phaseOf = h => h >= 22 || h < 6 ? 'night' : h < 8 ? 'dawn' : h >= 20 ? 'dusk' : 'day';
+let lastPhase = null;
+function drawClock() {
+  document.querySelectorAll('.gclock').forEach(el => el.textContent = clockText());
+  const t = gameTime(); if (!t) return;
+  const ph = phaseOf(t.h);
+  document.documentElement.style.setProperty('--bg', PHASE[ph].bg);   // the page background fades with the time of day
+  document.documentElement.dataset.tod = ph;
+  if (ph !== lastPhase) { if (lastPhase !== null && pausedAt == null) toast(PHASE[ph].msg); lastPhase = ph; }
+}
 setInterval(drawClock, 1000);
+
+/* ---------- hunger & energy: only the cashier computer can feed / sleep people ---------- */
+const FOOD_DRAIN = 100 / (2 * DAY_MS), SLEEP_DRAIN = 100 / (1.5 * DAY_MS), SLEEP_GAIN = 100 / (0.4 * DAY_MS);   // full → empty in 2 days / 1.5 days; a nap refills in ~4 min
+function vitalsNow(v) {
+  v = v || {}; const t = Date.now();
+  const food = Math.max(0, Math.min(100, (v.food ?? 100) - FOOD_DRAIN * (v.sleeping ? 0.5 : 1) * (t - (v.foodAt || t))));
+  const e0 = v.energy ?? 100, dt = t - (v.energyAt || t);
+  const energy = Math.max(0, Math.min(100, v.sleeping ? e0 + SLEEP_GAIN * dt : e0 - SLEEP_DRAIN * dt));
+  return { food, energy, sleeping: !!v.sleeping };
+}
+const vbar = (id, label, val, col) => `<div style="margin:8px 0"><div class="row between" style="font-size:13px"><span>${label}</span><b id="${id}n">${Math.round(val)}%</b></div><div style="height:12px;background:rgba(128,128,128,.25);border-radius:8px;overflow:hidden"><div id="${id}" style="height:100%;width:${val}%;background:${val < 25 ? '#e5484d' : col};transition:width .6s"></div></div></div>`;
+function vitalsHtml(v, who) {
+  const n = vitalsNow(v);
+  return vbar('vbF' + who, '🍔 Hunger (fullness)', n.food, '#f5a524') + vbar('vbE' + who, n.sleeping ? '😴 Sleeping…' : '⚡ Energy', n.energy, '#3e9bf0');
+}
+function vitalsTick() {
+  for (const [who, v] of Object.entries(window.VIT_LIVE || {})) {
+    const n = vitalsNow(v);
+    [['vbF', n.food], ['vbE', n.energy]].forEach(([k, val]) => { const b = document.getElementById(k + who), t = document.getElementById(k + who + 'n'); if (b) { b.style.width = val + '%'; b.style.background = val < 25 ? '#e5484d' : (k === 'vbF' ? '#f5a524' : '#3e9bf0'); } if (t) t.textContent = Math.round(val) + '%'; });
+  }
+}
+setInterval(vitalsTick, 1500);
 
 /* ---------- QR helpers ---------- */
 // opens the camera in the dialog, resolves with the first QR text it reads (or null if cancelled)
@@ -389,6 +424,37 @@ function payAnim({ amount, title = 'Payment successful', sub = '', kind = 'out' 
   chime();
 }
 
+/* ---------- save card image / install ---------- */
+let deferredInstall = null;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredInstall = e; });
+// draws a card picture (name + permanent QR) and shares/saves it
+async function saveCardImage() {
+  if (!(await loadLib('qrcode'))) return toast('QR library could not load', 'bad');
+  const q = qrcode(0, 'M'); q.addData('TPPAY:' + M.acc.name); q.make();
+  const img = new Image(); img.src = q.createDataURL(10, 0);
+  await new Promise(r => { img.onload = r; img.onerror = r; });
+  const W = 1012, H = 638, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const c = cv.getContext('2d'), rr = (x, y, w, h, r) => { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); };
+  const g = c.createLinearGradient(0, 0, W, H); g.addColorStop(0, '#6c7bff'); g.addColorStop(1, '#1d2250');
+  rr(0, 0, W, H, 46); c.fillStyle = g; c.fill();
+  c.fillStyle = '#fff'; c.font = '700 54px system-ui,sans-serif'; c.fillText('💳 TapPay', 56, 100);
+  c.font = '600 60px system-ui,sans-serif'; c.fillText('@' + M.acc.name, 56, H - 110);
+  c.font = '30px system-ui,sans-serif'; c.globalAlpha = 0.8; c.fillText('Scan the QR to pay me', 56, H - 56); c.globalAlpha = 1;
+  rr(W - 400, 120, 340, 340, 28); c.fillStyle = '#fff'; c.fill();
+  c.imageSmoothingEnabled = false; c.drawImage(img, W - 380, 140, 300, 300);
+  const blob = await new Promise(r => cv.toBlob(r, 'image/png')); if (!blob) return toast('Could not make the image', 'bad');
+  const file = new File([blob], 'tappay-card.png', { type: 'image/png' });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: 'My TapPay card' }); return; } catch (e) { if (e.name === 'AbortError') return; } }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'tappay-card.png'; document.body.appendChild(a); a.click(); a.remove();
+  toast('Card image saved');
+}
+function installHelp() {
+  if (deferredInstall) { deferredInstall.prompt(); deferredInstall = null; return; }
+  const d = $('#dlg');
+  d.innerHTML = `<h3>📲 Add to home screen</h3><p><b>iPhone (Safari):</b> tap the Share button, then <b>Add to Home Screen</b>.</p><p><b>Android (Chrome):</b> tap the ⋮ menu, then <b>Install app</b> / <b>Add to Home screen</b>.</p><div class="row"><button class="btn" id="insOk" type="button">OK</button></div>`;
+  d.onclose = null; $('#insOk').onclick = () => d.close(); d.showModal();
+}
+
 /* ---------- redeem a winning lottery ticket (phone) ---------- */
 async function redeemTicket(key) {
   const t = M.tickets[key]; if (!t || !t.prize || t.redeemed) return toast('Nothing to redeem', 'bad');
@@ -411,14 +477,24 @@ async function redeemTicket(key) {
 /* ---------- phone-controlled reader: a user turns the reader on with a price, the cashier screen charges the next card tap ---------- */
 let shopCur = null, shopMsgT = null, shopFlashing = false, localReq = null; // localReq = charge started from the Charge tab
 function shopOvEl() { let el = $('#shopOv'); if (!el) { el = document.createElement('div'); el.id = 'shopOv'; document.body.appendChild(el); } return el; }
+/* ---------- receipts & stock ---------- */
+async function nextReceipt() { const r = await runTransaction(ref(db, 'meta/receipt'), c => (c || 0) + 1); return r.snapshot.val(); }
+const recNo = n => '#' + String(n).padStart(4, '0');
+async function recordReceipt(r) { await set(ref(db, 'receipts/' + r.no), { ...r, ts: Date.now() }); }
+async function takeStock(shopId, items) {
+  for (const it of items || []) if (it.id) await runTransaction(ref(db, `shopInfo/${shopId}/items/${it.id}/stock`), c => c === null ? c : Math.max(0, c - it.qty));
+}
 // takes the money from the customer, pays the receiver (if any), plays the animation. Returns {ok} or {ok:false,title,text}
 async function chargeNow(cust, req) {
   if (req.to && req.to === cust) return { ok: false, title: "Can't pay yourself", text: 'Another person must tap their card.' };
   const cname = D.acc[cust]?.name || 'Customer', label = req.desc || 'Purchase', toName = req.to ? (D.acc[req.to]?.name || 'Shop') : 'Shop';
-  const r = await debit(cust, req.amount, req.to ? `${label} → ${toName}` : label, 'pos');
+  if ((D.acc[cust]?.balance ?? Infinity) < req.amount) return { ok: false, title: 'Insufficient balance', text: 'Not enough money on this card.' };
+  const no = await nextReceipt();
+  const r = await debit(cust, req.amount, (req.to ? `${label} → ${toName}` : label) + ' · ' + recNo(no), 'pos');
   if (!r.ok) return { ok: false, title: r.msg, text: 'Not enough money on this card.' };
-  if (req.to) await credit(req.to, req.amount, `${label} ← ${cname}`, 'pos-in');
-  payAnim({ amount: req.amount, title: 'Payment accepted', sub: `${cname} → ${toName} · new balance ${money(r.balance)}` });
+  if (req.to) await credit(req.to, req.amount, `${label} ← ${cname} · ${recNo(no)}`, 'pos-in');
+  await recordReceipt({ no, shop: req.to || '', shopName: toName, buyer: cust, buyerName: cname, items: [{ n: label, q: 1, p: req.amount }], total: req.amount });
+  payAnim({ amount: req.amount, title: 'Payment accepted', sub: `Receipt ${recNo(no)} · ${cname} → ${toName} · balance ${money(r.balance)}` });
   return { ok: true };
 }
 function drawShopOv(flash) {
@@ -448,15 +524,19 @@ function drawShopOv(flash) {
     if (!cust) return drawShopFlash('err', 'Card not registered', 'Try another card.', id, x);
     if (cust === id) return drawShopFlash('err', "Can't pay yourself", 'Another person must tap their card.', id, x);
     // claim this request so only one cashier page can charge it
+    if ((D.acc[cust]?.balance ?? Infinity) < x.amount) return drawShopFlash('err', 'Insufficient balance', 'Not enough money on this card.', id, x);
     const claim = await runTransaction(ref(db, `shops/${id}/on`), c => c === null ? c : c === true ? false : undefined);
     if (!claim.committed) return;
-    const cname = D.acc[cust]?.name || 'Customer', label = x.desc || 'Shop payment';
-    const r = await debit(cust, x.amount, `${label} → ${x.name || 'Shop'}`, 'pos');
+    const cname = D.acc[cust]?.name || 'Customer', label = x.desc || 'Shop payment', no = await nextReceipt();
+    const r = await debit(cust, x.amount, `${label} → ${x.name || 'Shop'} · ${recNo(no)}`, 'pos');
     if (!r.ok) { await update(ref(db, 'shops/' + id), { on: true }); return drawShopFlash('err', r.msg, 'Not enough money on this card.', id, x); }
-    await credit(id, x.amount, `${label} ← ${cname}`, 'pos-in');
-    await update(ref(db, 'shops/' + id), { last: { by: cname, amount: x.amount, desc: x.desc || '', ts: Date.now() } });
+    await credit(id, x.amount, `${label} ← ${cname} · ${recNo(no)}`, 'pos-in');
+    const its = (x.items || []).map(i => ({ n: i.name, q: i.qty, p: i.price, id: i.id }));
+    await recordReceipt({ no, shop: id, shopName: x.name || 'Shop', buyer: cust, buyerName: cname, items: its.length ? its.map(({ n, q, p }) => ({ n, q, p })) : [{ n: label, q: 1, p: x.amount }], total: x.amount });
+    await takeStock(id, x.items ? x.items.map(i => ({ id: i.id, qty: i.qty })) : []);
+    await update(ref(db, 'shops/' + id), { last: { by: cname, amount: x.amount, desc: x.desc || '', ts: Date.now(), receipt: no } });
     shopHandler = null; shopCur = null; shopFlashing = false; $('#shopOv')?.remove();
-    payAnim({ amount: x.amount, title: 'Payment accepted', sub: `${cname} → ${x.name || 'Shop'} · new balance ${money(r.balance)}` });
+    payAnim({ amount: x.amount, title: 'Payment accepted', sub: `Receipt ${recNo(no)} · ${cname} → ${x.name || 'Shop'} · balance ${money(r.balance)}` });
   };
 }
 function drawShopFlash(cls, title, text, id, x) {
@@ -656,10 +736,10 @@ const accName = id => D.acc[id]?.name || id;
 let curTab = 'dash';
 
 function adminGate() { sessionStorage.tp_admin = '1'; adminApp(); }
-const TABS = [['dash', '📊 Dashboard'], ['pos', '💳 Charge'], ['new', '➕ New account'], ['accounts', '👥 Accounts'], ['bills', '🧾 Bills'], ['tx', '📜 Transactions'], ['lottery', '🎟️ Lottery'], ['reader', '📡 Reader']];
+const TABS = [['dash', '📊 Dashboard'], ['pos', '💳 Charge'], ['new', '➕ New account'], ['accounts', '👥 Accounts'], ['bills', '🧾 Bills'], ['tx', '📜 Transactions'], ['shops', '🏪 Shops'], ['fake', '🎭 Fake customers'], ['life', '🍔 Hunger & sleep'], ['lottery', '🎟️ Lottery'], ['reader', '📡 Reader']];
 function adminApp() {
   cleanup();
-  root.innerHTML = `<div class="top"><div class="row" style="flex-wrap:nowrap"><button class="btn ghost sm" data-act="refresh" title="Refresh to get the latest update">🔄 Refresh</button><div class="brand">💳 TapPay · Cashier</div></div><div class="row"><span class="pill gclock" title="1 day = 5 minutes"></span><span class="pill bad" id="serBadge" data-act="serPair" style="cursor:pointer" title="Click to connect / disconnect the reader"></span><button class="btn ghost sm" id="serBtn" data-act="serPair">Pair reader</button><span class="mut" id="rdr" style="font-size:12px"></span><button class="btn ghost sm" data-act="alogout">Logout</button></div></div>
+  root.innerHTML = `<div class="top"><div class="row" style="flex-wrap:nowrap"><button class="btn ghost sm" data-act="refresh" title="Refresh to get the latest update">🔄 Refresh</button><div class="brand">💳 TapPay · Cashier</div></div><div class="row"><span class="pill gclock" title="1 day = 10 minutes: 7 min day, 3 min night"></span><span class="pill bad" id="serBadge" data-act="serPair" style="cursor:pointer" title="Click to connect / disconnect the reader"></span><button class="btn ghost sm" id="serBtn" data-act="serPair">Pair reader</button><span class="mut" id="rdr" style="font-size:12px"></span><button class="btn ghost sm" data-act="alogout">Logout</button></div></div>
   <div id="serBanner" style="display:none;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;padding:10px 14px;background:#3a1f2b;border-bottom:1px solid var(--bad)"><b id="serBannerTxt"></b><button class="btn sm" data-act="serPair">🔌 Connect reader</button></div>
   <div class="shell"><div class="side">${TABS.map(([k, n]) => `<button data-act="tab" data-k="${k}" id="t_${k}">${n}</button>`).join('')}</div><div class="main" id="view"></div></div>`;
   listen(ref(db, 'accounts'), s => { D.acc = s.val() || {}; drawCur(); });
@@ -667,8 +747,12 @@ function adminApp() {
   listen(ref(db, 'tx'), s => { D.tx = s.val() || {}; drawCur(); });
   listen(ref(db, 'schedules'), s => { D.sched = s.val() || {}; drawCur(); });
   listen(ref(db, 'shops'), s => { D.shops = s.val() || {}; drawShopOv(); });
+  listen(ref(db, 'shopInfo'), s => { D.shopInfo = s.val() || {}; drawCur(); });
+  listen(ref(db, 'catalog'), s => { D.catalog = s.val() || {}; drawCur(); });
+  listen(query(ref(db, 'receipts'), limitToLast(40)), s => { D.receipts = s.val() || {}; drawCur(); });
   listen(ref(db, 'lotteries'), s => { D.lot = s.val() || {}; drawCur(); });
   listen(ref(db, 'lotTickets'), s => { D.lotT = s.val() || {}; drawCur(); });
+  listen(ref(db, 'vitals'), s => { D.vit = s.val() || {}; window.VIT_LIVE = D.vit; if (curTab === 'life') V.life.draw(); });
   get(ref(db, 'scans/latest')).then(s => showReader(s.val()));
   serStatus(SER.status); serAuto();
   showTab(curTab); drawClock();
@@ -811,7 +895,7 @@ V.bills = {
   <div class="grid2"><label>Account<select id="sAcc"></select></label><label>Title<input id="sTitle" placeholder="e.g. Rent"></label>
   <label>Amount (${CUR})<input id="sAmt" type="number" step="0.01" min="0"></label>
   <label>Bill arrives at game time<input id="sAt" type="time" value="08:00"></label>
-  <label>Repeat every<div class="row" style="flex-wrap:nowrap;margin-top:5px"><input id="sEvery" type="number" min="1" step="1" value="1" style="margin:0"><select id="sUnit" style="margin:0;width:auto"><option value="300000" selected>game days (5 min)</option><option value="60000" data-free="1">minutes (any time)</option><option value="3600000" data-free="1">hours (any time)</option><option value="86400000" data-free="1">real days (any time)</option></select></div></label></div>
+  <label>Repeat every<div class="row" style="flex-wrap:nowrap;margin-top:5px"><input id="sEvery" type="number" min="1" step="1" value="1" style="margin:0"><select id="sUnit" style="margin:0;width:auto"><option value="600000" selected>game days (10 min)</option><option value="60000" data-free="1">minutes (any time)</option><option value="3600000" data-free="1">hours (any time)</option><option value="86400000" data-free="1">real days (any time)</option></select></div></label></div>
   <label class="chk"><input type="checkbox" id="sAuto"> Auto-pay from the user's balance when issued (stays unpaid if not enough money)</label>
   <button class="btn" data-act="addSched">Start automatic bill</button><div class="tbl" id="sList" style="margin-top:14px"></div></div>
   <div class="card"><h3>All bills</h3><div class="tbl" id="bList"></div></div>`,
@@ -842,6 +926,100 @@ V.tx = {
     $('#tList').innerHTML = txTable(allTx().filter(t => !q || (accName(t.acc) + t.type + t.desc).toLowerCase().includes(q)).slice(0, 300));
   }
 };
+
+/* --- shops: see every shop, bill them, set supplier prices, receipts (computer) --- */
+V.shops = {
+  html: () => `<h2>🏪 Shops</h2>
+  <div class="card"><h3>Shops</h3><div id="shTbl"></div></div>
+  <div class="card"><h3>Supplier price list</h3><p class="mut" style="margin-top:0">What shops pay when they buy stock from you (burgers, toys, …). Shops buy from the Shop tab on their phone.</p>
+  <div class="grid2"><label>Item<input id="cName" maxlength="30" placeholder="e.g. Hot Wheels car"></label><label>Price shops pay (${CUR})<input id="cPrice" type="number" step="0.01" min="0" placeholder="5"></label></div>
+  <div class="row"><button class="btn" data-act="catAdd">Add item</button><button class="btn ghost" data-act="catSeed">Add starter items (food + toys)</button></div><div id="catTbl" style="margin-top:12px"></div></div>
+  <div class="card"><h3>Latest receipts</h3><div id="rcTbl"></div></div>`,
+  init() { V.shops.draw(); },
+  draw() {
+    if (!$('#shTbl')) return;
+    const info = D.shopInfo || {}, rc = Object.values(D.receipts || {});
+    const rows = Object.entries(info).map(([id, x]) => {
+      const items = Object.values(x.items || {}), stock = items.reduce((a, i) => a + (i.stock || 0), 0), low = items.filter(i => (i.stock || 0) <= 0).length;
+      const sales = rc.filter(r => r.shop === id).reduce((a, r) => a + r.total, 0);
+      return `<tr><td><b>${esc(x.name || accName(id))}</b><br><span class="mut">@${esc(accName(id))}</span></td><td>${x.open === false ? '<span class="pill bad">closed</span>' : '<span class="pill ok">open</span>'}</td>
+      <td><details><summary>${items.length} items · ${stock} in stock${low ? ` · <span style="color:var(--bad)">${low} sold out</span>` : ''}</summary>${items.map(i => `<div class="mut">${esc(i.name)} — ${money(i.price)} · stock ${i.stock || 0}</div>`).join('') || '<div class="mut">No items yet</div>'}</details></td>
+      <td>${money(sales)}</td><td><button class="btn sm" data-act="shopBill" data-id="${id}">🧾 Bill shop</button></td></tr>`;
+    }).join('');
+    $('#shTbl').innerHTML = rows ? `<div class="tbl"><table><thead><tr><th>Shop</th><th>Status</th><th>Menu</th><th>Recent sales</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>` : '<p class="mut">No shops yet. A user opens their shop from the Shop tab on their phone (add a menu item or turn the shop on).</p>';
+    const cat = Object.entries(D.catalog || {}).sort((a, b) => a[1].name.localeCompare(b[1].name));
+    $('#catTbl').innerHTML = cat.length ? `<div class="tbl"><table><thead><tr><th>Item</th><th>Price</th><th></th></tr></thead><tbody>${cat.map(([id, c]) => `<tr><td>${esc(c.name)}</td><td><input id="cp_${id}" type="number" step="0.01" min="0" value="${c.price}" style="width:100px;margin:0"></td><td><button class="btn sm" data-act="catSave" data-id="${id}">Save</button> <button class="btn sm bad" data-act="catDel" data-id="${id}">✕</button></td></tr>`).join('')}</tbody></table></div>` : '<p class="mut">No items yet.</p>';
+    const rcs = Object.values(D.receipts || {}).sort((a, b) => b.no - a.no).slice(0, 25);
+    $('#rcTbl').innerHTML = rcs.length ? `<div class="tbl"><table><thead><tr><th>No.</th><th>When</th><th>Shop</th><th>Buyer</th><th>Items</th><th>Total</th></tr></thead><tbody>${rcs.map(r => `<tr><td><b>${recNo(r.no)}</b></td><td>${when(r.ts)}</td><td>${esc(r.shopName || '—')}</td><td>${esc(r.buyerName)}</td><td>${(r.items || []).map(i => `${i.q}× ${esc(i.n)}`).join(', ')}</td><td>${money(r.total)}</td></tr>`).join('')}</tbody></table></div>` : '<p class="mut">No receipts yet.</p>';
+  }
+};
+
+/* --- hunger & sleep (computer controls everyone) --- */
+let autoSleepOn = false, autoSleepT = null;
+async function autoSleepTick() {
+  const t = gameTime(); if (!t || pausedAt != null) return;
+  const night = phaseOf(t.h) === 'night';
+  for (const id of Object.keys(D.acc || {})) {
+    const n = vitalsNow((D.vit || {})[id]);
+    if (night === n.sleeping) continue;
+    await update(ref(db, 'vitals/' + id), { food: n.food, foodAt: Date.now(), energy: n.energy, energyAt: Date.now(), sleeping: night });
+  }
+}
+V.life = {
+  html: () => `<h2>🍔 Hunger & sleep</h2><p class="mut">Hunger falls and energy drains over game time (hunger falls half as fast while asleep). Users can't eat or sleep themselves — you do it here.</p>
+  <div class="card"><div class="row between"><div><b>Auto sleep at night</b><br><span class="mut">Everyone goes to sleep when night starts and wakes at dawn. Works while this page is open.</span></div><button class="btn" data-act="autoSleep" id="asBtn">${autoSleepOn ? '⏹ Turn off' : '▶ Turn on'}</button></div></div><div id="lifeBody"></div>`,
+  init() { V.life.draw(); },
+  draw() {
+    if (!$('#lifeBody')) return;
+    const rows = Object.entries(D.acc || {});
+    $('#lifeBody').innerHTML = rows.length ? rows.map(([id, a]) => { const v = (D.vit || {})[id]; return `<div class="card"><div class="row between"><h3 style="margin:0">${esc(a.name)}</h3>${vitalsNow(v).sleeping ? '<span class="pill">sleeping</span>' : ''}</div>${vitalsHtml(v, id)}
+      <div class="row"><button class="btn sm" data-act="vEat" data-id="${id}" data-n="20">🍟 Snack +20</button><button class="btn sm" data-act="vEat" data-id="${id}" data-n="50">🍔 Meal +50</button><button class="btn sm" data-act="vEat" data-id="${id}" data-n="100">🍗 Feast</button>
+      <button class="btn sm ghost" data-act="vSleep" data-id="${id}">${vitalsNow(v).sleeping ? '⏰ Wake up' : '😴 Send to sleep'}</button></div></div>`; }).join('') : '<p class="mut">No users yet.</p>';
+  }
+};
+
+/* --- fake customers: make orders yourself so shops get sales --- */
+const FAKE_NAMES = ['Sara', 'Omar', 'Lina', 'Khalid', 'Noor', 'Yusuf', 'Maya', 'Faisal', 'Huda', 'Zain', 'Reem', 'Adam', 'Dana', 'Tariq'];
+let fakeTimer = null;
+async function fakeOrder(shopId, picks, name) {
+  const x = (D.shopInfo || {})[shopId]; if (!x) return false;
+  const all = Object.entries(x.items || {}).filter(([, i]) => (i.stock || 0) > 0 && i.price > 0);
+  if (!picks) { if (!all.length) return false; const n = 1 + Math.floor(Math.random() * Math.min(3, all.length)); picks = [...all].sort(() => Math.random() - .5).slice(0, n).map(([id, i]) => ({ id, qty: Math.min(i.stock, 1 + Math.floor(Math.random() * 3)) })); }
+  const its = picks.map(p => { const i = x.items[p.id]; return i ? { id: p.id, n: i.name, q: Math.min(p.qty, i.stock || 0), p: i.price } : null; }).filter(i => i && i.q > 0);
+  if (!its.length) return false;
+  const total = r2(its.reduce((a, i) => a + i.q * i.p, 0)), cname = (name || FAKE_NAMES[Math.floor(Math.random() * FAKE_NAMES.length)]) + ' (guest)';
+  const no = await nextReceipt();
+  await credit(shopId, total, `${cname} · ${recNo(no)}`, 'pos-in');
+  await recordReceipt({ no, shop: shopId, shopName: x.name || accName(shopId), buyer: 'fake', buyerName: cname, items: its.map(({ n, q, p }) => ({ n, q, p })), total });
+  await takeStock(shopId, its.map(i => ({ id: i.id, qty: i.q })));
+  await update(ref(db, 'shops/' + shopId), { last: { by: cname, amount: total, desc: its.map(i => `${i.q}× ${i.n}`).join(', '), ts: Date.now(), receipt: no } });
+  return true;
+}
+V.fake = {
+  html: () => `<h2>🎭 Fake customers</h2>
+  <div class="card"><h3>Quick order</h3><p class="mut" style="margin-top:0">A pretend customer buys from a shop. The shop gets the money, a receipt and stock goes down. Only open shops with stock.</p>
+  <div class="grid2"><label>Shop<select id="fkShop"></select></label><label>Customer name (optional)<input id="fkName" maxlength="20" placeholder="random"></label>
+  <label>Item<select id="fkItem"></select></label><label>Quantity<input id="fkQty" type="number" min="1" value="1"></label></div>
+  <div class="row"><button class="btn" data-act="fkMake">Place this order</button><button class="btn ghost" data-act="fkRandom">🎲 Random order</button></div></div>
+  <div class="card"><h3>Auto customers</h3><p class="mut" style="margin-top:0">Random orders keep arriving while this page is open (not at night or when time is paused).</p>
+  <div class="row"><label style="margin:0">Every <input id="fkEvery" type="number" min="5" value="20" style="width:80px;display:inline-block"> seconds</label><button class="btn" data-act="fkAuto" id="fkAutoBtn">${fakeTimer ? '⏹ Stop' : '▶ Start'}</button></div></div>`,
+  init() { V.fake.draw(); },
+  draw() {
+    const sh = $('#fkShop'); if (!sh) return;
+    const cs = sh.value, ci = $('#fkItem').value;
+    sh.innerHTML = Object.entries(D.shopInfo || {}).filter(([, x]) => x.open !== false).map(([id, x]) => `<option value="${id}">${esc(x.name || accName(id))}</option>`).join('') || '<option value="">No open shops</option>';
+    if (cs) sh.value = cs;
+    const its = Object.entries((D.shopInfo || {})[sh.value]?.items || {}).filter(([, i]) => (i.stock || 0) > 0);
+    $('#fkItem').innerHTML = its.map(([id, i]) => `<option value="${id}">${esc(i.name)} — ${money(i.price)} (${i.stock} left)</option>`).join('') || '<option value="">No stock</option>';
+    if (ci) $('#fkItem').value = ci;
+    sh.onchange = () => V.fake.draw();
+  }
+};
+function fakeTick() {
+  const t = gameTime(); if (pausedAt != null || (t && phaseOf(t.h) === 'night')) return;
+  const open = Object.entries(D.shopInfo || {}).filter(([, x]) => x.open !== false && Object.values(x.items || {}).some(i => (i.stock || 0) > 0));
+  if (open.length) fakeOrder(open[Math.floor(Math.random() * open.length)][0]).catch(() => { });
+}
 
 /* --- lottery (cashier computer only) --- */
 V.lottery = {
@@ -892,6 +1070,33 @@ const ACT = {
   alogout() { SER.reader?.cancel(); sessionStorage.removeItem('tp_admin'); location.hash = ''; route(); },
   refresh() { location.reload(); },
   tab(d) { showTab(d.k); },
+  async vEat(d) { const n = vitalsNow((D.vit || {})[d.id]), v = (D.vit || {})[d.id] || {}; if (n.sleeping) return toast('They are asleep', 'bad'); await update(ref(db, 'vitals/' + d.id), { food: Math.min(100, n.food + Number(d.n)), foodAt: Date.now(), energy: n.energy, energyAt: Date.now(), sleeping: false }); toast('Fed ' + accName(d.id)); },
+  autoSleep() { autoSleepOn = !autoSleepOn; clearInterval(autoSleepT); autoSleepT = autoSleepOn ? setInterval(() => autoSleepTick().catch(() => { }), 3000) : null; if (autoSleepOn) autoSleepTick().catch(() => { }); $('#asBtn').textContent = autoSleepOn ? '⏹ Turn off' : '▶ Turn on'; toast(autoSleepOn ? 'Auto sleep on' : 'Auto sleep off'); },
+  async vSleep(d) { const n = vitalsNow((D.vit || {})[d.id]); await update(ref(db, 'vitals/' + d.id), { food: n.food, foodAt: Date.now(), energy: n.energy, energyAt: Date.now(), sleeping: !n.sleeping }); },
+  async fkMake() { const sh = $('#fkShop').value, it = $('#fkItem').value, q = Math.max(1, Math.floor(Number($('#fkQty').value) || 1)); if (!sh || !it) return toast('Pick a shop and an item', 'bad'); const ok = await fakeOrder(sh, [{ id: it, qty: q }], $('#fkName').value.trim()); toast(ok ? 'Order placed' : 'Could not place order', ok ? undefined : 'bad'); },
+  async fkRandom() { const sh = $('#fkShop').value; if (!sh) return toast('No open shop', 'bad'); const ok = await fakeOrder(sh); toast(ok ? 'Random order placed' : 'That shop has no stock', ok ? undefined : 'bad'); },
+  fkAuto() { if (fakeTimer) { clearInterval(fakeTimer); fakeTimer = null; } else { fakeTimer = setInterval(fakeTick, Math.max(5, Number($('#fkEvery').value) || 20) * 1000); fakeTick(); } $('#fkAutoBtn').textContent = fakeTimer ? '⏹ Stop' : '▶ Start'; },
+  async shopBill(d) {
+    const title = prompt('Bill title (e.g. Rent, Electricity):'); if (!title) return;
+    const amount = Number(prompt('Amount (' + CUR + '):')); if (!(amount > 0)) return toast('Enter an amount', 'bad');
+    await push(ref(db, 'bills/' + d.id), { title: title.trim(), amount: r2(amount), due: '', status: 'unpaid', created: Date.now(), showAt: Date.now() });
+    toast('Bill sent to ' + accName(d.id));
+  },
+  async catAdd() {
+    const name = $('#cName').value.trim(), price = r2(Number($('#cPrice').value));
+    if (!name || !(price > 0)) return toast('Enter an item name and price', 'bad');
+    await push(ref(db, 'catalog'), { name, price }); $('#cName').value = ''; $('#cPrice').value = ''; toast('Added');
+  },
+  async catSave(d) { const v = r2(Number($('#cp_' + d.id).value)); if (!(v > 0)) return toast('Enter a price', 'bad'); await update(ref(db, 'catalog/' + d.id), { price: v }); toast('Price saved'); },
+  async catDel(d) { if (confirm('Remove this item from the price list?')) await remove(ref(db, 'catalog/' + d.id)); },
+  async catSeed() {
+    const base = [['Burger', 8], ['Fries', 4], ['Pizza slice', 6], ['Hot dog', 5], ['Sandwich', 6], ['Drink', 3], ['Juice', 3], ['Ice cream', 4], ['Cake slice', 7], ['Coffee', 4],
+      ['Hot Wheels car', 5], ['Lego set', 20], ['Teddy bear', 12], ['Doll', 10], ['Puzzle', 8], ['Toy robot', 15], ['Ball', 5], ['Playdough', 6], ['Action figure', 9], ['Board game', 18]];
+    const have = new Set(Object.values(D.catalog || {}).map(c => c.name.toLowerCase())), up = {};
+    base.filter(([n]) => !have.has(n.toLowerCase())).forEach(([name, price]) => { up['catalog/' + push(ref(db, 'catalog')).key] = { name, price }; });
+    if (!Object.keys(up).length) return toast('Starter items are already there');
+    await update(ref(db), up); toast('Starter items added — edit the prices you want');
+  },
   async lotNew() {
     const name = $('#lName').value.trim(), price = r2(Number($('#lPrice').value));
     const prizes = $('#lPrizes').value.split(/[\s,;]+/).map(Number).filter(n => n > 0).map(r2);
@@ -1037,7 +1242,7 @@ const ACT = {
   accQR(d) { const a = D.acc[d.id]; if (a) showRecvQR(a.name); },
   async delacc(d) {
     const a = D.acc[d.id]; if (!a || !confirm(`Delete ${a.name} and all their data?`)) return;
-    await update(ref(db), { ['accounts/' + d.id]: null, ['cards/' + a.uid]: null, ['usernames/' + String(a.name || '').toLowerCase()]: null, ['bills/' + d.id]: null, ['tx/' + d.id]: null, ...(a.line ? { ['lines/' + a.line.number]: null } : {}) });
+    await update(ref(db), { ['accounts/' + d.id]: null, ['cards/' + a.uid]: null, ['usernames/' + String(a.name || '').toLowerCase()]: null, ['bills/' + d.id]: null, ['tx/' + d.id]: null, ['shopInfo/' + d.id]: null, ...(a.line ? { ['lines/' + a.line.number]: null } : {}) });
     toast('Deleted');
   },
   /* bills */
@@ -1051,7 +1256,7 @@ const ACT = {
     const acc = $('#sAcc').value, title = $('#sTitle').value.trim(), amount = Number($('#sAmt').value), n = Math.max(1, Math.floor(Number($('#sEvery').value) || 1));
     const u = $('#sUnit'), every = n * Number(u.value), unit = u.selectedOptions[0].text.replace(/ \(.*\)/, '');
     if (!acc || !title || !(amount > 0)) return toast('Fill account, title and amount', 'bad');
-    const gameDays = u.value === '300000', tv = $('#sAt').value, at = gameDays && /^\d\d:\d\d$/.test(tv) ? Number(tv.slice(0, 2)) * 60 + Number(tv.slice(3)) : null;
+    const gameDays = u.value === '600000', tv = $('#sAt').value, at = gameDays && /^\d\d:\d\d$/.test(tv) ? Number(tv.slice(0, 2)) * 60 + Number(tv.slice(3)) : null;
     const next = at != null ? nextGameTime(Date.now(), at) : Date.now();
     await push(ref(db, 'schedules'), { acc, title, amount: r2(amount), every, n, unit, auto: $('#sAuto').checked, active: true, next, created: Date.now(), ...(at != null ? { at } : {}) });
     $('#sTitle').value = ''; $('#sAmt').value = ''; toast(at != null ? 'Automatic bill started — first bill at game time ' + hhmm(at) : 'Automatic bill started — first bill is issued now');
@@ -1092,6 +1297,8 @@ const ACT = {
       localStorage.tp_me = JSON.stringify({ id: r.id }); meStart();
     };
   },
+  msaveCard() { saveCardImage(); },
+  minstall() { installHelp(); },
   async mredeemT(d) { await redeemTicket(d.k); },
   async mredeem() {
     const code = ($('#rdCode').value || '').trim();
@@ -1102,10 +1309,41 @@ const ACT = {
     toast(!any ? 'That ticket is not on your account' : any.redeemed ? 'Already redeemed' : any.prize ? 'Already redeemed' : any.drawn ? 'This ticket did not win' : 'Not drawn yet — wait for the draw', 'bad');
   },
   async mshopOn() {
-    const amount = r2(Number($('#shAmt').value)), desc = $('#shDesc').value.trim();
-    if (!(amount > 0) || amount > 100000) return toast('Enter a price', 'bad');
-    await update(ref(db, 'shops/' + M.id), { on: true, amount, desc, name: M.acc.name, ts: Date.now() + srvOffset });
+    const inf = M.shopInfo || {}; if (inf.open === false) return toast('Your shop is closed — open it first', 'bad');
+    const cart = M.cart || {}, items = [];
+    for (const [id, q] of Object.entries(cart)) { const i = (inf.items || {})[id]; if (i && q > 0) { if (q > (i.stock || 0)) return toast(`Only ${i.stock || 0} ${i.name} left`, 'bad'); items.push({ id, name: i.name, qty: q, price: i.price }); } }
+    let amount, desc;
+    if (items.length) { amount = r2(items.reduce((a, i) => a + i.qty * i.price, 0)); desc = items.map(i => `${i.qty}× ${i.name}`).join(', '); }
+    else { amount = r2(Number($('#shAmt').value)); desc = $('#shDesc').value.trim(); }
+    if (!(amount > 0) || amount > 100000) return toast('Pick items or enter a price', 'bad');
+    await update(ref(db, 'shops/' + M.id), { on: true, amount, desc, items: items.length ? items : null, name: inf.name || M.acc.name, ts: Date.now() + srvOffset });
     toast('Reader on — the cashier screen is showing the payment');
+  },
+  mcart(d) {
+    const i = ((M.shopInfo || {}).items || {})[d.id]; if (!i) return;
+    M.cart = M.cart || {}; M.cart[d.id] = Math.max(0, Math.min(i.stock || 0, (M.cart[d.id] || 0) + Number(d.d))); ME.shop.refresh();
+  },
+  async msName() { const v = ($('#shName').value || '').trim(); if (!v) return toast('Enter a shop name', 'bad'); await update(ref(db, 'shopInfo/' + M.id), { name: v }); toast('Shop name saved'); },
+  async msToggle() { const open = (M.shopInfo || {}).open !== false; await update(ref(db, 'shopInfo/' + M.id), { open: !open, name: (M.shopInfo || {}).name || M.acc.name }); toast(open ? 'Shop closed' : 'Shop open'); },
+  async msAdd() {
+    const name = $('#niName').value.trim(), price = r2(Number($('#niPrice').value)), stock = Math.max(0, Math.floor(Number($('#niStock').value) || 0));
+    if (!name || !(price > 0)) return toast('Enter a name and price', 'bad');
+    const k = push(ref(db, 'shopInfo/' + M.id + '/items')).key;
+    await update(ref(db, 'shopInfo/' + M.id), { name: (M.shopInfo || {}).name || M.acc.name, ['items/' + k]: { name, price, stock } });
+    $('#niName').value = ''; $('#niPrice').value = ''; $('#niStock').value = ''; toast('Item added');
+  },
+  async msItemSave(d) {
+    const price = r2(Number($('#ip_' + d.id).value)), stock = Math.max(0, Math.floor(Number($('#is_' + d.id).value) || 0));
+    if (!(price > 0)) return toast('Enter a price', 'bad');
+    await update(ref(db, `shopInfo/${M.id}/items/${d.id}`), { price, stock }); toast('Saved');
+  },
+  async msItemDel(d) { if (confirm('Remove this item?')) { await remove(ref(db, `shopInfo/${M.id}/items/${d.id}`)); delete (M.cart || {})[d.id]; } },
+  async mbuy(d) {
+    const c = (M.catalog || {})[d.id], q = Number(d.q); if (!c || !(q > 0)) return;
+    const r = await debit(M.id, r2(c.price * q), `Supplier: ${c.name} × ${q}`, 'supplier'); if (!r.ok) return toast(r.msg, 'bad');
+    await runTransaction(ref(db, `shopInfo/${M.id}/items/${d.id}`), cur => cur ? { ...cur, stock: (cur.stock || 0) + q } : { name: c.name, price: r2(c.price * 2), stock: q });
+    await update(ref(db, 'shopInfo/' + M.id), { name: (M.shopInfo || {}).name || M.acc.name });
+    toast(`Bought ${q} × ${c.name} — set your selling price in Menu & stock`);
   },
   async mshopOff() { await update(ref(db, 'shops/' + M.id), { on: false }); toast('Reader off'); },
   mchcard() { if (confirm('Change your card? Your old card will stop working.')) changeCardDialog(M.id, M.acc.name); },
@@ -1213,7 +1451,7 @@ function meStart() {
   if (!saved) return meLogin();
   M.id = saved.id; M.acc = null;
   runTransaction(ref(db, `accounts/${M.id}/freeMB`), c => c == null ? FREE_MB : undefined).catch(() => { });
-  root.innerHTML = `<div class="me"><div class="meTop"><div class="row" style="flex-wrap:nowrap;gap:8px"><button class="btn ghost sm" data-act="refresh" title="Refresh to get the latest update">🔄 Refresh</button><b style="font-size:18px">💳 TapPay</b></div><span class="pill gclock" title="1 day = 5 minutes"></span><button class="btn ghost sm" data-act="mlogout">Logout</button></div><div id="mv"><p class="mut">Loading…</p></div></div>`;
+  root.innerHTML = `<div class="me"><div class="meTop"><div class="row" style="flex-wrap:nowrap;gap:8px"><button class="btn ghost sm" data-act="refresh" title="Refresh to get the latest update">🔄 Refresh</button><b style="font-size:18px">💳 TapPay</b></div><span class="pill gclock" title="1 day = 10 minutes: 7 min day, 3 min night"></span><button class="btn ghost sm" data-act="mlogout">Logout</button></div><div id="mv"><p class="mut">Loading…</p></div></div>`;
   let shell = false;
   const meRefresh = () => keep(() => { const t = ME[meCur]; if (t && t.refresh) t.refresh(); });
   listen(ref(db, 'accounts/' + M.id), s => {
@@ -1232,11 +1470,16 @@ function meStart() {
     if (prizeSeen) { let n = 0; won.forEach(k => { if (!prizeSeen.has(k)) n++; }); if (n) { toast(`🎉 You won ${n > 1 ? n + ' prizes' : 'a prize'} in the lottery! Redeem on Home`); beep(); } }
     prizeSeen = won; meRefresh();
   });
+  M.vit = null; listen(ref(db, 'vitals/' + M.id), s => { M.vit = s.val(); window.VIT_LIVE = { me: M.vit }; if (meCur === 'home') meRefresh(); });
+  M.shopInfo = null; M.catalog = {}; M.cart = {};
+  listen(ref(db, 'shopInfo/' + M.id), s => { M.shopInfo = s.val(); meRefresh(); });
+  listen(ref(db, 'catalog'), s => { M.catalog = s.val() || {}; meRefresh(); });
   M.shop = null; let lastPaid = undefined;
   listen(ref(db, 'shops/' + M.id), s => {
     M.shop = s.val();
     const t = M.shop?.last?.ts;
-    if (lastPaid !== undefined && t && t !== lastPaid) payAnim({ amount: M.shop.last.amount, title: 'Money received', sub: `From ${M.shop.last.by}${M.shop.last.desc ? ' · ' + M.shop.last.desc : ''}`, kind: 'in' });
+    if (lastPaid !== undefined && t && t !== lastPaid) payAnim({ amount: M.shop.last.amount, title: 'Money received', sub: `${M.shop.last.receipt ? 'Receipt ' + recNo(M.shop.last.receipt) + ' · ' : ''}From ${M.shop.last.by}${M.shop.last.desc ? ' · ' + M.shop.last.desc : ''}`, kind: 'in' });
+    if (lastPaid !== undefined && t && t !== lastPaid) M.cart = {};
     lastPaid = t || null;
     meRefresh();
   });
@@ -1293,12 +1536,13 @@ function meShow(k) {
   $('#mv').innerHTML = ME[k].html(); ME[k].init?.(); ME[k].refresh?.();
 }
 const ME = {};
+function DAY_NIGHT_NOTE() { const t = gameTime(); if (!t) return ''; const n = phaseOf(t.h) === 'night'; return (n ? '🌙 It is night — ' : '☀️ It is day — ') + 'the cashier feeds you and puts you to sleep.'; }
 ME.home = {
   html: () => `<div class="bal"><small>Balance</small><b id="mBal">${money(M.acc.balance)}</b><small>@${esc(M.acc.name)}</small></div><div id="hBody"></div>`,
   refresh() {
     const l = M.acc.line;
     const unpaid = Object.values(M.bills).filter(b => b.status !== 'paid' && billVisible(b));
-    $('#hBody').innerHTML = `<div class="card"><div class="item"><span class="mut">📱 Line</span><b>${l ? esc(l.number) : 'Not active'}</b></div>
+    $('#hBody').innerHTML = `<div class="card"><h3 style="margin:0 0 4px">Your body</h3>${vitalsHtml(M.vit, 'me')}<p class="mut" style="margin:4px 0 0;font-size:12px">${(DAY_NIGHT_NOTE())}</p></div><div class="card"><div class="item"><span class="mut">📱 Line</span><b>${l ? esc(l.number) : 'Not active'}</b></div>
     <div class="item"><span class="mut">📶 Data left</span><b>${(M.acc.freeMB || 0) + (l?.dataMB || 0)} MB${M.acc.freeMB ? ` <span class="mut" style="font-weight:400">(${M.acc.freeMB} free)</span>` : ''}</b></div>
     <div class="item"><span class="mut">💳 Card</span><div class="row"><b>•••• ${esc(String(M.acc.uid || '').slice(-4))}</b><button class="btn sm ghost" data-act="mchcard">Change card</button></div></div>
     <div class="item"><span class="mut">🧾 Unpaid bills</span><b>${unpaid.length}${unpaid.length ? ' · ' + money(unpaid.reduce((s, b) => s + b.amount, 0)) : ''}</b></div></div>
@@ -1331,7 +1575,8 @@ ME.phone = {
 };
 ME.send = {
   html: () => `<h2>Send money</h2><div class="card"><button class="btn big" data-act="msendQR">📷 Scan QR to pay</button><p class="mut" style="font-size:13px;margin:10px 0 0">Money can only be sent by scanning the receiver's QR code.</p></div>
-  <div class="card big-ok"><h3>My QR</h3><div id="myQr" style="background:#fff;padding:12px;border-radius:14px;max-width:260px;margin:0 auto;min-height:100px"></div><p class="mut" style="text-align:center;margin:10px 0 0">@${esc(M.acc.name)} · this QR never changes. Others scan it to send you money.</p></div>`,
+  <div class="card big-ok"><h3>My QR</h3><div id="myQr" style="background:#fff;padding:12px;border-radius:14px;max-width:260px;margin:0 auto;min-height:100px"></div><p class="mut" style="text-align:center;margin:10px 0 0">@${esc(M.acc.name)} · this QR never changes. Others scan it to send you money.</p>
+  <div class="row" style="justify-content:center;margin-top:12px"><button class="btn sm" data-act="msaveCard">💳 Save my card to phone</button><button class="btn sm ghost" data-act="minstall">📲 Add app to home screen</button></div></div>`,
   async init() {
     const box = $('#myQr'); if (!box) return;
     if (!(await loadLib('qrcode'))) { const b = $('#myQr'); if (b) b.innerHTML = '<p style="color:#000">QR library could not load — your network may block the CDN.</p>'; return; }
@@ -1341,15 +1586,31 @@ ME.send = {
   }
 };
 ME.shop = {
-  html: () => `<h2>My shop reader</h2><div class="card"><p class="mut" style="margin-top:0">Set a price and turn the reader on. The cashier computer shows the payment screen, and the next card tapped pays you straight away.</p>
-  <div class="grid2"><label>Price (${CUR})<input id="shAmt" type="number" inputmode="decimal" step="0.01" min="0" placeholder="40"></label><label>For<input id="shDesc" maxlength="40" placeholder="e.g. Burger"></label></div>
-  <div id="shBtns"></div></div><div class="card" id="shLast"></div>`,
-  init() { const x = M.shop || {}; if (x.amount) $('#shAmt').value = x.amount; if (x.desc) $('#shDesc').value = x.desc; ME.shop.refresh(); },
+  html: () => `<h2>🏪 My shop</h2>
+  <div class="card" id="shHead"></div>
+  <div class="card"><h3>Sell</h3><div id="shCart"></div>
+    <details style="margin:8px 0"><summary class="mut">Or charge a custom amount</summary><div class="grid2"><label>Price (${CUR})<input id="shAmt" type="number" inputmode="decimal" step="0.01" min="0" placeholder="40"></label><label>For<input id="shDesc" maxlength="40" placeholder="e.g. Special order"></label></div></details>
+    <div id="shBtns"></div></div>
+  <div class="card" id="shLast"></div>
+  <div class="card"><h3>Menu &amp; stock</h3><div id="shMenu"></div>
+    <h3 style="margin-top:16px">Add a menu item</h3><div class="grid2"><label>Name<input id="niName" maxlength="30" placeholder="e.g. Burger"></label><label>Price (${CUR})<input id="niPrice" type="number" step="0.01" min="0" placeholder="15"></label><label>Stock<input id="niStock" type="number" step="1" min="0" placeholder="10"></label></div>
+    <button class="btn" data-act="msAdd">Add item</button></div>
+  <div class="card"><h3>Supplier — buy stock</h3><div id="shSup"></div></div>`,
+  init() { ME.shop.refresh(); },
+  info() { return M.shopInfo || {}; },
   refresh() {
-    const b = $('#shBtns'); if (!b) return;
-    const x = M.shop || {};
-    b.innerHTML = x.on ? `<div class="big-ok"><div class="tick">📡</div><h3>Reader is ON</h3><p>Waiting for a card: <b>${money(x.amount)}</b>${x.desc ? ' — ' + esc(x.desc) : ''}</p><button class="btn ghost big" data-act="mshopOff">Turn reader off</button></div>` : `<button class="btn big" data-act="mshopOn">▶ Turn reader on</button>`;
-    const l = x.last; $('#shLast').innerHTML = l ? `<h3>Last payment</h3><div class="item"><div>${esc(l.by)}${l.desc ? '<br><span class="mut">' + esc(l.desc) + '</span>' : ''}<br><span class="mut">${when(l.ts)}</span></div><b class="ok">+${money(l.amount)}</b></div>` : '<p class="mut">No payments yet.</p>';
+    if (!$('#shHead')) return;
+    const inf = M.shopInfo || {}, items = Object.entries(inf.items || {}), open = inf.open !== false, x = M.shop || {}, cart = M.cart || {};
+    $('#shHead').innerHTML = `<div class="grid2"><label>Shop name<input id="shName" maxlength="30" value="${esc(inf.name || M.acc.name)}"></label></div>
+      <div class="row"><button class="btn sm" data-act="msName">Save name</button><button class="btn sm ${open ? 'bad' : 'ok'}" data-act="msToggle">${open ? '🔒 Close shop' : '🔓 Open shop'}</button><span class="pill ${open ? 'ok' : 'bad'}">${open ? 'OPEN' : 'CLOSED'}</span></div>`;
+    const sellable = items.filter(([, i]) => (i.stock || 0) > 0);
+    const total = r2(sellable.reduce((a, [id, i]) => a + (cart[id] || 0) * i.price, 0));
+    $('#shCart').innerHTML = sellable.length ? sellable.map(([id, i]) => `<div class="item"><div><b>${esc(i.name)}</b><br><span class="mut">${money(i.price)} · ${i.stock} left</span></div><div class="row" style="flex-wrap:nowrap"><button class="btn sm ghost" data-act="mcart" data-id="${id}" data-d="-1">−</button><b style="min-width:22px;text-align:center">${cart[id] || 0}</b><button class="btn sm ghost" data-act="mcart" data-id="${id}" data-d="1">+</button></div></div>`).join('') + `<p style="margin:10px 0 0"><b>Total: ${money(total)}</b></p>` : '<p class="mut" style="margin:0">Add menu items with stock below to sell them here.</p>';
+    $('#shBtns').innerHTML = x.on ? `<div class="big-ok"><div class="tick">📡</div><h3>Reader is ON</h3><p>Waiting for a card: <b>${money(x.amount)}</b>${x.desc ? ' — ' + esc(x.desc) : ''}</p><button class="btn ghost big" data-act="mshopOff">Turn reader off</button></div>` : `<button class="btn big" data-act="mshopOn">📡 Turn reader on${total ? ' · ' + money(total) : ''}</button>`;
+    const l = x.last; $('#shLast').innerHTML = l ? `<h3>Last payment</h3><div class="item"><div>${esc(l.by)}${l.desc ? '<br><span class="mut">' + esc(l.desc) + '</span>' : ''}<br><span class="mut">${l.receipt ? 'Receipt ' + recNo(l.receipt) + ' · ' : ''}${when(l.ts)}</span></div><b class="ok">+${money(l.amount)}</b></div>` : '<h3>Last payment</h3><p class="mut" style="margin:0">No payments yet.</p>';
+    $('#shMenu').innerHTML = items.length ? items.sort((a, b) => a[1].name.localeCompare(b[1].name)).map(([id, i]) => `<div class="item" style="flex-wrap:wrap;gap:8px"><b style="flex:1;min-width:110px">${esc(i.name)}</b><label class="mut" style="font-size:12px">Price<input id="ip_${id}" type="number" step="0.01" min="0" value="${i.price}" style="width:80px;margin:0"></label><label class="mut" style="font-size:12px">Stock<input id="is_${id}" type="number" step="1" min="0" value="${i.stock || 0}" style="width:70px;margin:0"></label><button class="btn sm" data-act="msItemSave" data-id="${id}">Save</button><button class="btn sm bad" data-act="msItemDel" data-id="${id}">✕</button></div>`).join('') : '<p class="mut" style="margin:0">No items yet.</p>';
+    const cat = Object.entries(M.catalog || {}).sort((a, b) => a[1].name.localeCompare(b[1].name));
+    $('#shSup').innerHTML = cat.length ? cat.map(([id, c]) => `<div class="item"><div><b>${esc(c.name)}</b><br><span class="mut">${money(c.price)} each</span></div><div class="row" style="flex-wrap:nowrap"><button class="btn sm" data-act="mbuy" data-id="${id}" data-q="1">Buy 1</button><button class="btn sm" data-act="mbuy" data-id="${id}" data-q="5">Buy 5</button><button class="btn sm" data-act="mbuy" data-id="${id}" data-q="10">Buy 10</button></div></div>`).join('') : '<p class="mut" style="margin:0">The supplier has no items yet.</p>';
   }
 };
 ME.hist = {
