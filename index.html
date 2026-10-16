@@ -96,6 +96,10 @@ dialog .row{flex-direction:row-reverse}
 #popup .pav{width:38px;height:38px;border-radius:50%;background:var(--acc);display:grid;place-items:center;font-weight:700;flex:none}
 #popup small{display:block;color:var(--mut)}
 #popup b,#popup span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#shopOv{position:fixed;inset:0;z-index:70;background:#070a16f2;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px}
+#shopOv .box{background:var(--card2);border:2px solid var(--acc);border-radius:24px;padding:36px 28px;width:min(560px,96vw)}
+#shopOv .amt{font-size:clamp(44px,12vw,84px);font-weight:800;margin:10px 0;line-height:1}
+#shopOv.okk .box{border-color:#22c55e}#shopOv.err .box{border-color:#ef4444}
 #toast{position:fixed;left:50%;bottom:80px;transform:translateX(-50%);z-index:50;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
 #toast div{background:#0b0e1c;border:1px solid var(--line);padding:10px 16px;border-radius:12px}
 #toast div.bad{border-color:var(--bad)}#toast div.ok{border-color:var(--ok)}
@@ -221,7 +225,7 @@ function postPopup(p) {
   if (p.video) beep(); else if (navigator.vibrate) navigator.vibrate(120);
 }
 function qrStop() { clearInterval(M.qrTimer); M.qrTimer = null; if (M.qrTok) { remove(ref(db, 'qr/' + M.qrTok)).catch(() => { }); M.qrTok = null; } }
-function cleanup() { clearTimeout(popTimer); $('#popup')?.remove(); qrStop(); while (subs.length) subs.pop()(); stopMeter(); scanHandler = null; clearInterval(billTick); }
+function cleanup() { shopFlashing = false; shopHandler = null; $('#shopOv')?.remove(); shopCur = null; clearTimeout(popTimer); $('#popup')?.remove(); qrStop(); while (subs.length) subs.pop()(); stopMeter(); scanHandler = null; clearInterval(billTick); }
 
 /* ---------- shared world clock: 1 full day = 5 real minutes, same for everyone ---------- */
 const DAY_MS = 5 * 60 * 1000;
@@ -325,6 +329,43 @@ function changeCardDialog(id, who) {
   d.showModal();
 }
 
+/* ---------- phone-controlled reader: a user turns the reader on with a price, the cashier screen charges the next card tap ---------- */
+let shopCur = null, shopMsgT = null, shopFlashing = false;
+function shopOvEl() { let el = $('#shopOv'); if (!el) { el = document.createElement('div'); el.id = 'shopOv'; document.body.appendChild(el); } return el; }
+function drawShopOv(flash) {
+  const on = Object.entries(D.shops || {}).filter(([, x]) => x.on && x.amount > 0).sort((a, b) => (a[1].ts || 0) - (b[1].ts || 0));
+  if (flash) { shopFlashing = true; const el = shopOvEl(); el.className = flash.cls; el.innerHTML = `<div class="box"><div style="font-size:64px">${flash.cls === 'okk' ? '✅' : '⚠️'}</div><h2>${esc(flash.title)}</h2><p class="mut">${esc(flash.text)}</p></div>`; return; }
+  if (shopFlashing) return; // keep the result message on screen until its timer ends
+  if (!on.length) { shopCur = null; shopHandler = null; $('#shopOv')?.remove(); return; }
+  const [id, x] = on[0];
+  if (shopCur === id + x.ts && $('#shopOv') && !$('#shopOv').classList.contains('okk') && !$('#shopOv').classList.contains('err')) return;
+  shopCur = id + x.ts;
+  const el = shopOvEl(); el.className = '';
+  el.innerHTML = `<div class="box"><div class="mut">🏪 ${esc(x.name || 'Shop')}${on.length > 1 ? ' · +' + (on.length - 1) + ' waiting' : ''}</div><div class="amt">${money(x.amount)}</div>${x.desc ? `<h3>${esc(x.desc)}</h3>` : ''}<p style="font-size:22px"><span class="pulse">📡 Tap your card to pay</span></p><button class="btn ghost" id="shopCancel" type="button">Cancel</button></div>`;
+  $('#shopCancel').onclick = () => update(ref(db, 'shops/' + id), { on: false });
+  shopHandler = async uid => {
+    const cust = await accIdByUid(uid);
+    if (!cust) return drawShopFlash('err', 'Card not registered', 'Try another card.', id, x);
+    if (cust === id) return drawShopFlash('err', "Can't pay yourself", 'Another person must tap their card.', id, x);
+    // claim this request so only one cashier page can charge it
+    const claim = await runTransaction(ref(db, `shops/${id}/on`), c => c === true ? false : undefined);
+    if (!claim.committed) return;
+    const cname = D.acc[cust]?.name || 'Customer', label = x.desc || 'Shop payment';
+    const r = await debit(cust, x.amount, `${label} → ${x.name || 'Shop'}`, 'pos');
+    if (!r.ok) { await update(ref(db, 'shops/' + id), { on: true }); return drawShopFlash('err', r.msg, 'Not enough money on this card.', id, x); }
+    await credit(id, x.amount, `${label} ← ${cname}`, 'pos-in');
+    await update(ref(db, 'shops/' + id), { last: { by: cname, amount: x.amount, desc: x.desc || '', ts: Date.now() } });
+    beep();
+    shopHandler = null; shopCur = null;
+    drawShopOv({ cls: 'okk', title: `Paid ${money(x.amount)}`, text: `${cname} · new balance ${money(r.balance)}` });
+    clearTimeout(shopMsgT); shopMsgT = setTimeout(() => { shopFlashing = false; drawShopOv(); }, 2500);
+  };
+}
+function drawShopFlash(cls, title, text, id, x) {
+  drawShopOv({ cls, title, text });
+  clearTimeout(shopMsgT); shopMsgT = setTimeout(() => { shopFlashing = false; shopCur = null; drawShopOv(); }, 2200);
+}
+
 /* ---------- money core ---------- */
 async function debit(id, amt, desc, type, extra = {}) {
   amt = Number(amt);
@@ -397,10 +438,11 @@ onValue(ref(db, 'scans/latest'), s => {
 // one scan at a time: a duplicate tap while we're still looking up the card is ignored,
 // so the screen is never re-drawn under the cashier's/customer's fingers
 let scanBusy = false;
+let shopHandler = null; // set while the cashier screen shows a payment request from a phone
 async function runScan(uid) {
-  if (!scanHandler || scanBusy) return;
+  if ((!scanHandler && !shopHandler) || scanBusy) return;
   scanBusy = true;
-  try { await scanHandler(uid); } catch (e) { console.error(e); } finally { scanBusy = false; }
+  try { await (shopHandler || scanHandler)(uid); } catch (e) { console.error(e); } finally { scanBusy = false; }
 }
 // re-render safely: remember which field has focus (and what was typed) and put it back
 function keep(fn) {
@@ -523,6 +565,7 @@ function adminApp() {
   listen(ref(db, 'bills'), s => { D.bills = s.val() || {}; drawCur(); });
   listen(ref(db, 'tx'), s => { D.tx = s.val() || {}; drawCur(); });
   listen(ref(db, 'schedules'), s => { D.sched = s.val() || {}; drawCur(); });
+  listen(ref(db, 'shops'), s => { D.shops = s.val() || {}; drawShopOv(); });
   get(ref(db, 'scans/latest')).then(s => showReader(s.val()));
   serStatus(SER.status); serAuto();
   showTab(curTab); drawClock();
@@ -848,6 +891,13 @@ const ACT = {
       localStorage.tp_me = JSON.stringify({ id: r.id }); meStart();
     };
   },
+  async mshopOn() {
+    const amount = r2(Number($('#shAmt').value)), desc = $('#shDesc').value.trim();
+    if (!(amount > 0) || amount > 100000) return toast('Enter a price', 'bad');
+    await update(ref(db, 'shops/' + M.id), { on: true, amount, desc, name: M.acc.name, ts: Date.now() + srvOffset });
+    toast('Reader on — the cashier screen is showing the payment');
+  },
+  async mshopOff() { await update(ref(db, 'shops/' + M.id), { on: false }); toast('Reader off'); },
   mchcard() { if (confirm('Change your card? Your old card will stop working.')) changeCardDialog(M.id, M.acc.name); },
   async mpay(d) {
     const b = M.bills[d.id]; if (!b || b.status === 'paid') return;
@@ -943,7 +993,7 @@ const ACT = {
    MOBILE (user portal)
    ===================================================== */
 const M = { id: null, acc: null, bills: {}, tx: {}, posts: {}, nums: null, img: null, vid: null, vids: {}, openC: {}, iState: '' };
-const ME_TABS = [['home', '🏠', 'Home'], ['bills', '🧾', 'Bills'], ['insta', '📸', 'Instazyad'], ['phone', '📱', 'Phone'], ['send', '💸', 'Send'], ['hist', '🕘', 'History']];
+const ME_TABS = [['home', '🏠', 'Home'], ['bills', '🧾', 'Bills'], ['insta', '📸', 'Instazyad'], ['phone', '📱', 'Phone'], ['send', '💸', 'Send'], ['shop', '🏪', 'Shop'], ['hist', '🕘', 'History']];
 let meCur = 'home';
 const genNums = () => Array.from({ length: 3 }, () => '010' + String(Math.floor(Math.random() * 1e8)).padStart(8, '0'));
 
@@ -965,6 +1015,14 @@ function meStart() {
     meRefresh();
   });
   listen(ref(db, 'bills/' + M.id), s => { M.bills = s.val() || {}; meRefresh(); });
+  M.shop = null; let lastPaid = undefined;
+  listen(ref(db, 'shops/' + M.id), s => {
+    M.shop = s.val();
+    const t = M.shop?.last?.ts;
+    if (lastPaid !== undefined && t && t !== lastPaid) { toast(`💰 ${M.shop.last.by} paid ${money(M.shop.last.amount)}`); beep(); }
+    lastPaid = t || null;
+    meRefresh();
+  });
   listen(ref(db, 'tx/' + M.id), s => { M.tx = s.val() || {}; meRefresh(); });
   M.seenPosts = null;
   listen(query(ref(db, 'posts'), limitToLast(50)), s => {
@@ -1047,6 +1105,18 @@ ME.send = {
     if (!$('#myQr')) return;
     const q = qrcode(0, 'M'); q.addData('TPPAY:' + M.acc.name); q.make();
     box.innerHTML = q.createSvgTag({ scalable: true, margin: 0 });
+  }
+};
+ME.shop = {
+  html: () => `<h2>My shop reader</h2><div class="card"><p class="mut" style="margin-top:0">Set a price and turn the reader on. The cashier computer shows the payment screen, and the next card tapped pays you straight away.</p>
+  <div class="grid2"><label>Price (${CUR})<input id="shAmt" type="number" inputmode="decimal" step="0.01" min="0" placeholder="40"></label><label>For<input id="shDesc" maxlength="40" placeholder="e.g. Burger"></label></div>
+  <div id="shBtns"></div></div><div class="card" id="shLast"></div>`,
+  init() { const x = M.shop || {}; if (x.amount) $('#shAmt').value = x.amount; if (x.desc) $('#shDesc').value = x.desc; ME.shop.refresh(); },
+  refresh() {
+    const b = $('#shBtns'); if (!b) return;
+    const x = M.shop || {};
+    b.innerHTML = x.on ? `<div class="big-ok"><div class="tick">📡</div><h3>Reader is ON</h3><p>Waiting for a card: <b>${money(x.amount)}</b>${x.desc ? ' — ' + esc(x.desc) : ''}</p><button class="btn ghost big" data-act="mshopOff">Turn reader off</button></div>` : `<button class="btn big" data-act="mshopOn">▶ Turn reader on</button>`;
+    const l = x.last; $('#shLast').innerHTML = l ? `<h3>Last payment</h3><div class="item"><div>${esc(l.by)}${l.desc ? '<br><span class="mut">' + esc(l.desc) + '</span>' : ''}<br><span class="mut">${when(l.ts)}</span></div><b class="ok">+${money(l.amount)}</b></div>` : '<p class="mut">No payments yet.</p>';
   }
 };
 ME.hist = {
