@@ -100,6 +100,31 @@ dialog .row{flex-direction:row-reverse}
 #shopOv .box{background:var(--card2);border:2px solid var(--acc);border-radius:24px;padding:36px 28px;width:min(560px,96vw)}
 #shopOv .amt{font-size:clamp(44px,12vw,84px);font-weight:800;margin:10px 0;line-height:1}
 #shopOv.okk .box{border-color:#22c55e}#shopOv.err .box{border-color:#ef4444}
+#payAnim{position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;text-align:center;background:radial-gradient(circle at 50% 45%,#0f2a22f5,#070a16f7 70%);opacity:0;transition:opacity .25s;cursor:pointer;overflow:hidden;--c:#2ecc8f}
+#payAnim.in{--c:#6c7bff;background:radial-gradient(circle at 50% 45%,#1a1f4cf5,#070a16f7 70%)}
+#payAnim.show{opacity:1}
+#payAnim .stage{position:relative;width:200px;height:200px;margin:0 auto 18px}
+#payAnim .ring{position:absolute;inset:0;border-radius:50%;border:4px solid var(--c);opacity:0}
+#payAnim.show .ring{animation:payRing 1.4s ease-out forwards}
+#payAnim.show .ring.r2{animation-delay:.25s}#payAnim.show .ring.r3{animation-delay:.5s}
+#payAnim .disc{position:absolute;inset:25px;border-radius:50%;background:var(--c);box-shadow:0 0 60px var(--c);transform:scale(0)}
+#payAnim.show .disc{animation:payPop .6s cubic-bezier(.2,1.6,.4,1) .05s forwards}
+#payAnim svg{position:absolute;inset:25px;width:150px;height:150px}
+#payAnim svg path{fill:none;stroke:#fff;stroke-width:7;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:60;stroke-dashoffset:60}
+#payAnim.show svg path{animation:payTick .45s ease-out .45s forwards}
+#payAnim .amt{font-size:clamp(40px,11vw,76px);font-weight:800;line-height:1;opacity:0;transform:translateY(20px) scale(.8)}
+#payAnim.show .amt{animation:payUp .5s ease-out .7s forwards}
+#payAnim .ttl{font-size:22px;font-weight:700;margin-bottom:8px;opacity:0}
+#payAnim.show .ttl{animation:payUp .5s ease-out .55s forwards}
+#payAnim .sub{color:var(--mut);margin-top:10px;opacity:0}
+#payAnim.show .sub{animation:payUp .5s ease-out .9s forwards}
+#payAnim i{position:absolute;left:50%;top:44%;width:10px;height:16px;border-radius:2px;opacity:0}
+#payAnim.show i{animation:payConf 1.7s cubic-bezier(.15,.7,.3,1) var(--d) forwards}
+@keyframes payRing{0%{transform:scale(.5);opacity:.9}100%{transform:scale(2.3);opacity:0}}
+@keyframes payPop{to{transform:scale(1)}}
+@keyframes payTick{to{stroke-dashoffset:0}}
+@keyframes payUp{to{opacity:1;transform:none}}
+@keyframes payConf{0%{opacity:1;transform:translate(-50%,-50%) rotate(0)}100%{opacity:0;transform:translate(calc(-50% + var(--x)),calc(-50% + var(--y))) rotate(var(--r))}}
 #toast{position:fixed;left:50%;bottom:80px;transform:translateX(-50%);z-index:50;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
 #toast div{background:#0b0e1c;border:1px solid var(--line);padding:10px 16px;border-radius:12px}
 #toast div.bad{border-color:var(--bad)}#toast div.ok{border-color:var(--ok)}
@@ -225,7 +250,7 @@ function postPopup(p) {
   if (p.video) beep(); else if (navigator.vibrate) navigator.vibrate(120);
 }
 function qrStop() { clearInterval(M.qrTimer); M.qrTimer = null; if (M.qrTok) { remove(ref(db, 'qr/' + M.qrTok)).catch(() => { }); M.qrTok = null; } }
-function cleanup() { shopFlashing = false; shopHandler = null; $('#shopOv')?.remove(); shopCur = null; clearTimeout(popTimer); $('#popup')?.remove(); qrStop(); while (subs.length) subs.pop()(); stopMeter(); scanHandler = null; clearInterval(billTick); }
+function cleanup() { $('#payAnim')?.remove(); shopFlashing = false; shopHandler = null; $('#shopOv')?.remove(); shopCur = null; clearTimeout(popTimer); $('#popup')?.remove(); qrStop(); while (subs.length) subs.pop()(); stopMeter(); scanHandler = null; clearInterval(billTick); }
 
 /* ---------- shared world clock: 1 full day = 5 real minutes, same for everyone ---------- */
 const DAY_MS = 5 * 60 * 1000;
@@ -329,6 +354,41 @@ function changeCardDialog(id, who) {
   d.showModal();
 }
 
+/* ---------- payment animation: ring burst, drawn tick, confetti, counting amount, chime ---------- */
+let payAnimT = null;
+function chime() {
+  try {
+    primeAudio(); if (!actx) return;
+    const t0 = actx.currentTime;
+    [[660, 0], [880, 0.12], [1320, 0.24]].forEach(([f, dt]) => {
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.type = 'sine'; o.frequency.value = f;
+      g.gain.setValueAtTime(0.0001, t0 + dt); g.gain.exponentialRampToValueAtTime(0.9, t0 + dt + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dt + 0.5);
+      o.connect(g); g.connect(actx.destination); o.start(t0 + dt); o.stop(t0 + dt + 0.55);
+    });
+  } catch (e) { }
+  if (navigator.vibrate) navigator.vibrate([60, 40, 120]);
+}
+// kind: 'out' (you paid / payment accepted) or 'in' (you received money)
+function payAnim({ amount, title = 'Payment successful', sub = '', kind = 'out' }) {
+  let el = $('#payAnim'); if (el) el.remove();
+  el = document.createElement('div'); el.id = 'payAnim'; el.className = kind === 'in' ? 'in' : '';
+  const cols = kind === 'in' ? ['#6c7bff', '#a5b0ff', '#fff', '#ffb84d', '#2ecc8f'] : ['#2ecc8f', '#7dffcb', '#fff', '#ffb84d', '#6c7bff'];
+  const conf = Array.from({ length: 44 }, () => {
+    const a = Math.random() * Math.PI * 2, d = 140 + Math.random() * 260;
+    return `<i style="background:${cols[Math.floor(Math.random() * cols.length)]};--x:${Math.cos(a) * d}px;--y:${Math.sin(a) * d + 120}px;--r:${Math.round(Math.random() * 900 - 450)}deg;--d:${(0.45 + Math.random() * 0.25).toFixed(2)}s"></i>`;
+  }).join('');
+  el.innerHTML = `${conf}<div><div class="stage"><div class="ring"></div><div class="ring r2"></div><div class="ring r3"></div><div class="disc"></div><svg viewBox="0 0 150 150"><path d="M42 78 L66 102 L110 52"/></svg></div><div class="ttl">${esc(title)}</div><div class="amt" style="color:var(--c)">${money(0)}</div>${sub ? `<div class="sub">${esc(sub)}</div>` : ''}</div>`;
+  document.body.appendChild(el);
+  requestAnimationFrame(() => el.classList.add('show'));
+  const close = () => { el.classList.remove('show'); setTimeout(() => el.remove(), 300); };
+  el.onclick = close; clearTimeout(payAnimT); payAnimT = setTimeout(close, 3200);
+  const a = el.querySelector('.amt'), t0 = performance.now() + 700; // count the amount up as it appears
+  const step = now => { const k = Math.min(1, Math.max(0, (now - t0) / 800)); a.textContent = money(Number(amount) * (1 - Math.pow(1 - k, 3))); if (k < 1 && el.isConnected) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
+  chime();
+}
+
 /* ---------- phone-controlled reader: a user turns the reader on with a price, the cashier screen charges the next card tap ---------- */
 let shopCur = null, shopMsgT = null, shopFlashing = false;
 function shopOvEl() { let el = $('#shopOv'); if (!el) { el = document.createElement('div'); el.id = 'shopOv'; document.body.appendChild(el); } return el; }
@@ -355,10 +415,8 @@ function drawShopOv(flash) {
     if (!r.ok) { await update(ref(db, 'shops/' + id), { on: true }); return drawShopFlash('err', r.msg, 'Not enough money on this card.', id, x); }
     await credit(id, x.amount, `${label} ← ${cname}`, 'pos-in');
     await update(ref(db, 'shops/' + id), { last: { by: cname, amount: x.amount, desc: x.desc || '', ts: Date.now() } });
-    beep();
-    shopHandler = null; shopCur = null;
-    drawShopOv({ cls: 'okk', title: `Paid ${money(x.amount)}`, text: `${cname} · new balance ${money(r.balance)}` });
-    clearTimeout(shopMsgT); shopMsgT = setTimeout(() => { shopFlashing = false; drawShopOv(); }, 2500);
+    shopHandler = null; shopCur = null; shopFlashing = false; $('#shopOv')?.remove();
+    payAnim({ amount: x.amount, title: 'Payment accepted', sub: `${cname} → ${x.name || 'Shop'} · new balance ${money(r.balance)}` });
   };
 }
 function drawShopFlash(cls, title, text, id, x) {
@@ -804,6 +862,7 @@ const ACT = {
     if (!r.ok) return toast(r.msg, 'bad');
     if (to) await credit(to, pos.amount, `${label} ← ${pos.acc.name}`, 'pos-in');
     $('#pPanel').innerHTML = `<div class="card big-ok"><div class="tick ok">✅</div><h2>Payment accepted</h2><p>${money(pos.amount)} from ${esc(pos.acc.name)} to ${esc(toName)}<br><span class="mut">New balance ${money(r.balance)}</span></p><button class="btn" data-act="posReset">Next customer</button></div>`;
+    payAnim({ amount: pos.amount, title: 'Payment accepted', sub: `${pos.acc.name} → ${toName}` });
     pos.amount = 0; pos.acc = null;
   },
   async posBill(d) {
@@ -811,7 +870,7 @@ const ACT = {
     const r = await debit(pos.acc.id, b.amount, 'Bill: ' + b.title, 'bill');
     if (!r.ok) return toast(r.msg, 'bad');
     await update(ref(db, `bills/${pos.acc.id}/${d.id}`), { status: 'paid', paidAt: Date.now() });
-    toast('Bill paid');
+    payAnim({ amount: b.amount, title: 'Bill paid', sub: b.title });
   },
   posReset() { pos = { amount: 0, desc: '', need: pos.need, to: pos.to, acc: null, verified: false }; scanHandler = null; showTab('pos'); },
   /* new account */
@@ -903,7 +962,7 @@ const ACT = {
     const b = M.bills[d.id]; if (!b || b.status === 'paid') return;
     const r = await debit(M.id, b.amount, 'Bill: ' + b.title, 'bill');
     if (!r.ok) return toast(r.msg, 'bad');
-    await update(ref(db, `bills/${M.id}/${d.id}`), { status: 'paid', paidAt: Date.now() }); toast('Bill paid ✅');
+    await update(ref(db, `bills/${M.id}/${d.id}`), { status: 'paid', paidAt: Date.now() }); payAnim({ amount: b.amount, title: 'Bill paid', sub: b.title });
   },
   async mbuyline(d) {
     const num = d.num;
@@ -934,7 +993,7 @@ const ACT = {
     const t = await getAcc(to);
     const r = await debit(M.id, amt, 'Sent to ' + t.name, 'transfer-out'); if (!r.ok) return toast(r.msg, 'bad');
     await credit(to, amt, 'From ' + M.acc.name, 'transfer-in');
-    $('#sAmt').value = ''; toast('Sent ✅');
+    $('#sAmt').value = ''; payAnim({ amount: amt, title: 'Sent', sub: 'To ' + t.name });
   },
   async msendQR() {
     const raw = await qrScan('Scan a QR to pay', "Point at a store's or a friend's TapPay QR.");
@@ -948,7 +1007,7 @@ const ACT = {
     if (!o) return; const amt = Number(o.a);
     const r = await debit(M.id, amt, 'Paid ' + t.name + ' (QR)', 'transfer-out'); if (!r.ok) return toast(r.msg, 'bad');
     await credit(to, amt, 'From ' + M.acc.name + ' (QR)', 'transfer-in');
-    toast('Paid ' + money(amt) + ' to ' + t.name + ' ✅');
+    payAnim({ amount: amt, title: 'Payment sent', sub: 'To ' + t.name });
   },
   mrecvQR() { showRecvQR(M.acc.name); },
   async mpost() {
@@ -1019,22 +1078,33 @@ function meStart() {
   listen(ref(db, 'shops/' + M.id), s => {
     M.shop = s.val();
     const t = M.shop?.last?.ts;
-    if (lastPaid !== undefined && t && t !== lastPaid) { toast(`💰 ${M.shop.last.by} paid ${money(M.shop.last.amount)}`); beep(); }
+    if (lastPaid !== undefined && t && t !== lastPaid) payAnim({ amount: M.shop.last.amount, title: 'Money received', sub: `From ${M.shop.last.by}${M.shop.last.desc ? ' · ' + M.shop.last.desc : ''}`, kind: 'in' });
     lastPaid = t || null;
     meRefresh();
   });
   listen(ref(db, 'tx/' + M.id), s => { M.tx = s.val() || {}; meRefresh(); });
   M.seenPosts = null;
+  const seenKey = 'tp_lastPost_' + M.id;
   listen(query(ref(db, 'posts'), limitToLast(50)), s => {
-    M.posts = s.val() || {};
-    const ids = Object.keys(M.posts);
-    if (M.seenPosts) {
-      const fresh = ids.filter(i => !M.seenPosts.has(i) && M.posts[i].acc !== M.id).sort((a, b) => (M.posts[a].ts || 0) - (M.posts[b].ts || 0));
-      if (fresh.length) postPopup(M.posts[fresh[fresh.length - 1]]);
-    }
-    M.seenPosts = new Set(ids);
+    try {
+      M.posts = s.val() || {};
+      const ids = Object.keys(M.posts);
+      let stored = null; try { stored = Number(localStorage.getItem(seenKey)) || null; } catch (e) { }
+      const maxTs = ids.reduce((m, i) => Math.max(m, Number(M.posts[i].ts) || 0), 0);
+      let fresh = [];
+      if (M.seenPosts) fresh = ids.filter(i => !M.seenPosts.has(i));              // posted while the app is open
+      else if (stored) fresh = ids.filter(i => (Number(M.posts[i].ts) || 0) > stored); // posted while the app was closed
+      fresh = fresh.filter(i => M.posts[i].acc !== M.id).sort((a, b) => (M.posts[a].ts || 0) - (M.posts[b].ts || 0));
+      if (fresh.length) {
+        const last = M.posts[fresh[fresh.length - 1]];
+        postPopup(fresh.length > 1 ? { ...last, text: `+${fresh.length - 1} more · ${last.text || ''}` } : last);
+      }
+      M.seenPosts = new Set(ids);
+      if (maxTs) { try { localStorage.setItem(seenKey, String(Math.max(maxTs, stored || 0))); } catch (e) { } }
+    } catch (e) { console.error('post popup', e); }
     if (meCur === 'insta') ME.insta.feed();
   });
+
   // bills appear live (also scheduled ones when their time comes)
   let seen = null;
   billTick = setInterval(() => {
