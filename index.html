@@ -228,22 +228,28 @@ const DAY_MS = 5 * 60 * 1000;
 // real timestamp of the next time the game clock shows `mins` (minutes since 00:00), after `after`
 function nextGameTime(after, mins) {
   const base = clockStart == null ? Date.UTC(2026, 0, 1) : clockStart;
-  const e = after + srvOffset - base, off = mins / 1440 * DAY_MS;
+  const e = (pausedAt != null ? pausedAt + (after - Date.now()) : after + srvOffset) - base, off = mins / 1440 * DAY_MS;
   let d = Math.floor(e / DAY_MS);
   if (d * DAY_MS + off <= e) d++;
   return base - srvOffset + d * DAY_MS + off;
 }
 const hhmm = m => String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
-let clockStart = null, srvOffset = 0;
+let clockStart = null, srvOffset = 0, pausedAt = null;
+const nowSrv = () => pausedAt != null ? pausedAt : Date.now() + srvOffset;
 onValue(ref(db, '.info/serverTimeOffset'), s => { srvOffset = s.val() || 0; });
 onValue(ref(db, 'clock/start'), s => {
   if (s.val() == null) runTransaction(ref(db, 'clock/start'), c => c == null ? Date.now() + srvOffset : undefined).catch(() => { clockStart = Date.UTC(2026, 0, 1); });
   else clockStart = s.val();
   drawClock();
 }, () => { clockStart = Date.UTC(2026, 0, 1); drawClock(); });
+onValue(ref(db, 'clock/pausedAt'), s => {
+  pausedAt = s.val();
+  const b = document.getElementById('clkBtn'); if (b) b.textContent = pausedAt != null ? '▶ Resume time' : '⏸ Pause time';
+  drawClock();
+});
 function gameTime() {
   if (clockStart == null) return null;
-  const e = Math.max(0, Date.now() + srvOffset - clockStart);
+  const e = Math.max(0, nowSrv() - clockStart);
   const day = Math.floor(e / DAY_MS) + 1;
   const mins = Math.floor((e % DAY_MS) / DAY_MS * 1440);
   return { day, h: Math.floor(mins / 60), m: mins % 60 };
@@ -251,7 +257,7 @@ function gameTime() {
 function clockText() {
   const t = gameTime(); if (!t) return '🕒 …';
   const icon = t.h < 6 || t.h >= 20 ? '🌙' : '☀️';
-  return `${icon} Day ${t.day} · ${String(t.h).padStart(2, '0')}:${String(t.m).padStart(2, '0')}`;
+  return `${pausedAt != null ? '⏸' : icon} Day ${t.day} · ${String(t.h).padStart(2, '0')}:${String(t.m).padStart(2, '0')}${pausedAt != null ? ' · paused' : ''}`;
 }
 function drawClock() { document.querySelectorAll('.gclock').forEach(el => el.textContent = clockText()); }
 setInterval(drawClock, 1000);
@@ -532,7 +538,7 @@ function adminApp() {
 let schedBusy = false;
 // issues every automatic bill that is due. Only one cashier page wins each round (transaction on `next`).
 async function runSchedules() {
-  if (schedBusy) return; schedBusy = true;
+  if (schedBusy || pausedAt != null) return; schedBusy = true;
   try {
     for (const [id, x] of Object.entries(D.sched)) {
       if (!x.active || !(x.next <= Date.now())) continue;
@@ -564,7 +570,7 @@ function showTab(k) {
 const V = {};
 /* --- dashboard --- */
 V.dash = {
-  html: () => `<div class="row between"><h2>Dashboard</h2><div class="row"><span class="pill gclock"></span><button class="btn ghost sm" data-act="clockReset">🔄 Restart clock (Day 1)</button></div></div><div class="stats" id="stats"></div><div class="card"><h3>Latest transactions</h3><div class="tbl" id="dTx"></div></div>`,
+  html: () => `<div class="row between"><h2>Dashboard</h2><div class="row"><span class="pill gclock"></span><button class="btn ghost sm" id="clkBtn" data-act="clockPause">${pausedAt != null ? '▶ Resume time' : '⏸ Pause time'}</button><button class="btn ghost sm" data-act="clockReset">🔄 Restart clock (Day 1)</button></div></div><div class="stats" id="stats"></div><div class="card"><h3>Latest transactions</h3><div class="tbl" id="dTx"></div></div>`,
   draw() {
     const accs = Object.values(D.acc), tx = allTx();
     const today = new Date().toDateString();
@@ -704,7 +710,14 @@ const ACT = {
   alogout() { SER.reader?.cancel(); sessionStorage.removeItem('tp_admin'); location.hash = ''; route(); },
   refresh() { location.reload(); },
   tab(d) { showTab(d.k); },
-  async clockReset() { if (confirm('Restart the world clock at Day 1 for everyone?')) { await set(ref(db, 'clock/start'), Date.now() + srvOffset); toast('Clock restarted'); } },
+  async clockReset() { if (confirm('Restart the world clock at Day 1 for everyone?')) { await update(ref(db), { 'clock/start': Date.now() + srvOffset, 'clock/pausedAt': null }); toast('Clock restarted'); } },
+  async clockPause() {
+    if (pausedAt == null) { await set(ref(db, 'clock/pausedAt'), Date.now() + srvOffset); return toast('⏸ Time paused for everyone'); }
+    // resume: move the start forward by the paused duration so no game time passes, and push scheduled bills back by the same amount
+    const dur = Math.max(0, Date.now() + srvOffset - pausedAt), up = { 'clock/start': clockStart + dur, 'clock/pausedAt': null };
+    for (const [id, x] of Object.entries(D.sched || {})) if (x.active) up['schedules/' + id + '/next'] = x.next + dur;
+    await update(ref(db), up); toast('▶ Time resumed');
+  },
   /* POS */
   posStart() { pos.acc = null; pos.verified = false; $('#pPanel').innerHTML = ''; ACT.posArm(); },
   // card tap is always listening on this screen — the customer can just tap
