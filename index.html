@@ -778,7 +778,7 @@ async function runSchedules() {
         const n = c + x.every; if (n > Date.now()) return n; return x.at != null ? nextGameTime(Date.now(), x.at) : Date.now() + x.every;
       });
       if (!r.committed) continue;
-      const targets = x.acc === 'all' ? Object.keys(D.acc) : D.acc[x.acc] ? [x.acc] : [];
+      const targets = x.acc === 'all' ? Object.keys(D.acc) : x.acc === 'shops' ? Object.keys(D.shopInfo || {}).filter(i => D.acc[i]) : D.acc[x.acc] ? [x.acc] : [];
       for (const acc of targets) {
         const nb = push(ref(db, 'bills/' + acc));
         await set(nb, { title: x.title, amount: x.amount, due: '', status: 'unpaid', created: Date.now(), showAt: Date.now(), sched: id });
@@ -909,7 +909,7 @@ V.bills = {
     V.bills.fill();
     const sr = Object.entries(D.sched);
     if ($('#sList')) $('#sList').innerHTML = sr.length ? `<table><thead><tr><th>Account</th><th>Title</th><th>Amount</th><th>Every</th><th>Next bill</th><th></th></tr></thead><tbody>${sr.map(([id, x]) =>
-      `<tr><td>${x.acc === 'all' ? 'Everyone' : esc(accName(x.acc))}</td><td>${esc(x.title)}${x.auto ? ' <span class="pill">auto-pay</span>' : ''}</td><td>${money(x.amount)}</td><td>${x.n} ${esc(x.unit)}${x.at != null ? ' @ ' + hhmm(x.at) : ''}</td><td>${x.active ? esc(when(x.next)) : '<span class="pill bad">paused</span>'}</td>
+      `<tr><td>${x.acc === 'all' ? 'Everyone' : x.acc === 'shops' ? 'All shops' : esc(accName(x.acc))}</td><td>${esc(x.title)}${x.auto ? ' <span class="pill">auto-pay</span>' : ''}</td><td>${money(x.amount)}</td><td>${x.n} ${esc(x.unit)}${x.at != null ? ' @ ' + hhmm(x.at) : ''}</td><td>${x.active ? esc(when(x.next)) : '<span class="pill bad">paused</span>'}</td>
       <td><div class="row"><button class="btn sm ghost" data-act="schedToggle" data-id="${id}">${x.active ? 'Pause' : 'Resume'}</button><button class="btn sm bad" data-act="schedDel" data-id="${id}">Delete</button></div></td></tr>`).join('')}</tbody></table>` : '<p class="mut">No automatic bills yet.</p>';
     const rows = Object.entries(D.bills).flatMap(([acc, o]) => Object.entries(o || {}).map(([id, b]) => ({ id, acc, ...b }))).sort((a, b) => (b.created || 0) - (a.created || 0));
     $('#bList').innerHTML = rows.length ? `<table><thead><tr><th>Account</th><th>Title</th><th>Amount</th><th>Due</th><th>Status</th><th></th></tr></thead><tbody>${rows.map(b =>
@@ -931,6 +931,12 @@ V.tx = {
 V.shops = {
   html: () => `<h2>🏪 Shops</h2>
   <div class="card"><h3>Shops</h3><div id="shTbl"></div></div>
+  <div class="card"><h3>🔁 Automatic shop bills</h3><p class="mut" style="margin-top:0">Bill a shop (or all shops) again and again — rent, tax, anything. Keep this page open, it sends them. Manage or stop them in the Bills tab.</p>
+  <div class="grid2"><label>Shop<select id="abShop"></select></label><label>Title<input id="abTitle" placeholder="e.g. Shop rent"></label>
+  <label>Amount (${CUR})<input id="abAmt" type="number" step="0.01" min="0"></label><label>Arrives at game time<input id="abAt" type="time" value="08:00"></label>
+  <label>Repeat every (game days)<input id="abN" type="number" min="1" step="1" value="1"></label></div>
+  <label class="chk"><input type="checkbox" id="abAuto"> Auto-pay from the shop's balance when issued</label>
+  <button class="btn" data-act="shAutoBill">Start automatic bill</button></div>
   <div class="card"><h3>Supplier price list</h3><p class="mut" style="margin-top:0">What shops pay when they buy stock from you (burgers, toys, …). Shops buy from the Shop tab on their phone.</p>
   <div class="grid2"><label>Item<input id="cName" maxlength="30" placeholder="e.g. Hot Wheels car"></label><label>Price shops pay (${CUR})<input id="cPrice" type="number" step="0.01" min="0" placeholder="5"></label></div>
   <div class="row"><button class="btn" data-act="catAdd">Add item</button><button class="btn ghost" data-act="catSeed">Add starter items (food + toys)</button></div><div id="catTbl" style="margin-top:12px"></div></div>
@@ -939,6 +945,7 @@ V.shops = {
   draw() {
     if (!$('#shTbl')) return;
     const info = D.shopInfo || {}, rc = Object.values(D.receipts || {});
+    const ab = $('#abShop'); if (ab) { const c = ab.value; ab.innerHTML = '<option value="shops">All shops</option>' + Object.entries(info).map(([id, x]) => `<option value="${id}">${esc(x.name || accName(id))}</option>`).join(''); if (c) ab.value = c; }
     const rows = Object.entries(info).map(([id, x]) => {
       const items = Object.values(x.items || {}), stock = items.reduce((a, i) => a + (i.stock || 0), 0), low = items.filter(i => (i.stock || 0) <= 0).length;
       const sales = rc.filter(r => r.shop === id).reduce((a, r) => a + r.total, 0);
@@ -1081,6 +1088,13 @@ const ACT = {
     const amount = Number(prompt('Amount (' + CUR + '):')); if (!(amount > 0)) return toast('Enter an amount', 'bad');
     await push(ref(db, 'bills/' + d.id), { title: title.trim(), amount: r2(amount), due: '', status: 'unpaid', created: Date.now(), showAt: Date.now() });
     toast('Bill sent to ' + accName(d.id));
+  },
+  async shAutoBill() {
+    const acc = $('#abShop').value, title = $('#abTitle').value.trim(), amount = Number($('#abAmt').value), n = Math.max(1, Math.floor(Number($('#abN').value) || 1)), tv = $('#abAt').value;
+    if (!acc || !title || !(amount > 0)) return toast('Fill shop, title and amount', 'bad');
+    const at = /^\d\d:\d\d$/.test(tv) ? Number(tv.slice(0, 2)) * 60 + Number(tv.slice(3)) : 480;
+    await push(ref(db, 'schedules'), { acc, title, amount: r2(amount), every: n * 600000, n, unit: 'game days', auto: $('#abAuto').checked, active: true, next: nextGameTime(Date.now(), at), created: Date.now(), at });
+    $('#abTitle').value = ''; $('#abAmt').value = ''; toast('Automatic bill started — first bill at game time ' + hhmm(at));
   },
   async catAdd() {
     const name = $('#cName').value.trim(), price = r2(Number($('#cPrice').value));
