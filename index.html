@@ -250,7 +250,7 @@ function postPopup(p) {
   if (p.video) beep(); else if (navigator.vibrate) navigator.vibrate(120);
 }
 function qrStop() { clearInterval(M.qrTimer); M.qrTimer = null; if (M.qrTok) { remove(ref(db, 'qr/' + M.qrTok)).catch(() => { }); M.qrTok = null; } }
-function cleanup() { $('#payAnim')?.remove(); shopFlashing = false; shopHandler = null; $('#shopOv')?.remove(); shopCur = null; clearTimeout(popTimer); $('#popup')?.remove(); qrStop(); while (subs.length) subs.pop()(); stopMeter(); scanHandler = null; clearInterval(billTick); }
+function cleanup() { localReq = null; $('#payAnim')?.remove(); shopFlashing = false; shopHandler = null; $('#shopOv')?.remove(); shopCur = null; clearTimeout(popTimer); $('#popup')?.remove(); qrStop(); while (subs.length) subs.pop()(); stopMeter(); scanHandler = null; clearInterval(billTick); }
 
 /* ---------- shared world clock: 1 full day = 5 real minutes, same for everyone ---------- */
 const DAY_MS = 5 * 60 * 1000;
@@ -392,8 +392,16 @@ function payAnim({ amount, title = 'Payment successful', sub = '', kind = 'out' 
 /* ---------- redeem a winning lottery ticket (phone) ---------- */
 async function redeemTicket(key) {
   const t = M.tickets[key]; if (!t || !t.prize || t.redeemed) return toast('Nothing to redeem', 'bad');
-  const claim = await runTransaction(ref(db, `lotTickets/${t.lid}/${t.code}`), c => (!c || c.acc !== M.id || !c.prize || c.redeemed) ? undefined : { ...c, redeemed: true });
-  if (!claim.committed) return toast('Could not redeem this ticket', 'bad');
+  // first pass of a transaction often sees an empty local cache (null): return it as-is so Firebase retries with the real server value
+  let why = '';
+  const claim = await runTransaction(ref(db, `lotTickets/${t.lid}/${t.code}`), c => {
+    if (c === null) return c;
+    if (c.acc !== M.id) { why = 'This ticket is not on your account'; return; }
+    if (!c.prize) { why = 'This ticket did not win'; return; }
+    if (c.redeemed) { why = 'Already redeemed'; return; }
+    return { ...c, redeemed: true };
+  });
+  if (!claim.committed || !claim.snapshot.exists()) return toast(why || 'Could not redeem — ticket not found, ask the cashier', 'bad');
   const r = await credit(M.id, t.prize, `Lottery prize: ${t.lname} (#${t.code})`, 'lottery-win');
   if (!r.ok) { await update(ref(db, `lotTickets/${t.lid}/${t.code}`), { redeemed: false }); return toast(r.msg, 'bad'); }
   await update(ref(db, `userTickets/${M.id}/${key}`), { redeemed: true });
@@ -401,25 +409,46 @@ async function redeemTicket(key) {
 }
 
 /* ---------- phone-controlled reader: a user turns the reader on with a price, the cashier screen charges the next card tap ---------- */
-let shopCur = null, shopMsgT = null, shopFlashing = false;
+let shopCur = null, shopMsgT = null, shopFlashing = false, localReq = null; // localReq = charge started from the Charge tab
 function shopOvEl() { let el = $('#shopOv'); if (!el) { el = document.createElement('div'); el.id = 'shopOv'; document.body.appendChild(el); } return el; }
+// takes the money from the customer, pays the receiver (if any), plays the animation. Returns {ok} or {ok:false,title,text}
+async function chargeNow(cust, req) {
+  if (req.to && req.to === cust) return { ok: false, title: "Can't pay yourself", text: 'Another person must tap their card.' };
+  const cname = D.acc[cust]?.name || 'Customer', label = req.desc || 'Purchase', toName = req.to ? (D.acc[req.to]?.name || 'Shop') : 'Shop';
+  const r = await debit(cust, req.amount, req.to ? `${label} → ${toName}` : label, 'pos');
+  if (!r.ok) return { ok: false, title: r.msg, text: 'Not enough money on this card.' };
+  if (req.to) await credit(req.to, req.amount, `${label} ← ${cname}`, 'pos-in');
+  payAnim({ amount: req.amount, title: 'Payment accepted', sub: `${cname} → ${toName} · new balance ${money(r.balance)}` });
+  return { ok: true };
+}
 function drawShopOv(flash) {
   const on = Object.entries(D.shops || {}).filter(([, x]) => x.on && x.amount > 0).sort((a, b) => (a[1].ts || 0) - (b[1].ts || 0));
   if (flash) { shopFlashing = true; const el = shopOvEl(); el.className = flash.cls; el.innerHTML = `<div class="box"><div style="font-size:64px">${flash.cls === 'okk' ? '✅' : '⚠️'}</div><h2>${esc(flash.title)}</h2><p class="mut">${esc(flash.text)}</p></div>`; return; }
   if (shopFlashing) return; // keep the result message on screen until its timer ends
-  if (!on.length) { shopCur = null; shopHandler = null; $('#shopOv')?.remove(); return; }
-  const [id, x] = on[0];
+  if (!on.length && !localReq) { shopCur = null; shopHandler = null; $('#shopOv')?.remove(); return; }
+  const [id, x] = localReq ? ['__local', localReq] : on[0];
   if (shopCur === id + x.ts && $('#shopOv') && !$('#shopOv').classList.contains('okk') && !$('#shopOv').classList.contains('err')) return;
   shopCur = id + x.ts;
   const el = shopOvEl(); el.className = '';
-  el.innerHTML = `<div class="box"><div class="mut">🏪 ${esc(x.name || 'Shop')}${on.length > 1 ? ' · +' + (on.length - 1) + ' waiting' : ''}</div><div class="amt">${money(x.amount)}</div>${x.desc ? `<h3>${esc(x.desc)}</h3>` : ''}<p style="font-size:22px"><span class="pulse">📡 Tap your card to pay</span></p><button class="btn ghost" id="shopCancel" type="button">Cancel</button></div>`;
-  $('#shopCancel').onclick = () => update(ref(db, 'shops/' + id), { on: false });
+  el.innerHTML = `<div class="box"><div class="mut">🏪 ${esc(x.name || 'Shop')}${on.length + (localReq ? 0 : -1) > 0 ? ' · +' + (on.length + (localReq ? 0 : -1)) + ' waiting' : ''}</div><div class="amt">${money(x.amount)}</div>${x.desc ? `<h3>${esc(x.desc)}</h3>` : ''}<p style="font-size:22px"><span class="pulse">📡 Tap your card to pay</span></p><button class="btn ghost" id="shopCancel" type="button">Cancel</button></div>`;
+  $('#shopCancel').onclick = () => { if (id === '__local') { localReq = null; shopCur = null; drawShopOv(); } else update(ref(db, 'shops/' + id), { on: false }); };
+  if (id === '__local') {
+    shopHandler = async uid => {
+      const cust = await accIdByUid(uid);
+      if (!cust) return drawShopFlash('err', 'Card not registered', 'Try another card.', id, x);
+      const r = await chargeNow(cust, x);
+      if (!r.ok) return drawShopFlash('err', r.title, r.text, id, x);
+      localReq = null; shopHandler = null; shopCur = null; shopFlashing = false; $('#shopOv')?.remove(); pos.amount = 0; pos.desc = '';
+      if (curTab === 'pos') showTab('pos');
+    };
+    return;
+  }
   shopHandler = async uid => {
     const cust = await accIdByUid(uid);
     if (!cust) return drawShopFlash('err', 'Card not registered', 'Try another card.', id, x);
     if (cust === id) return drawShopFlash('err', "Can't pay yourself", 'Another person must tap their card.', id, x);
     // claim this request so only one cashier page can charge it
-    const claim = await runTransaction(ref(db, `shops/${id}/on`), c => c === true ? false : undefined);
+    const claim = await runTransaction(ref(db, `shops/${id}/on`), c => c === null ? c : c === true ? false : undefined);
     if (!claim.committed) return;
     const cname = D.acc[cust]?.name || 'Customer', label = x.desc || 'Shop payment';
     const r = await debit(cust, x.amount, `${label} → ${x.name || 'Shop'}`, 'pos');
@@ -708,7 +737,8 @@ V.pos = {
   <div class="card"><div class="grid2"><label>Amount (${CUR})<input id="pAmt" type="number" step="0.01" min="0" value="${pos.amount || ''}"></label>
   <label>Description<input id="pDesc" placeholder="e.g. Snacks" value="${esc(pos.desc)}"></label></div>
   <label>Pay to (who receives the money)<select id="pTo"></select></label>
-  <div class="row"><button class="btn" data-act="posStart">💳 Wait for card tap</button><button class="btn ghost" data-act="posQR">📷 No card? Scan QR</button></div>
+  <div class="row"><button class="btn big" data-act="posCharge">💳 Charge — show payment screen</button><button class="btn ghost" data-act="posQR">📷 No card? Scan QR</button></div>
+  <p class="mut" style="margin:8px 0 0">Pressing Charge opens a full-screen payment popup. The customer taps their card and it pays straight away — no Pay button. Leave the amount empty to just look up a customer's bills.</p>
   <p id="pStatus" class="mut"></p></div><div id="pPanel"></div>`,
   init() { V.pos.fill(); if (pos.acc) V.pos.panel(); else ACT.posArm(); },
   fill() {
@@ -916,6 +946,12 @@ const ACT = {
     await update(ref(db), up); toast('▶ Time resumed');
   },
   /* POS */
+  posCharge() {
+    posReadForm();
+    if (!(pos.amount > 0)) return toast('Enter an amount to charge', 'bad');
+    localReq = { amount: r2(pos.amount), desc: pos.desc, to: pos.to && D.acc[pos.to] ? pos.to : '', name: pos.to && D.acc[pos.to] ? D.acc[pos.to].name : 'Shop', ts: Date.now() };
+    shopCur = null; shopFlashing = false; drawShopOv();
+  },
   posStart() { pos.acc = null; pos.verified = false; $('#pPanel').innerHTML = ''; ACT.posArm(); },
   // card tap is always listening on this screen — the customer can just tap
   posArm() {
@@ -944,6 +980,12 @@ const ACT = {
       busy = true; beep(); d.close();
       const id = await accIdByName(m[1]);
       if (!id) return toast('Account not found', 'bad');
+      posReadForm();
+      if (pos.amount > 0) {
+        const r = await chargeNow(id, { amount: r2(pos.amount), desc: pos.desc, to: pos.to && D.acc[pos.to] ? pos.to : '' });
+        if (!r.ok) return toast(r.title, 'bad');
+        pos.amount = 0; pos.desc = ''; return showTab('pos');
+      }
       posIdentify(id);
     }, 250);
     d.showModal();
