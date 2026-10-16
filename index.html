@@ -523,6 +523,7 @@ function drawShopOv(flash) {
     const cust = await accIdByUid(uid);
     if (!cust) return drawShopFlash('err', 'Card not registered', 'Try another card.', id, x);
     if (cust === id) return drawShopFlash('err', "Can't pay yourself", 'Another person must tap their card.', id, x);
+    if (x.orderBuyer && cust !== x.orderBuyer) return drawShopFlash('err', 'Wrong card', `This order is for ${accName(x.orderBuyer)}.`, id, x);
     // claim this request so only one cashier page can charge it
     if ((D.acc[cust]?.balance ?? Infinity) < x.amount) return drawShopFlash('err', 'Insufficient balance', 'Not enough money on this card.', id, x);
     const claim = await runTransaction(ref(db, `shops/${id}/on`), c => c === null ? c : c === true ? false : undefined);
@@ -534,7 +535,8 @@ function drawShopOv(flash) {
     const its = (x.items || []).map(i => ({ n: i.name, q: i.qty, p: i.price, id: i.id }));
     await recordReceipt({ no, shop: id, shopName: x.name || 'Shop', buyer: cust, buyerName: cname, items: its.length ? its.map(({ n, q, p }) => ({ n, q, p })) : [{ n: label, q: 1, p: x.amount }], total: x.amount });
     await takeStock(id, x.items ? x.items.map(i => ({ id: i.id, qty: i.qty })) : []);
-    await update(ref(db, 'shops/' + id), { last: { by: cname, amount: x.amount, desc: x.desc || '', ts: Date.now(), receipt: no } });
+    if (x.order) await update(ref(db, 'orders/' + x.order), { status: 'paid', receipt: no, paidAt: Date.now() });
+    await update(ref(db, 'shops/' + id), { last: { by: cname, amount: x.amount, desc: x.desc || '', ts: Date.now(), receipt: no }, order: null, orderBuyer: null });
     shopHandler = null; shopCur = null; shopFlashing = false; $('#shopOv')?.remove();
     payAnim({ amount: x.amount, title: 'Payment accepted', sub: `Receipt ${recNo(no)} · ${cname} → ${x.name || 'Shop'} · balance ${money(r.balance)}` });
   };
@@ -706,6 +708,7 @@ document.addEventListener('click', e => {
   const b = e.target.closest('[data-act]');
   if (b && ACT[b.dataset.act]) ACT[b.dataset.act](b.dataset, b);
 });
+document.addEventListener('change', e => { if (e.target.id === 'oSel') { M.oShop = e.target.value; M.oc = {}; ME.order.refresh(); } });
 document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && e.target.id?.startsWith('cIn_')) { e.preventDefault(); ACT.mcomment({ id: e.target.id.slice(4) }); }
 });
@@ -1332,6 +1335,8 @@ const ACT = {
     toast(!any ? 'That ticket is not on your account' : any.redeemed ? 'Already redeemed' : any.prize ? 'Already redeemed' : any.drawn ? 'This ticket did not win' : 'Not drawn yet — wait for the draw', 'bad');
   },
   async mshopOn() {
+    // (custom / cart sale — not tied to an order)
+
     const inf = M.shopInfo || {}; if (inf.open === false) return toast('Your shop is closed — open it first', 'bad');
     const cart = M.cart || {}, items = [];
     for (const [id, q] of Object.entries(cart)) { const i = (inf.items || {})[id]; if (i && q > 0) { if (q > (i.stock || 0)) return toast(`Only ${i.stock || 0} ${i.name} left`, 'bad'); items.push({ id, name: i.name, qty: q, price: i.price }); } }
@@ -1339,9 +1344,26 @@ const ACT = {
     if (items.length) { amount = r2(items.reduce((a, i) => a + i.qty * i.price, 0)); desc = items.map(i => `${i.qty}× ${i.name}`).join(', '); }
     else { amount = r2(Number($('#shAmt').value)); desc = $('#shDesc').value.trim(); }
     if (!(amount > 0) || amount > 100000) return toast('Pick items or enter a price', 'bad');
-    await update(ref(db, 'shops/' + M.id), { on: true, amount, desc, items: items.length ? items : null, name: inf.name || M.acc.name, ts: Date.now() + srvOffset });
+    await update(ref(db, 'shops/' + M.id), { on: true, amount, desc, items: items.length ? items : null, name: inf.name || M.acc.name, ts: Date.now() + srvOffset, order: null, orderBuyer: null });
     toast('Reader on — the cashier screen is showing the payment');
   },
+  moc(d) { const i = ((M.allShops || {})[M.oShop]?.items || {})[d.id]; if (!i) return; M.oc = M.oc || {}; M.oc[d.id] = Math.max(0, Math.min(i.stock || 0, (M.oc[d.id] || 0) + Number(d.d))); ME.order.refresh(); },
+  async moplace() {
+    const inf = (M.allShops || {})[M.oShop]; if (!inf || inf.open === false) return toast('That shop is closed', 'bad');
+    const items = []; for (const [id, q] of Object.entries(M.oc || {})) { const i = (inf.items || {})[id]; if (i && q > 0) { if (q > (i.stock || 0)) return toast(`Only ${i.stock || 0} ${i.name} left`, 'bad'); items.push({ id, name: i.name, qty: q, price: i.price }); } }
+    if (!items.length) return toast('Pick something first', 'bad');
+    await push(ref(db, 'orders'), { shop: M.oShop, shopName: inf.name || accName(M.oShop), buyer: M.id, buyerName: M.acc.name, items, total: r2(items.reduce((a, i) => a + i.qty * i.price, 0)), status: 'new', ts: Date.now() });
+    M.oc = {}; toast('Order sent to the shop!'); ME.order.refresh();
+  },
+  async mocancel(d) { const o = (M.orders || {})[d.id]; if (!o || o.status !== 'new') return; await update(ref(db, 'orders/' + d.id), { status: 'cancelled' }); },
+  async mopay(d) {
+    const o = (M.orders || {})[d.id]; if (!o || o.shop !== M.id || o.status !== 'new') return;
+    const inf = M.shopInfo || {}; if (inf.open === false) return toast('Your shop is closed — open it first', 'bad');
+    for (const i of o.items) if (i.qty > ((inf.items || {})[i.id]?.stock || 0)) return toast(`Not enough ${i.name} in stock`, 'bad');
+    await update(ref(db, 'shops/' + M.id), { on: true, amount: o.total, desc: `Order for ${o.buyerName}: ` + o.items.map(i => `${i.qty}× ${i.name}`).join(', '), items: o.items, name: inf.name || M.acc.name, ts: Date.now() + srvOffset, order: d.id, orderBuyer: o.buyer });
+    toast(`Reader on — ${o.buyerName} must tap their card`);
+  },
+  async modeliver(d) { const o = (M.orders || {})[d.id]; if (o?.shop === M.id) await update(ref(db, 'orders/' + d.id), { status: 'delivered', deliveredAt: Date.now() }); },
   mcart(d) {
     const i = ((M.shopInfo || {}).items || {})[d.id]; if (!i) return;
     M.cart = M.cart || {}; M.cart[d.id] = Math.max(0, Math.min(i.stock || 0, (M.cart[d.id] || 0) + Number(d.d))); ME.shop.refresh();
@@ -1464,7 +1486,7 @@ const ACT = {
    MOBILE (user portal)
    ===================================================== */
 const M = { id: null, acc: null, bills: {}, tx: {}, posts: {}, nums: null, img: null, vid: null, vids: {}, openC: {}, iState: '' };
-const ME_TABS = [['home', '🏠', 'Home'], ['bills', '🧾', 'Bills'], ['insta', '📸', 'Instazyad'], ['phone', '📱', 'Phone'], ['send', '💸', 'Send'], ['shop', '🏪', 'Shop'], ['hist', '🕘', 'History']];
+const ME_TABS = [['home', '🏠', 'Home'], ['bills', '🧾', 'Bills'], ['insta', '📸', 'Instazyad'], ['phone', '📱', 'Phone'], ['send', '💸', 'Send'], ['order', '🛍️', 'Order'], ['shop', '🏪', 'Shop'], ['hist', '🕘', 'History']];
 let meCur = 'home';
 const genNums = () => Array.from({ length: 3 }, () => '010' + String(Math.floor(Math.random() * 1e8)).padStart(8, '0'));
 
@@ -1494,6 +1516,17 @@ function meStart() {
     prizeSeen = won; meRefresh();
   });
   M.vit = null; listen(ref(db, 'vitals/' + M.id), s => { M.vit = s.val(); window.VIT_LIVE = { me: M.vit }; if (meCur === 'home') meRefresh(); });
+  M.orders = {}; M.allShops = {}; M.oShop = ''; M.oc = {}; let ordSeen = null;
+  listen(ref(db, 'shopInfo'), s => { M.allShops = s.val() || {}; meRefresh(); });
+  listen(query(ref(db, 'orders'), limitToLast(100)), s => {
+    const all = s.val() || {}; M.orders = {};
+    Object.entries(all).forEach(([k, o]) => { if (o.buyer === M.id || o.shop === M.id) M.orders[k] = o; });
+    const sig = new Map(Object.entries(M.orders).map(([k, o]) => [k, o.status]));
+    if (ordSeen) sig.forEach((st, k) => { const o = M.orders[k];
+      if (!ordSeen.has(k) && o.shop === M.id && st === 'new') { toast(`🛍️ New order from ${o.buyerName}!`); beep(); }
+      else if (ordSeen.has(k) && ordSeen.get(k) !== st && o.buyer === M.id) toast(st === 'paid' ? '✅ Paid — your order is being prepared' : st === 'delivered' ? '🚚 Your order was delivered!' : st === 'cancelled' ? '❌ Your order was cancelled' : ''); });
+    ordSeen = sig; meRefresh();
+  });
   M.shopInfo = null; M.catalog = {}; M.cart = {};
   listen(ref(db, 'shopInfo/' + M.id), s => { M.shopInfo = s.val(); meRefresh(); });
   listen(ref(db, 'catalog'), s => { M.catalog = s.val() || {}; meRefresh(); });
@@ -1576,6 +1609,22 @@ ME.home = {
     })()}</div>`;
   }
 };
+ME.order = {
+  html: () => `<h2>🛍️ Order</h2><div class="card" id="oShop"></div><div class="card"><h3>My orders</h3><div id="oList"></div></div>`,
+  refresh() {
+    if (!$('#oShop')) return;
+    const shops = Object.entries(M.allShops || {}).filter(([id, x]) => id !== M.id && x.open !== false && Object.values(x.items || {}).some(i => (i.stock || 0) > 0));
+    if (!shops.find(([id]) => id === M.oShop)) { M.oShop = shops[0]?.[0] || ''; M.oc = {}; }
+    const inf = (M.allShops || {})[M.oShop], items = Object.entries(inf?.items || {}).filter(([, i]) => (i.stock || 0) > 0), oc = M.oc || {};
+    const total = r2(items.reduce((a, [id, i]) => a + (oc[id] || 0) * i.price, 0));
+    $('#oShop').innerHTML = shops.length ? `<label>Shop<select id="oSel" data-chg="mosel">${shops.map(([id, x]) => `<option value="${id}" ${id === M.oShop ? 'selected' : ''}>${esc(x.name || accName(id))}</option>`).join('')}</select></label>
+      ${items.map(([id, i]) => `<div class="item"><div><b>${esc(i.name)}</b><br><span class="mut">${money(i.price)} · ${i.stock} left</span></div><div class="row" style="flex-wrap:nowrap"><button class="btn sm ghost" data-act="moc" data-id="${id}" data-d="-1">−</button><b style="min-width:22px;text-align:center">${oc[id] || 0}</b><button class="btn sm ghost" data-act="moc" data-id="${id}" data-d="1">+</button></div></div>`).join('')}
+      <p><b>Total: ${money(total)}</b></p><button class="btn big" data-act="moplace">Place order</button><p class="mut" style="font-size:12px">The shop gets your order, then you tap your card to pay, and they deliver it to you.</p>` : '<p class="mut" style="margin:0">No open shops with stock right now.</p>';
+    const mine = Object.entries(M.orders || {}).filter(([, o]) => o.buyer === M.id).sort((a, b) => b[1].ts - a[1].ts).slice(0, 15);
+    const lab = { new: '⏳ Waiting for the shop', paid: '✅ Paid — being delivered', delivered: '🚚 Delivered', cancelled: '❌ Cancelled' };
+    $('#oList').innerHTML = mine.length ? mine.map(([k, o]) => `<div class="item"><div><b>${esc(o.shopName)}</b><br><span class="mut">${o.items.map(i => `${i.qty}× ${esc(i.name)}`).join(', ')}<br>${lab[o.status] || o.status}${o.receipt ? ' · ' + recNo(o.receipt) : ''}</span></div><div style="text-align:right"><b>${money(o.total)}</b>${o.status === 'new' ? `<br><button class="btn sm bad" data-act="mocancel" data-id="${k}">Cancel</button>` : ''}</div></div>`).join('') : '<p class="mut" style="margin:0">No orders yet.</p>';
+  }
+};
 ME.bills = {
   html: () => `<h2>Bills</h2><div class="card" id="bBody"></div>`,
   refresh() {
@@ -1615,6 +1664,7 @@ ME.shop = {
     <details style="margin:8px 0"><summary class="mut">Or charge a custom amount</summary><div class="grid2"><label>Price (${CUR})<input id="shAmt" type="number" inputmode="decimal" step="0.01" min="0" placeholder="40"></label><label>For<input id="shDesc" maxlength="40" placeholder="e.g. Special order"></label></div></details>
     <div id="shBtns"></div></div>
   <div class="card" id="shLast"></div>
+  <div class="card"><h3>📦 Customer orders</h3><div id="shOrders"></div></div>
   <div class="card"><h3>Menu &amp; stock</h3><div id="shMenu"></div>
     <h3 style="margin-top:16px">Add a menu item</h3><div class="grid2"><label>Name<input id="niName" maxlength="30" placeholder="e.g. Burger"></label><label>Price (${CUR})<input id="niPrice" type="number" step="0.01" min="0" placeholder="15"></label><label>Stock<input id="niStock" type="number" step="1" min="0" placeholder="10"></label></div>
     <button class="btn" data-act="msAdd">Add item</button></div>
@@ -1630,6 +1680,8 @@ ME.shop = {
     const total = r2(sellable.reduce((a, [id, i]) => a + (cart[id] || 0) * i.price, 0));
     $('#shCart').innerHTML = sellable.length ? sellable.map(([id, i]) => `<div class="item"><div><b>${esc(i.name)}</b><br><span class="mut">${money(i.price)} · ${i.stock} left</span></div><div class="row" style="flex-wrap:nowrap"><button class="btn sm ghost" data-act="mcart" data-id="${id}" data-d="-1">−</button><b style="min-width:22px;text-align:center">${cart[id] || 0}</b><button class="btn sm ghost" data-act="mcart" data-id="${id}" data-d="1">+</button></div></div>`).join('') + `<p style="margin:10px 0 0"><b>Total: ${money(total)}</b></p>` : '<p class="mut" style="margin:0">Add menu items with stock below to sell them here.</p>';
     $('#shBtns').innerHTML = x.on ? `<div class="big-ok"><div class="tick">📡</div><h3>Reader is ON</h3><p>Waiting for a card: <b>${money(x.amount)}</b>${x.desc ? ' — ' + esc(x.desc) : ''}</p><button class="btn ghost big" data-act="mshopOff">Turn reader off</button></div>` : `<button class="btn big" data-act="mshopOn">📡 Turn reader on${total ? ' · ' + money(total) : ''}</button>`;
+    const og = Object.entries(M.orders || {}).filter(([, o]) => o.shop === M.id && (o.status === 'new' || o.status === 'paid')).sort((a, b) => a[1].ts - b[1].ts);
+    $('#shOrders').innerHTML = og.length ? og.map(([k, o]) => `<div class="item" style="flex-wrap:wrap;gap:8px"><div><b>${esc(o.buyerName)}</b> · ${money(o.total)}<br><span class="mut">${o.items.map(i => `${i.qty}× ${esc(i.name)}`).join(', ')}</span></div><div class="row">${o.status === 'new' ? `<button class="btn sm" data-act="mopay" data-id="${k}">💳 Take payment</button><button class="btn sm bad" data-act="mocancel" data-id="${k}">Decline</button>` : `<span class="pill ok">paid ${o.receipt ? recNo(o.receipt) : ''}</span><button class="btn sm ok" data-act="modeliver" data-id="${k}">🚚 Delivered</button>`}</div></div>`).join('') : '<p class="mut" style="margin:0">No orders waiting.</p>';
     const l = x.last; $('#shLast').innerHTML = l ? `<h3>Last payment</h3><div class="item"><div>${esc(l.by)}${l.desc ? '<br><span class="mut">' + esc(l.desc) + '</span>' : ''}<br><span class="mut">${l.receipt ? 'Receipt ' + recNo(l.receipt) + ' · ' : ''}${when(l.ts)}</span></div><b class="ok">+${money(l.amount)}</b></div>` : '<h3>Last payment</h3><p class="mut" style="margin:0">No payments yet.</p>';
     $('#shMenu').innerHTML = items.length ? items.sort((a, b) => a[1].name.localeCompare(b[1].name)).map(([id, i]) => `<div class="item" style="flex-wrap:wrap;gap:8px"><b style="flex:1;min-width:110px">${esc(i.name)}</b><label class="mut" style="font-size:12px">Price<input id="ip_${id}" type="number" step="0.01" min="0" value="${i.price}" style="width:80px;margin:0"></label><label class="mut" style="font-size:12px">Stock<input id="is_${id}" type="number" step="1" min="0" value="${i.stock || 0}" style="width:70px;margin:0"></label><button class="btn sm" data-act="msItemSave" data-id="${id}">Save</button><button class="btn sm bad" data-act="msItemDel" data-id="${id}">✕</button></div>`).join('') : '<p class="mut" style="margin:0">No items yet.</p>';
     const cat = Object.entries(M.catalog || {}).sort((a, b) => a[1].name.localeCompare(b[1].name));
