@@ -752,7 +752,7 @@ const accName = id => D.acc[id]?.name || id;
 let curTab = 'dash';
 
 function adminGate() { sessionStorage.tp_admin = '1'; adminApp(); }
-const TABS = [['dash', '📊 Dashboard'], ['pos', '💳 Charge'], ['new', '➕ New account'], ['accounts', '👥 Accounts'], ['bills', '🧾 Bills'], ['tx', '📜 Transactions'], ['shops', '🏪 Shops'], ['fake', '🎭 Fake customers'], ['life', '🍔 Hunger & sleep'], ['lottery', '🎟️ Lottery'], ['reader', '📡 Reader']];
+const TABS = [['dash', '📊 Dashboard'], ['pos', '💳 Charge'], ['new', '➕ New account'], ['accounts', '👥 Accounts'], ['bills', '🧾 Bills'], ['tx', '📜 Transactions'], ['shops', '🏪 Shops'], ['fake', '🎭 Fake customers'], ['fakeord', '📥 Fake orders'], ['life', '🍔 Hunger & sleep'], ['lottery', '🎟️ Lottery'], ['reader', '📡 Reader']];
 function adminApp() {
   cleanup();
   root.innerHTML = `<div class="top"><div class="row" style="flex-wrap:nowrap"><button class="btn ghost sm" data-act="refresh" title="Refresh to get the latest update">🔄 Refresh</button><div class="brand">💳 TapPay · Cashier</div></div><div class="row"><span class="pill gclock" title="1 day = 10 minutes: 7 min day, 3 min night"></span><span class="pill bad" id="serBadge" data-act="serPair" style="cursor:pointer" title="Click to connect / disconnect the reader"></span><button class="btn ghost sm" id="serBtn" data-act="serPair">Pair reader</button><span class="mut" id="rdr" style="font-size:12px"></span><button class="btn ghost sm" data-act="alogout">Logout</button></div></div>
@@ -768,6 +768,13 @@ function adminApp() {
   listen(query(ref(db, 'receipts'), limitToLast(40)), s => { D.receipts = s.val() || {}; drawCur(); });
   listen(ref(db, 'lotteries'), s => { D.lot = s.val() || {}; drawCur(); });
   listen(ref(db, 'lotTickets'), s => { D.lotT = s.val() || {}; drawCur(); });
+  let foSeen = null;
+  listen(query(ref(db, 'orders'), limitToLast(100)), s => {
+    const all = s.val() || {}; D.fo = Object.fromEntries(Object.entries(all).filter(([, o]) => o.fake));
+    const ids = new Set(Object.entries(D.fo).filter(([, o]) => o.status === 'fake-new').map(([k]) => k));
+    if (foSeen) { let n = 0; ids.forEach(k => { if (!foSeen.has(k)) n++; }); if (n) { toast(`📥 ${n} new fake order${n > 1 ? 's' : ''}`); beep3(); } }
+    foSeen = ids; if (curTab === 'fakeord') V.fakeord.draw();
+  });
   listen(ref(db, 'vitals'), s => {
     D.vit = s.val() || {}; window.VIT_LIVE = D.vit; if (curTab === 'life') V.life.draw();
     // give everyone a starting point so hunger/energy begin falling from now
@@ -1020,16 +1027,37 @@ async function fakeOrder(shopId, picks, name) {
   const its = picks.map(p => { const i = x.items[p.id]; return i ? { id: p.id, n: i.name, q: Math.min(p.qty, i.stock || 0), p: i.price } : null; }).filter(i => i && i.q > 0);
   if (!its.length) return false;
   const total = r2(its.reduce((a, i) => a + i.q * i.p, 0)), cname = (name || FAKE_NAMES[Math.floor(Math.random() * FAKE_NAMES.length)]) + ' (guest)';
-  const no = await nextReceipt();
-  await credit(shopId, total, `${cname} · ${recNo(no)}`, 'pos-in');
-  await recordReceipt({ no, shop: shopId, shopName: x.name || accName(shopId), buyer: 'fake', buyerName: cname, items: its.map(({ n, q, p }) => ({ n, q, p })), total });
-  await takeStock(shopId, its.map(i => ({ id: i.id, qty: i.q })));
-  await update(ref(db, 'shops/' + shopId), { last: { by: cname, amount: total, desc: its.map(i => `${i.q}× ${i.n}`).join(', '), ts: Date.now(), receipt: no } });
+  await push(ref(db, 'orders'), { fake: true, status: 'fake-new', shop: shopId, shopName: x.name || accName(shopId), buyer: 'fake', buyerName: cname, items: its.map(({ id, n, q, p }) => ({ id, name: n, qty: q, price: p })), total, ts: Date.now() });
   return true;
 }
+async function fakeReceive(oid) {
+  const o = (D.fo || {})[oid]; if (!o || o.status !== 'fake-new') return false;
+  const inf = (D.shopInfo || {})[o.shop]; if (!inf) { toast('That shop no longer exists', 'bad'); return false; }
+  for (const i of o.items) if (i.qty > ((inf.items || {})[i.id]?.stock || 0)) { toast(`Not enough ${i.name} in stock`, 'bad'); return false; }
+  const claim = await runTransaction(ref(db, `orders/${oid}/status`), c => c === 'fake-new' ? 'fake-done' : undefined);
+  if (!claim.committed) return false;
+  const no = await nextReceipt();
+  await credit(o.shop, o.total, `${o.buyerName} · ${recNo(no)}`, 'pos-in');
+  await recordReceipt({ no, shop: o.shop, shopName: o.shopName, buyer: 'fake', buyerName: o.buyerName, items: o.items.map(i => ({ n: i.name, q: i.qty, p: i.price })), total: o.total });
+  await takeStock(o.shop, o.items.map(i => ({ id: i.id, qty: i.qty })));
+  await update(ref(db, 'orders/' + oid), { receipt: no, doneAt: Date.now() });
+  await update(ref(db, 'shops/' + o.shop), { last: { by: o.buyerName, amount: o.total, desc: o.items.map(i => `${i.qty}× ${i.name}`).join(', '), ts: Date.now(), receipt: no } });
+  return true;
+}
+V.fakeord = {
+  html: () => `<h2>📥 Fake orders</h2><p class="mut">Orders from fake customers wait here. Press Receive to accept (the shop is paid, a receipt is made and stock goes down) or Decline to throw it away.</p><div class="card"><h3>Waiting</h3><div id="foNew"></div></div><div class="card"><h3>History</h3><div id="foOld"></div></div>`,
+  init() { V.fakeord.draw(); },
+  draw() {
+    if (!$('#foNew')) return;
+    const all = Object.entries(D.fo || {}).sort((a, b) => b[1].ts - a[1].ts), nw = all.filter(([, o]) => o.status === 'fake-new').reverse(), old = all.filter(([, o]) => o.status !== 'fake-new').slice(0, 20);
+    const its = o => o.items.map(i => `${i.qty}× ${esc(i.name)}`).join(', ');
+    $('#foNew').innerHTML = nw.length ? nw.map(([k, o]) => `<div class="item" style="flex-wrap:wrap;gap:8px"><div><b>${esc(o.buyerName)}</b> → ${esc(o.shopName)}<br><span class="mut">${its(o)} · ${when(o.ts)}</span></div><div class="row"><b>${money(o.total)}</b><button class="btn sm ok" data-act="foRecv" data-id="${k}">✅ Receive</button><button class="btn sm bad" data-act="foDecl" data-id="${k}">❌ Decline</button></div></div>`).join('') : '<p class="mut" style="margin:0">No fake orders waiting. Make some in the Fake customers tab.</p>';
+    $('#foOld').innerHTML = old.length ? old.map(([, o]) => `<div class="item"><div>${esc(o.buyerName)} → ${esc(o.shopName)}<br><span class="mut">${its(o)}</span></div><div style="text-align:right"><b>${money(o.total)}</b><br>${o.status === 'fake-done' ? '<span class="pill ok">received ' + (o.receipt ? recNo(o.receipt) : '') + '</span>' : '<span class="pill bad">declined</span>'}</div></div>`).join('') : '<p class="mut" style="margin:0">Nothing yet.</p>';
+  }
+};
 V.fake = {
   html: () => `<h2>🎭 Fake customers</h2>
-  <div class="card"><h3>Quick order</h3><p class="mut" style="margin-top:0">A pretend customer buys from a shop. The shop gets the money, a receipt and stock goes down. Only open shops with stock.</p>
+  <div class="card"><h3>Quick order</h3><p class="mut" style="margin-top:0">A pretend customer orders from a shop. The order waits in the 📥 Fake orders tab until you Receive or Decline it. Only open shops with stock.</p>
   <div class="grid2"><label>Shop<select id="fkShop"></select></label><label>Customer name (optional)<input id="fkName" maxlength="20" placeholder="random"></label>
   <label>Item<select id="fkItem"></select></label><label>Quantity<input id="fkQty" type="number" min="1" value="1"></label></div>
   <div class="row"><button class="btn" data-act="fkMake">Place this order</button><button class="btn ghost" data-act="fkRandom">🎲 Random order</button></div></div>
@@ -1102,11 +1130,13 @@ const ACT = {
   alogout() { SER.reader?.cancel(); sessionStorage.removeItem('tp_admin'); location.hash = ''; route(); },
   refresh() { location.reload(); },
   tab(d) { showTab(d.k); },
+  async foRecv(d) { const ok = await fakeReceive(d.id); if (ok) toast('Order received — shop paid'); },
+  async foDecl(d) { await runTransaction(ref(db, `orders/${d.id}/status`), c => c === 'fake-new' ? 'fake-declined' : undefined); toast('Declined'); },
   async vEat(d) { const n = vitalsNow((D.vit || {})[d.id]), v = (D.vit || {})[d.id] || {}; if (n.sleeping) return toast('They are asleep', 'bad'); await update(ref(db, 'vitals/' + d.id), { food: Math.min(100, n.food + Number(d.n)), foodAt: Date.now(), energy: n.energy, energyAt: Date.now(), sleeping: false }); toast('Fed ' + accName(d.id)); },
   autoSleep() { autoSleepOn = !autoSleepOn; clearInterval(autoSleepT); autoSleepT = autoSleepOn ? setInterval(() => autoSleepTick().catch(() => { }), 3000) : null; if (autoSleepOn) autoSleepTick().catch(() => { }); $('#asBtn').textContent = autoSleepOn ? '⏹ Turn off' : '▶ Turn on'; toast(autoSleepOn ? 'Auto sleep on' : 'Auto sleep off'); },
   async vSleep(d) { const n = vitalsNow((D.vit || {})[d.id]); await update(ref(db, 'vitals/' + d.id), { food: n.food, foodAt: Date.now(), energy: n.energy, energyAt: Date.now(), sleeping: !n.sleeping }); },
-  async fkMake() { const sh = $('#fkShop').value, it = $('#fkItem').value, q = Math.max(1, Math.floor(Number($('#fkQty').value) || 1)); if (!sh || !it) return toast('Pick a shop and an item', 'bad'); const ok = await fakeOrder(sh, [{ id: it, qty: q }], $('#fkName').value.trim()); toast(ok ? 'Order placed' : 'Could not place order', ok ? undefined : 'bad'); },
-  async fkRandom() { const sh = $('#fkShop').value; if (!sh) return toast('No open shop', 'bad'); const ok = await fakeOrder(sh); toast(ok ? 'Random order placed' : 'That shop has no stock', ok ? undefined : 'bad'); },
+  async fkMake() { const sh = $('#fkShop').value, it = $('#fkItem').value, q = Math.max(1, Math.floor(Number($('#fkQty').value) || 1)); if (!sh || !it) return toast('Pick a shop and an item', 'bad'); const ok = await fakeOrder(sh, [{ id: it, qty: q }], $('#fkName').value.trim()); toast(ok ? 'Order sent to the Fake orders tab' : 'Could not place order', ok ? undefined : 'bad'); },
+  async fkRandom() { const sh = $('#fkShop').value; if (!sh) return toast('No open shop', 'bad'); const ok = await fakeOrder(sh); toast(ok ? 'Random order sent to Fake orders' : 'That shop has no stock', ok ? undefined : 'bad'); },
   fkAuto() { if (fakeTimer) { clearInterval(fakeTimer); fakeTimer = null; } else { fakeTimer = setInterval(fakeTick, Math.max(5, Number($('#fkEvery').value) || 20) * 1000); fakeTick(); } $('#fkAutoBtn').textContent = fakeTimer ? '⏹ Stop' : '▶ Start'; },
   async shopBill(d) {
     const title = prompt('Bill title (e.g. Rent, Electricity):'); if (!title) return;
@@ -1376,6 +1406,7 @@ const ACT = {
     await update(ref(db, 'shops/' + M.id), { on: true, amount: o.total, desc: `Order for ${o.buyerName}: ` + o.items.map(i => `${i.qty}× ${i.name}`).join(', '), items: o.items, name: inf.name || M.acc.name, ts: Date.now() + srvOffset, order: d.id, orderBuyer: o.buyer });
     toast(`Reader on — ${o.buyerName} must tap their card`);
   },
+  async mogot(d) { const o = (M.orders || {})[d.id]; if (o?.buyer === M.id && o.status === 'delivered') { await update(ref(db, 'orders/' + d.id), { status: 'received', receivedAt: Date.now() }); toast('Thanks! Order complete'); } },
   async modeliver(d) { const o = (M.orders || {})[d.id]; if (o?.shop === M.id) await update(ref(db, 'orders/' + d.id), { status: 'delivered', deliveredAt: Date.now() }); },
   mcart(d) {
     const i = ((M.shopInfo || {}).items || {})[d.id]; if (!i) return;
@@ -1537,7 +1568,7 @@ function meStart() {
     const sig = new Map(Object.entries(M.orders).map(([k, o]) => [k, o.status]));
     if (ordSeen) sig.forEach((st, k) => { const o = M.orders[k];
       if (!ordSeen.has(k) && o.shop === M.id && st === 'new') { toast(`🛍️ New order from ${o.buyerName}!`); beep3(); }
-      else if (ordSeen.has(k) && ordSeen.get(k) !== st && o.buyer === M.id) toast(st === 'paid' ? '✅ Paid — your order is being prepared' : st === 'delivered' ? '🚚 Your order was delivered!' : st === 'cancelled' ? '❌ Your order was cancelled' : ''); });
+      else if (ordSeen.has(k) && ordSeen.get(k) !== st && o.buyer === M.id) toast(st === 'paid' ? '✅ Paid — your order is being prepared' : st === 'delivered' ? '🚚 Your order was delivered — tap Received in Order' : st === 'received' ? '✅ Thanks, order complete' : st === 'cancelled' ? '❌ Your order was cancelled' : ''); });
     ordSeen = sig; meRefresh();
   });
   M.shopInfo = null; M.catalog = {}; M.cart = {};
@@ -1634,8 +1665,8 @@ ME.order = {
       ${items.map(([id, i]) => `<div class="item"><div><b>${esc(i.name)}</b><br><span class="mut">${money(i.price)} · ${i.stock} left</span></div><div class="row" style="flex-wrap:nowrap"><button class="btn sm ghost" data-act="moc" data-id="${id}" data-d="-1">−</button><b style="min-width:22px;text-align:center">${oc[id] || 0}</b><button class="btn sm ghost" data-act="moc" data-id="${id}" data-d="1">+</button></div></div>`).join('')}
       <p><b>Total: ${money(total)}</b></p><button class="btn big" data-act="moplace">Place order</button><p class="mut" style="font-size:12px">The shop gets your order, then you tap your card to pay, and they deliver it to you.</p>` : '<p class="mut" style="margin:0">No open shops with stock right now.</p>';
     const mine = Object.entries(M.orders || {}).filter(([, o]) => o.buyer === M.id).sort((a, b) => b[1].ts - a[1].ts).slice(0, 15);
-    const lab = { new: '⏳ Waiting for the shop', paid: '✅ Paid — being delivered', delivered: '🚚 Delivered', cancelled: '❌ Cancelled' };
-    $('#oList').innerHTML = mine.length ? mine.map(([k, o]) => `<div class="item"><div><b>${esc(o.shopName)}</b><br><span class="mut">${o.items.map(i => `${i.qty}× ${esc(i.name)}`).join(', ')}<br>${lab[o.status] || o.status}${o.receipt ? ' · ' + recNo(o.receipt) : ''}</span></div><div style="text-align:right"><b>${money(o.total)}</b>${o.status === 'new' ? `<br><button class="btn sm bad" data-act="mocancel" data-id="${k}">Cancel</button>` : ''}</div></div>`).join('') : '<p class="mut" style="margin:0">No orders yet.</p>';
+    const lab = { new: '⏳ Waiting for the shop', paid: '✅ Paid — being delivered', delivered: '🚚 Delivered — please confirm', received: '✅ Received', cancelled: '❌ Cancelled' };
+    $('#oList').innerHTML = mine.length ? mine.map(([k, o]) => `<div class="item"><div><b>${esc(o.shopName)}</b><br><span class="mut">${o.items.map(i => `${i.qty}× ${esc(i.name)}`).join(', ')}<br>${lab[o.status] || o.status}${o.receipt ? ' · ' + recNo(o.receipt) : ''}</span></div><div style="text-align:right"><b>${money(o.total)}</b>${o.status === 'new' ? `<br><button class="btn sm bad" data-act="mocancel" data-id="${k}">Cancel</button>` : ''}${o.status === 'delivered' ? `<br><button class="btn sm ok" data-act="mogot" data-id="${k}">✅ Received</button>` : ''}</div></div>`).join('') : '<p class="mut" style="margin:0">No orders yet.</p>';
   }
 };
 ME.bills = {
@@ -1693,8 +1724,8 @@ ME.shop = {
     const total = r2(sellable.reduce((a, [id, i]) => a + (cart[id] || 0) * i.price, 0));
     $('#shCart').innerHTML = sellable.length ? sellable.map(([id, i]) => `<div class="item"><div><b>${esc(i.name)}</b><br><span class="mut">${money(i.price)} · ${i.stock} left</span></div><div class="row" style="flex-wrap:nowrap"><button class="btn sm ghost" data-act="mcart" data-id="${id}" data-d="-1">−</button><b style="min-width:22px;text-align:center">${cart[id] || 0}</b><button class="btn sm ghost" data-act="mcart" data-id="${id}" data-d="1">+</button></div></div>`).join('') + `<p style="margin:10px 0 0"><b>Total: ${money(total)}</b></p>` : '<p class="mut" style="margin:0">Add menu items with stock below to sell them here.</p>';
     $('#shBtns').innerHTML = x.on ? `<div class="big-ok"><div class="tick">📡</div><h3>Reader is ON</h3><p>Waiting for a card: <b>${money(x.amount)}</b>${x.desc ? ' — ' + esc(x.desc) : ''}</p><button class="btn ghost big" data-act="mshopOff">Turn reader off</button></div>` : `<button class="btn big" data-act="mshopOn">📡 Turn reader on${total ? ' · ' + money(total) : ''}</button>`;
-    const og = Object.entries(M.orders || {}).filter(([, o]) => o.shop === M.id && (o.status === 'new' || o.status === 'paid')).sort((a, b) => a[1].ts - b[1].ts);
-    $('#shOrders').innerHTML = og.length ? og.map(([k, o]) => `<div class="item" style="flex-wrap:wrap;gap:8px"><div><b>${esc(o.buyerName)}</b> · ${money(o.total)}<br><span class="mut">${o.items.map(i => `${i.qty}× ${esc(i.name)}`).join(', ')}</span></div><div class="row">${o.status === 'new' ? `<button class="btn sm" data-act="mopay" data-id="${k}">💳 Take payment</button><button class="btn sm bad" data-act="mocancel" data-id="${k}">Decline</button>` : `<span class="pill ok">paid ${o.receipt ? recNo(o.receipt) : ''}</span><button class="btn sm ok" data-act="modeliver" data-id="${k}">🚚 Delivered</button>`}</div></div>`).join('') : '<p class="mut" style="margin:0">No orders waiting.</p>';
+    const og = Object.entries(M.orders || {}).filter(([, o]) => o.shop === M.id && (o.status === 'new' || o.status === 'paid' || o.status === 'delivered')).sort((a, b) => a[1].ts - b[1].ts);
+    $('#shOrders').innerHTML = og.length ? og.map(([k, o]) => `<div class="item" style="flex-wrap:wrap;gap:8px"><div><b>${esc(o.buyerName)}</b> · ${money(o.total)}<br><span class="mut">${o.items.map(i => `${i.qty}× ${esc(i.name)}`).join(', ')}</span></div><div class="row">${o.status === 'new' ? `<button class="btn sm" data-act="mopay" data-id="${k}">💳 Take payment</button><button class="btn sm bad" data-act="mocancel" data-id="${k}">Decline</button>` : o.status === 'delivered' ? `<span class="pill">⏳ Waiting for ${esc(o.buyerName)} to confirm</span>` : `<span class="pill ok">paid ${o.receipt ? recNo(o.receipt) : ''}</span><button class="btn sm ok" data-act="modeliver" data-id="${k}">🚚 Delivered</button>`}</div></div>`).join('') : '<p class="mut" style="margin:0">No orders waiting.</p>';
     const l = x.last; $('#shLast').innerHTML = l ? `<h3>Last payment</h3><div class="item"><div>${esc(l.by)}${l.desc ? '<br><span class="mut">' + esc(l.desc) + '</span>' : ''}<br><span class="mut">${l.receipt ? 'Receipt ' + recNo(l.receipt) + ' · ' : ''}${when(l.ts)}</span></div><b class="ok">+${money(l.amount)}</b></div>` : '<h3>Last payment</h3><p class="mut" style="margin:0">No payments yet.</p>';
     $('#shMenu').innerHTML = items.length ? items.sort((a, b) => a[1].name.localeCompare(b[1].name)).map(([id, i]) => `<div class="item" style="flex-wrap:wrap;gap:8px"><b style="flex:1;min-width:110px">${esc(i.name)}</b><label class="mut" style="font-size:12px">Price<input id="ip_${id}" type="number" step="0.01" min="0" value="${i.price}" style="width:80px;margin:0"></label><label class="mut" style="font-size:12px">Stock<input id="is_${id}" type="number" step="1" min="0" value="${i.stock || 0}" style="width:70px;margin:0"></label><button class="btn sm" data-act="msItemSave" data-id="${id}">Save</button><button class="btn sm bad" data-act="msItemDel" data-id="${id}">✕</button></div>`).join('') : '<p class="mut" style="margin:0">No items yet.</p>';
     const cat = Object.entries(M.catalog || {}).sort((a, b) => a[1].name.localeCompare(b[1].name));
