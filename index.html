@@ -213,6 +213,19 @@ function beep() {
   } catch (e) { }
   if (navigator.vibrate) navigator.vibrate(200);
 }
+function beep3() {
+  try {
+    primeAudio(); if (!actx) return;
+    const t0 = actx.currentTime, comp = actx.createDynamicsCompressor(); comp.connect(actx.destination);
+    [0, 0.25, 0.5].forEach(dt => {
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.type = 'square'; o.frequency.value = 1600;
+      g.gain.setValueAtTime(0.0001, t0 + dt); g.gain.exponentialRampToValueAtTime(1, t0 + dt + 0.01); g.gain.setValueAtTime(1, t0 + dt + 0.14); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dt + 0.18);
+      o.connect(g); g.connect(comp); o.start(t0 + dt); o.stop(t0 + dt + 0.2);
+    });
+  } catch (e) { }
+  if (navigator.vibrate) navigator.vibrate([200, 80, 200, 80, 200]);
+}
 /* ---------- camera permission ---------- */
 function camMsg(e) {
   if (!navigator.mediaDevices?.getUserMedia) return 'Camera needs a secure (https) page';
@@ -1523,7 +1536,7 @@ function meStart() {
     Object.entries(all).forEach(([k, o]) => { if (o.buyer === M.id || o.shop === M.id) M.orders[k] = o; });
     const sig = new Map(Object.entries(M.orders).map(([k, o]) => [k, o.status]));
     if (ordSeen) sig.forEach((st, k) => { const o = M.orders[k];
-      if (!ordSeen.has(k) && o.shop === M.id && st === 'new') { toast(`🛍️ New order from ${o.buyerName}!`); beep(); }
+      if (!ordSeen.has(k) && o.shop === M.id && st === 'new') { toast(`🛍️ New order from ${o.buyerName}!`); beep3(); }
       else if (ordSeen.has(k) && ordSeen.get(k) !== st && o.buyer === M.id) toast(st === 'paid' ? '✅ Paid — your order is being prepared' : st === 'delivered' ? '🚚 Your order was delivered!' : st === 'cancelled' ? '❌ Your order was cancelled' : ''); });
     ordSeen = sig; meRefresh();
   });
