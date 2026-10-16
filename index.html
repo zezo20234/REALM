@@ -742,7 +742,7 @@ function adminApp() {
   root.innerHTML = `<div class="top"><div class="row" style="flex-wrap:nowrap"><button class="btn ghost sm" data-act="refresh" title="Refresh to get the latest update">🔄 Refresh</button><div class="brand">💳 TapPay · Cashier</div></div><div class="row"><span class="pill gclock" title="1 day = 10 minutes: 7 min day, 3 min night"></span><span class="pill bad" id="serBadge" data-act="serPair" style="cursor:pointer" title="Click to connect / disconnect the reader"></span><button class="btn ghost sm" id="serBtn" data-act="serPair">Pair reader</button><span class="mut" id="rdr" style="font-size:12px"></span><button class="btn ghost sm" data-act="alogout">Logout</button></div></div>
   <div id="serBanner" style="display:none;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;padding:10px 14px;background:#3a1f2b;border-bottom:1px solid var(--bad)"><b id="serBannerTxt"></b><button class="btn sm" data-act="serPair">🔌 Connect reader</button></div>
   <div class="shell"><div class="side">${TABS.map(([k, n]) => `<button data-act="tab" data-k="${k}" id="t_${k}">${n}</button>`).join('')}</div><div class="main" id="view"></div></div>`;
-  listen(ref(db, 'accounts'), s => { D.acc = s.val() || {}; drawCur(); });
+  listen(ref(db, 'accounts'), s => { D.acc = s.val() || {}; drawCur(); initVitals(); });
   listen(ref(db, 'bills'), s => { D.bills = s.val() || {}; drawCur(); });
   listen(ref(db, 'tx'), s => { D.tx = s.val() || {}; drawCur(); });
   listen(ref(db, 'schedules'), s => { D.sched = s.val() || {}; drawCur(); });
@@ -752,7 +752,11 @@ function adminApp() {
   listen(query(ref(db, 'receipts'), limitToLast(40)), s => { D.receipts = s.val() || {}; drawCur(); });
   listen(ref(db, 'lotteries'), s => { D.lot = s.val() || {}; drawCur(); });
   listen(ref(db, 'lotTickets'), s => { D.lotT = s.val() || {}; drawCur(); });
-  listen(ref(db, 'vitals'), s => { D.vit = s.val() || {}; window.VIT_LIVE = D.vit; if (curTab === 'life') V.life.draw(); });
+  listen(ref(db, 'vitals'), s => {
+    D.vit = s.val() || {}; window.VIT_LIVE = D.vit; if (curTab === 'life') V.life.draw();
+    // give everyone a starting point so hunger/energy begin falling from now
+    initVitals();
+  });
   get(ref(db, 'scans/latest')).then(s => showReader(s.val()));
   serStatus(SER.status); serAuto();
   showTab(curTab); drawClock();
@@ -962,6 +966,11 @@ V.shops = {
 };
 
 /* --- hunger & sleep (computer controls everyone) --- */
+const vitInit = new Set();
+function initVitals() {
+  if (!D.vit) return;
+  Object.keys(D.acc || {}).filter(id => !D.vit[id] && !vitInit.has(id)).forEach(id => { vitInit.add(id); const t = Date.now(); runTransaction(ref(db, 'vitals/' + id), c => c ? undefined : { food: 100, foodAt: t, energy: 100, energyAt: t, sleeping: false }).catch(() => { }); });
+}
 let autoSleepOn = false, autoSleepT = null;
 async function autoSleepTick() {
   const t = gameTime(); if (!t || pausedAt != null) return;
